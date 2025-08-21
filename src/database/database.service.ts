@@ -57,7 +57,7 @@ export const databaseProviders = [
         username: 'admin',
         password: '059283805928388',
         database: 'lahant-store',
-      });
+      })
 
   //     const sequelize = new Sequelize(
   //       'postgresql://lahant_db_user:975iBNIcvvPmaB3iYgHsLBmCc9ls7FXG@dpg-d2i3kg6mcj7s73dvrh2g-a/lahant_db',

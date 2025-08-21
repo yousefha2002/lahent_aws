@@ -8,7 +8,7 @@ export class EdfapayService {
     ){}
     async handleNotification()
     {
-        await this.transactionService.confirmCharge(1)
+        // await this.transactionService.confirmCharge(1)
         return {mesg:"success"}
     }
 }
