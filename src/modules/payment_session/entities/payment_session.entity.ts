@@ -1,0 +1,71 @@
+import { LoyaltyOffer } from 'src/modules/loyalty_offer/entites/loyalty_offer.entity';
+import { Customer } from './../../customer/entities/customer.entity';
+import {
+    Table,
+    Column,
+    Model,
+    DataType,
+    AutoIncrement,
+    PrimaryKey,
+    ForeignKey,
+    AllowNull,
+    BelongsTo,
+    Default,
+} from 'sequelize-typescript';
+import { Order } from 'src/modules/order/entities/order.entity';
+import { GatewaySource } from 'src/common/enums/gateway-source';
+@Table({ tableName: 'payment_sessions' })
+export class PaymentSession extends Model {
+    @PrimaryKey
+    @AutoIncrement
+    @Column(DataType.INTEGER)
+    id: number;
+
+    @ForeignKey(() => Order)
+    @AllowNull(true)
+    @Column(DataType.INTEGER)
+    orderId: number;
+
+    @BelongsTo(() => Order)
+    order: Order;
+
+    @ForeignKey(() => LoyaltyOffer)
+    @AllowNull(true)
+    @Column(DataType.INTEGER)
+    loyaltyOfferId: number;
+
+    @BelongsTo(() => LoyaltyOffer)
+    loyaltyOffer: LoyaltyOffer;
+
+    @ForeignKey(() => Customer)
+    @AllowNull(false)
+    @Column(DataType.INTEGER)
+    customerId: number;
+
+    @BelongsTo(() => Customer)
+    customer: Customer;
+
+    @Column(DataType.ENUM(...Object.values(GatewaySource)))
+    purpose: GatewaySource;
+
+    @Column(DataType.FLOAT)
+    amount: number;
+
+    @Column(DataType.STRING)
+    hash:string
+
+    @Column(DataType.STRING)
+    provider: string; // مثلاً gateway: stripe, moyasar
+
+    @AllowNull(true)
+    @Column(DataType.STRING)
+    transactionId: string;
+
+    @Column(DataType.STRING)
+    paymentOrderId: string;
+
+    @AllowNull(false)
+    @Default('pending')
+    @Column(DataType.ENUM('pending', 'success', 'failed'))
+    status: 'pending' | 'success' | 'failed';
+}

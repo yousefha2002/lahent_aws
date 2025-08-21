@@ -1,0 +1,21 @@
+import { forwardRef, Module } from '@nestjs/common';
+import { TypeService } from './type.service';
+import { TypeController } from './type.controller';
+import { TypeProvider } from './providers/type.provider';
+import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
+import { AdminModule } from '../admin/admin.module';
+import { StoreModule } from '../store/store.module';
+import { SubtypeModule } from '../subtype/subtype.module';
+
+@Module({
+  controllers: [TypeController],
+  providers: [TypeService, ...TypeProvider],
+  imports: [
+    CloudinaryModule,
+    AdminModule,
+    forwardRef(() => StoreModule),
+    forwardRef(() => SubtypeModule),
+  ],
+  exports: [TypeService],
+})
+export class TypeModule {}

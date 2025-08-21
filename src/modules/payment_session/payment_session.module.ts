@@ -1,0 +1,11 @@
+import { Module } from '@nestjs/common';
+import { PaymentSessionService } from './payment_session.service';
+import { PaymentSessionController } from './payment_session.controller';
+import { PaymentSessionProvider } from './providers/payment_session.provider';
+
+@Module({
+  controllers: [PaymentSessionController],
+  providers: [PaymentSessionService,...PaymentSessionProvider],
+  exports:[PaymentSessionService]
+})
+export class PaymentSessionModule {}
