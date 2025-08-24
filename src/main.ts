@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
-// import * as crypto from 'crypto';
-// (global as any).crypto = crypto;
+import * as crypto from 'crypto';
+(global as any).crypto = crypto;
 
 import {
   ExpressAdapter,
