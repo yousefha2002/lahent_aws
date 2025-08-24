@@ -1,5 +1,3 @@
-import * as crypto from 'crypto';
-(global as any).crypto = crypto;
 import { Module } from '@nestjs/common';
 import { DatabaseModule } from './database/database.module';
 import { JwtModule } from '@nestjs/jwt';
@@ -75,7 +73,6 @@ import { ProductCategoryVariantModule } from './modules/product_category_variant
     JwtModule.register({ global: true, secret: 'refresh_token' }),
     DatabaseModule,
     AdminModule,
-    AppModule,
     CartModule,
     CartItemModule,
     CartItemExtraModule,
