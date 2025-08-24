@@ -32,9 +32,7 @@ export class CartItemVariantService {
 
     const existingVariantIds = existingVariants.map((e) => e.id);
 
-    const invalidIds = variants.filter(
-      (id) => !existingVariantIds.includes(id),
-    );
+    const invalidIds = variants.filter((id) => !existingVariantIds.includes(id));
 
     if (invalidIds.length > 0) {
       const message = this.i18n.translate(

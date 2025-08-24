@@ -9,7 +9,6 @@ import {
   AllowNull,
   BelongsTo,
 } from 'sequelize-typescript';
-import { ProductVariantType } from 'src/common/enums/product_varaint_type';
 import { OrderItem } from 'src/modules/order_item/entities/order_item.entity';
 import { ProductVariant } from 'src/modules/prouduct_variant/entities/prouduct_variant.entity';
 
@@ -41,12 +40,8 @@ export class OrderItemVariant extends Model{
     name: string;
 
     @AllowNull(false)
-    @Column(DataType.ENUM(...Object.values(ProductVariantType)))
-    type: ProductVariantType;
-
-    @AllowNull(false)
     @Column(DataType.FLOAT)
-    priceDiff: number;
+    additional_price: number;
 
     @AllowNull(true)
     @Column(DataType.STRING)

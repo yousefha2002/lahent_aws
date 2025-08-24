@@ -1,3 +1,4 @@
+import { ProductExtraLanguage } from './product_extra_language.entity';
 import {
   Table,
   Column,
@@ -9,6 +10,7 @@ import {
   ForeignKey,
   BelongsTo,
   Default,
+  HasMany,
 } from 'sequelize-typescript';
 import { Product } from 'src/modules/product/entities/product.entity';
 
@@ -28,15 +30,14 @@ export class ProductExtra extends Model {
   product: Product;
 
   @AllowNull(false)
-  @Column(DataType.STRING)
-  name: string;
-
-  @AllowNull(false)
   @Column(DataType.FLOAT)
-  price: number;
+  additional_price: number;
 
   @Default(true)
   @AllowNull(false)
   @Column(DataType.BOOLEAN)
   isActive: boolean;
+
+  @HasMany(()=>ProductExtraLanguage)
+  languages:ProductExtraLanguage[]
 }

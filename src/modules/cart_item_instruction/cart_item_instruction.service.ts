@@ -23,17 +23,18 @@ export class CartItemInstructionService {
     lang: Language = Language.en, // لغة افتراضية
   ) {
     if (!instructions || instructions.length === 0) return;
+    const uniqueInstructions = Array.from(new Set(instructions));
 
     const existingInstructions =
       await this.productInstructionRepo.findExistingInstructions(
-        instructions,
+        uniqueInstructions,
         productId,
       );
 
     const existingInstructionIds = existingInstructions.map((e) => e.id);
 
     // التحقق من التعليمات غير الموجودة
-    const invalidIds = instructions.filter(
+    const invalidIds = uniqueInstructions.filter(
       (id) => !existingInstructionIds.includes(id),
     );
 
@@ -46,7 +47,7 @@ export class CartItemInstructionService {
     }
 
     // إعداد الصفوف للإضافة
-    const itemsToInsert = instructions.map((instId) => ({
+    const itemsToInsert = uniqueInstructions.map((instId) => ({
       cartItemId,
       productInstructionId: instId,
     }));

@@ -1,14 +1,13 @@
 import { Expose, Transform, Type } from 'class-transformer';
+import { StoreLanguageDto } from './store-language.dto';
 
 export class SimpleStoreDto {
     @Expose()
     id: number;
 
     @Expose()
-    name: string;
-
-    @Expose()
-    address: string;
+    @Type(() => StoreLanguageDto)
+    languages: StoreLanguageDto[];
 
     @Expose()
     city:string
@@ -44,7 +43,7 @@ export class SimpleStoreDto {
 
 export class StoreWithTokenDto{
     @Expose()
-    token:string
+    accessToken:string
 
     @Expose()
     refreshToken:string

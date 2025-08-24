@@ -57,7 +57,7 @@ export class CartController {
   removeProductForCart(
     @CurrentUser() customer: Customer,
     @Param('cartItemId') cartItemId: string,
-    @Query('lang') lang: Language = Language.en
+    @Query('lang') lang: Language = Language.ar
   ) {
     return this.cartService.deleteProductFromCart(+cartItemId, customer.id,lang);
   }
@@ -68,7 +68,7 @@ export class CartController {
     @CurrentUser() customer: Customer,
     @Param('cartItemId') cartItemId: string,
     @Body() dto: UpdateCartProductQuantityDto,
-    @Query('lang') lang: Language = Language.en
+    @Query('lang') lang: Language = Language.ar
   ) {
     return this.cartService.updateProductQuantity(
       +cartItemId,
@@ -84,8 +84,9 @@ export class CartController {
   getCartItemsWithOffers(
     @CurrentUser() user: Customer,
     @Param('cartId', ParseIntPipe) cartId: number,
+    @Query('lang') lang: Language = Language.ar
   ) {
-    return this.cartService.getCartItemsWithOffers(cartId, user.id);
+    return this.cartService.getCartItemsWithOffers(cartId, user.id,lang);
   }
 
   @Serilaize(CartWithStoreDto)

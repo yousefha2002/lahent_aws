@@ -1,31 +1,31 @@
 import { Expose, Type } from 'class-transformer';
-import { SimpleOfferDto } from 'src/modules/offer/dto/simple-offer.dto';
 import { BaseProductDto } from './base-product.dto';
-import { VariantDto } from 'src/modules/prouduct_variant/dto/variant-dto';
-import { ExtraDto } from 'src/modules/product_extra/dto/extra-dto';
-import { InstructionDto } from 'src/modules/product_instruction/dto/instruction-dto';
+import { SimpleOfferDto } from 'src/modules/offer/dto/simple-offer.dto';
+import { ProductInstructionDto } from 'src/modules/product_instruction/dto/instruction-dto';
+import { CategoryWithVariantsDto } from 'src/modules/variant_category/dto/category_with_variants.dto';
+import { ProductExtraDto } from 'src/modules/product_extra/dto/extra-dto';
 
 export class FullProductDetailsDto extends BaseProductDto {
     @Expose()
-    product_number:number
+    product_number: number;
 
     @Expose()
-    sales:number
+    sales: number;
 
     @Expose()
     finalPrice: number;
 
     @Expose()
-    @Type(() => VariantDto)
-    variants: VariantDto[];
+    @Type(() => CategoryWithVariantsDto)
+    variantCategories: CategoryWithVariantsDto[];
 
     @Expose()
-    @Type(() => ExtraDto)
-    extras: ExtraDto[];
+    @Type(() => ProductExtraDto)
+    extras: ProductExtraDto[];
 
     @Expose()
-    @Type(() => InstructionDto)
-    instructions: InstructionDto[];
+    @Type(() => ProductInstructionDto)
+    instructions: ProductInstructionDto[];
 
     @Expose()
     @Type(() => SimpleOfferDto)

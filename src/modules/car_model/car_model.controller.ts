@@ -1,9 +1,21 @@
-import { Body, Controller, Get, Param, Post, Put, Query, ParseIntPipe, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+  ParseIntPipe,
+  UseGuards,
+} from '@nestjs/common';
 import { CarModelService } from './car_model.service';
 import { CreateCarModelDto } from './dto/create_car_model.dto';
 import { UpdateCarModelDto } from './dto/update_car_model.dto';
 import { AdminGuard } from 'src/common/guards/admin.guard';
 import { Language } from 'src/common/enums/language';
+import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
+import { CarModelDto } from './dto/car-model.dto';
 
 @Controller('car-model')
 export class CarModelController {
@@ -29,12 +41,17 @@ export class CarModelController {
   }
 
   @Get()
+  @Serilaize(CarModelDto)
   getAll() {
     return this.carModelService.getAll();
   }
 
   @Get(':id')
-  getOne(@Param('id', ParseIntPipe) id: number, @Query('lang') lang: Language = Language.en) {
+  @Serilaize(CarModelDto)
+  getOne(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('lang') lang: Language = Language.en,
+  ) {
     return this.carModelService.getOneOrFail(id, lang);
   }
 }

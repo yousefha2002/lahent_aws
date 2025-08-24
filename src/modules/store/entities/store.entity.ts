@@ -26,6 +26,7 @@ import { Owner } from 'src/modules/owner/entities/owner.entity';
 import { Product } from 'src/modules/product/entities/product.entity';
 import { Review } from 'src/modules/review/entities/review.entity';
 import { SubType } from 'src/modules/subtype/entities/subtype.entity';
+import { StoreLanguage } from './store_language.entity';
 
 @Table({ tableName: 'stores' })
 export class Store extends Model {
@@ -50,9 +51,8 @@ export class Store extends Model {
   @BelongsTo(() => SubType)
   subType: SubType;
 
-  @AllowNull(false)
-  @Column(DataType.STRING)
-  name: string;
+  @HasMany(() => StoreLanguage)
+  languages: StoreLanguage[];
 
   @AllowNull(false)
   @Column(DataType.STRING)
@@ -61,10 +61,6 @@ export class Store extends Model {
   @AllowNull(false)
   @Column(DataType.ENUM(...cities))
   city: City;
-
-  @AllowNull(false)
-  @Column(DataType.STRING)
-  address: string;
 
   @AllowNull(false)
   @Column(DataType.FLOAT)

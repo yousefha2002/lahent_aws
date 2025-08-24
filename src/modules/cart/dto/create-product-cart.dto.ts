@@ -34,4 +34,7 @@ export class CreateCartProductDto {
   @IsNumber({}, { each: true })
   @IsOptional()
   extras: number[];
+
+  @IsOptional()
+  note: string;
 }

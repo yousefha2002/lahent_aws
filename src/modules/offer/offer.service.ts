@@ -23,6 +23,8 @@ import { TargetType } from 'src/common/enums/target_type';
 import { Category } from '../category/entities/category.entity';
 import { I18nService } from 'nestjs-i18n';
 import { Language } from 'src/common/enums/language';
+import { StoreLanguage } from '../store/entities/store_language.entity';
+import { CategoryLanguage } from '../category/entities/category_language.entity';
 
 @Injectable()
 export class OfferService {
@@ -114,6 +116,7 @@ export class OfferService {
   async getActiveOffersWithStoreDetails(
     page: number,
     limit: number,
+    lang=Language.ar,
     storeId?: number,
   ) {
     const now = new Date();
@@ -131,10 +134,10 @@ export class OfferService {
           {
             model: Store,
             where: { status: StoreStatus.APPROVED },
+            include:[{model:StoreLanguage,where:{languageCode:lang}}]
           },
           {
             model: Product,
-            attributes: ['id', 'name'],
             include: [
               {
                 model: ProductImage,
@@ -145,6 +148,7 @@ export class OfferService {
           },
           {
             model: Category,
+            include:[{model:CategoryLanguage,where:{languageCode:lang},required:false}]
           },
         ],
         order: [['createdAt', 'DESC']],
@@ -177,35 +181,31 @@ export class OfferService {
     storeId: number,
     page: number,
     limit: number,
+    lang:Language,
     type?: string,
   ) {
     const offset = (page - 1) * limit;
 
-    const [offers, totalItems] = await Promise.all([
-      this.offerRepo.findAll({
-        where: { storeId, ...(type ? { type } : {}) },
-        include: [
-          {
-            model: Product,
-            include: [
-              {
-                model: ProductImage,
-                attributes: ['imageUrl'],
-                limit: 1,
-              },
-            ],
-          },
-          {
-            model: Category,
-          },
-        ],
-        order: [['createdAt', 'DESC']],
-        limit,
-        offset,
-      }),
-
-      this.offerRepo.count({ where: { storeId, ...(type ? { type } : {}) } }),
-    ]);
+    const { rows: offers, count: totalItems } = await this.offerRepo.findAndCountAll({
+      where: { storeId, ...(type ? { type } : {}) },
+      include: [
+        {
+          model: Product,
+          include: [
+            { model: ProductImage, attributes: ['imageUrl'], limit: 1 },
+          ],
+        },
+        {
+          model: Category,
+          include: [{ model: CategoryLanguage, where: { languageCode: lang }, required: false }],
+        },
+      ],
+      order: [['createdAt', 'DESC']],
+      distinct: true,
+      col: 'id',
+      limit,
+      offset,
+    });
 
     return {
       totalItems,
@@ -236,8 +236,8 @@ export class OfferService {
 
     let discountedPrice = basePrice;
 
-    if (offer.fixedPrice !== null && offer.fixedPrice !== undefined) {
-      discountedPrice = basePrice - offer.fixedPrice;
+    if (offer.discountAmount !== null && offer.discountAmount !== undefined) {
+      discountedPrice = basePrice - offer.discountAmount;
     } else if (
       offer.discountPercentage !== undefined &&
       offer.discountPercentage !== null
@@ -303,7 +303,7 @@ export class OfferService {
     const { type } = dto;
 
     if (type === OfferType.FIXED) {
-      if (dto.fixedPrice == null) {
+      if (dto.discountAmount == null) {
         throw new BadRequestException(
           this.i18n.translate('translation.offer.fixed_price_required', { lang }),
         );
@@ -317,7 +317,7 @@ export class OfferService {
           this.i18n.translate('translation.offer.discount_percentage_required', { lang }),
         );
       }
-      dto.fixedPrice = null;
+      dto.discountAmount = null;
       dto.buyQty = null;
       dto.getFreeQty = null;
     } else if (type === OfferType.INCENTIVE) {
@@ -326,7 +326,7 @@ export class OfferService {
           this.i18n.translate('translation.offer.buy_get_qty_required', { lang }),
         );
       }
-      dto.fixedPrice = null;
+      dto.discountAmount = null;
       dto.discountPercentage = null;
     } else {
       throw new BadRequestException(this.i18n.translate('translation.offer.invalid_offer_type', { lang }));

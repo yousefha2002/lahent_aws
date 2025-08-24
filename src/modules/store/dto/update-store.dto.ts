@@ -11,12 +11,9 @@ import {
 import { Transform, Type } from 'class-transformer';
 import { ActionOpeningHourDto } from 'src/modules/opening_hour/dto/action-open-hour.dto';
 import { cities } from 'src/common/constants/cities';
+import { StoreLanguageActionDto } from './store-language-action.dto';
 
 export class UpdateStoreDto {
-  @IsOptional()
-  @IsString()
-  name?: string;
-
   @Transform(({ value }) => value?.replace(/\D/g, ''))
   @IsOptional()
   @IsMobilePhone()
@@ -27,6 +24,7 @@ export class UpdateStoreDto {
   in_store?: boolean;
 
   @IsString()
+  @IsOptional()
   @IsNotEmpty()
   @IsIn(cities, { message: 'City must be one of the allowed cities in Saudi Arabia' })
   city: string;
@@ -48,4 +46,9 @@ export class UpdateStoreDto {
   @ValidateNested({ each: true })
   @Type(() => ActionOpeningHourDto)
   openingHours?: ActionOpeningHourDto[];
+
+  @IsOptional()
+  @IsArray()
+  @Type(() => StoreLanguageActionDto)
+  languages?: StoreLanguageActionDto[];
 }

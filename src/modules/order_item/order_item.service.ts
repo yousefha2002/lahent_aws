@@ -20,6 +20,7 @@ export class OrderItemService {
         quantity: number;
         freeQty?: number;
         offerId?: number | null;
+        note?:string|null
     },transaction?: any){
         return this.orderItemRepo.create({
         orderId: data.orderId,
@@ -33,6 +34,7 @@ export class OrderItemService {
         quantity: data.quantity,
         freeQty: data.freeQty ?? 0,
         offerId: data.offerId ?? null,
+        note:data.note
     },
     { transaction });
     }

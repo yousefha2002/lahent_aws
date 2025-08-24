@@ -28,7 +28,6 @@ export function mapOfferToResponse(offer: Offer,options: MapOfferOptions = {},)
         const products = offer.products || [];
         response.products = products.slice(0, 2).map((p) => ({
         id: p.id,
-        name: p.name,
         image: p.images?.[0]?.imageUrl || null,
         }));
         response.moreProducts = Math.max(0, products.length - 2);
@@ -38,8 +37,7 @@ export function mapOfferToResponse(offer: Offer,options: MapOfferOptions = {},)
     if (offer.target === TargetType.CATEGROY) {
         const categories = offer.categories || [];
         response.categories = categories.map((c) => ({
-            id: c.id,
-            title: c.title
+            ...c.toJSON()
         }));
     }
     return response;

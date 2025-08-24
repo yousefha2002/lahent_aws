@@ -1,19 +1,26 @@
 import { Expose, Type } from 'class-transformer';
 import { SimpleOfferDto } from 'src/modules/offer/dto/simple-offer.dto';
 import { BaseProductDto } from 'src/modules/product/dto/base-product.dto';
-import { ExtraDto } from 'src/modules/product_extra/dto/extra-dto';
-import { InstructionDto } from 'src/modules/product_instruction/dto/instruction-dto';
-import { VariantDto } from 'src/modules/prouduct_variant/dto/variant-dto';
+import { ProductExtraDto } from 'src/modules/product_extra/dto/extra-dto';
+import { InstructionDto, ProductInstructionDto } from 'src/modules/product_instruction/dto/instruction-dto';
+import { ProductVariantDto } from 'src/modules/prouduct_variant/dto/variant-dto';
+import { CategoryWithVariantsDto } from 'src/modules/variant_category/dto/category_with_variants.dto';
 
-export class ProductExtraWithSelectedDto extends ExtraDto {
+export class ProductExtraWithSelectedDto extends ProductExtraDto {
     @Expose() selected: boolean;
 }
 
-export class ProductVariantWithSelectedDto extends VariantDto{
+export class ProductVariantWithSelectedDto extends ProductVariantDto{
     @Expose() selected: boolean;
 }
 
-export class ProductInstructionWithSelectedDto extends InstructionDto {
+export class CategoryWithVariantsWithSelectedDto extends CategoryWithVariantsDto {
+    @Expose()
+    @Type(() => ProductVariantWithSelectedDto)
+    variants: ProductVariantWithSelectedDto[];
+}
+
+export class ProductInstructionWithSelectedDto extends ProductInstructionDto {
     @Expose() selected: boolean;
 }
 
@@ -31,6 +38,7 @@ export class CartItemWithProductOptionsDto {
     @Expose() originalPrice: number;
     @Expose() finalPrice: number;
     @Expose() totalPirce: number;
+    @Expose() note: string;
 
     @Expose()
     @Type(() => CartItemProductDto)
@@ -41,8 +49,8 @@ export class CartItemWithProductOptionsDto {
     extras: ProductExtraWithSelectedDto[];
 
     @Expose()
-    @Type(() => ProductVariantWithSelectedDto)
-    variants: ProductVariantWithSelectedDto[];
+    @Type(() => CategoryWithVariantsWithSelectedDto)
+    variantCategories: CategoryWithVariantsWithSelectedDto[];
 
     @Expose()
     @Type(() => ProductInstructionWithSelectedDto)

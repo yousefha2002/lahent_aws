@@ -14,6 +14,8 @@ import { CarTypeService } from './car_type.service';
 import { CreateCarTypeDto } from './dto/create_car_type.dto';
 import { UpdateCarTypeDto } from './dto/update_car_type.dto';
 import { Language } from 'src/common/enums/language';
+import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
+import { CarTypeDto } from './dto/car-type.dto';
 
 @Controller('car-type')
 export class CarTypeController {
@@ -21,7 +23,10 @@ export class CarTypeController {
 
   @UseGuards(AdminGuard)
   @Post()
-  create(@Body() dto: CreateCarTypeDto, @Query('lang') lang: Language = Language.en) {
+  create(
+    @Body() dto: CreateCarTypeDto,
+    @Query('lang') lang: Language = Language.en,
+  ) {
     return this.carTypeService.create(dto, lang);
   }
 
@@ -36,12 +41,17 @@ export class CarTypeController {
   }
 
   @Get()
+  @Serilaize(CarTypeDto)
   getAll() {
     return this.carTypeService.getAll();
   }
 
   @Get(':id')
-  getOne(@Param('id', ParseIntPipe) id: number, @Query('lang') lang: Language = Language.en) {
+  @Serilaize(CarTypeDto)
+  getOne(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('lang') lang: Language = Language.en,
+  ) {
     return this.carTypeService.getOneOrFail(id, lang);
   }
 }

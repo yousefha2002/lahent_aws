@@ -45,27 +45,41 @@ import { PaymentSession } from 'src/modules/payment_session/entities/payment_ses
 import { OfferCategory } from 'src/modules/offer_category/entites/offer_category.entity';
 import { Favorite } from 'src/modules/favirote/entities/favirote.entity';
 import { Review } from 'src/modules/review/entities/review.entity';
+import { VariantCategory } from 'src/modules/variant_category/entities/variant_category.entity';
+import { ProductCategoryVariant } from 'src/modules/product_category_variant/entities/product_category_variant.entity';
+import { StoreLanguage } from 'src/modules/store/entities/store_language.entity';
+import { CarBrandLanguage } from 'src/modules/car_brand/entities/car_brand.languae.entity';
+import { CategoryLanguage } from 'src/modules/category/entities/category_language.entity';
+import { CarTypeLanguage } from 'src/modules/car_type/entites/car_type_language.entity';
+import { CarModelLanguage } from 'src/modules/car_model/entites/car_mode_language.entity';
+import { VariantCategoryLanguage } from 'src/modules/variant_category/entities/variant_category_language.entity';
+import { ProductLanguage } from 'src/modules/product/entities/product_language.entity';
+import { ProductExtraLanguage } from 'src/modules/product_extra/entities/product_extra_language.entity';
+import { ProductVariantLanguage } from 'src/modules/prouduct_variant/entities/product_variant_language.entity';
+import { ProductInstructionLanguage } from 'src/modules/product_instruction/entities/product_instruction_language.dto';
+import { GiftCategoryLanguage } from 'src/modules/gift_category/entites/gift_category_language.entity';
 
 export const databaseProviders = [
   {
     provide: 'SEQUELIZE',
     useFactory: async () => {
-      const sequelize = new Sequelize({
-        dialect: 'mysql',
-        host: 'lahant-store.c4p0a0swsyob.us-east-1.rds.amazonaws.com',
-        port: 3306,
-        username: 'admin',
-        password: '059283805928388',
-        database: 'lahant-store',
-      })
+      // const sequelize = new Sequelize({
+      //   dialect: 'mysql',
+      //   host: 'localhost',
+      //   port: 3306,
+      //   username: 'root',
+      //   password: '2838293yo',
+      //   // password: '059283805928388',
+      //   database: 'store_db',
+      // });
 
-  //     const sequelize = new Sequelize(
-  //       'postgresql://lahant_db_user:975iBNIcvvPmaB3iYgHsLBmCc9ls7FXG@dpg-d2i3kg6mcj7s73dvrh2g-a/lahant_db',
-  //       {
-  //           dialect: 'postgres',
-  //         }
-  //      ); 
-      
+      const sequelize = new Sequelize(
+        'postgresql://lahant_db_user:975iBNIcvvPmaB3iYgHsLBmCc9ls7FXG@dpg-d2i3kg6mcj7s73dvrh2g-a/lahant_db',
+        {
+          dialect: 'postgres',
+        },
+      );
+
       sequelize.addModels([
         Admin,
         Cart,
@@ -113,15 +127,22 @@ export const databaseProviders = [
         OfferCategory,
         Favorite,
         Review,
+        VariantCategory,
+        ProductCategoryVariant,
+        StoreLanguage,
+        CarBrandLanguage,
+        CategoryLanguage,
+        CarTypeLanguage,
+        CarModelLanguage,
+        VariantCategoryLanguage,
+        ProductLanguage,
+        ProductExtraLanguage,
+        ProductVariantLanguage,
+        ProductInstructionLanguage,
+        GiftCategoryLanguage,
       ]);
-      // await sequelize.getQueryInterface().addColumn('payment_sessions', 'hash', {
-      //   type: DataTypes.STRING,
-      //   allowNull: true,
-      // });
-      // await sequelize.getQueryInterface().removeColumn('customers', 'password');
-
       await sequelize.sync({ alter: false });
       return sequelize;
-    }
+    },
   },
-]
+];

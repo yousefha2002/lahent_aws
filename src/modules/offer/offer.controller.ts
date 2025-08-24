@@ -42,16 +42,16 @@ export class OfferController {
 
   @Serilaize(PaginatedOfferResponseDto)
   @Get('active/all')
-  getActiveOffersWithStoreDetails(@Query('page') page=1,@Query('limit') limit=1,@Query('storeId') storeId?: number)
+  getActiveOffersWithStoreDetails(@Query('page') page=1,@Query('limit') limit=1,@Query('storeId') storeId?: number,@Query('lang') lang=Language.ar,)
   {
-    return this.offerService.getActiveOffersWithStoreDetails(+page,+limit,storeId)
+    return this.offerService.getActiveOffersWithStoreDetails(+page,+limit,lang,storeId)
   }
 
   @Serilaize(PaginatedOfferResponseDto)
   @UseGuards(StoreOrOwnerGuard,ApprovedStoreGuard)
   @Get('byStore/all')
-  getAllOffersForStore(@CurrentUser() store:Store,@Query('page') page=1,@Query('limit') limit=10,@Query('type') type?: string)
+  getAllOffersForStore(@CurrentUser() store:Store,@Query('page') page=1,@Query('limit') limit=10,@Query('type') type?: string,@Query('lang') lang=Language.ar)
   {
-    return this.offerService.getAllOffersForStore(store.id,+page,+limit,type)
+    return this.offerService.getAllOffersForStore(store.id,+page,+limit,lang,type)
   }
 }

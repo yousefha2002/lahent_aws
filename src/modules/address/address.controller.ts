@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { AddressService } from './address.service';
 import { CustomerGuard } from 'src/common/guards/customer.guard';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
@@ -8,6 +8,7 @@ import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { AddressDto } from './dto/address.dto';
 import { Language } from 'src/common/enums/language';
 import { CompletedProfileGuard } from 'src/common/guards/completed-profile.guard';
+import { UpdateAddressDto } from './dto/update-address.dto';
 
 @Controller('address')
 export class AddressController {
@@ -19,6 +20,14 @@ export class AddressController {
   create(@CurrentUser() user: Customer,@Body() dto: CreateAddressDto,@Query('lang') lang=Language.en) 
   {
     return this.addressService.create(user.id, dto,lang);
+  }
+
+  @Serilaize(AddressDto)
+  @UseGuards(CustomerGuard,CompletedProfileGuard)
+  @Put(':id')
+  update(@CurrentUser() user: Customer,@Param('id') addressId: number,@Body() dto: UpdateAddressDto,@Query('lang') lang=Language.en) 
+  {
+    return this.addressService.update(user.id,addressId, dto,lang);
   }
 
   @Serilaize(AddressDto)

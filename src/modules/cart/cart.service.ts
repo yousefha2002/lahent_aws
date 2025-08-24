@@ -40,7 +40,11 @@ export class CartService {
     private readonly i18n: I18nService,
   ) {}
 
-  async createProductCart(dto: CreateCartProductDto, customerId: number,lang=Language.en) {
+  async createProductCart(
+    dto: CreateCartProductDto,
+    customerId: number,
+    lang = Language.en,
+  ) {
     const transaction = await this.sequelize.transaction();
     const [store, product] = await Promise.all([
       this.storeService.storeById(dto.storeId),
@@ -53,14 +57,19 @@ export class CartService {
         product.storeId === dto.storeId &&
         product.isActive
       ) {
-        await this.prouductVariantService.validateProductVariantsSelection(dto.productId,dto.variants);
+        await this.prouductVariantService.validateProductVariantsSelection(
+          dto.productId,
+          dto.variants,
+        );
         const [cart, isCreated] = await this.findCartOrCreate(
           customerId,
           dto.storeId,
           transaction,
         );
         if (cart.customerId !== customerId) {
-          const message = this.i18n.translate('translation.invalid_cart', { lang });
+          const message = this.i18n.translate('translation.invalid_cart', {
+            lang,
+          });
           throw new BadRequestException(message);
         }
         const cartItem = await this.cartItemService.insertProductinCart(
@@ -68,6 +77,7 @@ export class CartService {
           dto.productId,
           dto.quantity,
           transaction,
+          dto.note,
         );
         // create extras , instructions , variants
         await Promise.all([
@@ -91,10 +101,14 @@ export class CartService {
           ),
         ]);
         await transaction.commit();
-        const message = this.i18n.translate('translation.cart_product_added', { lang });
+        const message = this.i18n.translate('translation.cart_product_added', {
+          lang,
+        });
         return { message };
       } else {
-        const message = this.i18n.translate('translation.invalid_store', { lang });
+        const message = this.i18n.translate('translation.invalid_store', {
+          lang,
+        });
         throw new BadRequestException(message);
       }
     } catch (err) {
@@ -115,7 +129,11 @@ export class CartService {
     return cart;
   }
 
-  async deleteProductFromCart(cartItemId: number, customerId: number,lang=Language.en) {
+  async deleteProductFromCart(
+    cartItemId: number,
+    customerId: number,
+    lang = Language.en,
+  ) {
     const cartItem = await this.cartItemService.findCartItem(cartItemId);
     const cart = await this.cartRepo.findOne({
       where: { id: cartItem.cartId, customerId },
@@ -125,7 +143,9 @@ export class CartService {
       throw new BadRequestException(message);
     }
     await cartItem.destroy();
-    const message = this.i18n.translate('translation.cart_product_deleted', { lang });
+    const message = this.i18n.translate('translation.cart_product_deleted', {
+      lang,
+    });
     return { message };
   }
 
@@ -133,7 +153,7 @@ export class CartService {
     cartItemId: number,
     customerId: number,
     dto: UpdateCartProductQuantityDto,
-    lang=Language.en
+    lang = Language.en,
   ) {
     const cartItem = await this.cartItemService.findCartItem(cartItemId);
     const cart = await this.cartRepo.findOne({
@@ -145,33 +165,44 @@ export class CartService {
     }
     cartItem.quantity = dto.quantity;
     await cartItem.save();
-    const message = this.i18n.translate('translation.cart_product_quantity_updated', { lang });
+    const message = this.i18n.translate(
+      'translation.cart_product_quantity_updated',
+      { lang },
+    );
     return { message };
   }
 
-  async getCartItemsWithOffers(cartId: number, customerId: number) {
+  async getCartItemsWithOffers(cartId: number, customerId: number,lang:Language) {
     await this.findCartByCustomer(cartId, customerId);
 
-    const cartItems =await this.cartItemService.findAllItemsByCartIdAndCustomerId(cartId,customerId);
+    const cartItems =
+      await this.cartItemService.findAllItemsByCartIdAndCustomerId(
+        cartId,
+        customerId,
+        lang
+      );
 
     return Promise.all(
       cartItems.map(async (item) => {
         const product = item.product;
-        const offer = await this.offerService.getActiveOfferForProduct(product.id);
+        const offer = await this.offerService.getActiveOfferForProduct(
+          product.id,
+        );
 
         // حساب سعر المنتج بعد الخصم
         let discountedPrice = product.basePrice;
         if (offer) {
-          discountedPrice = this.offerService.getDiscountedPrice(product.basePrice,offer,);
+          discountedPrice = this.offerService.getDiscountedPrice(product.basePrice,offer);
         }
-        const extrasTotal = item.extras.reduce((sum, e) => sum + (e.productExtra.price || 0), 0) | 0;
-        const variantsTotal = item.variants?.reduce((sum, v) => sum + (v.productVariant.priceDiff || 0),0,) | 0;
+        const extrasTotal =item.extras.reduce((sum, e) => sum + (e.productExtra.additional_price || 0), 0) |0;
+        const variantsTotal =item.variants?.reduce((sum, v) => sum + (v.productVariant.additional_price || 0),0,) | 0;
         const originalPrice = product.basePrice + extrasTotal + variantsTotal;
         const finalPrice = discountedPrice + extrasTotal + variantsTotal;
         const totalPrice = finalPrice * item.quantity;
 
         return {
           id: item.id,
+          note:item.note,
           quantity: item.quantity,
           finalPrice,
           totalPrice,
@@ -180,36 +211,35 @@ export class CartService {
             ...product.toJSON(),
             discountedPrice,
             images: product.images?.map((img) => img.imageUrl) || [],
-            categoryName: product.category?.title || null,
-            offer: offer??null,
+            offer: offer ?? null,
           },
-          extras: item.extras.map(e => ({
-            id: e.productExtraId,
-            name: e.productExtra.name,
-            price: e.productExtra.price,
+          extras: item.extras.map((e) => ({
+            ...e.productExtra.toJSON(),
           })),
-          variants: item.variants.map(v => ({
-            id: v.productVariantId,
-            name: v.productVariant.name,
-            priceDiff: v.productVariant.priceDiff,
-            type: v.productVariant.type,
-            imageUrl:v.productVariant.imageUrl ?? null
+          variants: item.variants.map((v) => ({
+            ...v.productVariant.toJSON(),
+            languages:v.productVariant.langauges
           })),
-          instructions: item.instructions.map(i => ({
-            id: i.productInstructionId,
-            text: i.productInstruction.text,
+          instructions: item.instructions.map((i) => ({
+            ...i.productInstruction.toJSON(),
           })),
         };
       }),
     );
   }
 
-  async findCartByCustomer(cartId: number, customerId: number,lang=Language.en) {
+  async findCartByCustomer(
+    cartId: number,
+    customerId: number,
+    lang = Language.en,
+  ) {
     const cart = await this.cartRepo.findOne({
       where: { id: cartId, customerId },
     });
     if (!cart) {
-      const message = this.i18n.translate('translation.cart_ownership_error', { lang });
+      const message = this.i18n.translate('translation.cart_ownership_error', {
+        lang,
+      });
       throw new ForbiddenException(message);
     }
     return cart;
@@ -228,7 +258,12 @@ export class CartService {
     return carts;
   }
 
-  async deleteCart(cartId: number, customerId: number, transaction?: any,lang=Language.en) {
+  async deleteCart(
+    cartId: number,
+    customerId: number,
+    transaction?: any,
+    lang = Language.en,
+  ) {
     await this.cartRepo.destroy({
       where: { id: cartId, customerId },
       transaction,
@@ -239,36 +274,58 @@ export class CartService {
 
   async updateProductCartItem(
     cartItemId: number,
-    dto: CreateCartProductDto, // or you can create a specific Update DTO
+    dto: CreateCartProductDto,
     customerId: number,
-    lang=Language.en
+    lang = Language.en,
   ) {
     const transaction = await this.sequelize.transaction();
 
     try {
       // 1. Fetch cart item with relation to cart and validate ownership
-      const cartItem = await this.cartItemService.findCartItemWithCustomer(cartItemId);
+      const cartItem =
+        await this.cartItemService.findCartItemWithCustomer(cartItemId);
 
       if (!cartItem) {
-        const message = this.i18n.translate('translation.cart_item_not_found', { lang });
+        const message = this.i18n.translate('translation.cart_item_not_found', {
+          lang,
+        });
         throw new NotFoundException(message);
+      }
+
+      const product = await this.productService.productById(cartItem.productId);
+      if (!product || !product.isActive) {
+        const message = this.i18n.translate('translation.product.invalid', {
+          lang,
+        });
+        throw new BadRequestException(message);
       }
 
       if (
         cartItem.cart.customerId !== customerId ||
         cartItem.cart.storeId !== dto.storeId
       ) {
-        const message = this.i18n.translate('translation.cart_ownership_error', { lang });
+        const message = this.i18n.translate(
+          'translation.cart_ownership_error',
+          { lang },
+        );
         throw new BadRequestException(message);
       }
 
-      await this.prouductVariantService.validateProductVariantsSelection(cartItem.productId,dto.variants);
+      await this.prouductVariantService.validateProductVariantsSelection(
+        cartItem.productId,
+        dto.variants,
+      );
 
       // 2. Update quantity if changed
       if (dto.quantity && dto.quantity !== cartItem.quantity) {
         cartItem.quantity = dto.quantity;
-        await cartItem.save({ transaction });
       }
+
+      if (dto.note) {
+        cartItem.note = dto.note;
+      }
+
+      await cartItem.save({ transaction });
 
       // 3. Clear existing extras, instructions, variants for this cartItem
       await Promise.all([
@@ -300,7 +357,9 @@ export class CartService {
       ]);
 
       await transaction.commit();
-      const message = this.i18n.translate('translation.cart_item_updated', { lang });
+      const message = this.i18n.translate('translation.cart_item_updated', {
+        lang,
+      });
       return { message };
     } catch (err) {
       await transaction.rollback();

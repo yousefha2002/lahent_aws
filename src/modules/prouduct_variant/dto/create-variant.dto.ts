@@ -1,31 +1,27 @@
-import {
-  IsString,
-  IsNumber,
-  IsEnum,
-  Min,
-  IsNotEmpty,
-  IsInt,
-} from 'class-validator';
-import { ProductVariantType } from 'src/common/enums/product_varaint_type';
-import { Transform } from 'class-transformer';
+import {Type } from 'class-transformer';
+import { IsArray, IsNotEmpty, IsNumber, IsString, ValidateNested } from 'class-validator';
+import { ProductVariantLanguageDto } from './variant-dto';
 
-export class CreateProductVariantDto {
+export class SingleVariantDto {
+  @IsNumber()
+  @IsNotEmpty()
+  additional_price: number;
+
+  @IsNumber()
+  @IsNotEmpty()
+  categoryId: number;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ProductVariantLanguageDto)
+  languages: ProductVariantLanguageDto[];
+}
+
+export class CreateProductVariantsDto {
   @IsString()
   @IsNotEmpty()
-  name: string;
+  productId: string;
 
-  @IsEnum(ProductVariantType, { message: 'Invalid variant type' })
-  @IsNotEmpty()
-  type: ProductVariantType;
-
-  @Transform(({ value }) => parseFloat(value))
-  @IsNumber({}, { message: 'price must be a number' })
-  @Min(0, { message: 'price must be a positive number' })
-  @IsNotEmpty()
-  price: number;
-
-  @Transform(({ value }) => parseInt(value, 10))
-  @IsInt({ message: 'productId must be an integer number' })
-  @IsNotEmpty()
-  productId: number;
+  @IsString()
+  variants: string
 }

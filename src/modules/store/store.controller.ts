@@ -38,6 +38,8 @@ import { StoreDetailsDto } from './dto/store-details.dto';
 import { Owner } from '../owner/entities/owner.entity';
 import { PaginatedStoreDto, StoreDto } from './dto/Store.dto';
 import { StoreWithTokenDto } from './dto/simple-store.dto';
+import { FullDetailsStoreDto } from './dto/full-details-store.dto';
+import { validateAndParseStoreTranslations } from 'src/common/validation/translationDto/storeTranslation.dto';
 
 @Controller('store')
 export class StoreController {
@@ -146,13 +148,15 @@ export class StoreController {
     );
   }
 
-  @Serilaize(StoreDto)
+  @UseGuards(CustomerGuard)
+  @Serilaize(FullDetailsStoreDto)
   @Get(':id')
   async getFullDetailsStore(
     @Param('id') storeId: number,
     @Query('lang') lang: Language = Language.en,
+    @CurrentUser() customer:Customer
   ) {
-    return this.storeService.getFullDetailsStore(storeId, lang);
+    return this.storeService.getFullDetailsStore(storeId,customer.id, lang);
   }
 
   @Put('/:storeId/approved')
@@ -203,5 +207,10 @@ export class StoreController {
   @Get('favourite/byCustomer')
   getFavouriteStoresByCustomer(@CurrentUser() user: Customer,@Query('lang') lang=Language.en,@Query('page') page = 1,@Query('limit') limit = 10) {
     return this.storeService.getFavouriteStoresByCustomer(user.id,lang,page,limit);
+  }
+
+  @Post('refresh-token')
+  async refreshToken(@Body('refreshToken') refreshToken: string) {
+    return this.storeAuthService.refreshToken(refreshToken)
   }
 }

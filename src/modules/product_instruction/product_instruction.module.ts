@@ -5,11 +5,13 @@ import { ProductInstructionProvider } from './providers/product_instruction.prov
 import { ProductModule } from '../product/product.module';
 import { StoreModule } from '../store/store.module';
 import { OwnerModule } from '../owner/owner.module';
+import { ProductInstructionLanguageProvider } from './providers/product_instruction_language.provider';
+import { DatabaseModule } from 'src/database/database.module';
 
 @Module({
   controllers: [ProductInstructionController],
-  providers: [ProductInstructionService, ...ProductInstructionProvider],
+  providers: [ProductInstructionService, ...ProductInstructionProvider,...ProductInstructionLanguageProvider],
   exports: [ProductInstructionService],
-  imports: [StoreModule, OwnerModule, forwardRef(() => ProductModule)],
+  imports: [StoreModule, OwnerModule, forwardRef(() => ProductModule),DatabaseModule],
 })
 export class ProductInstructionModule {}

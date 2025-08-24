@@ -11,7 +11,7 @@ export class SimpleOfferDto {
     getFreeQty: number | null;
 
     @Expose()
-    fixedPrice?: number | null;
+    discountAmount?: number | null;
 
     @Expose()
     discountPercentage?: number | null;

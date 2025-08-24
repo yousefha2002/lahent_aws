@@ -1,11 +1,13 @@
-import { IsString, IsNumber, IsNotEmpty } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsInt, IsNumber,IsArray, IsNotEmpty, ValidateNested } from 'class-validator';
+import { InstructionLanguageDto } from './instruction-dto';
 
 export class UpdateProductInstructionDto {
-  @IsString()
-  @IsNotEmpty()
-  text: string;
-
-  @IsNumber()
-  @IsNotEmpty()
+  @IsInt()
   productId: number;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => InstructionLanguageDto)
+  languages: InstructionLanguageDto[];
 }

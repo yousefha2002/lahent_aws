@@ -9,6 +9,7 @@ import { CustomerCarListDto } from "src/modules/car/dto/customer-car-list.dto";
 
 class OrderItemDto {
     @Expose() id: number;
+    @Expose() note: string;
     @Expose() productId: number;
     @Expose() productName: string;
     @Expose() unitBasePrice: number;

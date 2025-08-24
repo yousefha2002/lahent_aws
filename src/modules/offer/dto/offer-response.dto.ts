@@ -1,22 +1,20 @@
 import { Expose, Type } from 'class-transformer';
 import { SimpleOfferDto } from './simple-offer.dto';
+import { StoreLanguageDto } from 'src/modules/store/dto/store-language.dto';
+import { SimpleCategoryDto } from 'src/modules/category/dto/category.dto';
 
 export class OfferProductDto {
     @Expose() id: number;
-    @Expose() name: string;
     @Expose() image: string | null;
-}
-
-export class OfferCategoryDto {
-    @Expose() id: number;
-    @Expose() title: string;
 }
 
 export class OfferStoreDto {
     @Expose() id:number;
-    @Expose() name: string;
     @Expose() logoUrl: string;
     @Expose() city: string;
+    @Expose()
+    @Type(() => StoreLanguageDto)
+    languages: StoreLanguageDto[];
 }
 
 export class OfferResponseDto extends SimpleOfferDto {
@@ -39,8 +37,8 @@ export class OfferResponseDto extends SimpleOfferDto {
     @Expose() totalProducts: number;
 
     @Expose()
-    @Type(() => OfferCategoryDto)
-    categories: OfferCategoryDto[];
+    @Type(() => SimpleCategoryDto)
+    categories: SimpleCategoryDto[];
 }
 
 export class PaginatedOfferResponseDto {

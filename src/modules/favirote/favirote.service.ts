@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { Favorite } from './entities/favirote.entity';
 import { repositories } from 'src/common/enums/repositories';
 import { StoreService } from '../store/services/store.service';
@@ -10,12 +10,12 @@ export class FaviroteService {
   constructor(
     @Inject(repositories.favirote_repository)
     private favoriteModel: typeof Favorite,
-    private readonly storeService: StoreService,
+    @Inject(forwardRef(() => StoreService)) private storeService: StoreService,
     private readonly i18n: I18nService,
   ) {}
 
-  // إضافة متجر للمفضلة
-  async addFavorite(customerId: number, storeId: number, lang: Language = Language.en) {
+  async toggleFavorite(customerId: number, storeId: number, lang: Language = Language.en)
+  {
     const store = await this.storeService.storeById(storeId);
 
     if (!store) {
@@ -24,27 +24,32 @@ export class FaviroteService {
       );
     }
 
-    const [favorite] = await this.favoriteModel.findOrCreate({
-      where: { customerId, storeId },
-      defaults: { customerId, storeId },
-    });
+    const favorite = await this.findFavoriteStore(storeId,customerId)
 
-    return favorite;
+    if (favorite) {
+      await favorite.destroy();
+      return { message: this.i18n.translate('translation.removed_from_favorites', { lang }) };
+    } else {
+      await this.favoriteModel.create({ customerId, storeId });
+      return { message: this.i18n.translate('translation.added_to_favorites', { lang })};
+    }
   }
 
-  // إزالة متجر من المفضلة
   async removeFavorite(customerId: number, storeId: number, lang: Language = Language.en) {
-    const fav = await this.favoriteModel.findOne({
-      where: { customerId, storeId },
-    });
+    const favorite = await this.findFavoriteStore(storeId,customerId)
 
-    if (!fav) {
+    if (!favorite) {
       throw new NotFoundException(
         this.i18n.translate('translation.favorite_not_found', { lang }),
       );
     }
 
-    await fav.destroy();
+    await favorite.destroy();
     return { message: this.i18n.translate('translation.removed_from_favorites', { lang }) };
+  }
+
+  findFavoriteStore(storeId:number,customerId:number)
+  {
+    return this.favoriteModel.findOne({where: { customerId, storeId },});
   }
 }

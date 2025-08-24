@@ -1,9 +1,20 @@
-import { Body, Controller, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { CarBrandService } from './car_brand.service';
 import { CreateCarBrandDto } from './dto/create_car_brand.dto';
 import { UpdateCarBrandDto } from './dto/update_car_brand.dto';
 import { AdminGuard } from 'src/common/guards/admin.guard';
 import { Language } from 'src/common/enums/language';
+import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
+import { CarBrandDto } from './dto/car-brand.dto';
 
 @Controller('car-brand')
 export class CarBrandController {
@@ -11,8 +22,8 @@ export class CarBrandController {
 
   @UseGuards(AdminGuard)
   @Post()
-  create(@Body() dto: CreateCarBrandDto,@Query('lang') lang=Language.en) {
-    return this.carBrandService.create(dto,lang);
+  create(@Body() dto: CreateCarBrandDto, @Query('lang') lang = Language.en) {
+    return this.carBrandService.create(dto, lang);
   }
 
   @UseGuards(AdminGuard)
@@ -20,18 +31,20 @@ export class CarBrandController {
   update(
     @Param('id') id: number,
     @Body() dto: UpdateCarBrandDto,
-    @Query('lang') lang=Language.en
+    @Query('lang') lang = Language.en,
   ) {
-    return this.carBrandService.update(id, dto,lang);
+    return this.carBrandService.update(id, dto);
   }
 
   @Get()
+  @Serilaize(CarBrandDto)
   getAll() {
     return this.carBrandService.getAll();
   }
 
   @Get(':id')
-  getOne(@Param('id') id: number,@Query('lang') lang=Language.en) {
-    return this.carBrandService.getOneOrFail(id,lang);
+  @Serilaize(CarBrandDto)
+  getOne(@Param('id') id: number, @Query('lang') lang = Language.en) {
+    return this.carBrandService.getOneOrFail(id, lang);
   }
 }

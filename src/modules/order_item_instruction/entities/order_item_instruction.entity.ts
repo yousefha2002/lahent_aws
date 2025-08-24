@@ -37,5 +37,5 @@ export class OrderItemInstruction extends Model{
 
     @AllowNull(false)
     @Column(DataType.STRING)
-    text: string;
+    name: string;
 }

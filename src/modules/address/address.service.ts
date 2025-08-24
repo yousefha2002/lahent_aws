@@ -4,6 +4,7 @@ import { Address } from './entities/address.entity';
 import { CreateAddressDto } from './dto/create-address.dto';
 import { I18nService } from 'nestjs-i18n';
 import { Language } from 'src/common/enums/language';
+import { UpdateAddressDto } from './dto/update-address.dto';
 
 @Injectable()
 export class AddressService {
@@ -25,6 +26,14 @@ export class AddressService {
             throw new BadRequestException(msg);
         }
         return this.addressRepo.create({ ...dto, customerId });
+    }
+
+    async update(customerId: number,addressId: number,dto: UpdateAddressDto,lang = Language.en)
+    {
+        const address = await this.findOneOrFail(addressId, customerId, lang);
+        Object.assign(address, dto);
+        await address.save();
+        return address
     }
 
     async remove(customerId: number, addressId: number,lang=Language.en) 
@@ -64,11 +73,21 @@ export class AddressService {
         return distance; // بالكيلومتر
     }
 
-    isBetween(lat: number, lng: number,lat1: number, lng1: number,lat2: number, lng2: number): boolean {
-        const minLat = Math.min(lat1, lat2);
-        const maxLat = Math.max(lat1, lat2);
-        const minLng = Math.min(lng1, lng2);
-        const maxLng = Math.max(lng1, lng2);
-        return lat >= minLat && lat <= maxLat && lng >= minLng && lng <= maxLng;
+    isBetween(lat: number,lng: number,lat1: number,lng1: number,lat2: number,lng2: number,bufferMeters = 300): boolean {
+        // تقريب الإحداثيات إلى كيلومتر
+        const toKm = (deg: number) => deg * 111;
+        const x0 = toKm(lat);
+        const y0 = toKm(lng);
+        const x1 = toKm(lat1);
+        const y1 = toKm(lng1);
+        const x2 = toKm(lat2);
+        const y2 = toKm(lng2);
+
+        // المسافة العمودية من النقطة إلى الخط
+        const num = Math.abs((y2 - y1) * (x0 - x1) - (x2 - x1) * (y0 - y1));
+        const den = Math.sqrt((y2 - y1) ** 2 + (x2 - x1) ** 2);
+        const distanceKm = num / den;
+
+        return distanceKm * 1000 <= bufferMeters; // بالمتر
     }
 }

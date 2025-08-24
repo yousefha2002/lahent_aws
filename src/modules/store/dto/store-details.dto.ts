@@ -6,12 +6,6 @@ export class StoreDetailsDto {
   id: number;
 
   @Expose()
-  name: string;
-
-  @Expose()
-  address: string;
-
-  @Expose()
   logoUrl: string;
 
   @Expose()

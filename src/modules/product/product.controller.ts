@@ -11,17 +11,16 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { AnyFilesInterceptor, FileFieldsInterceptor } from '@nestjs/platform-express';
+import {
+  AnyFilesInterceptor,
+  FileFieldsInterceptor,
+} from '@nestjs/platform-express';
 import { ProductService } from './product.service';
 import { StoreOrOwnerGuard } from 'src/common/guards/StoreOrOwner.guard';
 import { Store } from '../store/entities/store.entity';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
-import { CreateProductDto } from './dto/create-product.dto';
+import { CreateProductDto, ProductLanguageDto } from './dto/create-product.dto';
 import { multerOptions } from 'src/multer/multer.options';
-import parseAndValidateExtraItems from 'src/common/validation/parseAndValidateExtraItem';
-import parseAndValidateVariants from 'src/common/validation/parseAndValidateVariants';
-import { variantType } from 'src/common/types/variant.type';
-import { extraItemType } from 'src/common/types/extraItem.type';
 import { UpdateProductWithImageDto } from './dto/update-product-withImage.dto';
 import {
   ExistingImage,
@@ -46,54 +45,15 @@ export class ProductController {
     @CurrentUser() store: Store,
     @Body() body: CreateProductDto,
     @UploadedFiles() files: Express.Multer.File[],
-    @Query('lang') lang=Language.en
+    @Query('lang') lang = Language.en,
   ) {
-    const productImages = files
-      .filter((f) => f.fieldname === 'images')
-
-    if (productImages.length === 0) {
-      throw new BadRequestException(
-        'يجب إرسال صورة واحدة على الأقل للمنتج',
-      );
+    if (!files || files.length === 0) {
+      throw new BadRequestException('يجب إرسال صورة واحدة على الأقل للمنتج');
     }
-
-    if (productImages.length > 5) {
+    if (files.length > 5) {
       throw new BadRequestException('يمكن رفع 5 صور فقط للمنتج');
     }
-    // ✅ Manually parse & validate extraItems
-    let extraItems: extraItemType[] = [];
-    if (body.extraItems) {
-      try {
-        extraItems = parseAndValidateExtraItems(body.extraItems);
-      } catch (error) {
-        throw new BadRequestException(error.message);
-      }
-    }
-    const variantFilesWithIndex = files
-      .filter(f => f.fieldname.startsWith('variantImage_'))
-      .map(f => ({
-        index: Number(f.fieldname.split('_')[1]),
-        file: f, // ملف Multer كامل
-      }));
-
-
-    let variants: variantType[] = [];
-    if (body.variants) {
-      try {
-        variants = parseAndValidateVariants(body.variants);
-      } catch (error) {
-        throw new BadRequestException(error.message);
-      }
-    }
-    return this.productService.createProduct(
-      store.id,
-      body,
-      productImages,
-      extraItems,
-      variants,
-      variantFilesWithIndex,
-      lang
-    );
+    return this.productService.createProduct(store.id, body, files, lang);
   }
 
   @Put('update/:productId')
@@ -104,7 +64,7 @@ export class ProductController {
   async updateProductWithImage(
     @Param('productId') productId: string,
     @Body() body: UpdateProductWithImageDto,
-    @Query('lang') lang=Language.en,
+    @Query('lang') lang = Language.en,
     @UploadedFiles() files: { images?: Express.Multer.File[] },
   ) {
     let existingImages: ExistingImage[] = [];
@@ -123,31 +83,19 @@ export class ProductController {
     );
   }
 
-  @Put('update/bycategory/:productId')
-  @UseGuards(StoreOrOwnerGuard, ApprovedStoreGuard)
-  updateProductWithCategory(
-    @Body() dto: UpdateProductWithIcategoryDto,
-    @Param('productId') productId: string,
-    @CurrentUser() store: Store,
-  ) {
-    return this.productService.updateProductWithCategory(
-      +productId,
-      dto,
-      store.id,
-    );
-  }
-
   @Serilaize(PaginatedProductWithOfferDto)
   @Get('all/:storeId')
   async getCustomerStoreProducts(
     @Param('storeId') storeId: number,
     @Query('categoryId') categoryId: number,
+    @Query('lang') lang=Language.ar,
     @Query('page') page = 1,
     @Query('limit') limit = 10,
     @Query('name') name: string,
   ) {
     return this.productService.getCustomerStoreProducts(
       storeId,
+      lang,
       +page,
       +limit,
       categoryId,
@@ -164,9 +112,11 @@ export class ProductController {
     @Query('page') page = 1,
     @Query('limit') limit = 10,
     @Query('name') name: string,
+    @Query('lang') lang = Language.ar
   ) {
     return this.productService.getProductsByStore(
       store.id,
+      lang,
       +page,
       +limit,
       categoryId,
@@ -176,8 +126,8 @@ export class ProductController {
 
   @Serilaize(FullProductDetailsDto)
   @Get('/:productId')
-  getFullProductDetails(@Param('productId') productId: number) {
-    return this.productService.getFullProductDetails(productId);
+  getFullProductDetails(@Param('productId') productId: string,@Query('lang') lang=Language.ar,) {
+    return this.productService.getFullProductDetails(+productId,lang);
   }
 
   @Put('active/:productId')
@@ -185,28 +135,12 @@ export class ProductController {
   activeProduct(
     @Param('productId') productId: string,
     @CurrentUser() store: Store,
-    @Query('lang') lang=Language.en
+    @Query('lang') lang = Language.en,
   ) {
     return this.productService.changeProductActivity(
       +productId,
       store.id,
-      true,
-      lang
-    );
-  }
-
-  @Put('unactive/:productId')
-  @UseGuards(StoreOrOwnerGuard, ApprovedStoreGuard)
-  unactiveProduct(
-    @Param('productId') productId: string,
-    @CurrentUser() store: Store,
-    @Query('lang') lang=Language.en
-  ) {
-    return this.productService.changeProductActivity(
-      +productId,
-      store.id,
-      false,
-      lang
+      lang,
     );
   }
 }

@@ -52,6 +52,8 @@ import { OfferCategoryModule } from './modules/offer_category/offer_category.mod
 import { FaviroteModule } from './modules/favirote/favirote.module';
 import { ReviewModule } from './modules/review/review.module';
 import { EdfapayModule } from './modules/edfapay/edfapay.module';
+import { VariantCategoryModule } from './modules/variant_category/variant_category.module';
+import { ProductCategoryVariantModule } from './modules/product_category_variant/product_category_variant.module';
 
 @Module({
   imports: [
@@ -120,6 +122,8 @@ import { EdfapayModule } from './modules/edfapay/edfapay.module';
     FaviroteModule,
     ReviewModule,
     EdfapayModule,
+    VariantCategoryModule,
+    ProductCategoryVariantModule,
   ],
   providers: [MulterConfigService],
 })

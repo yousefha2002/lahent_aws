@@ -1,6 +1,8 @@
+import { FaviroteService } from './../../favirote/favirote.service';
 import { StoreUtilsService } from './storeUtils.service';
 import {
   BadRequestException,
+  forwardRef,
   Inject,
   Injectable,
   NotFoundException,
@@ -21,6 +23,7 @@ import { getDayOfWeek } from 'src/common/utils/getDayOfWeek';
 import { Op } from 'sequelize';
 import { I18nService } from 'nestjs-i18n';
 import { Customer } from 'src/modules/customer/entities/customer.entity';
+import { StoreLanguage } from '../entities/store_language.entity';
 
 @Injectable()
 export class StoreService {
@@ -30,7 +33,9 @@ export class StoreService {
     private readonly cloudinaryService: CloudinaryService,
     private readonly openingHourService: OpeningHourService,
     private readonly storeUtilsService: StoreUtilsService,
+    @Inject(repositories.store_langauge_repository) private storeLanguageRepo: typeof StoreLanguage,
     private readonly i18n: I18nService,
+    @Inject(forwardRef(() => FaviroteService)) private faviroteService: FaviroteService,
   ) {}
 
   async findAllStores(
@@ -54,10 +59,16 @@ export class StoreService {
       },
       include: [
         {
+          model: StoreLanguage,
+          where: { languageCode: lang },
+          required: false
+        },
+        {
           model: SubType,
+          where: { languageCode: lang },
           ...(typeId && { where: { typeId } }),
           include: [
-            { model: SubTypeLanguage },
+            { model: SubTypeLanguage,where: { languageCode: lang } },
             { model: Type, include: [TypeLanguage] },
           ],
         },
@@ -66,12 +77,11 @@ export class StoreService {
       offset,
       limit,
       distinct: true,
+      col: 'id',
       order: [['id', 'DESC']],
     });
 
-    const stores = rows.map((store) =>
-      this.storeUtilsService.mapStoreWithExtras(store, lang),
-    );
+    const stores = rows.map((store) =>this.storeUtilsService.mapStoreWithExtras(store));
     return {
       stores,
       totalPages: Math.ceil(count / limit),
@@ -89,8 +99,8 @@ export class StoreService {
         {
           model: SubType,
           include: [
-            { model: SubTypeLanguage },
-            { model: Type, include: [TypeLanguage] },
+            { model: SubTypeLanguage,where:{languageCode:lang} },
+            { model: Type, include: [{model:TypeLanguage,where:{languageCode:lang}}] },
           ],
         },
         { model: OpeningHour },
@@ -99,11 +109,11 @@ export class StoreService {
     });
 
     return stores.map((store) =>
-      this.storeUtilsService.mapStoreWithExtras(store, lang),
+      this.storeUtilsService.mapStoreWithExtras(store),
     );
   }
 
-  async getFullDetailsStore(storeId: number, lang: Language = Language.en) {
+  async getFullDetailsStore(storeId: number,customerId:number, lang: Language = Language.en) {
     const store = await this.storeRepo.findOne({
       where: {
         id: storeId,
@@ -111,10 +121,14 @@ export class StoreService {
       },
       include: [
         {
+          model: StoreLanguage,
+          where: { languageCode: lang },
+        },
+        {
           model: SubType,
           include: [
-            { model: SubTypeLanguage },
-            { model: Type, include: [TypeLanguage] },
+            { model: SubTypeLanguage,where:{languageCode:lang} },
+            { model: Type, include: [{model:TypeLanguage,where:{languageCode:lang}}] },
           ],
         },
         { model: OpeningHour },
@@ -126,7 +140,11 @@ export class StoreService {
         this.i18n.t('translation.store.not_found_or_not_approved'),
       );
     }
-    return this.storeUtilsService.mapStoreWithExtras(store, lang);
+    let isFavorite = false
+    const favorite = await this.faviroteService.findFavoriteStore(storeId,customerId)
+    isFavorite = favorite ? true : false
+    const storeResponce = await this.storeUtilsService.mapStoreWithExtras(store);
+    return {store:storeResponce,isFavorite}
   }
 
   async changeStoreStatus(status: StoreStatus, storeId: number,lang = Language.en) {
@@ -157,7 +175,6 @@ export class StoreService {
       }
     }
     Object.assign(store, {
-      ...(dto.name !== undefined && { name: dto.name }),
       ...(dto.phone !== undefined && { phone: dto.phone }),
       ...(dto.in_store !== undefined && { in_store: dto.in_store }),
       ...(dto.drive_thru !== undefined && { drive_thru: dto.drive_thru }),
@@ -174,6 +191,25 @@ export class StoreService {
         dto.openingHours,
       );
     }
+
+    if (dto.languages) {
+    for (const t of dto.languages) {
+      const existing = await this.storeLanguageRepo.findOne({
+        where: { storeId: store.id, languageCode: t.languageCode },
+      });
+      if (existing) {
+        existing.name = t.name;
+        await existing.save();
+      } else {
+        await this.storeLanguageRepo.create({
+          storeId: store.id,
+          languageCode: t.languageCode,
+          name: t.name,
+        });
+      }
+    }
+  }
+
     return { message: this.i18n.t('translation.store.updated_successfully',{lang}) };
   }
 
@@ -266,11 +302,12 @@ export class StoreService {
     const { rows, count } = await this.storeRepo.findAndCountAll({
       where: {status: StoreStatus.APPROVED,},
       include: [
+        {model:StoreLanguage,where:{languageCode:lang}},
         {
           model: SubType,
           include: [
-            { model: SubTypeLanguage },
-            { model: Type, include: [TypeLanguage] },
+            { model: SubTypeLanguage,where:{languageCode:lang} },
+            { model: Type, include: [{model:TypeLanguage,where:{languageCode:lang}}] },
           ],
         },
         { model: OpeningHour },
@@ -287,7 +324,7 @@ export class StoreService {
       order: [['id', 'DESC']],
     });
 
-    const stores = rows.map((store) =>this.storeUtilsService.mapStoreWithExtras(store, lang));
+    const stores = rows.map((store) =>this.storeUtilsService.mapStoreWithExtras(store));
     return {
       stores,
       totalPages: Math.ceil(count / limit),

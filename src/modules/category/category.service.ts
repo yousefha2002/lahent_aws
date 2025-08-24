@@ -12,53 +12,119 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 import { Op, Sequelize } from 'sequelize';
 import { I18nService } from 'nestjs-i18n';
 import { Language } from 'src/common/enums/language';
+import { CategoryLanguage } from './entities/category_language.entity';
+import { UpdateCategoryDto } from './dto/update-category.dto';
 
 @Injectable()
 export class CategoryService {
   constructor(
-    @Inject(repositories.category_repository)
-    private categoryRepo: typeof Category,
+    @Inject(repositories.category_repository) private categoryRepo: typeof Category,
+    @Inject(repositories.category_langauge_repository) private categoryLanguageRepo: typeof CategoryLanguage,
     @Inject(forwardRef(() => ProductService))
     private productService: ProductService,
-    private readonly i18n: I18nService, // إضافة i18n
+    private readonly i18n: I18nService, 
+    @Inject('SEQUELIZE') private readonly sequelize: Sequelize
   ) {}
 
-  async create(storeId: number, dto: CreateCategoryDto, lang: Language = Language.en) {
-    await this.verifyNameWithStore(storeId, dto.title, undefined, lang);
-    await this.categoryRepo.create({ storeId, title: dto.title });
-    const message = this.i18n.translate('translation.category.created', { lang });
-    return { message };
+  async create(storeId: number,dto: CreateCategoryDto,lang: Language = Language.en) 
+  {
+    const transaction = await this.sequelize.transaction();
+    try {
+      const category = await this.categoryRepo.create(
+        { storeId },
+        { transaction }
+      );
+
+      for (const langObj of dto.languages) {
+        await this.verifyNameWithStore(storeId,langObj.title,undefined,langObj.languageCode as Language,);
+
+        await this.categoryLanguageRepo.create(
+          {
+            title: langObj.title,
+            languageCode: langObj.languageCode,
+            categoryId:category.id
+          },
+          { transaction }
+        );
+      }
+
+      await transaction.commit();
+      const message = this.i18n.translate('translation.category.created', { lang });
+      return { message };
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
   }
 
-  async update(
-    dto: CreateCategoryDto,
-    categoryId: number,
-    storeId: number,
-    lang: Language = Language.en
-  ) {
-    const category = await this.validateCategoryBelongsToStore(categoryId, storeId, lang);
-    await this.verifyNameWithStore(category.storeId, dto.title, categoryId, lang);
-    category.title = dto.title;
-    await category.save();
-    const message = this.i18n.translate('translation.category.updated', { lang });
-    return { message };
-  }
+  async update(categoryId: number,storeId: number,dto: UpdateCategoryDto,lang: Language) 
+  {
+      const transaction = await this.sequelize.transaction();
+      try {
+        const category = await this.validateCategoryBelongsToStore(categoryId, storeId, lang);
+        if(dto.languages)
+        for (const langObj of dto.languages) {
+          await this.verifyNameWithStore(
+            storeId,
+            langObj.title,
+            categoryId,
+            langObj.languageCode as Language,
+          );
+          const existingLang = await this.categoryLanguageRepo.findOne({
+            where: {
+              categoryId,
+              languageCode: langObj.languageCode,
+            },
+            transaction,
+          });
 
-  async verifyNameWithStore(
-    storeId: number,
-    title: string,
-    categoryId?: number,
-    lang: Language = Language.en
-  ) {
-    const where: any = { storeId, title };
+          if (existingLang) {
+            existingLang.title = langObj.title;
+            await existingLang.save({ transaction });
+          } else {
+            await this.categoryLanguageRepo.create(
+              {
+                title: langObj.title,
+                languageCode: langObj.languageCode,
+                categoryId: category.id,
+              },
+              { transaction }
+            );
+          }
+        }
+
+        await transaction.commit();
+        const message = this.i18n.translate('translation.category.updated', { lang });
+        return { message };
+      } catch (error) {
+        await transaction.rollback();
+        throw error;
+      }
+    }
+
+  async verifyNameWithStore(storeId: number,title: string,categoryId?: number,lang: Language = Language.en) 
+  {
+    const where: any = { storeId };
     if (categoryId) {
       where.id = { [Op.ne]: categoryId };
     }
-    const category = await this.categoryRepo.findOne({ where });
+
+    const category = await this.categoryRepo.findOne({
+      where,
+      include: [
+        {
+          model: CategoryLanguage,
+          where: { title, languageCode: lang },
+          required: true, // لازم يكون مطابق
+        },
+      ],
+    });
+
     if (category) {
       const message = this.i18n.translate('translation.category.name_exists', { lang });
       throw new BadGatewayException(message);
     }
+
     return true;
   }
 
@@ -74,7 +140,7 @@ export class CategoryService {
   }
 
   async categoryById(categoryId: number | string, lang: Language = Language.en) {
-    const category = await this.categoryRepo.findByPk(categoryId);
+    const category = await this.categoryRepo.findByPk(categoryId,{include:{model:CategoryLanguage,where: { languageCode: lang }}});
     if (!category) {
       const message = this.i18n.translate('translation.category.not_found', { lang });
       throw new BadRequestException(message);
@@ -82,9 +148,10 @@ export class CategoryService {
     return category;
   }
 
-  async getCategoriesWithProductCount(storeId: number) {
+  async getCategoriesWithProductCount(storeId: number,lang:Language) {
     const categories = await this.categoryRepo.findAll({
       where: { storeId },
+      include:[{model:CategoryLanguage,where:{languageCode:lang}}],
       attributes: {
         include: [
           [
@@ -100,8 +167,7 @@ export class CategoryService {
     });
 
     return categories.map(category => ({
-      id: category.id,
-      title: category.title,
+      ...category.toJSON(),
       productCount: Number(category.getDataValue('productCount')),
     }));
   }

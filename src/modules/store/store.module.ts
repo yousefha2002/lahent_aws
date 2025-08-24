@@ -14,10 +14,12 @@ import { SubtypeModule } from '../subtype/subtype.module';
 import { StoreAuthService } from './services/storeAuth.service';
 import { StoreGeolocationService } from './services/storeGeolocation.service';
 import { StoreUtilsService } from './services/storeUtils.service';
+import { FaviroteModule } from '../favirote/favirote.module';
+import { StoreLanguageProvider } from './providers/storeLangauge.provider';
 
 @Module({
   controllers: [StoreController],
-  providers: [StoreService,StoreAuthService,StoreGeolocationService,StoreUtilsService, ...StoreProvider],
+  providers: [StoreService,StoreAuthService,StoreGeolocationService,StoreUtilsService, ...StoreProvider,...StoreLanguageProvider],
   imports: [
     OwnerModule,
     CloudinaryModule,
@@ -28,6 +30,7 @@ import { StoreUtilsService } from './services/storeUtils.service';
     CustomerModule,
     RecentAddressModule,
     AdminModule,
+    forwardRef(()=>FaviroteModule)
   ],
   exports: [StoreService,StoreUtilsService],
 })

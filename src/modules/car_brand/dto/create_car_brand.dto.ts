@@ -1,13 +1,21 @@
+import { IsNotEmpty, Validate } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator';
+import { Language } from 'src/common/enums/language';
+import { ValidLanguageKeysAndValues } from 'src/common/validation/valid-language-keys.validator';
 
 export class CreateCarBrandDto {
-  @Transform(({ value }) =>
-    typeof value === 'string' ? value.trim().toLowerCase() : value,
+  @IsNotEmpty({ message: 'Names object cannot be empty' })
+  @Validate(ValidLanguageKeysAndValues)
+  @Transform(
+    ({ value }) => {
+      if (!value || typeof value !== 'object') return value;
+      const result: Record<'en' | 'ar', string> = {} as any;
+      for (const key of [Language.en, Language.ar]) {
+        if (typeof value[key] === 'string') result[key] = value[key].trim();
+      }
+      return result;
+    },
+    { toClassOnly: true },
   )
-  @IsNotEmpty()
-  @IsString()
-  @MinLength(3, { message: 'Name must be at least 3 characters' })
-  @MaxLength(14, { message: 'Name must be at most 14 characters' })
-  name: string;
+  names: Record<'en' | 'ar', string>;
 }

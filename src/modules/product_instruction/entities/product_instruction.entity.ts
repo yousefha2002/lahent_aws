@@ -9,8 +9,10 @@ import {
   ForeignKey,
   BelongsTo,
   Default,
+  HasMany,
 } from 'sequelize-typescript';
 import { Product } from 'src/modules/product/entities/product.entity';
+import { ProductInstructionLanguage } from './product_instruction_language.dto';
 
 @Table({ tableName: 'product_instructions' })
 export class ProductInstruction extends Model {
@@ -27,12 +29,11 @@ export class ProductInstruction extends Model {
   @BelongsTo(() => Product)
   product: Product;
 
-  @AllowNull(false)
-  @Column(DataType.STRING)
-  text: string;
-
   @Default(true)
   @AllowNull(false)
   @Column(DataType.BOOLEAN)
   isActive: boolean;
+
+  @HasMany(()=>ProductInstructionLanguage)
+  languages:ProductInstructionLanguage[]
 }

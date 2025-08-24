@@ -1,16 +1,19 @@
-import { IsString, IsNumber, IsNotEmpty, Min } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsArray, IsNumber, IsNotEmpty, Min, IsOptional, ValidateNested } from 'class-validator';
+import { ProductExtraLanguageDto } from './extra-dto';
 
 export class UpdateProductExtraDto {
-  @IsString()
-  @IsNotEmpty()
-  name: string;
-
-  @IsNumber()
-  @IsNotEmpty()
-  @Min(0)
-  price: number;
-
   @IsNumber()
   @IsNotEmpty()
   productId: number;
+
+  @IsNumber()
+  @IsOptional()
+  additional_price?: number;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ProductExtraLanguageDto)
+  @IsOptional()
+  languages?: ProductExtraLanguageDto[];
 }

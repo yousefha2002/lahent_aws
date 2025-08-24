@@ -61,9 +61,9 @@
     "used_up": "Coupon has been fully used",
     "not_available_for_store": "Coupon is not available for this store"
   },
-  "invalid_store": "Invalid store",
   "favorite_not_found": "Favorite not found",
   "removed_from_favorites": "Removed from favorites",
+  "added_to_favorites": "Added to favorites",
   "not_enough_balance": "You don't have enough money",
   "receiver_required": "Receiver name and phone are required for non-registered users",
   "gift_sent": "Gift sent to the user",

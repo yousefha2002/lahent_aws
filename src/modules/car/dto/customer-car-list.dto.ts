@@ -1,4 +1,7 @@
 import { Expose, Type } from 'class-transformer';
+import { CarBrandDto } from 'src/modules/car_brand/dto/car-brand.dto';
+import { CarModelDto } from 'src/modules/car_model/dto/car-model.dto';
+import { CarTypeDto } from 'src/modules/car_type/dto/car-type.dto';
 
 class SimpleEntityDto {
   @Expose()
@@ -28,14 +31,14 @@ export class CustomerCarListDto {
   color: boolean;
 
   @Expose()
-  @Type(() => SimpleEntityDto)
-  carType: SimpleEntityDto;
+  @Type(() => CarTypeDto)
+  carType: CarTypeDto;
 
   @Expose()
-  @Type(() => SimpleEntityDto)
-  brand: SimpleEntityDto;
+  @Type(() => CarBrandDto)
+  brand: CarBrandDto;
 
   @Expose()
-  @Type(() => SimpleEntityDto)
-  model: SimpleEntityDto;
+  @Type(() => CarModelDto)
+  model: CarModelDto;
 }

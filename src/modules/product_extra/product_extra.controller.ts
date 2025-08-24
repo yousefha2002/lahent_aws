@@ -13,6 +13,9 @@ import { StoreOrOwnerGuard } from 'src/common/guards/StoreOrOwner.guard';
 import { ApprovedStoreGuard } from 'src/common/guards/approvedStore.guard';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { ExtraDto } from './dto/extra-dto';
+import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
+import { Store } from '../store/entities/store.entity';
+import { CreateProductExtraDto } from './dto/create-product-extra.dto';
 
 @Controller('product-extra')
 export class ProductExtraController {
@@ -23,32 +26,24 @@ export class ProductExtraController {
   update(
     @Body() body: UpdateProductExtraDto,
     @Param('extraId') extraId: string,
+    @CurrentUser() store: Store,
   ) {
-    return this.productExtraService.updateExtraProduct(+extraId, body);
+    return this.productExtraService.updateExtraProduct(
+      +extraId,
+      body,
+      store.id,
+    );
   }
 
   @UseGuards(StoreOrOwnerGuard, ApprovedStoreGuard)
   @Put('/active/:extraId')
-  active(@Param('extraId') extraId: string) {
-    return this.productExtraService.updateIsActive(+extraId, true);
+  active(@Param('extraId') extraId: string, @CurrentUser() store: Store) {
+    return this.productExtraService.updateIsActive(+extraId, store.id);
   }
 
   @UseGuards(StoreOrOwnerGuard, ApprovedStoreGuard)
-  @Put('/unactive/:extraId')
-  unactive(@Param('extraId') extraId: string) {
-    return this.productExtraService.updateIsActive(+extraId, false);
-  }
-
-  @UseGuards(StoreOrOwnerGuard, ApprovedStoreGuard)
-  @Delete('/:extraId')
-  delete(@Param('extraId') extraId: string) {
-    return this.productExtraService.deleteExtraProduct(+extraId);
-  }
-
-  @UseGuards(StoreOrOwnerGuard, ApprovedStoreGuard)
-  @Serilaize(ExtraDto)
-  @Post('')
-  createSingle(@Body() body: UpdateProductExtraDto) {
-    return this.productExtraService.createSingleExtraItem(body);
+  @Post()
+  createProductExtras(@Body() body: CreateProductExtraDto,@CurrentUser() store:Store) {
+    return this.productExtraService.createProductExtras(body,store.id);
   }
 }

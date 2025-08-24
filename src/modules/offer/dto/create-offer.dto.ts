@@ -16,7 +16,7 @@ export class CreateOfferDto {
     @IsOptional()
     @IsNumber()
     @Min(1)
-    fixedPrice?: number|null;
+    discountAmount?: number|null;
 
     @IsOptional()
     @IsNumber()

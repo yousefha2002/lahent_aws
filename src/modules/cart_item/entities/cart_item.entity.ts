@@ -43,6 +43,9 @@ export class CartItem extends Model {
   @Column(DataType.INTEGER)
   quantity: number;
 
+  @Column(DataType.TEXT)
+  note: string;
+
   @HasMany(() => CartItemExtra)
   extras: CartItemExtra[];
 

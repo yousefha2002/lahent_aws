@@ -12,10 +12,12 @@ import { ProuductVariantModule } from '../prouduct_variant/prouduct_variant.modu
 import { DatabaseModule } from 'src/database/database.module';
 import { CategoryModule } from '../category/category.module';
 import { OfferModule } from '../offer/offer.module';
+import { ProductCategoryVariantModule } from '../product_category_variant/product_category_variant.module';
+import { ProductLanguageProvider } from './providers/product_language.provider';
 
 @Module({
   controllers: [ProductController],
-  providers: [ProductService, ...ProductProvider],
+  providers: [ProductService, ...ProductProvider,...ProductLanguageProvider],
   exports: [ProductService],
   imports: [
     OwnerModule,
@@ -28,6 +30,7 @@ import { OfferModule } from '../offer/offer.module';
     forwardRef(() => ProductExtraModule),
     forwardRef(() => ProductInstructionModule),
     forwardRef(() => ProuductVariantModule),
+    ProductCategoryVariantModule
   ],
 })
 export class ProductModule {}

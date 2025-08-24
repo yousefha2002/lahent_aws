@@ -1,9 +1,14 @@
 import { Expose, Type } from "class-transformer";
 import { StoreTypeDto } from "src/modules/type/dto/storeType.dto";
+import { SubTypeLanguageDto } from "./subType.dto";
 
 export class StoreSubTypeDto {
     @Expose() id: number;
     @Expose() name: string;
+
+    @Expose()
+    @Type(() => SubTypeLanguageDto)
+    languages: SubTypeLanguageDto[];
 
     @Expose()
     @Type(() => StoreTypeDto)

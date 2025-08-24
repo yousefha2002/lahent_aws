@@ -1,9 +1,22 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Put, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  Put,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { GiftCategoryService } from './gift_category.service';
 import { AdminGuard } from 'src/common/guards/admin.guard';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
-import { GiftCategoryDto } from './dto/gift-category.dto';
-import { ActionGiftCategoryDto } from './dto/action-gift-category.dto';
+import {
+  GiftCategoryDto,
+  GiftCategoryDtoWithMessage,
+} from './dto/gift-category.dto';
+import { CreateGiftCategoryDto } from './dto/action-gift-category.dto';
 import { GiftCategoryListDto } from './dto/gift-category-list.dto';
 import { Language } from 'src/common/enums/language';
 
@@ -11,23 +24,30 @@ import { Language } from 'src/common/enums/language';
 export class GiftCategoryController {
   constructor(private readonly giftCategoryService: GiftCategoryService) {}
 
-  @Serilaize(GiftCategoryDto)
+  @Serilaize(GiftCategoryDtoWithMessage)
   @UseGuards(AdminGuard)
   @Post()
-  async create(@Body() body: ActionGiftCategoryDto,@Query('lang') lang=Language.en) {
-    return this.giftCategoryService.create(body,lang);
+  async create(
+    @Body() body: CreateGiftCategoryDto,
+    @Query('lang') lang = Language.en,
+  ) {
+    return this.giftCategoryService.create(body, lang);
   }
 
   @Serilaize(GiftCategoryDto)
   @UseGuards(AdminGuard)
   @Put(':id')
-  async update(@Param('id', ParseIntPipe) id: number, @Body() body: ActionGiftCategoryDto,@Query('lang') lang=Language.en) {
-    return this.giftCategoryService.update(id, body,lang);
+  async update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: CreateGiftCategoryDto,
+    @Query('lang') lang = Language.en,
+  ) {
+    return this.giftCategoryService.update(id, body, lang);
   }
 
-  @Serilaize(GiftCategoryListDto)
+  @Serilaize(GiftCategoryDto)
   @Get('with-templates')
-  async findAllWithTemplates() {
-    return this.giftCategoryService.findAllWithTemplates()
+  async findAllWithTemplates(@Query('lang') lang = Language.en) {
+    return this.giftCategoryService.findAllWithTemplates(lang);
   }
 }

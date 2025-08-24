@@ -19,9 +19,9 @@ export class FaviroteController {
   constructor(private readonly faviroteService: FaviroteService) {}
 
   @UseGuards(CustomerGuard,CompletedProfileGuard)
-  @Post(':storeId')
+  @Post('toggle/:storeId')
   add(@Param('storeId') storeId: string, @CurrentUser() user: Customer,@Query('lang') lang=Language.en) {
-    return this.faviroteService.addFavorite(user.id, +storeId,lang);
+    return this.faviroteService.toggleFavorite(user.id, +storeId,lang);
   }
 
   @UseGuards(CustomerGuard)

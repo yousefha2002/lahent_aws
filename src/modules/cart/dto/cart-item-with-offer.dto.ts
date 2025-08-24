@@ -1,9 +1,9 @@
 import { Expose, Type } from "class-transformer";
 import { SimpleOfferDto } from "src/modules/offer/dto/simple-offer.dto";
 import { BaseProductDto } from "src/modules/product/dto/base-product.dto";
-import { ExtraDto } from "src/modules/product_extra/dto/extra-dto";
-import { InstructionDto } from "src/modules/product_instruction/dto/instruction-dto";
-import { VariantDto } from "src/modules/prouduct_variant/dto/variant-dto";
+import { ProductExtraDto } from "src/modules/product_extra/dto/extra-dto";
+import { InstructionDto, ProductInstructionDto } from "src/modules/product_instruction/dto/instruction-dto";
+import { ProductVariantDto, VariantDto } from "src/modules/prouduct_variant/dto/variant-dto";
 
 class ProductWithOfferDto extends BaseProductDto {
     @Expose()
@@ -17,6 +17,9 @@ class ProductWithOfferDto extends BaseProductDto {
 export class CartItemWithOfferDto {
     @Expose()
     id: number;
+
+    @Expose()
+    note: string;
 
     @Expose()
     quantity: number;
@@ -35,14 +38,14 @@ export class CartItemWithOfferDto {
     product: ProductWithOfferDto;
 
     @Expose()
-    @Type(() => VariantDto)
-    variants: VariantDto;
+    @Type(() => ProductVariantDto)
+    variants: ProductVariantDto;
     
     @Expose()
-    @Type(() => InstructionDto)
+    @Type(() => ProductInstructionDto)
     instructions: InstructionDto;
 
     @Expose()
-    @Type(() => ExtraDto)
-    extras: ExtraDto;
+    @Type(() => ProductExtraDto)
+    extras: ProductExtraDto;
 }

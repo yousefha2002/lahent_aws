@@ -19,6 +19,7 @@ import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { CategoryDto } from './dto/category.dto';
 import { ApprovedStoreGuard } from 'src/common/guards/approvedStore.guard';
 import { Language } from 'src/common/enums/language';
+import { UpdateCategoryDto } from './dto/update-category.dto';
 
 @Controller('category')
 export class CategoryController {
@@ -33,12 +34,12 @@ export class CategoryController {
   @Put(':categoryId')
   @UseGuards(StoreOrOwnerGuard, ApprovedStoreGuard)
   updateCategory(
-    @Body() body: CreateCategoryDto,
+    @Body() body: UpdateCategoryDto,
     @Param('categoryId') categoryId: string,
     @CurrentUser() store: Store,
     @Query('lang') lang=Language.en
   ) {
-    return this.categoryService.update(body, +categoryId, store.id,lang);
+    return this.categoryService.update(+categoryId,store.id,body,lang=Language.ar);
   }
 
   @Get('/:categoryId')
@@ -59,7 +60,7 @@ export class CategoryController {
 
   @Get('/all/:storeId')
   @Serilaize(CategoryDto)
-  getCategoriesWithProductCount(@Param('storeId') storeId: string) {
-    return this.categoryService.getCategoriesWithProductCount(+storeId);
+  getCategoriesWithProductCount(@Param('storeId') storeId: string,@Query('lang') lang=Language.ar) {
+    return this.categoryService.getCategoriesWithProductCount(+storeId,lang);
   }
 }

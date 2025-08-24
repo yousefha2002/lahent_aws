@@ -1,4 +1,14 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { CarService } from './car.service';
 import { CustomerGuard } from 'src/common/guards/customer.guard';
 import { CreateCarDto } from './dto/create_car.dto';
@@ -14,40 +24,55 @@ import { CompletedProfileGuard } from 'src/common/guards/completed-profile.guard
 export class CarController {
   constructor(private readonly carService: CarService) {}
 
-  @UseGuards(CustomerGuard,CompletedProfileGuard)
+  @UseGuards(CustomerGuard, CompletedProfileGuard)
   @Post()
-  create(@Body() dto:CreateCarDto,@CurrentUser() user:Customer,@Query('lang') lang=Language.en)
-  {
-    return this.carService.create(user.id,dto,lang)
+  create(
+    @Body() dto: CreateCarDto,
+    @CurrentUser() user: Customer,
+    @Query('lang') lang = Language.en,
+  ) {
+    return this.carService.create(user.id, dto, lang);
   }
 
   @Serilaize(CustomerCarListDto)
   @UseGuards(CustomerGuard)
   @Get('all/byCustomer/saved')
-  getAllCustomerCars(@CurrentUser() user:Customer)
-  {
-    return this.carService.getAllCustomerCars(user.id)
+  getAllCustomerCars(
+    @CurrentUser() user: Customer,
+    @Query('lang') lang: Language.en,
+  ) {
+    return this.carService.getAllCustomerCars(user.id, lang);
   }
 
   @Serilaize(CustomerCarListDto)
   @UseGuards(CustomerGuard)
   @Get(':carId/byCustomer')
-  getCustomerCar(@CurrentUser() user:Customer,@Param('carId') carId:number,@Query('lang') lang:Language.en)
-  {
-    return this.carService.getCustomerCar(user.id,carId,lang)
+  getCustomerCar(
+    @CurrentUser() user: Customer,
+    @Param('carId') carId: number,
+    @Query('lang') lang: Language.en,
+  ) {
+    return this.carService.getCustomerCar(user.id, carId, lang);
   }
 
   @UseGuards(CustomerGuard)
   @Delete(':carId')
-  deleteCustomerCar(@CurrentUser() user:Customer,@Param('carId') carId:number,@Query('lang')lang=Language.en)
-  {
-    return this.carService.delete(user.id,carId,lang)
+  deleteCustomerCar(
+    @CurrentUser() user: Customer,
+    @Param('carId') carId: number,
+    @Query('lang') lang = Language.en,
+  ) {
+    return this.carService.delete(user.id, carId, lang);
   }
 
   @UseGuards(CustomerGuard)
   @Put(':carId')
-  update(@Body() dto:UpdateCarDto,@CurrentUser() user:Customer,@Param('carId') carId:number,@Query('lang') lang=Language.en)
-  {
-    return this.carService.update(user.id,carId,dto,lang)
+  update(
+    @Body() dto: UpdateCarDto,
+    @CurrentUser() user: Customer,
+    @Param('carId') carId: number,
+    @Query('lang') lang = Language.en,
+  ) {
+    return this.carService.update(user.id, carId, dto, lang);
   }
 }

@@ -19,10 +19,14 @@ export class GiftTemplateService {
     private giftTemplateRepo: typeof GiftTemplate,
     private readonly cloudinaryService: CloudinaryService,
     private readonly giftCategoryService: GiftCategoryService,
-    private readonly i18n: I18nService
+    private readonly i18n: I18nService,
   ) {}
 
-  async create(body: CreateGiftTemplateDto, file: Express.Multer.File, lang = Language.en) {
+  async create(
+    body: CreateGiftTemplateDto,
+    file: Express.Multer.File,
+    lang = Language.en,
+  ) {
     const { categoryId } = body;
     if (!file) {
       const msg = this.i18n.translate('translation.file_required', { lang });
@@ -38,14 +42,23 @@ export class GiftTemplateService {
       categoryId,
     });
 
-    const msg = this.i18n.translate('translation.gift_template.created', { lang });
-    return { message: msg, giftTemplate };
+    const msg = this.i18n.translate('translation.gift_template.created', {
+      lang,
+    });
+    return { message: msg };
   }
 
-  async update(body: CreateGiftTemplateDto, templateId: number,lang = Language.en, file: Express.Multer.File, ) {
+  async update(
+    body: CreateGiftTemplateDto,
+    templateId: number,
+    lang = Language.en,
+    file: Express.Multer.File,
+  ) {
     const giftTemplate = await this.giftTemplateRepo.findByPk(templateId);
     if (!giftTemplate) {
-      const msg = this.i18n.translate('translation.gift_template.not_found', { lang });
+      const msg = this.i18n.translate('translation.gift_template.not_found', {
+        lang,
+      });
       throw new BadRequestException(msg);
     }
 
@@ -64,7 +77,9 @@ export class GiftTemplateService {
     giftTemplate.categoryId = +categoryId;
     await giftTemplate.save();
 
-    const msg = this.i18n.translate('translation.gift_template.updated', { lang });
+    const msg = this.i18n.translate('translation.gift_template.updated', {
+      lang,
+    });
     return { message: msg, giftTemplate };
   }
 
@@ -86,7 +101,9 @@ export class GiftTemplateService {
   async findById(id: number, lang = Language.en) {
     const giftTemplate = await this.giftTemplateRepo.findByPk(id);
     if (!giftTemplate) {
-      const msg = this.i18n.translate('translation.gift_template.invalid', { lang });
+      const msg = this.i18n.translate('translation.gift_template.invalid', {
+        lang,
+      });
       throw new NotFoundException(msg);
     }
     return giftTemplate;

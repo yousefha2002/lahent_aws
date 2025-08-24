@@ -16,11 +16,13 @@ import { CartItem } from 'src/modules/cart_item/entities/cart_item.entity';
 import { Category } from 'src/modules/category/entities/category.entity';
 import { Offer } from 'src/modules/offer/entities/offer.entity';
 import { OfferProduct } from 'src/modules/offer_product/entites/offer_product.entity';
+import { ProductCategoryVariant } from 'src/modules/product_category_variant/entities/product_category_variant.entity';
 import { ProductExtra } from 'src/modules/product_extra/entities/product_extra.entity';
 import { ProductImage } from 'src/modules/product_image/entities/product_image.entity';
 import { ProductInstruction } from 'src/modules/product_instruction/entities/product_instruction.entity';
-import { ProductVariant } from 'src/modules/prouduct_variant/entities/prouduct_variant.entity';
 import { Store } from 'src/modules/store/entities/store.entity';
+import { VariantCategory } from 'src/modules/variant_category/entities/variant_category.entity';
+import { ProductLanguage } from './product_language.entity';
 
 @Table({ tableName: 'products' })
 export class Product extends Model{
@@ -46,18 +48,6 @@ export class Product extends Model{
     category: Category;
 
     @AllowNull(false)
-    @Column(DataType.STRING)
-    name: string;
-
-    @AllowNull(false)
-    @Column(DataType.STRING)
-    shortDescription: string;
-
-    @AllowNull(false)
-    @Column(DataType.TEXT)
-    longDescription: string;
-
-    @AllowNull(false)
     @Column(DataType.FLOAT)
     basePrice: number;
 
@@ -73,7 +63,7 @@ export class Product extends Model{
     @Column(DataType.INTEGER)
     sales: number;
 
-    @Default(true)
+    @Default(false)
     @Column(DataType.BOOLEAN)
     isActive: boolean;
 
@@ -83,14 +73,20 @@ export class Product extends Model{
     @HasMany(() => ProductInstruction)
     instructions: ProductInstruction[];
 
-    @HasMany(() => ProductVariant)
-    variants: ProductVariant[];
+    @BelongsToMany(() => VariantCategory, () => ProductCategoryVariant)
+    variantCategories: VariantCategory[];
+
+    @HasMany(() => ProductCategoryVariant)
+    productCategoryVariants: ProductCategoryVariant[];
 
     @HasMany(() => ProductImage)
     images: ProductImage[];
 
     @HasMany(() => CartItem)
     cartItems: CartItem[];
+
+    @HasMany(()=>ProductLanguage)
+    languages:ProductLanguage
 
     @BelongsToMany(() => Offer, () => OfferProduct)
     offers: Offer[];

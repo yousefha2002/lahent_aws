@@ -1,10 +1,5 @@
-import {
-  BadRequestException,
-  forwardRef,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { StoreService } from './store.service';
+import {BadRequestException,forwardRef,Inject,Injectable,NotFoundException,} from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
 import { Store } from '../entities/store.entity';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
@@ -19,26 +14,27 @@ import { SubtypeService } from '../../subtype/subtype.service';
 import { I18nService } from 'nestjs-i18n';
 import { Language } from 'src/common/enums/language';
 import { generateAccessToken, generateRefreshToken } from 'src/common/utils/generateToken';
+import { JwtService } from '@nestjs/jwt';
+import { validateAndParseStoreTranslations } from 'src/common/validation/translationDto/storeTranslation.dto';
+import { StoreLanguage } from '../entities/store_language.entity';
 
 @Injectable()
 export class StoreAuthService {
     constructor(
         @Inject(repositories.store_repository) private storeRepo: typeof Store,
+        @Inject(repositories.store_langauge_repository) private storeLanguageRepo: typeof StoreLanguage,
         private readonly cloudinaryService: CloudinaryService,
         private readonly openingHourService: OpeningHourService,
         @Inject(forwardRef(() => SubtypeService))
         private subTypeService: SubtypeService,
         private readonly i18n: I18nService, 
+        private jwtService: JwtService,
+        private storeService:StoreService
     ) {}
 
-    async create(
-        dto: CreateStoreDto,
-        ownerId: string,
-        hours: OpeningHourEnum[],
-        logo: Express.Multer.File,
-        cover: Express.Multer.File,
-        lang=Language.en
-    ) {
+    async create(dto: CreateStoreDto,ownerId: string,hours: OpeningHourEnum[],logo: Express.Multer.File,cover: Express.Multer.File,lang=Language.en) 
+    {
+        const translations = validateAndParseStoreTranslations(dto.translations);
         await Promise.all([
         this.checkIfPhoneUsed(dto.phone),
         this.checkIfPhoneLoginUsed(dto.phoneLogin),
@@ -57,6 +53,15 @@ export class StoreAuthService {
         coverUpload,
         );
 
+        await Promise.all(
+            translations.map((t) =>
+            this.storeLanguageRepo.create({
+                storeId: newStore.id,
+                languageCode: t.languageCode,
+                name: t.name,
+            }),
+            ),
+        );
         await this.openingHourService.createOpiningHourForStore(newStore.id, hours);
 
         return { message: this.i18n.t('translation.store.created',{lang}) };
@@ -93,9 +98,7 @@ export class StoreAuthService {
         lat: dto.lat,
         lng: dto.lng,
         city: dto.city,
-        name: dto.name,
         password: passwordHashed,
-        address: dto.address,
         subTypeId: dto.subTypeId,
         logoUrl: logoUpload.secure_url,
         logoPublicId: logoUpload.public_id,
@@ -134,5 +137,21 @@ export class StoreAuthService {
         accessToken,
         refreshToken
         };
+    }
+
+    async refreshToken(refreshToken:string)
+    {
+        try {
+            const decoded = await this.jwtService.verifyAsync(refreshToken, {secret: 'refresh_token',});
+            const store = await this.storeService.storeById(decoded.id);
+            
+            if (store&&store.refreshToken !== refreshToken) {
+            throw new BadRequestException('Invalid refresh token');
+            }
+            const accessToken = generateAccessToken({ id: store?.id, role: decoded.role });
+            return { accessToken };
+        } catch (err) {
+            throw new BadRequestException('Invalid or expired refresh token');
+        }
     }
 }

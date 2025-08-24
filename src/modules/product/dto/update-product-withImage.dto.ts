@@ -1,19 +1,18 @@
-import { Transform } from 'class-transformer';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import { IsArray, IsNotEmpty, IsString, ValidateNested } from 'class-validator';
+import { ProductLanguageDto } from './create-product.dto';
 
 export class UpdateProductWithImageDto {
-  @Transform(({ value }) => value?.trim().toLowerCase())
   @IsString()
-  @IsNotEmpty()
-  name: string;
+  languages: string;
 
   @IsString()
   @IsNotEmpty()
-  shortDescription: string;
+  basePrice: string;
 
   @IsString()
   @IsNotEmpty()
-  longDescription: string;
+  preparationTime: string;
 
   @IsString()
   existingImages: string; // JSON string from FormData

@@ -10,11 +10,6 @@ import {
 import { cities } from 'src/common/constants/cities';
 
 export class CreateStoreDto {
-  @Transform(({ value }) => value?.trim().toLowerCase())
-  @IsString()
-  @IsNotEmpty()
-  name: string;
-
   @Transform(({ value }) => value?.replace(/\D/g, ''))
   @IsNotEmpty()
   @IsMobilePhone()
@@ -24,10 +19,6 @@ export class CreateStoreDto {
   @IsNotEmpty()
   @IsMobilePhone()
   phoneLogin: string;
-
-  @IsString()
-  @IsNotEmpty()
-  address: string;
 
   @IsString()
   @IsNotEmpty()
@@ -69,4 +60,8 @@ export class CreateStoreDto {
   @IsString()
   @IsNotEmpty()
   openingHours: string;
+
+  @IsString()
+  @IsNotEmpty()
+  translations: string;
 }

@@ -91,4 +91,7 @@ import { Product } from 'src/modules/product/entities/product.entity';
 
     @HasMany(() => OrderItemInstruction)
     instructions: OrderItemInstruction[];
+
+    @Column(DataType.TEXT)
+    note: string;
 }

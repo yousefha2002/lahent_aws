@@ -24,15 +24,16 @@ export class CartItemExtraService {
     lang: Language = Language.en,
   ) {
     if (!extras || extras.length === 0) return;
+    const uniqueExtras = Array.from(new Set(extras));
 
     const existingExtras = await this.productExtraService.findExistingExtras(
-      extras,
+      uniqueExtras,
       productId,
     );
 
     const existingExtraIds = existingExtras.map((e) => e.id);
 
-    const invalidIds = extras.filter((id) => !existingExtraIds.includes(id));
+    const invalidIds = uniqueExtras.filter((id) => !existingExtraIds.includes(id));
     if (invalidIds.length > 0) {
       const message = this.i18n.translate('translation.cart.extra_not_found', {
         lang,
@@ -41,7 +42,7 @@ export class CartItemExtraService {
       throw new NotFoundException(message);
     }
 
-    const itemsToInsert = extras.map((extraId) => ({
+    const itemsToInsert = uniqueExtras.map((extraId) => ({
       cartItemId,
       productExtraId: extraId,
     }));

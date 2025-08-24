@@ -8,11 +8,11 @@ export class OrderItemInstructionService {
         @Inject(repositories.order_item_instruction_repository) private orderItemInstructionRepo: typeof OrderItemInstruction
     ){}
 
-    async createInstructions(orderItemId: number, instructions: { id: number; text: string }[],transaction?: any) {
+    async createInstructions(orderItemId: number, instructions: { id: number; name: string }[],transaction?: any) {
         const creations = instructions.map(instruction => this.orderItemInstructionRepo.create({
         orderItemId,
         instructionId: instruction.id,
-        text: instruction.text,
+        name: instruction.name,
         },{transaction}));
         return Promise.all(creations);
     }

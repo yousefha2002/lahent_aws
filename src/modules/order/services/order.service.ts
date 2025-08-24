@@ -43,6 +43,13 @@ import { Store } from 'src/modules/store/entities/store.entity';
 import { OpeningHour } from 'src/modules/opening_hour/entites/opening_hour.entity';
 import { I18nService } from 'nestjs-i18n';
 import { Language } from 'src/common/enums/language';
+import { StoreLanguage } from 'src/modules/store/entities/store_language.entity';
+import { CarType } from 'src/modules/car_type/entites/car_type.entity';
+import { CarTypeLanguage } from 'src/modules/car_type/entites/car_type_language.entity';
+import { CarBrand } from 'src/modules/car_brand/entities/car_brand.entity';
+import { CarBrandLanguage } from 'src/modules/car_brand/entities/car_brand.languae.entity';
+import { CarModel } from 'src/modules/car_model/entites/car_model.entity';
+import { CarModelLanguage } from 'src/modules/car_model/entites/car_mode_language.entity';
 
 @Injectable()
 export class OrderService {
@@ -61,7 +68,7 @@ export class OrderService {
     private readonly i18n: I18nService,
   ) {}
 
-    async placeOrder(user: Customer, dto: createOrderDto, lang = Language.en) {
+  async placeOrder(user: Customer, dto: createOrderDto, lang = Language.en) {
         const transaction = await this.sequelize.transaction();
         try {
             const {
@@ -73,7 +80,6 @@ export class OrderService {
                 pickupPersonName,
                 pickupPersonNumber,
                 carId,
-                newCar,
                 pointsUsed,
                 paymentMethod,
                 gatewayType,
@@ -154,6 +160,7 @@ export class OrderService {
       const cartItems = await this.cartService.getCartItemsWithOffers(
         cartId,
         user.id,
+        lang
       );
       const store = await this.storeService.storeById(cart.storeId);
       if (!store || store.status !== StoreStatus.APPROVED) {
@@ -285,11 +292,15 @@ export class OrderService {
       );
 
             for (const item of cartItems) {
+                const productName = item.product.languages?.find(l => l.languageCode === lang)?.name ?? item.product.languages?.[0]?.name ?? '';
+                const extrasForDb = item.extras.map(e => ({...e,name: e.languages?.find(l => l.languageCode === lang)?.name ?? e.languages?.[0]?.name ?? '',}));
+                const instructionsForDb = item.instructions.map(i => ({...i,name: i.languages?.find(l => l.languageCode === lang)?.name ?? i.languages?.[0]?.name ?? ''}));
+                const variantsForDb = item.variants.map(v => ({...v,name: v.languages?.find(l => l.languageCode === lang)?.name ?? v.languages?.[0]?.name ?? '',}));
                 const orderItem = await this.orderItemService.createOrderItem(
                     {
                         orderId: order.id,
                         productId: item.product.id,
-                        productName: item.product.name,
+                        productName: productName,
                         productImageUrl: item.product.images[0],
                         unitBasePrice: item.product.basePrice,
                         unitDiscountedPrice:item.product.discountedPrice,
@@ -298,17 +309,14 @@ export class OrderService {
                         quantity: item.quantity,
                         offerId: item.product.offer?.id ?? null,
                         freeQty: 0,
+                        note:item.note,
                     },
                     transaction,
                 );
                 await Promise.all([
-                    this.orderItemExtraService.createExtras(orderItem.id, item.extras, transaction),
-                    this.orderItemVariantService.createVariants(orderItem.id, item.variants, transaction),
-                    this.orderItemInstructionService.createInstructions(
-                        orderItem.id,
-                        item.instructions,
-                        transaction,
-                    ),
+                    this.orderItemExtraService.createExtras(orderItem.id, extrasForDb, transaction),
+                    this.orderItemVariantService.createVariants(orderItem.id, variantsForDb, transaction),
+                    this.orderItemInstructionService.createInstructions(orderItem.id,instructionsForDb,transaction),
                 ]);
             }
 
@@ -396,7 +404,7 @@ export class OrderService {
     const offset = (page - 1) * limit;
     const { rows: orders, count } = await this.orderRepo.findAndCountAll({
       where: { customerId },
-      include: [{ model: Store }],
+      include: [{ model: Store,include:[{model:StoreLanguage,required:false,where:{languageCode:lang}}]}],
       attributes: {
         include: [
           [
@@ -428,7 +436,12 @@ export class OrderService {
       where: { id: orderId, storeId },
       include: [
         { model: Customer, include: [Avatar] },
-        { model: Car, include: ['carType', 'brand', 'model'] },
+        { model: Car, include: [
+          {model:CarType,include:[{model:CarTypeLanguage,where:{languageCode:lang}}]},
+          {model:CarBrand,include:[{model:CarBrandLanguage,where:{languageCode:lang}}]},
+          {model:CarModel,include:[{model:CarModelLanguage,where:{languageCode:lang}}]}
+        ] 
+        },
         {
           model: OrderItem,
           include: [
@@ -456,8 +469,13 @@ export class OrderService {
     const order = await this.orderRepo.findOne({
       where: { id: orderId, customerId },
       include: [
-        { model: Store, include: [{ model: OpeningHour }] },
-        { model: Car, include: ['carType', 'brand', 'model'] },
+        { model: Store, include: [{ model: OpeningHour},{model:StoreLanguage,required:false,where:{languageCode:lang}}] },
+        { model: Car, include: [
+          {model:CarType,include:[{model:CarTypeLanguage,where:{languageCode:lang}}]},
+          {model:CarBrand,include:[{model:CarBrandLanguage,where:{languageCode:lang}}]},
+          {model:CarModel,include:[{model:CarModelLanguage,where:{languageCode:lang}}]}
+        ] 
+        },
         {
           model: OrderItem,
           include: [

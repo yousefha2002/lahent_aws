@@ -49,7 +49,7 @@ export class Offer extends Model {
 
   @AllowNull(true)
   @Column(DataType.FLOAT)
-  fixedPrice: number;
+  discountAmount: number;
 
   @AllowNull(true)
   @Column(DataType.FLOAT)
