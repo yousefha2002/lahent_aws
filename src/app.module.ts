@@ -47,7 +47,6 @@ import { SubtypeModule } from './modules/subtype/subtype.module';
 import { PaymentSessionModule } from './modules/payment_session/payment_session.module';
 import * as path from 'path';
 import { TransactionModule } from './modules/transaction/transaction.module';
-import { ScheduleModule } from '@nestjs/schedule';
 import { OfferCategoryModule } from './modules/offer_category/offer_category.module';
 import { FaviroteModule } from './modules/favirote/favirote.module';
 import { ReviewModule } from './modules/review/review.module';
@@ -68,7 +67,6 @@ import { ProductCategoryVariantModule } from './modules/product_category_variant
         new HeaderResolver(['accept-language']), // أو من الهيدر
       ],
     }),
-    ScheduleModule.forRoot(),
     JwtModule.register({ global: true, secret: 'token' }),
     JwtModule.register({ global: true, secret: 'refresh_token' }),
     DatabaseModule,
