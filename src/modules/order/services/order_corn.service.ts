@@ -9,12 +9,12 @@ import { OrderStatusService } from './order_status.service';
 
 @Injectable()
 export class OrderCronService {
-    private readonly logger = new Logger(OrderCronService.name);
+    // private readonly logger = new Logger(OrderCronService.name);
 
-    constructor(
-        @Inject(repositories.order_repository) private orderRepo: typeof Order,
-        private readonly orderStatusService:OrderStatusService
-    ) {}
+    // constructor(
+    //     @Inject(repositories.order_repository) private orderRepo: typeof Order,
+    //     private readonly orderStatusService:OrderStatusService
+    // ) {}
 
     // /***  إلغاء الطلبات التي لم يتم دفعها خلال 30 دقيقة*/
     // @Cron(CronExpression.EVERY_MINUTE)
