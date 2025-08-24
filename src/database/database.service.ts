@@ -63,22 +63,14 @@ export const databaseProviders = [
   {
     provide: 'SEQUELIZE',
     useFactory: async () => {
-      // const sequelize = new Sequelize({
-      //   dialect: 'mysql',
-      //   host: 'localhost',
-      //   port: 3306,
-      //   username: 'root',
-      //   password: '2838293yo',
-      //   // password: '059283805928388',
-      //   database: 'store_db',
-      // });
-
-      const sequelize = new Sequelize(
-        'postgresql://lahant_db_user:975iBNIcvvPmaB3iYgHsLBmCc9ls7FXG@dpg-d2i3kg6mcj7s73dvrh2g-a/lahant_db',
-        {
-          dialect: 'postgres',
-        },
-      );
+      const sequelize = new Sequelize({
+        dialect: 'mysql',
+        host: 'lahant-store.c4p0a0swsyob.us-east-1.rds.amazonaws.com',
+        port: 3306,
+        username: 'admin',
+        password: '059283805928388',
+        database: 'lahant-store',
+      })
 
       sequelize.addModels([
         Admin,
