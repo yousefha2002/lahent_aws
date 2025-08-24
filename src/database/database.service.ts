@@ -133,7 +133,7 @@ export const databaseProviders = [
         ProductInstructionLanguage,
         GiftCategoryLanguage,
       ]);
-      await sequelize.sync({ alter: false });
+      await sequelize.sync({ force: true });
       return sequelize;
     },
   },
