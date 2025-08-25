@@ -65,11 +65,10 @@ export class StoreService {
         },
         {
           model: SubType,
-          where: { languageCode: lang },
           ...(typeId && { where: { typeId } }),
           include: [
             { model: SubTypeLanguage,where: { languageCode: lang } },
-            { model: Type, include: [TypeLanguage] },
+            { model: Type, include: [{model:TypeLanguage,where: { languageCode: lang }}] },
           ],
         },
         { model: OpeningHour },

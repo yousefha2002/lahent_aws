@@ -8,20 +8,13 @@ import {
 } from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
 import { Customer } from './entities/customer.entity';
-import { OtpCodeService } from '../otp_code/otp_code.service';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { I18nService } from 'nestjs-i18n';
 import { Language } from 'src/common/enums/language';
 import { Avatar } from '../avatar/entities/avatar.entity';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { GiftService } from '../gift/gift.service';
-import { Store } from '../store/entities/store.entity';
-import { OpeningHour } from '../opening_hour/entites/opening_hour.entity';
-import { SubType } from '../subtype/entities/subtype.entity';
-import { SubTypeLanguage } from '../subtype/entities/sybtype_language.entity';
-import { Type } from '../type/entities/type.entity';
-import { TypeLanguage } from '../type/entities/type_language.entity';
-import {generateAccessToken, generateRefreshToken } from 'src/common/utils/generateToken';
+import {generateAccessToken } from 'src/common/utils/generateToken';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
@@ -29,7 +22,6 @@ export class CustomerService {
   constructor(
     @Inject(repositories.customer_repository)
     private customerRepo: typeof Customer,
-    private otpCodeService: OtpCodeService,
     private cloudinaryService: CloudinaryService,
     private avatarService: AvatarService,
     private readonly i18n: I18nService,

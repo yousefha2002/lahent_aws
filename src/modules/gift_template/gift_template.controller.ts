@@ -21,11 +21,43 @@ import {
   PaginatedGiftTemplateDto,
 } from './dto/gift-template.dto';
 import { Language } from 'src/common/enums/language';
+import {
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiResponse,
+  ApiSecurity,
+} from '@nestjs/swagger';
 
+@ApiQuery({ name: 'lang', enum: Language, required: false, example: 'ar' })
 @Controller('gift-template')
 export class GiftTemplateController {
   constructor(private readonly giftTemplateService: GiftTemplateService) {}
 
+  @ApiOperation({ summary: 'Create a Gift Template (admin only)' })
+  @ApiConsumes('multipart/form-data')
+  @ApiSecurity('access-token')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        image: { type: 'string', format: 'binary' },
+        categoryId: { type: 'number', example: 1 },
+      },
+      required: ['image', 'categoryId'],
+    },
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Gift template created successfully',
+    schema: {
+      example: {
+        message: 'Created successfully',
+      },
+    },
+  })
   @UseGuards(AdminGuard)
   @Post()
   @UseInterceptors(FileInterceptor('image'))
@@ -37,6 +69,33 @@ export class GiftTemplateController {
     return this.giftTemplateService.create(body, file, lang);
   }
 
+  @ApiOperation({ summary: 'Update a Gift Template by ID (admin only)' })
+  @ApiParam({
+    name: 'id',
+    description: 'ID of the gift template to update',
+    example: 1,
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiSecurity('access-token')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        image: { type: 'string', format: 'binary' },
+        categoryId: { type: 'number', example: 1 },
+      },
+      required: ['image', 'categoryId'],
+    },
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Gift template updated successfully',
+    schema: {
+      example: {
+        message: 'Updated successfully',
+      },
+    },
+  })
   @Serilaize(GiftTemplateDto)
   @UseGuards(AdminGuard)
   @Put(':id')
@@ -50,6 +109,33 @@ export class GiftTemplateController {
     return this.giftTemplateService.update(body, id, lang, file);
   }
 
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    example: 1,
+    description: 'Page number for pagination',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    example: 10,
+    description: 'Number of items per page',
+  })
+  @ApiOperation({
+    summary: 'Get all gift templates and its languages by gift categoryId',
+  })
+  @ApiParam({
+    name: 'categoryId',
+    description: 'ID of the gift Category',
+    example: 1,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'all gift templates by gift category',
+    type: PaginatedGiftTemplateDto,
+  })
   @Serilaize(PaginatedGiftTemplateDto)
   @Get('by-category/:categoryId')
   async findByCategory(

@@ -1,26 +1,33 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { Expose, Type } from 'class-transformer';
 import { GiftCategoryDto } from 'src/modules/gift_category/dto/gift-category.dto';
 
 export class GiftTemplateDto {
-    @Expose()
-    id: string;
+  @ApiProperty({ example: 1 })
+  @Expose()
+  id: string;
 
-    @Expose()
-    imageUrl:string
+  @ApiProperty({ example: 'https:/cloudinary/image.com' })
+  @Expose()
+  imageUrl: string;
 
-    @Expose()
-    @Type(() => GiftCategoryDto)
-    category: GiftCategoryDto;
+  @ApiProperty({ type: () => GiftCategoryDto })
+  @Expose()
+  @Type(() => GiftCategoryDto)
+  category: GiftCategoryDto;
 }
 
 export class PaginatedGiftTemplateDto {
-    @Expose()
-    total:number
+  @ApiProperty({ example: 30 })
+  @Expose()
+  total: number;
 
-    @Expose()
-    totalPages:number
+  @ApiProperty({ example: 3 })
+  @Expose()
+  totalPages: number;
 
-    @Expose()
-    @Type(() => GiftTemplateDto)
-    data: GiftTemplateDto;
+  @ApiProperty({ type: GiftTemplateDto })
+  @Expose()
+  @Type(() => GiftTemplateDto)
+  data: GiftTemplateDto;
 }

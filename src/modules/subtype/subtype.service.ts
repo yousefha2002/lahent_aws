@@ -113,7 +113,7 @@ export class SubtypeService {
   }
 
   async getAllSubTypesByTypeId(typeId: number, language: Language) {
-    const types = await this.subTypeRepo.findAll({
+    const subTypes = await this.subTypeRepo.findAll({
       where: { typeId },
       include: [
         {
@@ -123,6 +123,6 @@ export class SubtypeService {
       ],
     });
 
-    return types;
+    return subTypes;
   }
 }

@@ -1,18 +1,24 @@
-import { Expose } from "class-transformer";
+import { Expose } from 'class-transformer';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class AddressDto {
+    @ApiProperty({ example: 1 })
     @Expose()
-    id:number
+    id: number;
 
+    @ApiProperty({ example: '123 Main St, City, Country' })
     @Expose()
-    address:string
+    address: string;
 
+    @ApiProperty({ example: 'Home' })
     @Expose()
-    label:string
+    label: string;
 
+    @ApiProperty({ example: 31.7683 })
     @Expose()
-    lat:number
+    lat: number;
 
+    @ApiProperty({ example: 35.2137 })
     @Expose()
-    lng:number
+    lng: number;
 }

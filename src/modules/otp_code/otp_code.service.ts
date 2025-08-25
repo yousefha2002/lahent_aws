@@ -37,7 +37,7 @@ export class OtpCodeService {
         await this.otpCodeRepo.create({ phone, code, isUsed: false, type: 'owner',expiresAt });
 
         const msg = this.i18n.translate('translation.otp.sent', { lang });
-        return { message: msg, phone, code };
+        return { message: msg, phone, code ,status:'signup'};
     }
 
       if (type === 'customer') {

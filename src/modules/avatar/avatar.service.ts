@@ -36,8 +36,8 @@ export class AvatarService {
             throw new BadRequestException(message)
         }
         const result = await this.cloudinaryService.uploadImage(file);
-        const avatar = await this.avatarRepo.create({url: result.secure_url,publicId: result.public_id})
+        await this.avatarRepo.create({url: result.secure_url,publicId: result.public_id})
         const message = this.i18n.translate('translation.createdSuccefully', { lang });
-        return {avatar,message}
+        return {message}
     }
 }

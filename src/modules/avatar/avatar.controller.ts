@@ -5,21 +5,51 @@ import { MulterExceptionFilter } from 'src/multer/multer.exception.filter';
 import { multerOptions } from 'src/multer/multer.options';
 import { AdminGuard } from 'src/common/guards/admin.guard';
 import { Language } from 'src/common/enums/language';
+import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
+import { AvatarDto } from './dto/avatar.dto';
+import { ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 
+@ApiQuery({ name: 'lang', enum: Language, required: false, example: 'ar' })
 @Controller('avatar')
 export class AvatarController {
   constructor(private readonly avatarService: AvatarService) {}
   
+  @ApiOperation({ summary: 'Get list of avatars' })
+  @ApiResponse({status: 200,description: 'List of avatars',type: AvatarDto,isArray: true})
+  @Serilaize(AvatarDto)
   @Get()
   getAvatars() {
     return this.avatarService.findAll()
   }
 
+  @ApiOperation({ summary: 'Create a new avatar (admin only)' })
+  @ApiSecurity('access-token')
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        image: {
+          type: 'string',
+          format: 'binary',
+        }
+      },
+    },
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Avatar created successfully',
+    schema: {
+      example: {
+        message: 'Created successfully',
+      },
+    },
+  })
   @UseGuards(AdminGuard)
   @Post()
   @UseInterceptors(FileInterceptor('image', multerOptions))
   @UseFilters(MulterExceptionFilter)
-  createAvatar(@Query('lang') lang=Language.en,@UploadedFile() file?: Express.Multer.File)
+  createAvatar(@Query('lang') lang=Language.ar,@UploadedFile() file?: Express.Multer.File)
   {
     return this.avatarService.create(lang,file)
   }

@@ -47,9 +47,7 @@ export class TypeService {
       this.createTypeLang(dto.nameEn, Language.en, typeCreated.id),
       this.createTypeLang(dto.nameAr, Language.ar, typeCreated.id),
     ]);
-    const message = this.i18n.translate('translation.createdSuccefully', {
-      lang, // تمرير اللغة يدويًا
-    });
+    const message = this.i18n.translate('translation.createdSuccefully', {lang,});
     return { message };
   }
 

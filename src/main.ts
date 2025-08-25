@@ -1,10 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
-import * as crypto from 'crypto';
-
-if (!(global as any).crypto) {
-  (global as any).crypto = crypto;
-}
+// import * as crypto from 'crypto';
+// (global as any).crypto = crypto;
 
 import {
   ExpressAdapter,
@@ -24,7 +21,7 @@ async function bootstrap() {
     .setTitle('API Docs')
     .setDescription('NestJS API endpoints')
     .setVersion('1.0')
-    .addSecurity('custom-token', {
+    .addSecurity('access-token', {
       type: 'apiKey',
       in: 'header',
       name: 'Authorization',
