@@ -84,8 +84,8 @@ export class StoreController {
         translations: {
           type: 'string',
           example: JSON.stringify([
-            { languageCode: 'en', name: 'My Store', description: 'Best store' },
-            { languageCode: 'ar', name: 'متجري', description: 'أفضل متجر' },
+            { languageCode: 'en', name: 'My Store' },
+            { languageCode: 'ar', name: 'متجري'},
           ]),
         },
         logo: { type: 'string', format: 'binary' },
@@ -165,25 +165,29 @@ export class StoreController {
   }
 
   @Post('nearby')
-  @Serilaize(StoreDto)
+  @Serilaize(PaginatedStoreDto)
   @UseGuards(CustomerGuard)
   @ApiOperation({ summary: 'Get nearby stores based on customer location' })
   @ApiQuery({ name: 'type', type: Number, required: false, example: 1 })
   @ApiQuery({ name: 'subType', type: Number, required: false, example: 2 })
   @ApiSecurity('access-token')
-  @ApiResponse({status: 200,description: 'Store login successful',type: [StoreDto]})
+  @ApiResponse({status: 200,description: 'Store login successful',type: [PaginatedStoreDto]})
   @ApiBody({ type: GetNearbyStoresDto })
   async getNearbyStores(
     @Body() dto: GetNearbyStoresDto,
     @CurrentUser() customer: Customer,
-    @Query('lang') lang = Language.en,
+    @Query('lang') lang = Language.ar,
     @Query('type') type: number,
     @Query('subType') subType: number,
+    @Query('page') page = 1,
+    @Query('limit') limit = 20
   ) {
     return this.storeGeolocationService.findStoresNearbyOrBetween(
       dto,
       customer.id,
       lang,
+      +page,
+      +limit,
       type,
       subType,
     );

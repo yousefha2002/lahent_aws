@@ -14,6 +14,7 @@ import { I18nService } from 'nestjs-i18n';
 import { Language } from 'src/common/enums/language';
 import { CategoryLanguage } from './entities/category_language.entity';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { validateRequiredLanguages, validateUniqueLanguages } from 'src/common/utils/validateLanguages';
 
 @Injectable()
 export class CategoryService {
@@ -29,6 +30,8 @@ export class CategoryService {
   async create(storeId: number,dto: CreateCategoryDto,lang: Language = Language.en) 
   {
     const transaction = await this.sequelize.transaction();
+    const codes = dto.languages.map(l => l.languageCode);
+    validateRequiredLanguages(codes, 'category languages');
     try {
       const category = await this.categoryRepo.create(
         { storeId },
@@ -63,33 +66,37 @@ export class CategoryService {
       try {
         const category = await this.validateCategoryBelongsToStore(categoryId, storeId, lang);
         if(dto.languages)
-        for (const langObj of dto.languages) {
-          await this.verifyNameWithStore(
-            storeId,
-            langObj.title,
-            categoryId,
-            langObj.languageCode as Language,
-          );
-          const existingLang = await this.categoryLanguageRepo.findOne({
-            where: {
+        {
+          const codes = dto.languages.map(l => l.languageCode);
+          validateUniqueLanguages(codes, 'category languages');
+          for (const langObj of dto.languages) {
+            await this.verifyNameWithStore(
+              storeId,
+              langObj.title,
               categoryId,
-              languageCode: langObj.languageCode,
-            },
-            transaction,
-          });
-
-          if (existingLang) {
-            existingLang.title = langObj.title;
-            await existingLang.save({ transaction });
-          } else {
-            await this.categoryLanguageRepo.create(
-              {
-                title: langObj.title,
-                languageCode: langObj.languageCode,
-                categoryId: category.id,
-              },
-              { transaction }
+              langObj.languageCode as Language,
             );
+            const existingLang = await this.categoryLanguageRepo.findOne({
+              where: {
+                categoryId,
+                languageCode: langObj.languageCode,
+              },
+              transaction,
+            });
+
+            if (existingLang) {
+              existingLang.title = langObj.title;
+              await existingLang.save({ transaction });
+            } else {
+              await this.categoryLanguageRepo.create(
+                {
+                  title: langObj.title,
+                  languageCode: langObj.languageCode,
+                  categoryId: category.id,
+                },
+                { transaction }
+              );
+            }
           }
         }
 

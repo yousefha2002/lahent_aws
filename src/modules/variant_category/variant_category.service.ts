@@ -5,6 +5,7 @@ import { Sequelize } from 'sequelize';
 import { VariantCategoryLanguage } from './entities/variant_category_language.entity';
 import { CreateVariantCategoryDto } from './dto/create_variant_category.dto';
 import { Language } from 'src/common/enums/language';
+import { validateRequiredLanguages } from 'src/common/utils/validateLanguages';
 
 @Injectable()
 export class VariantCategoryService {
@@ -17,6 +18,8 @@ export class VariantCategoryService {
     async create(createDto: CreateVariantCategoryDto) 
     {
         const { languages } = createDto;
+        const codes = languages.map(l => l.languageCode);
+        validateRequiredLanguages(codes, 'variant category languages');
 
         const t = await this.sequelize.transaction();
         try {

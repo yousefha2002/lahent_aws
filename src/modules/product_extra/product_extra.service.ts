@@ -13,6 +13,7 @@ import { Product } from '../product/entities/product.entity';
 import { CreateProductExtraDto } from './dto/create-product-extra.dto';
 import { Sequelize } from 'sequelize';
 import { ProductExtraLanguage } from './entities/product_extra_language.entity';
+import { validateRequiredLanguages, validateUniqueLanguages } from 'src/common/utils/validateLanguages';
 
 @Injectable()
 export class ProductExtraService {
@@ -35,6 +36,8 @@ export class ProductExtraService {
 
       try {
         for (const extra of dto.extras) {
+          const codes = extra.languages.map(l => l.languageCode);
+          validateRequiredLanguages(codes, 'product extra languages');
           const createdExtra = await this.productExtraRepo.create(
             {
               productId: dto.productId,
@@ -86,6 +89,8 @@ export class ProductExtraService {
     }
 
     if (dto.languages && Array.isArray(dto.languages)) {
+      const codes = dto.languages.map(l => l.languageCode);
+      validateUniqueLanguages(codes, 'product extra languages');
       for (const langDto of dto.languages) {
         const langEntry = extra.languages.find(l => l.languageCode === langDto.languageCode);
         if (langEntry) {

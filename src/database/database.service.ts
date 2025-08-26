@@ -72,6 +72,16 @@ export const databaseProviders = [
         database: 'lahant-store',
       })
 
+      // const sequelize = new Sequelize({
+      //   dialect: 'mysql',
+      //   host: 'localhost',
+      //   port: 3306,
+      //   username: 'root',
+      //   password: '2838293yo',
+      //   // password: '059283805928388',
+      //   database: 'store_db',
+      // });
+
       sequelize.addModels([
         Admin,
         Cart,

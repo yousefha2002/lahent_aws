@@ -1,5 +1,6 @@
 import { BadRequestException } from '@nestjs/common';
 import { Language } from '../enums/language';
+import { validateRequiredLanguages } from '../utils/validateLanguages';
 
 export interface ProductLanguageDto {
     languageCode: Language;
@@ -60,10 +61,7 @@ export function validateProductLanguages(raw: string | ProductLanguageDto[],): P
 
     // التأكد من عدم تكرار اللغة
     const codes = parsed.map(l => l.languageCode);
-    const unique = new Set(codes);
-    if (codes.length !== unique.size) {
-        throw new BadRequestException('Duplicate languages are not allowed');
-    }
+    validateRequiredLanguages(codes, 'product languages')
 
     return parsed as ProductLanguageDto[];
 }

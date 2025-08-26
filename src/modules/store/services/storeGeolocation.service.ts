@@ -30,7 +30,9 @@ export class StoreGeolocationService {
     async findStoresNearbyOrBetween(
     dto: GetNearbyStoresDto,
     customerId: number,
-    lang = Language.en,
+    lang :Language,
+    page:number,
+    limit:number,
     typeId?: number,
     subTypeId?: number,
     ) {
@@ -44,48 +46,77 @@ export class StoreGeolocationService {
         targetCoords.lat,
         targetCoords.lng,
         lang,
+        page,
+        limit,
         typeId,
         subTypeId,
         );
     }
 
-    return this.findStoresWithinRadius(currentLat, currentLng, lang, typeId, subTypeId);
+    return this.findStoresWithinRadius(currentLat, currentLng, lang,page,limit, typeId, subTypeId);
     }
 
-    async findStoresWithinRadius(lat: number,lng: number,lang: Language,typeId?: number,subTypeId?: number,) 
+    async findStoresWithinRadius(lat: number,lng: number,lang: Language,page:number,limit:number,typeId?: number,subTypeId?: number) 
     {
-        const stores = await this.storeRepo.findAll({
-        where: {
+        const offset = (page - 1) * limit;
+        const totalItems = await this.storeRepo.count({
+            where: {
             status: StoreStatus.APPROVED,
             ...(subTypeId && { subTypeId }),
             [Op.and]: literal(`
+                6371 * 2 * ASIN(
+                SQRT(
+                    POWER(SIN((lat - ${lat}) * PI()/180 / 2), 2) +
+                    COS(${lat} * PI()/180) * COS(lat * PI()/180) *
+                    POWER(SIN((lng - ${lng}) * PI()/180 / 2), 2)
+                )
+                ) <= ${RADIS_KM}
+            `)
+            },
+        });
+
+        const stores = await this.storeRepo.findAll({
+            where: {
+            status: StoreStatus.APPROVED,
+            ...(subTypeId && { subTypeId }),
+            [Op.and]: literal(`
+                6371 * 2 * ASIN(
+                SQRT(
+                    POWER(SIN((lat - ${lat}) * PI()/180 / 2), 2) +
+                    COS(${lat} * PI()/180) * COS(lat * PI()/180) *
+                    POWER(SIN((lng - ${lng}) * PI()/180 / 2), 2)
+                )
+                ) <= ${RADIS_KM}
+            `)
+            },
+            include: [
+            { model: StoreLanguage, where: { languageCode: lang } },
+            { model: SubType, ...(typeId && { where: { typeId } }),
+                include: [
+                { model: SubTypeLanguage, where: { languageCode: lang } },
+                { model: Type, include: [{ model: TypeLanguage, where: { languageCode: lang } }] },
+                ]
+            },
+            { model: OpeningHour },
+            ],
+            order: literal(`
             6371 * 2 * ASIN(
                 SQRT(
                 POWER(SIN((lat - ${lat}) * PI()/180 / 2), 2) +
                 COS(${lat} * PI()/180) * COS(lat * PI()/180) *
                 POWER(SIN((lng - ${lng}) * PI()/180 / 2), 2)
                 )
-            ) <= ${RADIS_KM}
-            `)
-        },
-        include: [
-            {
-                model: StoreLanguage,
-                where: { languageCode: lang },
-            },
-            {
-            model: SubType,
-            ...(typeId && { where: { typeId } }),
-            include: [
-                { model: SubTypeLanguage,where:{languageCode:lang} },
-                { model: Type, include: [{model:TypeLanguage,where:{languageCode:lang}},] },
-            ],
-            },
-            { model: OpeningHour },
-        ],
+            )
+            `),
+            limit,
+            offset,
         });
 
-        return stores.map((store) => this.storeUtilsService.mapStoreWithExtras(store));;
+        return {
+            totalItems,
+            totalPages: Math.ceil(totalItems / limit),
+            stores: stores.map(store => this.storeUtilsService.mapStoreWithExtras(store)),
+        };
     }
 
     async findStoresBetweenPoints(
@@ -94,64 +125,101 @@ export class StoreGeolocationService {
         finalTargetLat: number,
         finalTargetLng: number,
         lang: Language,
+        page:number,
+        limit:number,
         typeId?: number,
         subTypeId?: number,
-        ) {
+    ) {
         // نحسب مركز الخط
         const centerLat = (currentLat + finalTargetLat) / 2;
         const centerLng = (currentLng + finalTargetLng) / 2;
 
         // نصف طول الخط بالكيلومتر
-        const lineDistanceKm =this.addressService.calculateDistance(currentLat,currentLng,finalTargetLat,finalTargetLng) / 1000; // إذا الدالة بالميتر
-        const bufferKm = 0.3; // 300 متر حول الخط
-        const radiusKm = lineDistanceKm / 2 + bufferKm;
-
-        // نجيب المتاجر حول مركز الخط فقط
-        const stores = await this.storeRepo.findAll({
-            where: {
-            status: StoreStatus.APPROVED,
-            ...(subTypeId && { subTypeId }),
-            [Op.and]: literal(`
-                6371 * 2 * ASIN(
-                SQRT(
-                    POWER(SIN((lat - ${centerLat}) * PI()/180 / 2), 2) +
-                    COS(${centerLat} * PI()/180) * COS(lat * PI()/180) *
-                    POWER(SIN((lng - ${centerLng}) * PI()/180 / 2), 2)
-                )
-                ) <= ${radiusKm}
-            `),
-            },
-            include: [
-            {
-                model: SubType,
-                ...(typeId && { where: { typeId } }),
-                include: [
-                { model: SubTypeLanguage,where:{languageCode:lang} },
-                { model: Type, include: [{model:TypeLanguage,where:{languageCode:lang}},] },
-                ],
-            },
-            {
-                model: StoreLanguage,
-                where: { languageCode: lang },
-            },
-            { model: OpeningHour },
-            ],
-        });
-
-        // نصفي المتاجر بدقة أعلى على الخط
-        const result = stores.filter((store) =>
-            this.addressService.isBetween(
-            store.lat,
-            store.lng,
+        const lineDistanceKm = this.addressService.calculateDistance(
             currentLat,
             currentLng,
             finalTargetLat,
-            finalTargetLng,
-            300, // buffer بالميتر
-            ),
+            finalTargetLng
+        ) / 1000; // إذا الدالة بالميتر
+        const bufferKm = 0.3; // 300 متر حول الخط
+        const radiusKm = lineDistanceKm / 2 + bufferKm;
+
+        const offset = (page - 1) * limit;
+
+        // نحسب العدد الإجمالي قبل الـ pagination
+        const totalItems = await this.storeRepo.count({
+            where: {
+                status: StoreStatus.APPROVED,
+                ...(subTypeId && { subTypeId }),
+                [Op.and]: literal(`
+                    6371 * 2 * ASIN(
+                    SQRT(
+                        POWER(SIN((lat - ${centerLat}) * PI()/180 / 2), 2) +
+                        COS(${centerLat} * PI()/180) * COS(lat * PI()/180) *
+                        POWER(SIN((lng - ${centerLng}) * PI()/180 / 2), 2)
+                    )
+                    ) <= ${radiusKm}
+                `),
+            },
+        });
+
+        // نجيب المتاجر حول مركز الخط مع pagination
+        const stores = await this.storeRepo.findAll({
+            where: {
+                status: StoreStatus.APPROVED,
+                ...(subTypeId && { subTypeId }),
+                [Op.and]: literal(`
+                    6371 * 2 * ASIN(
+                    SQRT(
+                        POWER(SIN((lat - ${centerLat}) * PI()/180 / 2), 2) +
+                        COS(${centerLat} * PI()/180) * COS(lat * PI()/180) *
+                        POWER(SIN((lng - ${centerLng}) * PI()/180 / 2), 2)
+                    )
+                    ) <= ${radiusKm}
+                `),
+            },
+            include: [
+                {
+                    model: SubType,
+                    ...(typeId && { where: { typeId } }),
+                    include: [
+                        { model: SubTypeLanguage, where: { languageCode: lang } },
+                        { model: Type, include: [{ model: TypeLanguage, where: { languageCode: lang } }] },
+                    ],
+                },
+                { model: StoreLanguage, where: { languageCode: lang } },
+                { model: OpeningHour },
+            ],
+            offset,
+            limit,
+            order: literal(`
+                6371 * 2 * ASIN(
+                    SQRT(
+                        POWER(SIN((lat - ${centerLat}) * PI()/180 / 2), 2) +
+                        COS(${centerLat} * PI()/180) * COS(lat * PI()/180) *
+                        POWER(SIN((lng - ${centerLng}) * PI()/180 / 2), 2)
+                    )
+                )
+            `), // ترتيب حسب الأقرب
+        });
+
+        // نصفي المتاجر بدقة أعلى على الخط
+        const filtered = stores.filter(store =>
+            this.addressService.isBetween(
+                store.lat,
+                store.lng,
+                currentLat,
+                currentLng,
+                finalTargetLat,
+                finalTargetLng,
+                300 // buffer بالمتر
+            )
         );
 
-    return result.map((store) =>this.storeUtilsService.mapStoreWithExtras(store),);
+        return {
+            totalItems,
+            stores: filtered.map(store => this.storeUtilsService.mapStoreWithExtras(store)),
+        };
     }
 
     async getFinalTargetCoordinates(

@@ -1,4 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
+import { validateRequiredLanguages } from '../utils/validateLanguages';
 
 export interface VariantLanguageDto {
     languageCode: string;
@@ -77,14 +78,8 @@ export function validateAndParseVariants(raw: string): VariantDto[] {
         lang.name = name.trim();
         });
 
-        // ✅ تحقق من تكرار اللغة داخل نفس الفاريانت
         const languagesCodes = languages.map((l) => l.languageCode);
-        const unique = new Set(languagesCodes);
-        if (unique.size !== languagesCodes.length) {
-        throw new BadRequestException(
-            `Duplicate languages are not allowed in variant at index ${index}.`
-        );
-        }
+        validateRequiredLanguages(languagesCodes, `variant at index ${index}`);
     });
 
     return parsed as VariantDto[];

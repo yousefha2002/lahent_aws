@@ -1,4 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
+import { validateRequiredLanguages } from 'src/common/utils/validateLanguages';
 
 export interface StoreTranslationDto {
     languageCode: string;
@@ -45,12 +46,8 @@ export function validateAndParseStoreTranslations(raw: string): StoreTranslation
         item.name = name.trim();
     });
 
-    // Optional: تحقق إن كل لغة موجودة مرة واحدة فقط
     const languages = parsed.map((t) => t.languageCode);
-    const uniqueLanguages = new Set(languages);
-    if (languages.length !== uniqueLanguages.size) {
-        throw new BadRequestException('Duplicate languages are not allowed in translations.');
-    }
+    validateRequiredLanguages(languages, 'translations');
 
     return parsed as StoreTranslationDto[];
 }

@@ -12,6 +12,7 @@ import { UpdateProductInstructionDto } from './dto/update-product-instruction.st
 import { Product } from '../product/entities/product.entity';
 import { ProductInstructionLanguage } from './entities/product_instruction_language.dto';
 import { CreateProductInstructionDto } from './dto/create-product-instruction.dto';
+import { validateRequiredLanguages, validateUniqueLanguages } from 'src/common/utils/validateLanguages';
 
 @Injectable()
 export class ProductInstructionService {
@@ -29,6 +30,8 @@ export class ProductInstructionService {
     if (product.storeId !== storeId) {
       throw new BadRequestException('Invalid Process');
     }
+    const codes = dto.languages.map(l => l.languageCode);
+    validateRequiredLanguages(codes, 'product instruction languages');
 
     const instruction = await this.productInstructionRepo.create(
       { productId: dto.productId },
@@ -66,6 +69,8 @@ export class ProductInstructionService {
       if (product.storeId !== storeId) {
         throw new BadRequestException('Invalid Process');
       }
+      const codes = dto.languages.map(l => l.languageCode);
+      validateUniqueLanguages(codes, 'product instruction languages');
 
       for (const lang of dto.languages) {
         const existingLang = instruction.languages.find(l => l.languageCode === lang.languageCode);
