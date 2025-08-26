@@ -1,24 +1,12 @@
-import { ProductCategoryVariantService } from './../product_category_variant/product_category_variant.service';
-import {
-  BadRequestException,
-  forwardRef,
-  Inject,
-  Injectable,
-} from '@nestjs/common';
+import {BadRequestException,forwardRef,Inject,Injectable,} from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
 import { Product } from './entities/product.entity';
-import { CreateProductDto, ProductLanguageDto } from './dto/create-product.dto';
-import { extraItemType } from 'src/common/types/extraItem.type';
-import { variantType } from 'src/common/types/variant.type';
+import { CreateProductDto } from './dto/create-product.dto';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { ProductImageService } from '../product_image/product_image.service';
-import { ProductInstructionService } from '../product_instruction/product_instruction.service';
-import { ProductExtraService } from '../product_extra/product_extra.service';
-import { ProuductVariantService } from '../prouduct_variant/prouduct_variant.service';
 import { Sequelize, Transaction, Op } from 'sequelize';
 import { UpdateProductWithImageDto } from './dto/update-product-withImage.dto';
 import { ExistingImage } from 'src/common/validation/parseAndValidateExistingImages';
-import { UpdateProductWithIcategoryDto } from './dto/update-product-withCategory.dto';
 import { CategoryService } from '../category/category.service';
 import { ProductImage } from '../product_image/entities/product_image.entity';
 import { OfferService } from '../offer/offer.service';
@@ -28,7 +16,6 @@ import { ProductExtra } from '../product_extra/entities/product_extra.entity';
 import { ProductInstruction } from '../product_instruction/entities/product_instruction.entity';
 import { Store } from '../store/entities/store.entity';
 import { StoreStatus } from 'src/common/enums/store_status';
-import { VariantFileWithIndex } from 'src/common/types/varientFileWithIndex.type';
 import { I18nService } from 'nestjs-i18n';
 import { Language } from 'src/common/enums/language';
 import { ProductCategoryVariant } from '../product_category_variant/entities/product_category_variant.entity';
@@ -328,71 +315,77 @@ export class ProductService {
     return product;
   }
 
-  async getFullProductDetails(productId: number,lang:Language) {
+  async getFullProductDetails(productId: number,lang: Language,options?: { includeInactive?: boolean }) 
+  {
+    const { includeInactive = false } = options || {};
+
     const product = await this.productRepo.findOne({
-      where: { id: productId, isActive: true },
+      where: { id: productId, ...(includeInactive ? {} : { isActive: true }) },
       include: [
         {
           model: Store,
-          where: { status: StoreStatus.APPROVED },
           required: true,
+          ...(includeInactive ? {} : { where: { status: StoreStatus.APPROVED } }),
         },
         {
-          model:ProductLanguage,
-          where:{languageCode:lang},
+          model: ProductLanguage,
+          where: { languageCode: lang },
         },
         { model: ProductImage, required: false, order: [['id', 'ASC']] },
         {
-        model: ProductCategoryVariant,
-        required: false,
-        include: [
-          {
-            model: ProductVariant,
-            required: false,
-            include: [
-              {
-                model: ProductVariantLanguage,
-                where: { languageCode: lang },
-                required: false,
-              }, 
-            ],
-          },
-          {
-            model: VariantCategory,
-            required: true,
-            include: [
-              {
-                model: VariantCategoryLanguage,
-                where: { languageCode: lang },
-                required: false,
-              },
-            ],
-          },
-        ],
-      },
-      {
-        model: ProductExtra,
-        required: false,
-        include: [
-          {
-            model: ProductExtraLanguage,
-            where: { languageCode: lang },
-            required: false,
-          },
-        ],
-      },
-      {
-        model: ProductInstruction,
-        required: false,
-        include: [
-          {
-            model: ProductInstructionLanguage,
-            where: { languageCode: lang },
-            required: false,
-          },
-        ],
-      },
-        { model: Category, include:[{model:CategoryLanguage,where:{languageCode:lang}}] },
+          model: ProductCategoryVariant,
+          required: false,
+          include: [
+            {
+              model: ProductVariant,
+              required: false,
+              ...(includeInactive ? {} : { where: { isActive: true } }),
+              include: [
+                {
+                  model: ProductVariantLanguage,
+                  where: { languageCode: lang },
+                  required: false,
+                },
+              ],
+            },
+            {
+              model: VariantCategory,
+              required: true,
+              include: [
+                {
+                  model: VariantCategoryLanguage,
+                  where: { languageCode: lang },
+                  required: false,
+                },
+              ],
+            },
+          ],
+        },
+        {
+          model: ProductExtra,
+          required: false,
+          ...(includeInactive ? {} : { where: { isActive: true } }),
+          include: [
+            {
+              model: ProductExtraLanguage,
+              where: { languageCode: lang },
+              required: false,
+            },
+          ],
+        },
+        {
+          model: ProductInstruction,
+          required: false,
+          ...(includeInactive ? {} : { where: { isActive: true } }),
+          include: [
+            {
+              model: ProductInstructionLanguage,
+              where: { languageCode: lang },
+              required: false,
+            },
+          ],
+        },
+        { model: Category, include: [{ model: CategoryLanguage, where: { languageCode: lang } }] },
       ],
     });
 
@@ -413,9 +406,7 @@ export class ProductService {
         id: catVar.variantCategory.id,
         languages: catVar.variantCategory.languages || [],
         variants: catVar.variants?.map(v => ({
-          id: v.id,
-          additional_price: v.additional_price,
-          imageUrl: v.imageUrl,
+          ...v.toJSON(),
           languages: v.langauges || []
         })) || []
       })) || [],

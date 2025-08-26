@@ -26,6 +26,9 @@ export class ProductExtraDto {
     @ValidateNested({ each: true })
     @Type(() => ProductExtraLanguageDto)
     languages: ProductExtraLanguageDto[];
+
+    @Expose()
+    isActive:boolean
 }
 
 export class ProductExtraLanguageDto {

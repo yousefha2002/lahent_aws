@@ -29,4 +29,7 @@ export class ProductInstructionDto {
     @Expose()
     @Type(() => InstructionLanguageDto)
     languages: InstructionLanguageDto[];
+
+    @Expose()
+    isActive:boolean
 }

@@ -39,6 +39,9 @@ export class ProductVariantDto {
     imageUrl: string | null;
 
     @Expose()
+    isActive:boolean
+
+    @Expose()
     @Type(() => ProductVariantLanguageDto)
     languages: ProductVariantLanguageDto[];
 }

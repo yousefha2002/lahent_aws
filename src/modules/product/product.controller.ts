@@ -130,6 +130,13 @@ export class ProductController {
     return this.productService.getFullProductDetails(+productId,lang);
   }
 
+  @UseGuards(StoreOrOwnerGuard, ApprovedStoreGuard)
+  @Serilaize(FullProductDetailsDto)
+  @Get('/:productId/byStore')
+  getFullProductDetailsForStore(@Param('productId') productId: string,@Query('lang') lang=Language.ar,) {
+    return this.productService.getFullProductDetails(+productId,lang,{ includeInactive: true });
+  }
+
   @Put('active/:productId')
   @UseGuards(StoreOrOwnerGuard, ApprovedStoreGuard)
   activeProduct(
