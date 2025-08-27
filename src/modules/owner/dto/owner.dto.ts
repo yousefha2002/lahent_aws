@@ -17,27 +17,16 @@ export class OwnerDto {
     @ApiProperty({ example: 'owner@example.com' })
     @Expose()
     email: string;
+
+    @ApiProperty({ example:false, description: 'Profile completion status' })
+    @Expose()
+    isCompletedProfile: boolean;
 }
 
 export class OnwerWithMessageDto {
     @ApiProperty({ example: 'Owner created successfully' })
     @Expose()
     message: string;
-
-    @ApiProperty({ type: OwnerDto })
-    @Expose()
-    @Type(() => OwnerDto)
-    owner: OwnerDto;
-}
-
-export class OnwerWithTokenDto {
-    @ApiProperty({ example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' })
-    @Expose()
-    accessToken: string;
-
-    @ApiProperty({ example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' })
-    @Expose()
-    refreshToken: string;
 
     @ApiProperty({ type: OwnerDto })
     @Expose()

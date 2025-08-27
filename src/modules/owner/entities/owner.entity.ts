@@ -7,6 +7,7 @@ import {
   PrimaryKey,
   AutoIncrement,
   HasMany,
+  Default,
 } from 'sequelize-typescript';
 import { Store } from 'src/modules/store/entities/store.entity';
 
@@ -20,7 +21,7 @@ export class Owner extends Model {
   @Column(DataType.STRING)
   refreshToken: string ;
 
-  @AllowNull(false)
+  @AllowNull(true)
   @Column(DataType.STRING)
   name: string;
 
@@ -28,14 +29,14 @@ export class Owner extends Model {
   @Column({type:DataType.STRING,unique:true})
   phone: string;
 
-  @AllowNull(false)
+  @AllowNull(true)
   @Column(DataType.STRING)
   email: string;
 
-  @AllowNull(false)
-  @Column(DataType.STRING)
-  password: string;
-
   @HasMany(() => Store)
   stores: Store[];
+
+  @Default(false)
+  @Column(DataType.BOOLEAN)
+  isCompletedProfile: boolean;
 }

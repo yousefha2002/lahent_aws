@@ -25,17 +25,9 @@ export class OtpCode extends Model {
     @Column(DataType.STRING)
     code: string;
 
-    @AllowNull(true)
-    @Column(DataType.STRING)
-    token: string;
-
     @Default(false)
     @Column(DataType.BOOLEAN)
     isVerified: boolean;
-
-    @Default(false)
-    @Column(DataType.BOOLEAN)
-    isUsed: boolean;
 
     @AllowNull(false)
     @Column(DataType.ENUM(RoleStatus.OWNER, RoleStatus.CUSTOMER))

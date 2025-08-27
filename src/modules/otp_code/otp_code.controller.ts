@@ -6,6 +6,7 @@ import { Language } from 'src/common/enums/language';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { CustomerOtpSendToken, CustomerOtpVerifyToken } from './dto/customer-otp.dto';
 import { ApiBody, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { OwnerOtpSendToken, OwnerOtpVerifyToken } from './dto/owner-otp.dto';
 
 @ApiQuery({ name: 'lang', enum: Language, required: false, example: 'en' })
 @Controller('otp-code')
@@ -13,17 +14,13 @@ export class OtpCodeController {
   constructor(private readonly otpCodeService: OtpCodeService) {}
 
   @ApiOperation({ summary: 'Verify OTP for owner' })
+  @Serilaize(OwnerOtpVerifyToken)
   @ApiBody({ type: VerifyOtpDto })
   @ApiResponse({
-  status: 201,
-  description: 'Owner verified successfully',
-  schema: {
-    example: {
-      token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
-      message: 'OTP verified successfully'
-    }
-  }
-})
+    status: 201,
+    description: 'OTP verified successfully for owner',
+    type: OwnerOtpVerifyToken
+  })
   @Post('verify/owner')
   async verifyOtpOwner(@Body() body: VerifyOtpDto, @Query('lang') lang = Language.en) {
     return this.otpCodeService.verifyOtp(body.phone, 'owner', body.code, lang);
@@ -47,9 +44,9 @@ export class OtpCodeController {
   @ApiResponse({
     status: 201,
     description: 'OTP sent successfully to owner',
-    type: CustomerOtpSendToken,
+    type: OwnerOtpSendToken,
   })
-  @Serilaize(CustomerOtpSendToken)
+  @Serilaize(OwnerOtpSendToken)
   @Post('send/owner')
   sendOtpForOwner(@Body() body: SendOtpDto,@Query('lang') lang=Language.en) {
       return this.otpCodeService.sendOtp(body, 'owner', lang);

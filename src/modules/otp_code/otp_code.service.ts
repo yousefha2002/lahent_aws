@@ -1,3 +1,4 @@
+import { OwnerService } from 'src/modules/owner/owner.service';
 import { BadRequestException, forwardRef, Inject, Injectable } from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
 import { OtpCode } from './entities/otp_code.entity';
@@ -17,27 +18,23 @@ export class OtpCodeService {
     private otpCodeRepo: typeof OtpCode,
     private readonly smsService: SmsService,
     private readonly i18n: I18nService,
+    private readonly ownerService:OwnerService,
     @Inject(forwardRef(() => CustomerService)) private customerService: CustomerService
   ) {}
 
   async sendOtp(dto: SendOtpDto, type: 'customer' | 'owner', lang: Language = Language.en) {
     const {phone} = dto
     if (type === 'owner') {
-        const existingOtp = await this.otpCodeRepo.findOne({
-            where: { phone, type: 'owner', isUsed: true },
-        });
-
-        if (existingOtp) {
-            const msg = this.i18n.translate('translation.otp.already_sent', { lang });
-            throw new BadRequestException(msg);
-        }
-
+        const owner = await this.ownerService.findByPhone(dto.phone)
         const code = generateOtpCode();
         const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
-        await this.otpCodeRepo.create({ phone, code, isUsed: false, type: 'owner',expiresAt });
-
-        const msg = this.i18n.translate('translation.otp.sent', { lang });
-        return { message: msg, phone, code ,status:'signup'};
+        await this.otpCodeRepo.create({ phone, code,isVerified: false, type: 'owner',expiresAt });
+        if (owner) {
+            return {phone, code, status: 'login' };
+        } 
+        else{
+            return {phone, code,status:"signup" };
+        }
     }
 
       if (type === 'customer') {
@@ -66,13 +63,29 @@ export class OtpCodeService {
       const msg = this.i18n.translate('translation.otp.invalid', { lang });
       throw new BadRequestException(msg);
     }
-    const msg = this.i18n.translate('translation.otp.success', { lang });
     if (type === 'owner') {
-      const token = generateRefreshToken({ phone });
       record.isVerified = true;
-      record.token = token;
       await record.save();
-      return { token, message: msg };
+      const owner = await this.ownerService.findByPhone(phone);
+      if(owner)
+      {
+        const payload = { id: owner.id, role: RoleStatus.OWNER };
+        const accessToken = generateAccessToken(payload);
+        const refreshToken = generateRefreshToken(payload);
+        const login_data = await this.ownerService.login(phone);
+        owner.refreshToken = refreshToken
+        await owner.save()
+        return { status: 'login', owner: login_data.owner,accessToken,refreshToken};
+      }
+      else{
+        const owner = await this.ownerService.createOwner(phone)
+        const payload = { id: owner.id, role: RoleStatus.OWNER };
+        const accessToken = generateAccessToken(payload);
+        const refreshToken = generateRefreshToken(payload);
+        owner.refreshToken = refreshToken;
+        await owner.save();
+        return { status: 'signup',owner, phone, accessToken, refreshToken};
+      }
     }
 
     if(type==='customer')
@@ -100,19 +113,5 @@ export class OtpCodeService {
         return { status: 'signup',customer, phone, accessToken, refreshToken};
       }
     }
-  }
-
-  async validateOtp(phone: string, token: string,type:'customer' | 'owner', lang: Language = Language.en) {
-    const otp = await this.otpCodeRepo.findOne({
-      where: { phone, token, isVerified: true, isUsed: false,type },
-      order: [['createdAt', 'DESC']],
-    });
-
-    if (!otp) {
-      const msg = this.i18n.translate('translation.otp.verification_failed', { lang });
-      throw new BadRequestException(msg);
-    }
-
-    return otp;
   }
 }

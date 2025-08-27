@@ -3,12 +3,10 @@ import { IsEmail, IsOptional, IsString } from 'class-validator';
 
 export class UpdateOwnerDto {
     @ApiPropertyOptional({ example: 'John Doe' })
-    @IsOptional()
     @IsString()
-    name?: string;
+    name: string;
 
     @ApiPropertyOptional({ example: 'owner@example.com' })
-    @IsOptional()
     @IsEmail()
-    email?: string;
+    email: string;
 }
