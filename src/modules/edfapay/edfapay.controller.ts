@@ -1,11 +1,11 @@
 import { Controller, Post } from '@nestjs/common';
 import { EdfapayService } from './edfapay.service';
 
-@Controller('edfapay')
+@Controller('api/edfapay')
 export class EdfapayController {
   constructor(private readonly edfapayService: EdfapayService) {}
 
-  @Post('notification')
+  @Post('webhook')
   async notification() {
     return this.edfapayService.handleNotification()
   }
