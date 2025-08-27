@@ -58,25 +58,6 @@ export class OwnerService {
     return {owner};
   }
 
-  async updateOwner(dto: UpdateOwnerDto, owner: Owner, lang: Language = Language.en) {
-    if (dto.email && dto.email !== owner.email) {
-      const existing = await this.ownerRepo.findOne({ where: { email: dto.email } });
-      if (existing) {
-        const msg = await this.i18n.translate('translation.email_taken', { lang });
-        throw new BadRequestException(msg);
-      }
-    }
-
-    Object.assign(owner, dto);
-    await owner.save();
-    const msg = this.i18n.translate('translation.owner_updated', { lang });
-
-    return {
-      message: msg,
-      owner,
-    };
-  }
-
   async refreshToken(refreshToken:string)
     {
       try {

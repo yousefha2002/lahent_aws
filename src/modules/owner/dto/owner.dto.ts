@@ -22,14 +22,3 @@ export class OwnerDto {
     @Expose()
     isCompletedProfile: boolean;
 }
-
-export class OnwerWithMessageDto {
-    @ApiProperty({ example: 'Owner created successfully' })
-    @Expose()
-    message: string;
-
-    @ApiProperty({ type: OwnerDto })
-    @Expose()
-    @Type(() => OwnerDto)
-    owner: OwnerDto;
-}
