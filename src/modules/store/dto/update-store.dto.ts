@@ -12,41 +12,50 @@ import { Transform, Type } from 'class-transformer';
 import { ActionOpeningHourDto } from 'src/modules/opening_hour/dto/action-open-hour.dto';
 import { cities } from 'src/common/constants/cities';
 import { StoreLanguageActionDto } from './store-language-action.dto';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateStoreDto {
+ @ApiProperty({ example: '0501234567', required: false })
   @Transform(({ value }) => value?.replace(/\D/g, ''))
   @IsOptional()
   @IsMobilePhone()
   phone?: string;
 
+  @ApiProperty({ example: true, required: false })
   @IsOptional()
   @IsBoolean()
   in_store?: boolean;
 
+  @ApiProperty({ example: 'الرياض', required: false })
   @IsString()
   @IsOptional()
   @IsNotEmpty()
   @IsIn(cities, { message: 'City must be one of the allowed cities in Saudi Arabia' })
   city: string;
 
+  @ApiProperty({ example: false, required: false })
   @IsOptional()
   @IsBoolean()
   drive_thru?: boolean;
 
+  @ApiProperty({ example: '1234567890', required: false })
   @IsOptional()
   @IsString()
   commercialRegister?: string;
 
+  @ApiProperty({ example: '1234567890', required: false })
   @IsOptional()
   @IsString()
   taxNumber?: string;
 
+  @ApiProperty({ type: [ActionOpeningHourDto] })
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => ActionOpeningHourDto)
   openingHours?: ActionOpeningHourDto[];
 
+  @ApiProperty({ type: [StoreLanguageActionDto] })
   @IsOptional()
   @IsArray()
   @Type(() => StoreLanguageActionDto)

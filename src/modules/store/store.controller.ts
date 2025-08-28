@@ -171,7 +171,7 @@ export class StoreController {
   @ApiQuery({ name: 'type', type: Number, required: false, example: 1 })
   @ApiQuery({ name: 'subType', type: Number, required: false, example: 2 })
   @ApiSecurity('access-token')
-  @ApiResponse({status: 200,description: 'Store login successful',type: [PaginatedStoreDto]})
+  @ApiResponse({status: 200,type: [PaginatedStoreDto]})
   @ApiBody({ type: GetNearbyStoresDto })
   async getNearbyStores(
     @Body() dto: GetNearbyStoresDto,
@@ -236,25 +236,89 @@ export class StoreController {
   }
 
   @Put('/:storeId/approved')
+  @ApiOperation({ summary: 'Approve a store (Admin only)' })
+  @ApiSecurity('access-token')
+  @ApiParam({ name: 'storeId', description: 'ID of the store to approve', example: 5 })
   @UseGuards(AdminGuard)
+  @ApiResponse({
+    status: 200,
+    description: 'Store approved successfully',
+    schema: {
+      example: {
+        message: 'Store status updated to APPROVED',
+        storeId: 5,
+      },
+    },
+  })
   acceptStore(@Param('storeId') storeId: string,@Query('lang') lang=Language.en) {
     return this.storeService.changeStoreStatus(StoreStatus.APPROVED, +storeId,lang);
   }
 
   @Put('/:storeId/rejected')
+  @ApiOperation({ summary: 'Reject a store (Admin only)' })
+  @ApiSecurity('access-token')
+  @ApiParam({ name: 'storeId', description: 'ID of the store to reject', example: 5 })
+  @ApiResponse({
+    status: 200,
+    description: 'Store rejected successfully',
+    schema: {
+      example: {
+        message: 'Store status updated to REJECTED',
+        storeId: 5,
+      },
+    },
+  })
   @UseGuards(AdminGuard)
   rejectStore(@Param('storeId') storeId: string,@Query('lang') lang=Language.en) {
     return this.storeService.changeStoreStatus(StoreStatus.REJECTED, +storeId,lang);
   }
 
-  @UseGuards(StoreOrOwnerGuard)
   @Put()
+  @ApiOperation({ summary: 'Update store details (Store or Owner only)' })
+  @ApiSecurity('access-token')
+  @ApiBody({ type: UpdateStoreDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Store updated successfully',
+    schema: { example: { message: 'Store updated successfully' } },
+  })
+  @UseGuards(StoreOrOwnerGuard)
+
   updateStore(@CurrentUser() store: Store, @Body() dto: UpdateStoreDto,@Query('lang') lang=Language.en) {
     return this.storeService.updateStore(store, dto,lang);
   }
 
-  @UseGuards(StoreOrOwnerGuard)
   @Put('update-images')
+  @UseGuards(StoreOrOwnerGuard)
+  @ApiOperation({ summary: 'Update store images (logo / cover)' })
+  @ApiSecurity('access-token')
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        logo: {
+          type: 'string',
+          format: 'binary',
+        },
+        cover: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Store images updated successfully',
+    schema: {
+      example: {
+        message: 'Images updated successfully',
+        logoUrl: 'https://res.cloudinary.com/demo/image/upload/v1234567890/logo.png',
+        coverUrl: 'https://res.cloudinary.com/demo/image/upload/v1234567890/cover.png',
+      },
+    },
+  })
   @UseInterceptors(
     FileFieldsInterceptor(
       [
@@ -278,14 +342,38 @@ export class StoreController {
     return this.storeService.updateStoreImages(store, logo, cover,lang);
   }
 
+  @Get('favourite/byCustomer')
+  @ApiOperation({ summary: 'Get favourite stores for the current customer' })
+  @ApiSecurity('access-token')
+  @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
+  @ApiResponse({status: 200,description: 'List of favourite stores with pagination',type: PaginatedStoreDto})
   @Serilaize(PaginatedStoreDto)
   @UseGuards(CustomerGuard)
-  @Get('favourite/byCustomer')
   getFavouriteStoresByCustomer(@CurrentUser() user: Customer,@Query('lang') lang=Language.en,@Query('page') page = 1,@Query('limit') limit = 10) {
     return this.storeService.getFavouriteStoresByCustomer(user.id,lang,page,limit);
   }
 
   @Post('refresh-token')
+  @ApiOperation({ summary: 'Refresh access token using refresh token' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        refreshToken: { type: 'string', example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' },
+      },
+      required: ['refreshToken'],
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns new access & refresh tokens',
+    schema: {
+      example: {
+        accessToken: 'newAccessTokenHere',
+      },
+    },
+  })
   async refreshToken(@Body('refreshToken') refreshToken: string) {
     return this.storeAuthService.refreshToken(refreshToken)
   }

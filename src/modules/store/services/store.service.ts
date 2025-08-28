@@ -153,7 +153,7 @@ export class StoreService {
     }
     store.status = status;
     await store.save();
-    return { message: this.i18n.t('translation.store.status_updated',{lang}) };
+    return {storeId:store.id, message: this.i18n.t('translation.store.status_updated',{lang}) };
   }
 
   async storeById(id: string | number) {

@@ -8,10 +8,6 @@ export class StoreSubTypeDto {
     @Expose()
     id: number;
 
-    @ApiProperty({ example: 'Food & Drinks' })
-    @Expose()
-    name: string;
-
     @ApiProperty({ type: [SubTypeLanguageDto] })
     @Expose()
     @Type(() => SubTypeLanguageDto)

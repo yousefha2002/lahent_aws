@@ -7,10 +7,6 @@ export class StoreTypeDto {
     @Expose()
     id: number;
 
-    @ApiProperty({ example: 'Electronics' })
-    @Expose()
-    name: string;
-
     @ApiProperty({ example: 'https://example.com/icon.png' })
     @Expose()
     iconUrl: string;
