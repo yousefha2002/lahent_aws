@@ -58,7 +58,8 @@
     "inactive": "الكوبون غير مفعل",
     "expired": "الكوبون منتهي الصلاحية",
     "used_up": "تم استخدام الكوبون بالكامل",
-    "not_available_for_store": "الكوبون غير متاح لهذا المتجر"
+    "not_available_for_store": "الكوبون غير متاح لهذا المتجر",
+    "validate":"نجاح عملية تأكيد الكوبون"
   },
   "favorite_not_found": "المفضل غير موجود",
   "removed_from_favorites": "تم الحذف من المفضلة",

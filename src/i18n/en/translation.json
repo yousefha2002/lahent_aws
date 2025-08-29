@@ -58,7 +58,8 @@
     "inactive": "Coupon is not active",
     "expired": "Coupon has expired",
     "used_up": "Coupon has been fully used",
-    "not_available_for_store": "Coupon is not available for this store"
+    "not_available_for_store": "Coupon is not available for this store",
+    "validate":"validate coupon success"
   },
   "favorite_not_found": "Favorite not found",
   "removed_from_favorites": "Removed from favorites",

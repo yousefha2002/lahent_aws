@@ -31,8 +31,7 @@ export class LoyaltyOfferService {
             startDate: dto.startDate ?? new Date(),
         });
 
-        const msg = this.i18n.translate('translation.loyalty_offer.created', { lang });
-        return { message: msg, data: offer };
+        return offer
     }
 
     async findAllForAdmin() {

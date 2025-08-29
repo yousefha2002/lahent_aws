@@ -15,7 +15,7 @@ export class ReviewService {
     private readonly orderService: OrderService,
   ) {}
 
-  async createView(customerId: number, dto: CreateReviewDto) {
+  async createReview(customerId: number, dto: CreateReviewDto) {
     const [store, count] = await Promise.all([
       this.storeService.storeById(dto.storeId),
       this.orderService.countRecivedOrderForCustomer(

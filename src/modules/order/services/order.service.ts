@@ -137,7 +137,7 @@ export class OrderService {
 
       let finalCarId: number | null = null;
       if (pickupType === PickupType.DRIVE_THRU) {
-        finalCarId = carId;
+        finalCarId = carId ?? null;
         if (!finalCarId && dto.newCar) {
           const car = await this.carService.create(
             user.id,
@@ -318,7 +318,11 @@ export class OrderService {
       await this.cartService.deleteCart(storeId, user.id, transaction);
 
       await transaction.commit();
-      return { order };
+      return {
+        orderId: order.id,
+        totalPrice: round2(finalPriceToPay),
+        message: this.i18n.translate('translation.orders.order_placed_successfully', { lang }),
+      };
     } catch (error) {
       await transaction.rollback();
       throw error;
