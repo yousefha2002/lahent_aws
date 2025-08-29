@@ -1,4 +1,5 @@
 import { Expose, Type } from 'class-transformer';
+import { ApiProperty } from '@nestjs/swagger';
 import { BaseProductDto } from './base-product.dto';
 import { SimpleOfferDto } from 'src/modules/offer/dto/simple-offer.dto';
 import { ProductInstructionDto } from 'src/modules/product_instruction/dto/instruction-dto';
@@ -7,27 +8,34 @@ import { ProductExtraDto } from 'src/modules/product_extra/dto/extra-dto';
 
 export class FullProductDetailsDto extends BaseProductDto {
     @Expose()
+    @ApiProperty({ example: 101 })
     product_number: number;
 
     @Expose()
+    @ApiProperty({ example: 250 })
     sales: number;
 
     @Expose()
+    @ApiProperty({ example: 49.99 })
     finalPrice: number;
 
     @Expose()
     @Type(() => CategoryWithVariantsDto)
+    @ApiProperty({ type: [CategoryWithVariantsDto] })
     variantCategories: CategoryWithVariantsDto[];
 
     @Expose()
     @Type(() => ProductExtraDto)
+    @ApiProperty({ type: [ProductExtraDto] })
     extras: ProductExtraDto[];
 
     @Expose()
     @Type(() => ProductInstructionDto)
+    @ApiProperty({ type: [ProductInstructionDto] })
     instructions: ProductInstructionDto[];
 
     @Expose()
     @Type(() => SimpleOfferDto)
+    @ApiProperty({ type: SimpleOfferDto, nullable: true })
     offer: SimpleOfferDto | null;
 }

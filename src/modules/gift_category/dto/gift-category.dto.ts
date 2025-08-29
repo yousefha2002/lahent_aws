@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Expose, Type } from 'class-transformer';
 import { GiftTemplateDto } from 'src/modules/gift_template/dto/gift-template.dto';
 
-export class TypeLanguageDto {
+export class GiftCategoryTypeLanguageDto {
   @ApiProperty({ example: 'أعياد' })
   @Expose()
   name: string;
@@ -17,10 +17,10 @@ export class GiftCategoryDto {
   @Expose()
   id: string;
 
-  @ApiProperty({ type: [TypeLanguageDto] })
+  @ApiProperty({ type: [GiftCategoryTypeLanguageDto] })
   @Expose()
-  @Type(() => TypeLanguageDto)
-  languages: TypeLanguageDto[];
+  @Type(() => GiftCategoryTypeLanguageDto)
+  languages: GiftCategoryTypeLanguageDto[];
 
   @ApiProperty({ type: () => GiftTemplateDto, isArray: true })
   @Expose()

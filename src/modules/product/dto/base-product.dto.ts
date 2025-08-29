@@ -1,22 +1,49 @@
+import { ApiProperty } from "@nestjs/swagger";
 import { Expose, Type } from "class-transformer";
 import { Language } from "src/common/enums/language";
 import { SimpleCategoryDto } from "src/modules/category/dto/category.dto";
 
 export class ProductLanguageDto {
-    @Expose() languageCode: Language
-    @Expose() name: string;
-    @Expose() shortDescription: string;
-    @Expose() longDescription: string;
+    @ApiProperty({ example: 'en' })
+    @Expose()
+    languageCode: string;
+
+    @ApiProperty({ example: 'Burger' })
+    @Expose()
+    name: string;
+
+    @ApiProperty({ example: 'Tasty burger' })
+    @Expose()
+    shortDescription: string;
+
+    @ApiProperty({ example: 'A very tasty burger made with fresh ingredients.' })
+    @Expose()
+    longDescription: string;
 }
 
 export class BaseProductDto {
-    @Expose() id: number;
-    @Expose() basePrice: number;
+    @ApiProperty({ example: 1 })
+    @Expose() 
+    id: number;
+
+    @ApiProperty({ example: 25 })
+    @Expose() 
+    basePrice: number;
+
+    @ApiProperty({ type: [ProductLanguageDto] })
     @Expose()
     @Type(() => ProductLanguageDto)
     languages: ProductLanguageDto[];
-    @Expose() images: string[];
-    @Expose() preparationTime: number;
+
+    @ApiProperty({ example: ['url1', 'url2'] })
+    @Expose() 
+    images: string[];
+
+    @ApiProperty({ example: 10 })
+    @Expose() 
+    preparationTime: number;
+
+    @ApiProperty({ type: SimpleCategoryDto })
     @Expose()
     @Type(()=>SimpleCategoryDto)
     category:SimpleCategoryDto

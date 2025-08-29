@@ -204,6 +204,7 @@ export class ProductService {
 
       await transaction.commit();
       return {
+        productId,
         message: this.i18n.translate('translation.product.updated', { lang }),
       };
     } catch (error) {

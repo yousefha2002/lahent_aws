@@ -31,7 +31,7 @@
   "invalid_store": "المتجر غير صالح",
   "invalid_cart": "السلة غير صالحة",
   "cart_item_updated": "تم تعديل العنصر في السلة بنجاح",
-  "cart_ownership_error": "هذه السلة لا تخصك",
+  "cart_ownership_error": "ليس لديك سلة لهذا المتجر",
   "cart_deleted": "تم حذف السلة بنجاح",
   "cart_item_invalid": "العنصر في السلة غير صالح",
   "cart_item_not_found": "العنصر غير موجود في السلة",

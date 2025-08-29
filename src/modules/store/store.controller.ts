@@ -292,6 +292,7 @@ export class StoreController {
   @UseGuards(StoreOrOwnerGuard)
   @ApiOperation({ summary: 'Update store images (logo / cover)' })
   @ApiSecurity('access-token')
+  @ApiQuery({ name: 'storeId', required: false, example: '1' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {

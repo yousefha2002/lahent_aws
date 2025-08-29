@@ -8,7 +8,7 @@ import { CreateCarDto } from "src/modules/car/dto/create_car.dto";
 export class createOrderDto {
     @IsNumber()
     @IsNotEmpty()
-    cartId:number
+    storeId:number
 
     @IsString()
     @IsNotEmpty()

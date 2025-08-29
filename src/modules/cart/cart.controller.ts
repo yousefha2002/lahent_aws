@@ -21,12 +21,27 @@ import { CartItemWithOfferDto } from './dto/cart-item-with-offer.dto';
 import { CartWithStoreDto } from './dto/cart-with-store.dto';
 import { Language } from 'src/common/enums/language';
 import { CompletedProfileGuard } from 'src/common/guards/completed-profile.guard';
+import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 
+@ApiQuery({ name: 'lang', enum: Language, required: false, example: 'ar' })
 @Controller('cart')
 export class CartController {
   constructor(private readonly cartService: CartService) {}
 
   @Post('add-product')
+  @ApiOperation({ summary: 'Add product to customer cart' })
+  @ApiSecurity('access-token')
+  @ApiBody({ type: CreateCartProductDto })
+  @ApiQuery({ name: 'lang', enum: Language, required: false, example: 'en' })
+  @ApiResponse({
+    status: 201,
+    description: 'Product successfully added to cart',
+    schema: {
+      example: {
+        message: 'Product added to cart successfully',
+      },
+    },
+  })
   @UseGuards(CustomerGuard,CompletedProfileGuard)
   addProductForCart(
     @CurrentUser() customer: Customer,
@@ -38,6 +53,16 @@ export class CartController {
 
   @Put('update-product/:cartItemId')
   @UseGuards(CustomerGuard)
+  @ApiOperation({ summary: 'Update a product in the customer cart' })
+  @ApiSecurity('access-token')
+  @ApiParam({ name: 'cartItemId', type: Number, description: 'ID of the cart item', example: 10 })
+  @ApiQuery({ name: 'lang', enum: Language, required: false, example: 'en' })
+  @ApiBody({ type: CreateCartProductDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Cart product updated successfully',
+    schema: { example: { message: 'Cart product updated successfully' } },
+  })
   updateProductForCart(
     @CurrentUser() customer: Customer,
     @Body() body: CreateCartProductDto,
@@ -54,6 +79,14 @@ export class CartController {
 
   @Delete('remove-product/:cartItemId')
   @UseGuards(CustomerGuard)
+  @ApiOperation({ summary: 'Remove a product from the customer cart' })
+  @ApiSecurity('access-token')
+  @ApiParam({ name: 'cartItemId', type: Number, description: 'ID of the cart item', example: 10 })
+  @ApiResponse({
+    status: 200,
+    description: 'Cart product removed successfully',
+    schema: { example: { message: 'Product removed from cart successfully' } },
+  })
   removeProductForCart(
     @CurrentUser() customer: Customer,
     @Param('cartItemId') cartItemId: string,
@@ -64,6 +97,15 @@ export class CartController {
 
   @Put('update-product-qty/:cartItemId')
   @UseGuards(CustomerGuard)
+  @ApiOperation({ summary: 'Update quantity of a product in the customer cart' })
+  @ApiSecurity('access-token')
+  @ApiParam({ name: 'cartItemId', type: Number, description: 'ID of the cart item', example: 10 })
+  @ApiBody({ type: UpdateCartProductQuantityDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Cart product quantity updated successfully',
+    schema: { example: { message: 'Product quantity updated successfully' } },
+  })
   updateProductCartQty(
     @CurrentUser() customer: Customer,
     @Param('cartItemId') cartItemId: string,
@@ -80,18 +122,33 @@ export class CartController {
 
   @Serilaize(CartItemWithOfferDto)
   @UseGuards(CustomerGuard)
-  @Get(':cartId')
+  @Get(':storeId')
+  @ApiOperation({ summary: 'Get all cart items for a store with offers' })
+  @ApiSecurity('access-token')
+  @ApiParam({ name: 'storeId', type: Number, description: 'ID of the store', example: 1 })
+  @ApiResponse({
+    status: 200,
+    description: 'List of cart items with applied offers',
+    type: [CartItemWithOfferDto],
+  })
   getCartItemsWithOffers(
     @CurrentUser() user: Customer,
-    @Param('cartId', ParseIntPipe) cartId: number,
+    @Param('storeId', ParseIntPipe) storeId: number,
     @Query('lang') lang: Language = Language.ar
   ) {
-    return this.cartService.getCartItemsWithOffers(cartId, user.id,lang);
+    return this.cartService.getCartItemsWithOffers(storeId, user.id,lang);
   }
 
   @Serilaize(CartWithStoreDto)
   @UseGuards(CustomerGuard)
   @Get('all/byCustomer')
+  @ApiOperation({ summary: 'Get all carts for the current customer' })
+  @ApiSecurity('access-token')
+  @ApiResponse({
+    status: 200,
+    description: 'List of carts with their store details',
+    type: [CartWithStoreDto],
+  })
   findAllCartsByCustomer(@CurrentUser() user: Customer) {
     return this.cartService.findAllCartsByCustomer(user.id);
   }

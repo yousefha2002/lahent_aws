@@ -72,7 +72,7 @@ export class OrderService {
         const transaction = await this.sequelize.transaction();
         try {
             const {
-                cartId,
+                storeId,
                 couponCode,
                 scheduledAt,
                 pickupType,
@@ -156,13 +156,8 @@ export class OrderService {
         }
       }
 
-      const cart = await this.cartService.findCartByCustomer(cartId, user.id);
-      const cartItems = await this.cartService.getCartItemsWithOffers(
-        cartId,
-        user.id,
-        lang
-      );
-      const store = await this.storeService.storeById(cart.storeId);
+      const cartItems = await this.cartService.getCartItemsWithOffers(storeId,user.id,lang);
+      const store = await this.storeService.storeById(storeId);
       if (!store || store.status !== StoreStatus.APPROVED) {
         throw new BadRequestException(
           this.i18n.translate('translation.orders.store_unavailable', { lang }),
@@ -175,7 +170,7 @@ export class OrderService {
 
       if (scheduledAt) {
         const storeIsOpen = await this.storeService.isStoreOpenAt(
-          cart.storeId,
+          storeId,
           scheduledAt,
         );
         if (!storeIsOpen) {
@@ -188,7 +183,7 @@ export class OrderService {
       } else {
         const now = new Date();
         const storeIsOpenNow = await this.storeService.isStoreOpenAt(
-          cart.storeId,
+          storeId,
           now,
         );
         if (!storeIsOpenNow) {
@@ -209,7 +204,7 @@ export class OrderService {
         coupon = await this.couponService.validateCoupon(
           couponCode,
           lang,
-          cart.storeId,
+          storeId,
         );
       }
 
@@ -263,7 +258,7 @@ export class OrderService {
       const order = await this.orderRepo.create(
         {
           customerId: user.id,
-          storeId: cart.storeId,
+          storeId:storeId,
           subtotalBeforeDiscount,
           estimatedTime,
           discountCouponAmount,
@@ -320,7 +315,7 @@ export class OrderService {
                 ]);
             }
 
-      await this.cartService.deleteCart(cartId, user.id, transaction);
+      await this.cartService.deleteCart(storeId, user.id, transaction);
 
       await transaction.commit();
       return { order };

@@ -172,12 +172,17 @@ export class CartService {
     return { message };
   }
 
-  async getCartItemsWithOffers(cartId: number, customerId: number,lang:Language) {
-    await this.findCartByCustomer(cartId, customerId);
+  async getCartItemsWithOffers(storeId: number, customerId: number,lang:Language) {
+    const cart = await this.cartRepo.findOne({where:{customerId,storeId}});
+    if(!cart)
+    {
+      const message = this.i18n.translate('translation.cart_ownership_error', {lang});
+      throw new ForbiddenException(message);
+    }
 
     const cartItems =
       await this.cartItemService.findAllItemsByCartIdAndCustomerId(
-        cartId,
+        cart.id,
         customerId,
         lang
       );
@@ -259,13 +264,13 @@ export class CartService {
   }
 
   async deleteCart(
-    cartId: number,
+    storeId: number,
     customerId: number,
     transaction?: any,
     lang = Language.en,
   ) {
     await this.cartRepo.destroy({
-      where: { id: cartId, customerId },
+      where: { storeId, customerId },
       transaction,
     });
     const message = this.i18n.translate('translation.cart_deleted', { lang });

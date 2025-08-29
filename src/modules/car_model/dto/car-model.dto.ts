@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose, Type } from 'class-transformer';
 
-export class TypeLanguageDto {
+export class CarModelLanguageDto {
   @ApiProperty({ example: 'HONDAY' })
   @Expose()
   name: string;
@@ -16,8 +16,8 @@ export class CarModelDto {
   @Expose()
   id: string;
 
-  @ApiProperty({ type: [TypeLanguageDto] })
+  @ApiProperty({ type: [CarModelLanguageDto] })
   @Expose()
-  @Type(() => TypeLanguageDto)
-  languages: TypeLanguageDto[];
+  @Type(() => CarModelLanguageDto)
+  languages: CarModelLanguageDto[];
 }

@@ -19,26 +19,64 @@ import { ProductService } from './product.service';
 import { StoreOrOwnerGuard } from 'src/common/guards/StoreOrOwner.guard';
 import { Store } from '../store/entities/store.entity';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
-import { CreateProductDto, ProductLanguageDto } from './dto/create-product.dto';
+import { CreateProductDto } from './dto/create-product.dto';
 import { multerOptions } from 'src/multer/multer.options';
 import { UpdateProductWithImageDto } from './dto/update-product-withImage.dto';
 import {
   ExistingImage,
   parseAndValidateExistingImages,
 } from 'src/common/validation/parseAndValidateExistingImages';
-import { UpdateProductWithIcategoryDto } from './dto/update-product-withCategory.dto';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { PaginatedProductWithOfferDto } from './dto/productwithoffer.dto';
 import { PaginatedSimpleProductDto } from './dto/product-for-store.dto';
 import { FullProductDetailsDto } from './dto/full-product-with-details.dto';
 import { ApprovedStoreGuard } from 'src/common/guards/approvedStore.guard';
 import { Language } from 'src/common/enums/language';
+import { ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 
+@ApiQuery({ name: 'lang', enum: Language, required: false, example: 'ar' })
 @Controller('product')
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
   @Post('create')
+  @ApiOperation({ summary: 'Create a new product with images and languages' })
+  @ApiQuery({ name: 'storeId', required: false, example: '1' })
+  @ApiSecurity('access-token')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        categoryId: { type: 'string', example: '1' },
+        basePrice: { type: 'string', example: '100' },
+        preparationTime: { type: 'string', example: '15' },
+        languages: {
+          type: 'string',
+          example: JSON.stringify([
+            { languageCode: 'en', name: 'My Product', shortDescription: 'Short desc', longDescription: 'Long desc' },
+            { languageCode: 'ar', name: 'منتجي', shortDescription: 'وصف قصير', longDescription: 'وصف طويل' },
+          ]),
+        },
+        images: {
+          type: 'array',
+          items: { type: 'string', format: 'binary' },
+          description: 'Upload 1 to 5 product images',
+        },
+      },
+      required: ['categoryId','basePrice','preparationTime','languages','images'],
+    },
+  })
+  @ApiQuery({ name: 'lang', enum: Language, required: false })
+  @ApiResponse({
+    status: 201,
+    schema: {
+      example: {
+        message: 'Product created successfully',
+        productId: 123
+      },
+    },
+  })
+  @ApiConsumes('multipart/form-data')
   @UseGuards(StoreOrOwnerGuard, ApprovedStoreGuard)
   @UseInterceptors(AnyFilesInterceptor(multerOptions))
   async create(
@@ -57,6 +95,48 @@ export class ProductController {
   }
 
   @Put('update/:productId')
+  @ApiOperation({ summary: 'Update product details with images and languages' })
+  @ApiSecurity('access-token')
+  @ApiParam({ name: 'productId', example: 101 })
+  @ApiQuery({ name: 'storeId', required: false, example: '1' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        categoryId: { type: 'string', example: '2' },
+        basePrice: { type: 'string', example: '120' },
+        preparationTime: { type: 'string', example: '20' },
+        languages: {
+          type: 'string',
+          example: JSON.stringify([
+            { languageCode: 'en', name: 'Updated Product', shortDescription: 'New short desc', longDescription: 'New long desc' },
+            { languageCode: 'ar', name: 'المنتج المحدّث', shortDescription: 'وصف قصير جديد', longDescription: 'وصف طويل جديد' },
+          ]),
+        },
+        existingImages: {
+          type: 'string',
+          description: 'JSON array of existing image IDs to keep',
+          example: JSON.stringify([{ id: 1 }, { id: 2 }]),
+        },
+        images: {
+          type: 'array',
+          items: { type: 'string', format: 'binary' },
+          description: 'Upload up to 5 new images',
+        },
+      },
+      required: ['languages'],
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    schema: {
+      example: {
+        message: 'Product updated successfully',
+        productId: 101,
+      },
+    },
+  })
   @UseGuards(StoreOrOwnerGuard, ApprovedStoreGuard)
   @UseInterceptors(
     FileFieldsInterceptor([{ name: 'images', maxCount: 5 }], multerOptions),
@@ -85,6 +165,12 @@ export class ProductController {
 
   @Serilaize(PaginatedProductWithOfferDto)
   @Get('all/:storeId')
+  @ApiOperation({ summary: 'Get all products of a store for customers' })
+  @ApiQuery({ name: 'categoryId', required: false, type: Number })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'name', required: false, type: String })
+  @ApiResponse({status: 200,description: 'Paginated list of products with offers',type: PaginatedProductWithOfferDto})
   async getCustomerStoreProducts(
     @Param('storeId') storeId: number,
     @Query('categoryId') categoryId: number,
@@ -106,6 +192,10 @@ export class ProductController {
   @Serilaize(PaginatedSimpleProductDto)
   @UseGuards(StoreOrOwnerGuard, ApprovedStoreGuard)
   @Get('all')
+  @ApiOperation({ summary: 'Get all products of the current store' })
+  @ApiQuery({ name: 'storeId', required: false, example: '1' })
+  @ApiSecurity('access-token')
+  @ApiResponse({ status: 200, description: 'Paginated list of products for the store', type: PaginatedSimpleProductDto})
   async getProductsByStore(
     @CurrentUser() store: Store,
     @Query('categoryId') categoryId: number,
@@ -126,6 +216,9 @@ export class ProductController {
 
   @Serilaize(FullProductDetailsDto)
   @Get('/:productId')
+  @ApiOperation({ summary: 'Get full details of a product' })
+  @ApiParam({ name: 'productId', example: 1 })
+  @ApiResponse({ status: 200, type: FullProductDetailsDto })
   getFullProductDetails(@Param('productId') productId: string,@Query('lang') lang=Language.ar,) {
     return this.productService.getFullProductDetails(+productId,lang);
   }
@@ -133,13 +226,30 @@ export class ProductController {
   @UseGuards(StoreOrOwnerGuard, ApprovedStoreGuard)
   @Serilaize(FullProductDetailsDto)
   @Get('/:productId/byStore')
+  @ApiOperation({ summary: 'Get full product details for the store (including inactive)' })
+  @ApiSecurity('access-token')
+  @ApiQuery({ name: 'storeId', required: false, example: '1' })
+  @ApiParam({ name: 'productId', example: 101 })
+  @ApiResponse({ status: 200, type: FullProductDetailsDto })
   getFullProductDetailsForStore(@Param('productId') productId: string,@Query('lang') lang=Language.ar,) {
     return this.productService.getFullProductDetails(+productId,lang,{ includeInactive: true });
   }
 
   @Put('active/:productId')
   @UseGuards(StoreOrOwnerGuard, ApprovedStoreGuard)
-  activeProduct(
+  @ApiOperation({ summary: 'Toggle product active status' })
+  @ApiSecurity('access-token')
+  @ApiQuery({ name: 'storeId', required: false, example: '1' })
+  @ApiParam({ name: 'productId', example: 101 })
+  @ApiResponse({
+    status: 200,
+    schema: {
+      example: {
+        message: 'Product activity status changed successfully',
+      },
+    },
+  })
+  changeProductActivity(
     @Param('productId') productId: string,
     @CurrentUser() store: Store,
     @Query('lang') lang = Language.en,
