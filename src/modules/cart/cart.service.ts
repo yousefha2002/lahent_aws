@@ -46,15 +46,12 @@ export class CartService {
     lang = Language.en,
   ) {
     const transaction = await this.sequelize.transaction();
-    const [store, product] = await Promise.all([
-      this.storeService.storeById(dto.storeId),
-      this.productService.productById(dto.productId),
-    ]);
+    const product = await this.productService.productById(dto.productId)
+    const store = await this.storeService.storeById(product.storeId)
     try {
       if (
         store &&
         store.status === StoreStatus.APPROVED &&
-        product.storeId === dto.storeId &&
         product.isActive
       ) {
         await this.prouductVariantService.validateProductVariantsSelection(
@@ -63,15 +60,9 @@ export class CartService {
         );
         const [cart, isCreated] = await this.findCartOrCreate(
           customerId,
-          dto.storeId,
+          store.id,
           transaction,
         );
-        if (cart.customerId !== customerId) {
-          const message = this.i18n.translate('translation.invalid_cart', {
-            lang,
-          });
-          throw new BadRequestException(message);
-        }
         const cartItem = await this.cartItemService.insertProductinCart(
           cart.id,
           dto.productId,
@@ -307,7 +298,7 @@ export class CartService {
 
       if (
         cartItem.cart.customerId !== customerId ||
-        cartItem.cart.storeId !== dto.storeId
+        cartItem.cart.storeId !== product.storeId
       ) {
         const message = this.i18n.translate(
           'translation.cart_ownership_error',

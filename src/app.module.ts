@@ -66,11 +66,10 @@ import { ConfigModule } from '@nestjs/config';
         watch: false,
       },
       resolvers: [
-        { use: QueryResolver, options: ['lang', 'locale'] }, // يدعم lang=en أو lang=ar في URL
-        new HeaderResolver(['accept-language']), // أو من الهيدر
+        { use: QueryResolver, options: ['lang', 'locale'] },
+        new HeaderResolver(['accept-language']), 
       ],
-    }),
-    // ScheduleModule.forRoot(),
+    }),    
     JwtModule.register({ global: true, secret: 'token' }),
     JwtModule.register({ global: true, secret: 'refresh_token' }),
     DatabaseModule,

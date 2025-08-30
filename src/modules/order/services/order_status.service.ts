@@ -15,6 +15,8 @@ import { PointActionSoucre } from 'src/common/enums/point_action_source';
 import { OrderItem } from 'src/modules/order_item/entities/order_item.entity';
 import { I18nService } from 'nestjs-i18n';
 import { Language } from 'src/common/enums/language';
+import { CONFIRMATION_EXTENSION_MINUTES, UNPAID_EXPIRATION_MINUTES } from 'src/common/constants';
+import { Op } from 'sequelize';
 
 @Injectable()
 export class OrderStatusService {
@@ -209,5 +211,99 @@ export class OrderStatusService {
         await order.save();
 
         return { success: true, message: this.i18n.translate('translation.orders.extended_success', { lang }) };
+    }
+
+    async expireUnpaidOrders() 
+    {
+        const expirationTime = new Date(Date.now() - UNPAID_EXPIRATION_MINUTES * 60 * 1000);
+        const orders = await this.orderRepo.findAll({
+        where: {
+            status: OrderStatus.PENDING_PAYMENT,
+            createdAt: { [Op.lt]: expirationTime },
+        },
+        });
+
+        for (const order of orders) {
+            order.status = OrderStatus.EXPIRED;
+            order.canceledAt = new Date();
+            await order.save();
+        }
+    }
+
+    async updatePendingConfirmationOrders() 
+    {
+        const now = new Date();
+        const orders = await this.orderRepo.findAll({
+        where: {
+            status: OrderStatus.PENDING_CONFIRMATION,
+            confirmationTimeoutAt: { [Op.lt]: now },
+        },
+        });
+
+        for (const order of orders) {
+        order.status = OrderStatus.CUSTOMER_DECISION;
+        order.confirmationTimeoutAt = new Date(order.confirmationTimeoutAt.getTime() + CONFIRMATION_EXTENSION_MINUTES * 60 * 1000);
+        await order.save();
+        }
+    }
+
+    async cancelExpiredCustomerDecision() 
+    {
+        const now = new Date();
+        const orders = await this.orderRepo.findAll({
+        where: {
+            status: OrderStatus.CUSTOMER_DECISION,
+            confirmationTimeoutAt: { [Op.lt]: now },
+        },
+        });
+
+        for (const order of orders) {
+        await this.refundOrder(order.id, { id: order.customerId } as any);
+        }
+    }
+
+    async updatePreparingOrdersStatus() 
+    {
+        const now = new Date();
+        const orders = await this.orderRepo.findAll({
+        where: {
+            status: { [Op.in]: [OrderStatus.PREPARING, OrderStatus.HALF_PREPARATION] },
+            preparedAt: { [Op.ne]: null },
+        },
+        });
+
+        for (const order of orders) {
+        if (!order.preparedAt || !order.estimatedTime) continue;
+
+        const elapsedMs = now.getTime() - order.preparedAt.getTime();
+        const estimatedMs = order.estimatedTime * 60 * 1000;
+
+        if (elapsedMs >= estimatedMs) {
+            order.status = OrderStatus.READY;
+            order.readyAt = now;
+            await order.save();
+        } else if (elapsedMs >= estimatedMs / 2 && order.status !== OrderStatus.HALF_PREPARATION) {
+            order.status = OrderStatus.HALF_PREPARATION;
+            await order.save();
+        }
+        }
+    }
+
+    async updateScheduledOrdersToPreparing() 
+    {
+        const now = new Date();
+        const orders = await this.orderRepo.findAll({
+        where: {
+            status: OrderStatus.PLACED,
+            isScheduled: true,
+            scheduledAt: { [Op.lte]: now },
+        },
+        });
+
+        for (const order of orders) {
+        order.status = OrderStatus.PREPARING;
+        order.preparedAt = now;
+        await order.save();
+        }
     }
 }

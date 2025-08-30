@@ -2,11 +2,6 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsArray, IsNotEmpty, IsNumber, IsOptional, Min } from 'class-validator';
 
 export class CreateCartProductDto {
-  @ApiProperty({ example: 1, description: 'Store ID' })
-  @IsNumber()
-  @IsNotEmpty()
-  storeId: number;
-
   @ApiProperty({ example: 25, description: 'Product ID' })
   @IsNumber()
   @IsNotEmpty()

@@ -12,7 +12,6 @@ import { OrderItemVariantModule } from '../order_item_variant/order_item_variant
 import { CarModule } from '../car/car.module';
 import { DatabaseModule } from 'src/database/database.module';
 import { StoreModule } from '../store/store.module';
-import { OrderCronService } from './services/order_corn.service';
 import { TransactionModule } from '../transaction/transaction.module';
 import { PaymentSessionModule } from '../payment_session/payment_session.module';
 import { UserPointHistoryModule } from '../user_point_history/user_point_history.module';
@@ -22,6 +21,8 @@ import { OrderPointsService } from './services/order_points.service';
 import { OrderStatusService } from './services/order_status.service';
 import { OfferModule } from '../offer/offer.module';
 import { ProductModule } from '../product/product.module';
+import { BullModule } from '@nestjs/bull';
+import { OrderQueueScheduler } from './order.scheduler';
 
 @Module({
   controllers: [OrderController],
@@ -31,9 +32,18 @@ import { ProductModule } from '../product/product.module';
     OrderPointsService,
     OrderStatusService,
     ...OrderProvider,
-    OrderCronService,
+    OrderQueueScheduler
   ],
   imports: [
+    BullModule.forRoot({
+      redis: {
+        host: process.env.REDIS_HOST,
+        port: Number(process.env.REDIS_PORT)
+      },
+    }),
+    BullModule.registerQueue({
+      name: 'orders',
+    }),
     CartModule,
     CustomerModule,
     CouponModule,
