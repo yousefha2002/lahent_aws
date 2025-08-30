@@ -19,9 +19,6 @@ export class EdfapayService {
         }
         const paymentorderId = order_id??"5305e75d-ea36-415c-aeb8-02bfd97b9e26"
         const session = await this.paymentSessionService.getByPaymentOrderId(paymentorderId)
-        if (hash !== session.hash) {
-            throw new BadRequestException('Invalid hash');
-        }
         session.transactionId = trans_id;
         if (status === 'SETTLED' || status === 'SUCCESS')
         {
