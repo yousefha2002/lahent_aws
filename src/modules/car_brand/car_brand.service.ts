@@ -23,7 +23,7 @@ export class CarBrandService {
     private readonly i18n: I18nService,
   ) {}
 
-  async create(dto: CreateCarBrandDto, lang = Language.en) {
+  async create(dto: CreateCarBrandDto, lang = Language.ar) {
     // Validate all names first
     for (const [langCode, name] of Object.entries(dto.names)) {
       const exists = await this.carBrandLanguageRep.findOne({
@@ -56,7 +56,7 @@ export class CarBrandService {
     return { message };
   }
 
-  async update(id: number, dto: UpdateCarBrandDto, lang = Language.en) {
+  async update(id: number, dto: UpdateCarBrandDto, lang = Language.ar) {
     const brand = await this.getOneOrFail(id);
 
     for (const [langCode, name] of Object.entries(dto.names)) {
@@ -92,13 +92,13 @@ export class CarBrandService {
     return { message };
   }
 
-  async getAll(lang = Language.en) {
+  async getAll(lang = Language.ar) {
     return this.carBrandRep.findAll({
       include: [{ model: CarBrandLanguage, where: { languageCode: lang } }],
     });
   }
 
-  async getOneOrFail(id: number, lang = Language.en) {
+  async getOneOrFail(id: number, lang = Language.ar) {
     const brand = await this.carBrandRep.findByPk(id, {
       include: [{ model: CarBrandLanguage, where: { languageCode: lang } }],
     });

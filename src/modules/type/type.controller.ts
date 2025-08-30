@@ -7,7 +7,7 @@ import {
   Param,
   Post,
   Put,
-  Query,
+  Req,
   UploadedFile,
   UseFilters,
   UseGuards,
@@ -19,12 +19,10 @@ import { CreateTypeDto } from './dto/create-type.dto';
 import { MulterExceptionFilter } from 'src/multer/multer.exception.filter';
 import { multerOptions } from 'src/multer/multer.options';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { Language } from 'src/common/enums/language';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { TypeDto } from './dto/type.dto';
-import { ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 
-@ApiQuery({ name: 'lang', enum: Language, required: false, example: 'ar' })
 @Controller('type')
 export class TypeController {
   constructor(private readonly typeService: TypeService) {}
@@ -57,14 +55,14 @@ export class TypeController {
   @UseInterceptors(FileInterceptor('image', multerOptions))
   @UseFilters(MulterExceptionFilter)
   createType(
-    @Query('lang') lang: Language = Language.ar,
+    @Req() req,
     @Body() dto: CreateTypeDto,
     @UploadedFile() file?: Express.Multer.File,
   ) {
     if (!file) {
       throw new BadRequestException('upload icon is required');
     }
-    return this.typeService.createType(dto, file, lang);
+    return this.typeService.createType(dto, file, req.lang);
   }
 
   @ApiOperation({ summary: 'Update type by ID (admin only)' })
@@ -94,12 +92,12 @@ export class TypeController {
   @UseInterceptors(FileInterceptor('image', multerOptions))
   @UseFilters(MulterExceptionFilter)
   updateType(
-    @Query('lang') lang: Language = Language.ar,
+    @Req() req,
     @Param('typeId') typeId: string,
     @Body() dto: CreateTypeDto,
     @UploadedFile() file?: Express.Multer.File,
   ) {
-    return this.typeService.updateType(+typeId, dto, lang, file);
+    return this.typeService.updateType(+typeId, dto, req.lang, file);
   }
 
   @ApiOperation({ summary: 'Delete a type by ID (admin only)' })
@@ -114,17 +112,17 @@ export class TypeController {
   @UseGuards(AdminGuard)
   deleteType(
     @Param('typeId') typeId: string,
-    @Query('lang') lang: Language = Language.ar,
+    @Req() req,
   ) {
-    return this.typeService.deleteType(+typeId, lang);
+    return this.typeService.deleteType(+typeId, req.lang);
   }
 
   @ApiOperation({ summary: 'Get all types with their languages' })
   @ApiResponse({ status: 200, description: 'List of types', type: [TypeDto] })
   @Get('all')
   @Serilaize(TypeDto)
-  getAllTypes(@Query('lang') lang: Language=Language.ar) {
-    return this.typeService.getAllTypes(lang);
+  getAllTypes(@Req() req) {
+    return this.typeService.getAllTypes(req.lang);
   }
 
   @ApiOperation({ summary: 'Get a single type by ID with its languages' })
@@ -134,8 +132,8 @@ export class TypeController {
   @Serilaize(TypeDto)
   getOne(
     @Param('typeId') typeId: string,
-    @Query('lang') lang: Language = Language.ar,
+    @Req() req,
   ) {
-    return this.typeService.getOneType(+typeId, lang);
+    return this.typeService.getOneType(+typeId, req.lang);
   }
 }

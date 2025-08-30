@@ -13,11 +13,6 @@ export class PaymentSessionService {
         @Inject(repositories.payment_session_repository) private paymentSessionRepo: typeof PaymentSession,
     ){}
 
-    findAll()
-    {
-        return this.paymentSessionRepo.findAll()
-    }
-
     async startPayment({ customer, amount, provider, purpose,sourceId}: { customer: Customer; amount: number; provider: string; purpose: GatewaySource;sourceId?:number }) 
     {
     // 1. إنشاء جلسة في DB

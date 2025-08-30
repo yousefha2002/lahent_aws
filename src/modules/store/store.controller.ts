@@ -12,6 +12,7 @@ import {
   Query,
   Put,
   Param,
+  Req,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { CreateStoreDto } from './dto/create-store.dto';
@@ -41,7 +42,6 @@ import { StoreWithTokenDto } from './dto/simple-store.dto';
 import { FullDetailsStoreDto } from './dto/full-details-store.dto';
 import { ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 
-@ApiQuery({ name: 'lang', enum: Language, required: false, example: 'ar' })
 @Controller('store')
 export class StoreController {
   constructor(
@@ -109,7 +109,7 @@ export class StoreController {
       multerOptions,
     ),
   )
-  async create(@Body() body: CreateStoreDto,@CurrentUser() user: any,@Query('lang') lang=Language.en,@UploadedFiles()    
+  async create(@Body() body: CreateStoreDto,@CurrentUser() user: any,@Req() req,@UploadedFiles()    
     files: {
       logo?: Express.Multer.File[];
       cover?: Express.Multer.File[];
@@ -130,7 +130,7 @@ export class StoreController {
       openingHours2 as OpeningHourEnum[],
       logoImage,
       coverImage,
-      lang
+      req.lang
     );
   }
 
@@ -139,8 +139,8 @@ export class StoreController {
   @ApiOperation({ summary: 'Login store and return access & refresh tokens' })
   @ApiBody({ type: LoginStoreDto })
   @ApiResponse({status: 200,description: 'Store login successful',type: StoreWithTokenDto})
-  login(@Body() body: LoginStoreDto,@Query('lang') lang=Language.en) {
-    return this.storeAuthService.login(body,lang);
+  login(@Body() body: LoginStoreDto,@Req() req) {
+    return this.storeAuthService.login(body,req.lang);
   }
 
   @Get('details')
@@ -160,8 +160,8 @@ export class StoreController {
   @ApiSecurity('access-token')
   @Serilaize(StoreDto)
   @UseGuards(OwnerGuard)
-  findStoresByOwner(@CurrentUser() owner: Owner,@Query('lang') lang=Language.en) {
-    return this.storeService.findStoresByOwner(owner.id,lang);
+  findStoresByOwner(@CurrentUser() owner: Owner,@Req() req) {
+    return this.storeService.findStoresByOwner(owner.id,req.lang);
   }
 
   @Post('nearby')
@@ -176,7 +176,7 @@ export class StoreController {
   async getNearbyStores(
     @Body() dto: GetNearbyStoresDto,
     @CurrentUser() customer: Customer,
-    @Query('lang') lang = Language.ar,
+    @Req() req,
     @Query('type') type: number,
     @Query('subType') subType: number,
     @Query('page') page = 1,
@@ -185,7 +185,7 @@ export class StoreController {
     return this.storeGeolocationService.findStoresNearbyOrBetween(
       dto,
       customer.id,
-      lang,
+      req.lang,
       +page,
       +limit,
       type,
@@ -206,12 +206,12 @@ export class StoreController {
     @Query('type') type: number,
     @Query('subType') subType: number,
     @Query('page') page = 1,
-    @Query('lang') lang = Language.en,
+    @Req() req,
     @Query('lang') name: string,
     @Query('limit') limit = 10,
   ) {
     return this.storeService.findAllStores(
-      lang,
+      req.lang,
       page,
       limit,
       type,
@@ -229,10 +229,10 @@ export class StoreController {
   @ApiResponse({status: 200,description: 'full details of store',type: FullDetailsStoreDto,})
   async getFullDetailsStore(
     @Param('id') storeId: number,
-    @Query('lang') lang: Language = Language.en,
+    @Req() req,
     @CurrentUser() customer:Customer
   ) {
-    return this.storeService.getFullDetailsStore(storeId,customer.id, lang);
+    return this.storeService.getFullDetailsStore(storeId,customer.id, req.lang);
   }
 
   @Put('/:storeId/approved')
@@ -250,8 +250,8 @@ export class StoreController {
       },
     },
   })
-  acceptStore(@Param('storeId') storeId: string,@Query('lang') lang=Language.en) {
-    return this.storeService.changeStoreStatus(StoreStatus.APPROVED, +storeId,lang);
+  acceptStore(@Param('storeId') storeId: string,@Req() req) {
+    return this.storeService.changeStoreStatus(StoreStatus.APPROVED, +storeId,req.lang);
   }
 
   @Put('/:storeId/rejected')
@@ -269,8 +269,8 @@ export class StoreController {
     },
   })
   @UseGuards(AdminGuard)
-  rejectStore(@Param('storeId') storeId: string,@Query('lang') lang=Language.en) {
-    return this.storeService.changeStoreStatus(StoreStatus.REJECTED, +storeId,lang);
+  rejectStore(@Param('storeId') storeId: string,@Req() req) {
+    return this.storeService.changeStoreStatus(StoreStatus.REJECTED, +storeId,req.lang);
   }
 
   @Put()
@@ -284,8 +284,8 @@ export class StoreController {
   })
   @UseGuards(StoreOrOwnerGuard)
 
-  updateStore(@CurrentUser() store: Store, @Body() dto: UpdateStoreDto,@Query('lang') lang=Language.en) {
-    return this.storeService.updateStore(store, dto,lang);
+  updateStore(@CurrentUser() store: Store, @Body() dto: UpdateStoreDto,@Req() req) {
+    return this.storeService.updateStore(store, dto,req.lang);
   }
 
   @Put('update-images')
@@ -331,7 +331,7 @@ export class StoreController {
   )
   updateImages(
     @CurrentUser() store: Store,
-    @Query('lang') lang=Language.en,
+    @Req() req,
     @UploadedFiles()
     files: {
       logo?: Express.Multer.File[];
@@ -340,7 +340,7 @@ export class StoreController {
   ) {
     const logo = files.logo?.[0];
     const cover = files.cover?.[0];
-    return this.storeService.updateStoreImages(store, logo, cover,lang);
+    return this.storeService.updateStoreImages(store, logo, cover,req.lang);
   }
 
   @Get('favourite/byCustomer')
@@ -351,8 +351,8 @@ export class StoreController {
   @ApiResponse({status: 200,description: 'List of favourite stores with pagination',type: PaginatedStoreDto})
   @Serilaize(PaginatedStoreDto)
   @UseGuards(CustomerGuard)
-  getFavouriteStoresByCustomer(@CurrentUser() user: Customer,@Query('lang') lang=Language.en,@Query('page') page = 1,@Query('limit') limit = 10) {
-    return this.storeService.getFavouriteStoresByCustomer(user.id,lang,page,limit);
+  getFavouriteStoresByCustomer(@CurrentUser() user: Customer,@Req() req,@Query('page') page = 1,@Query('limit') limit = 10) {
+    return this.storeService.getFavouriteStoresByCustomer(user.id,req.lang,page,limit);
   }
 
   @Post('refresh-token')

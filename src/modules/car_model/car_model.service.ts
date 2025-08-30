@@ -24,7 +24,7 @@ export class CarModelService {
     private readonly i18n: I18nService,
   ) {}
 
-  async create(dto: CreateCarModelDto, lang = Language.en) {
+  async create(dto: CreateCarModelDto, lang = Language.ar) {
     // Validate names
     for (const [langCode, name] of Object.entries(dto.names)) {
       const exists = await this.carModelLanguageRepo.findOne({
@@ -57,7 +57,7 @@ export class CarModelService {
     return { message };
   }
 
-  async update(id: number, dto: UpdateCarModelDto, lang = Language.en) {
+  async update(id: number, dto: UpdateCarModelDto, lang = Language.ar) {
     const model = await this.getOneOrFail(id);
 
     // Validate names
@@ -93,13 +93,13 @@ export class CarModelService {
     return { message };
   }
 
-  async getAll(lang = Language.en) {
+  async getAll(lang = Language.ar) {
     return this.carModelRepo.findAll({
       include: [{ model: CarModelLanguage, where: { languageCode: lang } }],
     });
   }
 
-  async getOneOrFail(id: number, lang = Language.en) {
+  async getOneOrFail(id: number, lang = Language.ar) {
     const model = await this.carModelRepo.findByPk(id, {
       include: [{ model: CarModelLanguage, where: { languageCode: lang } }],
     });

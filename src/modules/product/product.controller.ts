@@ -7,6 +7,7 @@ import {
   Post,
   Put,
   Query,
+  Req,
   UploadedFiles,
   UseGuards,
   UseInterceptors,
@@ -34,7 +35,6 @@ import { ApprovedStoreGuard } from 'src/common/guards/approvedStore.guard';
 import { Language } from 'src/common/enums/language';
 import { ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 
-@ApiQuery({ name: 'lang', enum: Language, required: false, example: 'ar' })
 @Controller('product')
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
@@ -83,7 +83,7 @@ export class ProductController {
     @CurrentUser() store: Store,
     @Body() body: CreateProductDto,
     @UploadedFiles() files: Express.Multer.File[],
-    @Query('lang') lang = Language.en,
+    @Req() req,
   ) {
     if (!files || files.length === 0) {
       throw new BadRequestException('يجب إرسال صورة واحدة على الأقل للمنتج');
@@ -91,7 +91,7 @@ export class ProductController {
     if (files.length > 5) {
       throw new BadRequestException('يمكن رفع 5 صور فقط للمنتج');
     }
-    return this.productService.createProduct(store.id, body, files, lang);
+    return this.productService.createProduct(store.id, body, files, req.lang);
   }
 
   @Put('update/:productId')
@@ -144,7 +144,7 @@ export class ProductController {
   async updateProductWithImage(
     @Param('productId') productId: string,
     @Body() body: UpdateProductWithImageDto,
-    @Query('lang') lang = Language.en,
+    @Req() req,
     @UploadedFiles() files: { images?: Express.Multer.File[] },
   ) {
     let existingImages: ExistingImage[] = [];
@@ -157,7 +157,7 @@ export class ProductController {
     return this.productService.updateProductWithImages(
       +productId,
       body,
-      lang,
+      req.lang,
       existingImages,
       images,
     );
@@ -174,14 +174,14 @@ export class ProductController {
   async getCustomerStoreProducts(
     @Param('storeId') storeId: number,
     @Query('categoryId') categoryId: number,
-    @Query('lang') lang=Language.ar,
+    @Req() req,
     @Query('page') page = 1,
     @Query('limit') limit = 10,
     @Query('name') name: string,
   ) {
     return this.productService.getCustomerStoreProducts(
       storeId,
-      lang,
+      req.lang,
       +page,
       +limit,
       categoryId,
@@ -202,11 +202,11 @@ export class ProductController {
     @Query('page') page = 1,
     @Query('limit') limit = 10,
     @Query('name') name: string,
-    @Query('lang') lang = Language.ar
+    @Req() req
   ) {
     return this.productService.getProductsByStore(
       store.id,
-      lang,
+      req.lang,
       +page,
       +limit,
       categoryId,

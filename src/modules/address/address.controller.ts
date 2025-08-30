@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { AddressService } from './address.service';
 import { CustomerGuard } from 'src/common/guards/customer.guard';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
@@ -11,7 +11,6 @@ import { CompletedProfileGuard } from 'src/common/guards/completed-profile.guard
 import { UpdateAddressDto } from './dto/update-address.dto';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 
-@ApiQuery({ name: 'lang', enum: Language, required: false, example: 'ar' })
 @Controller('address')
 export class AddressController {
   constructor(private readonly addressService: AddressService) {}
@@ -23,9 +22,9 @@ export class AddressController {
   @ApiBody({ type: CreateAddressDto })
   @ApiResponse({status: 201,description: 'Address created successfully',type: AddressDto})
   @Post()
-  create(@CurrentUser() user: Customer,@Body() dto: CreateAddressDto,@Query('lang') lang=Language.ar) 
+  create(@CurrentUser() user: Customer,@Body() dto: CreateAddressDto, @Req() req) 
   {
-    return this.addressService.create(user.id, dto,lang);
+    return this.addressService.create(user.id, dto,req.lang);
   }
 
   @Serilaize(AddressDto)
@@ -37,9 +36,9 @@ export class AddressController {
   @ApiBody({ type: UpdateAddressDto })
   @ApiResponse({ status: 200, description: 'Address updated successfully', type: AddressDto })
   @Put(':id')
-  update(@CurrentUser() user: Customer,@Param('id') addressId: number,@Body() dto: UpdateAddressDto,@Query('lang') lang=Language.ar) 
+  update(@CurrentUser() user: Customer,@Param('id') addressId: number,@Body() dto: UpdateAddressDto, @Req() req) 
   {
-    return this.addressService.update(user.id,addressId, dto,lang);
+    return this.addressService.update(user.id,addressId, dto,req.lang);
   }
 
   @Serilaize(AddressDto)
@@ -58,8 +57,8 @@ export class AddressController {
   @ApiParam({ name: 'id', description: 'ID of the address to delete', example: 1 })
   @ApiResponse({status: 200,description: 'Address deleted successfully',schema: { example: { message: 'Deleted successfully' } },})
   @Delete(':id')
-  remove(@CurrentUser() user: Customer,@Param('id') addressId: number,@Query('lang') lang=Language.ar) 
+  remove(@CurrentUser() user: Customer,@Param('id') addressId: number, @Req() req) 
   {
-    return this.addressService.remove(user.id, addressId,lang);
+    return this.addressService.remove(user.id, addressId,req.lang);
   }
 }

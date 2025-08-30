@@ -8,6 +8,7 @@ import {
   Query,
   ParseIntPipe,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { CarModelService } from './car_model.service';
 import { CreateCarModelDto } from './dto/create_car_model.dto';
@@ -25,7 +26,6 @@ import {
   ApiSecurity,
 } from '@nestjs/swagger';
 
-@ApiQuery({ name: 'lang', enum: Language, required: false, example: 'ar' })
 @Controller('car-model')
 export class CarModelController {
   constructor(private readonly carModelService: CarModelService) {}
@@ -53,10 +53,9 @@ export class CarModelController {
   @UseGuards(AdminGuard)
   @Post()
   create(
-    @Body() dto: CreateCarModelDto,
-    @Query('lang') lang: Language = Language.en,
+    @Body() dto: CreateCarModelDto,@Req() req
   ) {
-    return this.carModelService.create(dto, lang);
+    return this.carModelService.create(dto, req.lang);
   }
 
   @ApiOperation({ summary: 'update a car model by ID (admin only)' })
@@ -89,9 +88,9 @@ export class CarModelController {
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateCarModelDto,
-    @Query('lang') lang: Language = Language.en,
+    @Req() req,
   ) {
-    return this.carModelService.update(id, dto, lang);
+    return this.carModelService.update(id, dto, req.lang);
   }
 
   @ApiOperation({ summary: 'Get all car model and its languages' })
@@ -103,8 +102,8 @@ export class CarModelController {
   })
   @Get()
   @Serilaize(CarModelDto)
-  getAll() {
-    return this.carModelService.getAll();
+  getAll(@Req() req) {
+    return this.carModelService.getAll(req.lang);
   }
 
   @ApiOperation({ summary: 'Get a car model by ID with its languages' })
@@ -118,8 +117,8 @@ export class CarModelController {
   @Serilaize(CarModelDto)
   getOne(
     @Param('id', ParseIntPipe) id: number,
-    @Query('lang') lang: Language = Language.en,
+    @Req() req,
   ) {
-    return this.carModelService.getOneOrFail(id, lang);
+    return this.carModelService.getOneOrFail(id, req.lang);
   }
 }

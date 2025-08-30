@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Delete, Get, Param, Query, Req, UseGuards } from '@nestjs/common';
 import { RecentAddressService } from './recent_address.service';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { RecentAddressDto } from './dto/recent-address.dto';
@@ -6,9 +6,8 @@ import { CustomerGuard } from 'src/common/guards/customer.guard';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { Customer } from '../customer/entities/customer.entity';
 import { Language } from 'src/common/enums/language';
-import { ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
+import { ApiOperation, ApiParam, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 
-@ApiQuery({ name: 'lang', enum: Language, required: false, example: 'ar' })
 @Controller('recent-address')
 export class RecentAddressController {
   constructor(private readonly recentAddressService: RecentAddressService) {}
@@ -28,8 +27,8 @@ export class RecentAddressController {
     @ApiParam({ name: 'id', description: 'ID of the recent address to delete', example: 1 })
     @ApiResponse({status: 200,description: 'Recent address deleted successfully',schema: { example: { message: 'Deleted successfully' } },})
     @Delete(':id')
-    remove(@CurrentUser() user: Customer,@Param('id') addressId: number,@Query('lang') lang=Language.en) 
+    remove(@CurrentUser() user: Customer,@Param('id') addressId: number,@Req() req) 
     {
-      return this.recentAddressService.removeRecentAddress(addressId,user.id,lang);
+      return this.recentAddressService.removeRecentAddress(addressId,user.id,req.lang);
     }
 }

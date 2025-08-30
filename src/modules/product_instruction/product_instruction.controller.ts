@@ -13,10 +13,8 @@ import { UpdateProductInstructionDto } from './dto/update-product-instruction.st
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { Store } from '../store/entities/store.entity';
 import { CreateProductInstructionDto } from './dto/create-product-instruction.dto';
-import { Language } from 'src/common/enums/language';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 
-@ApiQuery({ name: 'lang', enum: Language, required: false, example: 'ar' })
 @Controller('product-instruction')
 export class ProductInstructionController {
   constructor(

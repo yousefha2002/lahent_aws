@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { OwnerService } from './owner.service';
 import { UpdateOwnerDto } from './dto/updateOwner.dto';
 import { OwnerGuard } from 'src/common/guards/owner.guard';
@@ -9,7 +9,6 @@ import { OwnerDto } from './dto/owner.dto';
 import { Language } from 'src/common/enums/language';
 import { ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 
-@ApiQuery({ name: 'lang', enum: Language, required: false, example: 'ar' })
 @Controller('owner')
 export class OwnerController {
   constructor(private readonly ownerService: OwnerService) {}
@@ -25,10 +24,10 @@ export class OwnerController {
   @Serilaize(OwnerDto)
   @UseGuards(OwnerGuard)
   @Put()
-  async updateOwner(@Body() body: UpdateOwnerDto,@CurrentUser() user:Owner,@Query('lang') lang=Language.en
+  async updateOwner(@Body() body: UpdateOwnerDto,@CurrentUser() user:Owner,@Req() req
   ) 
   {
-    return this.ownerService.updateOwnerProfile(user.id,body,lang);
+    return this.ownerService.updateOwnerProfile(user.id,body,req.lang);
   }
 
   @ApiOperation({ summary: 'Refresh access token using refresh token' })

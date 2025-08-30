@@ -1,4 +1,4 @@
-import {Body,Controller,Delete,Get,Param,Post,Put,Query,UseGuards,} from '@nestjs/common';
+import {Body,Controller,Delete,Get,Param,Post,Put,Query,Req,UseGuards,} from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { StoreOrOwnerGuard } from 'src/common/guards/StoreOrOwner.guard';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
@@ -11,7 +11,6 @@ import { Language } from 'src/common/enums/language';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 
-@ApiQuery({ name: 'lang', enum: Language, required: false, example: 'ar' })
 @Controller('category')
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
@@ -23,9 +22,8 @@ export class CategoryController {
   @ApiQuery({ name: 'storeId', required: false, example: '1' })
   @ApiResponse({status: 201,description: 'category created successfully',schema: {example: {message: 'Created successfully'}}})
   @UseGuards(StoreOrOwnerGuard, ApprovedStoreGuard)
-  createCategory(@CurrentUser() store: Store, @Body() body: CreateCategoryDto,@Query('lang') lang=Language.en) {
-    console.log(body)
-    return this.categoryService.create(store.id, body,lang);
+  createCategory(@CurrentUser() store: Store, @Body() body: CreateCategoryDto,@Req() req) {
+    return this.categoryService.create(store.id, body,req.lang);
   }
 
   @Put(':categoryId')
@@ -40,9 +38,9 @@ export class CategoryController {
     @Body() body: UpdateCategoryDto,
     @Param('categoryId') categoryId: string,
     @CurrentUser() store: Store,
-    @Query('lang') lang=Language.en
+    @Req() req
   ) {
-    return this.categoryService.update(+categoryId,store.id,body,lang=Language.ar);
+    return this.categoryService.update(+categoryId,store.id,body,req.lang);
   }
 
   @Get('/:categoryId')
@@ -50,8 +48,8 @@ export class CategoryController {
   @ApiOperation({ summary: 'Get category by ID' })
   @ApiParam({ name: 'categoryId', example: 1 })
   @ApiResponse({ status: 200, description: 'Category details', type: CategoryDto })
-  getOne(@Param('categoryId') categoryId: string,@Query('lang') lang=Language.en) {
-    return this.categoryService.categoryById(categoryId,lang);
+  getOne(@Param('categoryId') categoryId: string,@Req() req) {
+    return this.categoryService.categoryById(categoryId,req.lang);
   }
 
   @Delete('/:categoryId')
@@ -64,9 +62,9 @@ export class CategoryController {
   deleteOne(
     @Param('categoryId') categoryId: string,
     @CurrentUser() store: Store,
-    @Query('lang') lang=Language.en
+    @Req() req
   ) {
-    return this.categoryService.deleteCategory(+categoryId, store.id,lang);
+    return this.categoryService.deleteCategory(+categoryId, store.id,req.lang);
   }
 
   @Get('/all/:storeId')
@@ -74,7 +72,7 @@ export class CategoryController {
   @ApiParam({ name: 'storeId', example: 1 })
   @ApiResponse({status: 200,description: 'List of categories',type: [CategoryDto]})
   @Serilaize(CategoryDto)
-  getCategoriesWithProductCount(@Param('storeId') storeId: string,@Query('lang') lang=Language.ar) {
-    return this.categoryService.getCategoriesWithProductCount(+storeId,lang);
+  getCategoriesWithProductCount(@Param('storeId') storeId: string,@Req() req) {
+    return this.categoryService.getCategoriesWithProductCount(+storeId,req.lang);
   }
 }

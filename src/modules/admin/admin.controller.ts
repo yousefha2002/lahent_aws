@@ -5,6 +5,7 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { AdminService } from './admin.service';
@@ -16,7 +17,6 @@ import { AdminPasswordDto } from './dto/admin-password.dto';
 import { Language } from 'src/common/enums/language';
 import { ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 
-@ApiQuery({ name: 'lang', enum: Language, required: false, example: 'ar' })
 @Controller('admin')
 export class AdminController {
   constructor(
@@ -25,7 +25,6 @@ export class AdminController {
 
   @ApiOperation({ summary: 'Signup a new admin' })
   @ApiBody({ type: authAdminDto })
-  @ApiQuery({ name: 'lang', enum: Language, required: false })
   @ApiResponse({
     status: 201,
     schema: {
@@ -36,9 +35,9 @@ export class AdminController {
     },
   })
   @Post('signup')
-  async signupAdmin(@Body() body: authAdminDto,@Query('lang') lang=Language.ar) {
+  async signupAdmin(@Body() body: authAdminDto, @Req() req) {
     const { email, password } = body;
-    return this.adminService.signup(email, password,lang);
+    return this.adminService.signup(email, password,req.lang);
   }
 
   @Post('login')
@@ -54,9 +53,9 @@ export class AdminController {
       },
     },
   })
-  async loginAdmin(@Body() body: authAdminDto,@Query('lang') lang=Language.ar) {
+  async loginAdmin(@Body() body: authAdminDto, @Req() req) {
     const { email, password } = body;
-    return this.adminService.login(email, password,lang);
+    return this.adminService.login(email, password,req.lang);
   }
 
   @Serilaize(AdminDto)
@@ -66,8 +65,8 @@ export class AdminController {
   @ApiSecurity('access-token')
   @ApiBody({ type: AdminEmailDto })
   @ApiResponse({status: 200,type: AdminDto})
-  changeAdminEmail(@Body() body: AdminEmailDto,@Query('lang') lang=Language.ar) {
-    return this.adminService.changeEmail(body.newEmail,lang);
+  changeAdminEmail(@Body() body: AdminEmailDto, @Req() req) {
+    return this.adminService.changeEmail(body.newEmail,req.lang);
   }
 
   @Serilaize(AdminDto)
@@ -77,7 +76,7 @@ export class AdminController {
   @ApiBody({ type: AdminPasswordDto })
   @ApiResponse({status: 200,type: AdminDto,})
   @UseGuards(AdminGuard)
-  changeAdminPassword(@Body() body: AdminPasswordDto,@Query('lang') lang=Language.ar) {
-    return this.adminService.changePassword(body,lang);
+  changeAdminPassword(@Body() body: AdminPasswordDto, @Req() req) {
+    return this.adminService.changePassword(body,req.lang);
   }
 }

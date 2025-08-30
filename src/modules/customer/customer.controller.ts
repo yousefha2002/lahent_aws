@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Put, Query, UploadedFile, UseFilters, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Post, Put, Query, Req, UploadedFile, UseFilters, UseGuards, UseInterceptors } from '@nestjs/common';
 import { CustomerService } from './customer.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { multerOptions } from 'src/multer/multer.options';
@@ -12,7 +12,6 @@ import { CustomerDto } from './dto/customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 
-@ApiQuery({ name: 'lang', enum: Language, required: false, example: 'ar' })
 @Controller('customer')
 export class CustomerController {
   constructor(private readonly customerService: CustomerService) {}
@@ -53,9 +52,9 @@ export class CustomerController {
   @Put()
   @UseInterceptors(FileInterceptor('image', multerOptions))
   @UseFilters(MulterExceptionFilter)
-  updateCustomer(@CurrentUser() user:Customer,@Body() body:UpdateCustomerDto,@Query('lang') lang=Language.ar,@UploadedFile() file?: Express.Multer.File)
+  updateCustomer(@CurrentUser() user:Customer,@Body() body:UpdateCustomerDto,@Req() req,@UploadedFile() file?: Express.Multer.File)
   {
-    return this.customerService.updateProfile(user.id,body,lang,file)
+    return this.customerService.updateProfile(user.id,body,req.lang,file)
   }
 
   @ApiOperation({ summary: 'Refresh access token using refresh token' })

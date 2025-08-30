@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Query } from '@nestjs/common';
+import { Body, Controller, Post, Query, Req } from '@nestjs/common';
 import { OtpCodeService } from './otp_code.service';
 import { SendOtpDto } from './dto/send_otp.dto';
 import { VerifyOtpDto } from './dto/verify_opt.dto';
@@ -8,7 +8,6 @@ import { CustomerOtpSendToken, CustomerOtpVerifyToken } from './dto/customer-otp
 import { ApiBody, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { OwnerOtpSendToken, OwnerOtpVerifyToken } from './dto/owner-otp.dto';
 
-@ApiQuery({ name: 'lang', enum: Language, required: false, example: 'en' })
 @Controller('otp-code')
 export class OtpCodeController {
   constructor(private readonly otpCodeService: OtpCodeService) {}
@@ -22,8 +21,8 @@ export class OtpCodeController {
     type: OwnerOtpVerifyToken
   })
   @Post('verify/owner')
-  async verifyOtpOwner(@Body() body: VerifyOtpDto, @Query('lang') lang = Language.en) {
-    return this.otpCodeService.verifyOtp(body.phone, 'owner', body.code, lang);
+  async verifyOtpOwner(@Body() body: VerifyOtpDto, @Req() req) {
+    return this.otpCodeService.verifyOtp(body.phone, 'owner', body.code, req.lang);
   }
 
   @ApiOperation({ summary: 'Verify OTP for customer' })
@@ -35,8 +34,8 @@ export class OtpCodeController {
     type: CustomerOtpVerifyToken
   })
   @Post('verify/customer')
-  async verifyOtpCustomer(@Body() body: VerifyOtpDto, @Query('lang') lang = Language.en) {
-    return this.otpCodeService.verifyOtp(body.phone, 'customer', body.code, lang);
+  async verifyOtpCustomer(@Body() body: VerifyOtpDto, @Req() req) {
+    return this.otpCodeService.verifyOtp(body.phone, 'customer', body.code, req.lang);
   }
 
   @ApiOperation({ summary: 'Send OTP to owner' })
@@ -48,8 +47,8 @@ export class OtpCodeController {
   })
   @Serilaize(OwnerOtpSendToken)
   @Post('send/owner')
-  sendOtpForOwner(@Body() body: SendOtpDto,@Query('lang') lang=Language.en) {
-      return this.otpCodeService.sendOtp(body, 'owner', lang);
+  sendOtpForOwner(@Body() body: SendOtpDto,@Req() req) {
+      return this.otpCodeService.sendOtp(body, 'owner', req.lang);
   }
 
   @ApiOperation({ summary: 'Send OTP to customer' })
@@ -60,7 +59,7 @@ export class OtpCodeController {
     type: CustomerOtpSendToken,
   })
   @Post('send/customer')
-  sendOtpForCustomer(@Body() body: SendOtpDto,@Query('lang') lang=Language.en) {
-      return this.otpCodeService.sendOtp(body, 'customer', lang);
+  sendOtpForCustomer(@Body() body: SendOtpDto,@Req() req) {
+      return this.otpCodeService.sendOtp(body, 'customer', req.lang);
   }
 }

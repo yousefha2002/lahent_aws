@@ -21,9 +21,7 @@ import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { Store } from '../store/entities/store.entity';
 import { UpdateProductVariantDto } from './dto/update-variant.dto';
 import { ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
-import { Language } from 'src/common/enums/language';
 
-@ApiQuery({ name: 'lang', enum: Language, required: false, example: 'ar' })
 @Controller('product-variant')
 export class ProuductVariantController {
   constructor(

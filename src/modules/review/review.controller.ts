@@ -19,9 +19,7 @@ import { Store } from '../store/entities/store.entity';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { PaginatedReviewDto } from './dto/review.dto';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
-import { Language } from 'src/common/enums/language';
 
-@ApiQuery({ name: 'lang', enum: Language, required: false, example: 'ar' })
 @Controller('review')
 export class ReviewController {
   constructor(private readonly reviewService: ReviewService) {}

@@ -6,6 +6,7 @@ import {
   Post,
   Put,
   Query,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { CarBrandService } from './car_brand.service';
@@ -24,7 +25,6 @@ import {
   ApiSecurity,
 } from '@nestjs/swagger';
 
-@ApiQuery({ name: 'lang', enum: Language, required: false, example: 'ar' })
 @Controller('car-brand')
 export class CarBrandController {
   constructor(private readonly carBrandService: CarBrandService) {}
@@ -51,8 +51,8 @@ export class CarBrandController {
   })
   @UseGuards(AdminGuard)
   @Post()
-  create(@Body() dto: CreateCarBrandDto, @Query('lang') lang = Language.en) {
-    return this.carBrandService.create(dto, lang);
+  create(@Body() dto: CreateCarBrandDto, @Req() req) {
+    return this.carBrandService.create(dto, req.lang);
   }
 
   @ApiOperation({ summary: 'update a car brand by ID (admin only)' })
@@ -85,7 +85,6 @@ export class CarBrandController {
   update(
     @Param('id') id: number,
     @Body() dto: UpdateCarBrandDto,
-    @Query('lang') lang = Language.en,
   ) {
     return this.carBrandService.update(id, dto);
   }
@@ -99,8 +98,8 @@ export class CarBrandController {
   })
   @Get()
   @Serilaize(CarBrandDto)
-  getAll() {
-    return this.carBrandService.getAll();
+  getAll(@Req() req) {
+    return this.carBrandService.getAll(req.lang);
   }
 
   @ApiOperation({ summary: 'Get a car brand by ID with its languages' })
@@ -112,7 +111,7 @@ export class CarBrandController {
   })
   @Get(':id')
   @Serilaize(CarBrandDto)
-  getOne(@Param('id') id: number, @Query('lang') lang = Language.en) {
-    return this.carBrandService.getOneOrFail(id, lang);
+  getOne(@Param('id') id: number, @Req() req) {
+    return this.carBrandService.getOneOrFail(id, req.lang);
   }
 }

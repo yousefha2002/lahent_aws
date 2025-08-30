@@ -49,9 +49,9 @@ export class SimpleStoreDto {
     @Transform(({ obj }) => obj.numberOfRates > 0 ? obj.rate / obj.numberOfRates : 0)
     averageRating: number;
 
-    @ApiProperty({ example: '10' })
+    @ApiProperty({ example: 10 })
     @Expose()
-    numberOfRates: string;
+    numberOfRates: number;
 }
 
 export class StoreWithTokenDto {

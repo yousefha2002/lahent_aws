@@ -14,9 +14,7 @@ import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { Store } from '../store/entities/store.entity';
 import { CreateProductExtraDto } from './dto/create-product-extra.dto';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
-import { Language } from 'src/common/enums/language';
 
-@ApiQuery({ name: 'lang', enum: Language, required: false, example: 'ar' })
 @Controller('product-extra')
 export class ProductExtraController {
   constructor(private readonly productExtraService: ProductExtraService) {}

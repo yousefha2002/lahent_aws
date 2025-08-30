@@ -6,6 +6,7 @@ import {
   Post,
   Put,
   Query,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { OfferService } from './offer.service';
@@ -49,9 +50,9 @@ export class OfferController {
   async changeOfferActiveStatus(
     @Param('offerId') offerId: string,
     @Body() body: ChangeOfferActiveDto,
-    @Query('lang') lang=Language.en
+    @Req() req
   ) {
-    return this.offerService.changeOfferActiveStatus(+offerId, body,lang);
+    return this.offerService.changeOfferActiveStatus(+offerId, body,req.lang);
   }
 
   @Serilaize(PaginatedOfferResponseDto)
@@ -61,9 +62,9 @@ export class OfferController {
   @ApiQuery({ name: 'storeId', required: false, type: Number, example: 5 })
   @ApiResponse({status: 200,description: 'Paginated list of active offers',type: PaginatedOfferResponseDto})
   @Get('active/all')
-  getActiveOffersWithStoreDetails(@Query('page') page=1,@Query('limit') limit=1,@Query('storeId') storeId?: number,@Query('lang') lang=Language.ar,)
+  getActiveOffersWithStoreDetails(@Query('page') page=1,@Query('limit') limit=1,@Req() req,@Query('storeId') storeId?: number)
   {
-    return this.offerService.getActiveOffersWithStoreDetails(+page,+limit,lang,storeId)
+    return this.offerService.getActiveOffersWithStoreDetails(+page,+limit,req.lang,storeId)
   }
 
   @Serilaize(PaginatedOfferResponseDto)
@@ -76,8 +77,8 @@ export class OfferController {
   @ApiQuery({ name: 'type', required: false, type: String, example: 'DISCOUNT_AMOUNT' })
   @ApiQuery({ name: 'storeId', required: false, type: Number, example: 5 })
   @ApiResponse({status: 200,description: 'Paginated list of offers for the store',type: PaginatedOfferResponseDto})
-  getAllOffersForStore(@CurrentUser() store:Store,@Query('page') page=1,@Query('limit') limit=10,@Query('type') type?: string,@Query('lang') lang=Language.ar)
+  getAllOffersForStore(@CurrentUser() store:Store,@Query('page') page=1,@Query('limit') limit=10,@Req() req,@Query('type') type?: string)
   {
-    return this.offerService.getAllOffersForStore(store.id,+page,+limit,lang,type)
+    return this.offerService.getAllOffersForStore(store.id,+page,+limit,req.lang,type)
   }
 }

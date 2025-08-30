@@ -8,6 +8,7 @@ import {
   Post,
   Put,
   Query,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { CartService } from './cart.service';
@@ -23,7 +24,6 @@ import { Language } from 'src/common/enums/language';
 import { CompletedProfileGuard } from 'src/common/guards/completed-profile.guard';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 
-@ApiQuery({ name: 'lang', enum: Language, required: false, example: 'ar' })
 @Controller('cart')
 export class CartController {
   constructor(private readonly cartService: CartService) {}
@@ -32,7 +32,6 @@ export class CartController {
   @ApiOperation({ summary: 'Add product to customer cart' })
   @ApiSecurity('access-token')
   @ApiBody({ type: CreateCartProductDto })
-  @ApiQuery({ name: 'lang', enum: Language, required: false, example: 'en' })
   @ApiResponse({
     status: 201,
     description: 'Product successfully added to cart',
@@ -46,9 +45,9 @@ export class CartController {
   addProductForCart(
     @CurrentUser() customer: Customer,
     @Body() body: CreateCartProductDto,
-    @Query('lang') lang: Language = Language.en
+    @Req() req
   ) {
-    return this.cartService.createProductCart(body, customer.id,lang);
+    return this.cartService.createProductCart(body, customer.id,req.lang);
   }
 
   @Put('update-product/:cartItemId')
@@ -56,7 +55,6 @@ export class CartController {
   @ApiOperation({ summary: 'Update a product in the customer cart' })
   @ApiSecurity('access-token')
   @ApiParam({ name: 'cartItemId', type: Number, description: 'ID of the cart item', example: 10 })
-  @ApiQuery({ name: 'lang', enum: Language, required: false, example: 'en' })
   @ApiBody({ type: CreateCartProductDto })
   @ApiResponse({
     status: 200,
@@ -67,13 +65,13 @@ export class CartController {
     @CurrentUser() customer: Customer,
     @Body() body: CreateCartProductDto,
     @Param('cartItemId') cartItemId: string,
-    @Query('lang') lang: Language = Language.en
+    @Req() req
   ) {
     return this.cartService.updateProductCartItem(
       +cartItemId,
       body,
       customer.id,
-      lang
+      req.lang
     );
   }
 
@@ -90,9 +88,9 @@ export class CartController {
   removeProductForCart(
     @CurrentUser() customer: Customer,
     @Param('cartItemId') cartItemId: string,
-    @Query('lang') lang: Language = Language.ar
+    @Req() req
   ) {
-    return this.cartService.deleteProductFromCart(+cartItemId, customer.id,lang);
+    return this.cartService.deleteProductFromCart(+cartItemId, customer.id,req.lang);
   }
 
   @Put('update-product-qty/:cartItemId')
@@ -110,13 +108,13 @@ export class CartController {
     @CurrentUser() customer: Customer,
     @Param('cartItemId') cartItemId: string,
     @Body() dto: UpdateCartProductQuantityDto,
-    @Query('lang') lang: Language = Language.ar
+    @Req() req
   ) {
     return this.cartService.updateProductQuantity(
       +cartItemId,
       customer.id,
       dto,
-      lang
+      req.lang
     );
   }
 
@@ -134,9 +132,9 @@ export class CartController {
   getCartItemsWithOffers(
     @CurrentUser() user: Customer,
     @Param('storeId', ParseIntPipe) storeId: number,
-    @Query('lang') lang: Language = Language.ar
+    @Req() req
   ) {
-    return this.cartService.getCartItemsWithOffers(storeId, user.id,lang);
+    return this.cartService.getCartItemsWithOffers(storeId, user.id,req.lang);
   }
 
   @Serilaize(CartWithStoreDto)

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Query, UploadedFile, UseFilters, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Post, Query, Req, UploadedFile, UseFilters, UseGuards, UseInterceptors } from '@nestjs/common';
 import { AvatarService } from './avatar.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { MulterExceptionFilter } from 'src/multer/multer.exception.filter';
@@ -9,7 +9,6 @@ import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { AvatarDto } from './dto/avatar.dto';
 import { ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 
-@ApiQuery({ name: 'lang', enum: Language, required: false, example: 'ar' })
 @Controller('avatar')
 export class AvatarController {
   constructor(private readonly avatarService: AvatarService) {}
@@ -49,8 +48,8 @@ export class AvatarController {
   @Post()
   @UseInterceptors(FileInterceptor('image', multerOptions))
   @UseFilters(MulterExceptionFilter)
-  createAvatar(@Query('lang') lang=Language.ar,@UploadedFile() file?: Express.Multer.File)
+  createAvatar( @Req() req,@UploadedFile() file?: Express.Multer.File)
   {
-    return this.avatarService.create(lang,file)
+    return this.avatarService.create(req.lang,file)
   }
 }

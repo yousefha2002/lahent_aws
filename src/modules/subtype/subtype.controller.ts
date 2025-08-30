@@ -7,6 +7,7 @@ import {
   Post,
   Put,
   Query,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { SubtypeService } from './subtype.service';
@@ -20,12 +21,10 @@ import {
   ApiBody,
   ApiOperation,
   ApiParam,
-  ApiQuery,
   ApiResponse,
   ApiSecurity,
 } from '@nestjs/swagger';
 
-@ApiQuery({ name: 'lang', enum: Language, required: false, example: 'ar' })
 @Controller('subtype')
 export class SubtypeController {
   constructor(private readonly subtypeService: SubtypeService) {}
@@ -123,8 +122,8 @@ export class SubtypeController {
   @Serilaize(SubTypeDto)
   fetchAllByTypeId(
     @Param('typeId') typeId: string,
-    @Query('lang') lang: Language = Language.en,
+    @Req() req,
   ) {
-    return this.subtypeService.getAllSubTypesByTypeId(+typeId, lang);
+    return this.subtypeService.getAllSubTypesByTypeId(+typeId, req.lang);
   }
 }

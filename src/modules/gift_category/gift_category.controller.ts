@@ -7,6 +7,7 @@ import {
   Post,
   Put,
   Query,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { GiftCategoryService } from './gift_category.service';
@@ -27,7 +28,6 @@ import {
   ApiSecurity,
 } from '@nestjs/swagger';
 
-@ApiQuery({ name: 'lang', enum: Language, required: false, example: 'ar' })
 @Controller('gift-category')
 export class GiftCategoryController {
   constructor(private readonly giftCategoryService: GiftCategoryService) {}
@@ -63,9 +63,9 @@ export class GiftCategoryController {
   @Post()
   async create(
     @Body() body: CreateGiftCategoryDto,
-    @Query('lang') lang = Language.en,
+    @Req() req,
   ) {
-    return this.giftCategoryService.create(body, lang);
+    return this.giftCategoryService.create(body, req.lang);
   }
 
   @ApiOperation({ summary: 'update a gift category by ID (admin only)' })
@@ -105,9 +105,9 @@ export class GiftCategoryController {
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() body: CreateGiftCategoryDto,
-    @Query('lang') lang = Language.en,
+    @Req() req,
   ) {
-    return this.giftCategoryService.update(id, body, lang);
+    return this.giftCategoryService.update(id, body, req.lang);
   }
 
   @ApiOperation({ summary: 'Get all Gift category and its languages' })
@@ -119,7 +119,7 @@ export class GiftCategoryController {
   })
   @Serilaize(GiftCategoryDto)
   @Get('with-templates')
-  async findAllWithTemplates(@Query('lang') lang = Language.en) {
-    return this.giftCategoryService.findAllWithTemplates(lang);
+  async findAllWithTemplates(@Req() req) {
+    return this.giftCategoryService.findAllWithTemplates(req.lang);
   }
 }

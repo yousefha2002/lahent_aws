@@ -7,6 +7,7 @@ import {
   Post,
   Put,
   Query,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { CarService } from './car.service';
@@ -21,7 +22,6 @@ import { Language } from 'src/common/enums/language';
 import { CompletedProfileGuard } from 'src/common/guards/completed-profile.guard';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 
-@ApiQuery({ name: 'lang', enum: Language, required: false, example: 'ar' })
 @Controller('car')
 export class CarController {
   constructor(private readonly carService: CarService) {}
@@ -44,9 +44,9 @@ export class CarController {
   create(
     @Body() dto: CreateCarDto,
     @CurrentUser() user: Customer,
-    @Query('lang') lang = Language.en,
+    @Req() req,
   ) {
-    return this.carService.create(user.id, dto, lang);
+    return this.carService.create(user.id, dto, req.lang);
   }
 
   @Serilaize(CustomerCarListDto)
@@ -57,9 +57,9 @@ export class CarController {
   @ApiResponse({status: 200,description: 'List of saved cars for the customer',type: CustomerCarListDto})
   getAllCustomerCars(
     @CurrentUser() user: Customer,
-    @Query('lang') lang: Language.en,
+    @Req() req,
   ) {
-    return this.carService.getAllCustomerCars(user.id, lang);
+    return this.carService.getAllCustomerCars(user.id, req.lang);
   }
 
   @Serilaize(CustomerCarListDto)
@@ -72,9 +72,9 @@ export class CarController {
   getCustomerCar(
     @CurrentUser() user: Customer,
     @Param('carId') carId: number,
-    @Query('lang') lang: Language.en,
+    @Req() req,
   ) {
-    return this.carService.getCustomerCar(user.id, carId, lang);
+    return this.carService.getCustomerCar(user.id, carId, req.lang);
   }
 
   @UseGuards(CustomerGuard)
@@ -87,9 +87,9 @@ export class CarController {
   deleteCustomerCar(
     @CurrentUser() user: Customer,
     @Param('carId') carId: number,
-    @Query('lang') lang = Language.en,
+    @Req() req,
   ) {
-    return this.carService.delete(user.id, carId, lang);
+    return this.carService.delete(user.id, carId, req.lang);
   }
 
   @UseGuards(CustomerGuard)
@@ -103,8 +103,8 @@ export class CarController {
     @Body() dto: UpdateCarDto,
     @CurrentUser() user: Customer,
     @Param('carId') carId: number,
-    @Query('lang') lang = Language.en,
+    @Req() req,
   ) {
-    return this.carService.update(user.id, carId, dto, lang);
+    return this.carService.update(user.id, carId, dto, req.lang);
   }
 }

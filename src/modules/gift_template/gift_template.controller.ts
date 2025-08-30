@@ -7,6 +7,7 @@ import {
   Post,
   Put,
   Query,
+  Req,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -31,7 +32,6 @@ import {
   ApiSecurity,
 } from '@nestjs/swagger';
 
-@ApiQuery({ name: 'lang', enum: Language, required: false, example: 'ar' })
 @Controller('gift-template')
 export class GiftTemplateController {
   constructor(private readonly giftTemplateService: GiftTemplateService) {}
@@ -64,9 +64,9 @@ export class GiftTemplateController {
   async create(
     @UploadedFile() file: Express.Multer.File,
     @Body() body: CreateGiftTemplateDto,
-    @Query('lang') lang = Language.en,
+    @Req() req,
   ) {
-    return this.giftTemplateService.create(body, file, lang);
+    return this.giftTemplateService.create(body, file, req.lang);
   }
 
   @ApiOperation({ summary: 'Update a Gift Template by ID (admin only)' })
@@ -102,11 +102,11 @@ export class GiftTemplateController {
   @UseInterceptors(FileInterceptor('image'))
   async update(
     @Param('id', ParseIntPipe) id: number,
-    @Query('lang') lang = Language.en,
+    @Req() req,
     @Body() body: CreateGiftTemplateDto,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    return this.giftTemplateService.update(body, id, lang, file);
+    return this.giftTemplateService.update(body, id, req.lang, file);
   }
 
   @ApiQuery({

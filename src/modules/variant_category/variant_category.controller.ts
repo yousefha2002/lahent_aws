@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { VariantCategoryService } from './variant_category.service';
 import { AdminGuard } from 'src/common/guards/admin.guard';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
@@ -7,7 +7,6 @@ import { CreateVariantCategoryDto } from './dto/create_variant_category.dto';
 import { Language } from 'src/common/enums/language';
 import { ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 
-@ApiQuery({ name: 'lang', enum: Language, required: false, example: 'ar' })
 @Controller('variant-category')
 export class VariantCategoryController {
   constructor(private readonly variantCategoryService: VariantCategoryService) {}
@@ -36,8 +35,8 @@ export class VariantCategoryController {
     description: 'List of all variant categories',
     type: [VariantCategoryDto],
   })
-  getAll(@Query('lang') lang=Language.ar)
+  getAll(@Req() req)
   {
-    return this.variantCategoryService.getAll(lang)
+    return this.variantCategoryService.getAll(req.lang)
   }
 }

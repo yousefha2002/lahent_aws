@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { GiftService } from './gift.service';
 import { CreateGiftDto } from './dto/create-gift.dto';
 import { CustomerGuard } from 'src/common/guards/customer.guard';
@@ -14,7 +14,6 @@ import {
   ApiSecurity,
 } from '@nestjs/swagger';
 
-@ApiQuery({ name: 'lang', enum: Language, required: false, example: 'ar' })
 @Controller('gift')
 export class GiftController {
   constructor(private readonly giftService: GiftService) {}
@@ -47,8 +46,8 @@ export class GiftController {
   CreateGiftDto(
     @Body() body: CreateGiftDto,
     @CurrentUser() sender: Customer,
-    @Query('lang') lang = Language.en,
+    @Req() req,
   ) {
-    return this.giftService.createGift(sender.id, body, lang);
+    return this.giftService.createGift(sender.id, body, req.lang);
   }
 }

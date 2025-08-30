@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { DatabaseModule } from './database/database.module';
 import { JwtModule } from '@nestjs/jwt';
 import { CartModule } from './modules/cart/cart.module';
@@ -55,6 +55,7 @@ import { EdfapayModule } from './modules/edfapay/edfapay.module';
 import { VariantCategoryModule } from './modules/variant_category/variant_category.module';
 import { ProductCategoryVariantModule } from './modules/product_category_variant/product_category_variant.module';
 import { ConfigModule } from '@nestjs/config';
+import { LanguageMiddleware } from './common/middlewares/language.middleware';
 
 @Module({
   imports: [
@@ -128,4 +129,8 @@ import { ConfigModule } from '@nestjs/config';
   ],
   providers: [MulterConfigService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LanguageMiddleware).forRoutes('*');
+  }
+}

@@ -8,6 +8,7 @@ import {
   ParseIntPipe,
   Query,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { AdminGuard } from 'src/common/guards/admin.guard';
 import { CarTypeService } from './car_type.service';
@@ -25,7 +26,6 @@ import {
   ApiSecurity,
 } from '@nestjs/swagger';
 
-@ApiQuery({ name: 'lang', enum: Language, required: false, example: 'ar' })
 @Controller('car-type')
 export class CarTypeController {
   constructor(private readonly carTypeService: CarTypeService) {}
@@ -54,9 +54,9 @@ export class CarTypeController {
   @Post()
   create(
     @Body() dto: CreateCarTypeDto,
-    @Query('lang') lang: Language = Language.en,
+    @Req() req,
   ) {
-    return this.carTypeService.create(dto, lang);
+    return this.carTypeService.create(dto, req.lang);
   }
 
   @ApiOperation({ summary: 'update a car type by ID (admin only)' })
@@ -89,9 +89,9 @@ export class CarTypeController {
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateCarTypeDto,
-    @Query('lang') lang: Language = Language.en,
+    @Req() req,
   ) {
-    return this.carTypeService.update(id, dto, lang);
+    return this.carTypeService.update(id, dto, req.lang);
   }
 
   @ApiOperation({ summary: 'Get all car types and its languages' })
@@ -103,8 +103,8 @@ export class CarTypeController {
   })
   @Get()
   @Serilaize(CarTypeDto)
-  getAll() {
-    return this.carTypeService.getAll();
+  getAll(@Req() req) {
+    return this.carTypeService.getAll(req.lang);
   }
 
   @ApiOperation({ summary: 'Get a car type by ID with its languages' })
@@ -118,8 +118,8 @@ export class CarTypeController {
   @Serilaize(CarTypeDto)
   getOne(
     @Param('id', ParseIntPipe) id: number,
-    @Query('lang') lang: Language = Language.en,
+    @Req() req,
   ) {
-    return this.carTypeService.getOneOrFail(id, lang);
+    return this.carTypeService.getOneOrFail(id, req.lang);
   }
 }

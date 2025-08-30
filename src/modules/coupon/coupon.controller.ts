@@ -6,6 +6,7 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { CouponService } from './coupon.service';
@@ -23,7 +24,6 @@ import { Language } from 'src/common/enums/language';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { CouponValidateDto } from './dto/coupon-validate.dto';
 
-@ApiQuery({ name: 'lang', enum: Language, required: false, example: 'ar' })
 @Controller('coupon')
 export class CouponController {
   constructor(private readonly couponService: CouponService) {}
@@ -35,8 +35,8 @@ export class CouponController {
   @ApiSecurity('access-token')
   @ApiBody({ type: CreateCouponDto })
   @ApiResponse({ status: 201, description: 'Created coupon', type: CouponDto })
-  create(@Body() dto: CreateCouponDto,@Query('lang') lang=Language.en) {
-    return this.couponService.createCoupon(dto,lang);
+  create(@Body() dto: CreateCouponDto,@Req() req) {
+    return this.couponService.createCoupon(dto,req.lang);
   }
 
   @UseGuards(StoreOrOwnerGuard, ApprovedStoreGuard)
@@ -47,8 +47,8 @@ export class CouponController {
   @ApiBody({ type: CreateCouponDto })
   @ApiQuery({ name: 'lang', required: false, enum: Language, example: 'en' })
   @ApiResponse({ status: 201, description: 'Created coupon', type: CouponDto })
-  createByStore(@Body() dto: CreateCouponDto, @CurrentUser() store: Store,@Query('lang') lang=Language.en) {
-    return this.couponService.createCoupon(dto,lang, store.id);
+  createByStore(@Body() dto: CreateCouponDto, @CurrentUser() store: Store,@Req() req) {
+    return this.couponService.createCoupon(dto,req.lang, store.id);
   }
 
   @Serilaize(CouponValidateDto)
@@ -56,9 +56,9 @@ export class CouponController {
   @ApiOperation({ summary: 'Validate a coupon code' })
   @ApiQuery({ name: 'code', required: true, description: 'Coupon code to validate', example: 'SUMMER2025' })
   @ApiResponse({ status: 200, description: 'Coupon validation result', type: CouponValidateDto })
-  validateCoupon(@Body() dto:ValidateCouponDTO,@Query('lang') lang=Language.en)
+  validateCoupon(@Body() dto:ValidateCouponDTO,@Req() req)
   {
-    return this.couponService.validateCoupon(dto.code,lang)
+    return this.couponService.validateCoupon(dto.code,req.lang)
   }
 
   @UseGuards(AdminGuard)
@@ -70,8 +70,8 @@ export class CouponController {
   @ApiBody({ type: UpdateCouponDto })
   @ApiResponse({ status: 200, description: 'Updated coupon', type: CouponDto })
   @ApiResponse({ status: 404, description: 'Coupon not found' })
-  update(@Param('id') id: number, @Body() dto: UpdateCouponDto,@Query('lang') lang=Language.en) {
-    return this.couponService.updateCoupon(id ,dto,lang);
+  update(@Param('id') id: number, @Body() dto: UpdateCouponDto,@Req() req) {
+    return this.couponService.updateCoupon(id ,dto,req.lang);
   }
 
   @UseGuards(StoreOrOwnerGuard, ApprovedStoreGuard)
@@ -86,8 +86,8 @@ export class CouponController {
     @Param('id') id: number,
     @Body() dto: UpdateCouponDto,
     @CurrentUser() store: Store,
-    @Query('lang') lang=Language.en
+    @Req() req
   ) {
-    return this.couponService.updateCoupon(id, dto,lang, store.id);
+    return this.couponService.updateCoupon(id, dto,req.lang, store.id);
   }
 }
