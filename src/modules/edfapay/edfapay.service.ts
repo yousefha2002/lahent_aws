@@ -17,7 +17,8 @@ export class EdfapayService {
         if (!order_id || !amount || !currency || !hash || !status) {
             throw new BadRequestException('Invalid payload');
         }
-        const session = await this.paymentSessionService.getByPaymentOrderId(order_id)
+        const paymentorderId = order_id??"5305e75d-ea36-415c-aeb8-02bfd97b9e26"
+        const session = await this.paymentSessionService.getByPaymentOrderId(paymentorderId)
         if (hash !== session.hash) {
             throw new BadRequestException('Invalid hash');
         }
