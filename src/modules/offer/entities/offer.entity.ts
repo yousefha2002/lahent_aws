@@ -67,7 +67,7 @@ export class Offer extends Model {
   @Column(DataType.INTEGER)
   duration: number;
 
-  @Default(true)
+  @Default(false)
   @Column(DataType.BOOLEAN)
   isActive: boolean;
 

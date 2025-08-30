@@ -86,6 +86,7 @@ export class TransactionService {
       order: [['createdAt', 'DESC']],
       limit,
       offset,
+      distinct: true,
       include: [
         { model: Order, include: [Store] },
         { model: Gift, include: [{ model: Customer, as: 'sender',include:[Avatar] }, { model: Customer, as: 'receiver',include:[Avatar] }] },

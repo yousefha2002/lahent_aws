@@ -99,15 +99,9 @@ export class OfferService {
   async changeOfferActiveStatus(
     offerId: number,
     dto: ChangeOfferActiveDto,
-    storeId: number,
     lang = Language.en,
   ) {
     const offer = await this.offerById(offerId, lang);
-    if (offer.storeId !== storeId) {
-      throw new BadRequestException(
-        this.i18n.translate('translation.offer.not_belong_to_store', { lang }),
-      );
-    }
     offer.isActive = dto.isActive;
     await offer.save();
     return { message: this.i18n.translate('translation.offer.active_status_updated', { lang }) };

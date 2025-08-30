@@ -39,6 +39,9 @@ export class OfferResponseDto extends SimpleOfferDto {
     @ApiProperty({ example: '2025-09-30T23:59:59Z', type: String, format: 'date-time' })
     @Expose() endDate: Date;
 
+    @ApiProperty({ example: true })
+    @Expose() isActive: boolean;
+
     @ApiProperty({ example: 'PRODUCT' })
     @Expose() target: string;
 

@@ -19,6 +19,7 @@ import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { PaginatedOfferResponseDto } from './dto/offer-response.dto';
 import { Language } from 'src/common/enums/language';
 import { ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
+import { AdminGuard } from 'src/common/guards/admin.guard';
 
 @ApiQuery({ name: 'lang', enum: Language, required: false, example: 'ar' })
 @Controller('offer')
@@ -43,16 +44,15 @@ export class OfferController {
     return this.offerService.createOffer(dto, store.id,lang);
   }
 
-  // @UseGuards(StoreOrOwnerGuard,ApprovedStoreGuard)
-  // @Put('/active-status/:offerId')
-  // async changeOfferActiveStatus(
-  //   @CurrentUser() store: Store,
-  //   @Param('offerId') offerId: string,
-  //   @Body() body: ChangeOfferActiveDto,
-  //   @Query('lang') lang=Language.en
-  // ) {
-  //   return this.offerService.changeOfferActiveStatus(+offerId, body, store.id,lang);
-  // }
+  @UseGuards(AdminGuard)
+  @Put('/active-status/:offerId')
+  async changeOfferActiveStatus(
+    @Param('offerId') offerId: string,
+    @Body() body: ChangeOfferActiveDto,
+    @Query('lang') lang=Language.en
+  ) {
+    return this.offerService.changeOfferActiveStatus(+offerId, body,lang);
+  }
 
   @Serilaize(PaginatedOfferResponseDto)
   @ApiOperation({ summary: 'Get all active offers with store details' })

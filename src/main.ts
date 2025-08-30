@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
+import * as bodyParser from 'body-parser';
 // import * as crypto from 'crypto';
 // (global as any).crypto = crypto;
 
@@ -30,6 +31,8 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
+  app.use(bodyParser.urlencoded({ extended: true }));
+  app.use(bodyParser.json()); 
   app.enableCors();
   app.useGlobalPipes(
     new ValidationPipe({
