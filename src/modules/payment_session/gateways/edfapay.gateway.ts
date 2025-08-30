@@ -7,17 +7,25 @@ import { v4 as uuidv4 } from 'uuid';
 
 
 export class EdFapayGateway implements PaymentGateway {
-    private apiUrl = "https://api.edfapay.com/payment/initiate";
-    private merchantId = "19f37151-a6fc-45b7-adcb-50f0202a99aa";
-    private secretKey = "31265726-6ce9-45c9-9e8d-e891a35d8c3d";
-
+    private apiUrl: string;
+    private merchantId: string;
+    private secretKey: string;
+    constructor() {
+        if (!process.env.EDFA_API_URL || !process.env.EDFA_MERCHANT_ID || !process.env.EDFA_SECRET_KEY) {
+            throw new Error('EDFAPAY environment variables are missing');
+        }
+        this.apiUrl = process.env.EDFA_API_URL;
+        this.merchantId = process.env.EDFA_MERCHANT_ID;
+        this.secretKey = process.env.EDFA_SECRET_KEY;
+    }
+    
     async createPayment(amount: number, currency: string, callbackUrl: string,customer:Customer,description?:string) 
     {
         const paymentOrderId = uuidv4();
         description = description || `Payment for order ${paymentOrderId}`;
 
         const formData = new NodeFormData()
-        const hash = generateHash(paymentOrderId,amount.toString(),currency,description,this.secretKey,);
+        const hash = generateHash(paymentOrderId,amount.toString(),currency,description,this.secretKey);
 
         formData.append('action', 'SALE');
         formData.append('edfa_merchant_id', this.merchantId);
@@ -46,7 +54,6 @@ export class EdFapayGateway implements PaymentGateway {
 
         const checkoutUrl = response.data.redirect_url;
 
-        return { checkoutUrl,paymentOrderId,hash};
+        return { checkoutUrl,paymentOrderId,description,currency};
     }
-
 }

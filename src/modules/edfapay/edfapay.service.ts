@@ -3,13 +3,16 @@ import { TransactionService } from './../transaction/transaction.service';
 import { PaymentSessionService } from './../payment_session/payment_session.service';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { GatewaySource } from 'src/common/enums/gateway-source';
+import { generateHash } from 'src/common/utils/generateHash';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class EdfapayService {
     constructor(
         private paymentSessionService:PaymentSessionService,
         private transactionService:TransactionService,
-        private orderPaymentService:OrderPaymentService
+        private orderPaymentService:OrderPaymentService,
+        private configService: ConfigService
     ){}
     async handleNotification(body:any)
     {
@@ -17,10 +20,20 @@ export class EdfapayService {
         if (!order_id || !amount || !currency || !hash || !status) {
             throw new BadRequestException('Invalid payload');
         }
-        const paymentorderId = order_id??"5305e75d-ea36-415c-aeb8-02bfd97b9e26"
-        const session = await this.paymentSessionService.getByPaymentOrderId(paymentorderId)
+        const session = await this.paymentSessionService.getByPaymentOrderId(order_id)
         if (session.status === 'success') {
             return { message: 'Payment already processed' };
+        }
+        const secretKey = this.configService.get<string>('EDFA_SECRET_KEY')!;
+        const generatedHash = generateHash(
+            session.paymentOrderId,
+            session.amount.toString(),
+            session.currency,
+            session.description,
+            secretKey
+        );
+        if (body.hash !== generatedHash) {
+            throw new BadRequestException('Invalid hash');
         }
         session.transactionId = trans_id;
         if (status === 'SETTLED' || status === 'SUCCESS')

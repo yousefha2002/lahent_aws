@@ -54,9 +54,11 @@ import { ReviewModule } from './modules/review/review.module';
 import { EdfapayModule } from './modules/edfapay/edfapay.module';
 import { VariantCategoryModule } from './modules/variant_category/variant_category.module';
 import { ProductCategoryVariantModule } from './modules/product_category_variant/product_category_variant.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
     I18nModule.forRoot({
       fallbackLanguage: 'en',
       loaderOptions: {

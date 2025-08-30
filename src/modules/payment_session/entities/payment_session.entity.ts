@@ -52,7 +52,10 @@ export class PaymentSession extends Model {
     amount: number;
 
     @Column(DataType.STRING)
-    hash:string
+    description:string
+
+    @Column(DataType.STRING)
+    currency:string
 
     @Column(DataType.STRING)
     provider: string; // مثلاً gateway: stripe, moyasar
