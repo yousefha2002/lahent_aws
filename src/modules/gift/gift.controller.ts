@@ -1,18 +1,13 @@
-import { Body, Controller, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { GiftService } from './gift.service';
 import { CreateGiftDto } from './dto/create-gift.dto';
 import { CustomerGuard } from 'src/common/guards/customer.guard';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { Customer } from '../customer/entities/customer.entity';
-import { Language } from 'src/common/enums/language';
 import { CompletedProfileGuard } from 'src/common/guards/completed-profile.guard';
-import {
-  ApiBody,
-  ApiOperation,
-  ApiQuery,
-  ApiResponse,
-  ApiSecurity,
-} from '@nestjs/swagger';
+import { I18n, I18nContext } from 'nestjs-i18n';
+import { getLang } from 'src/common/utils/get-lang.util';
+import { ApiBody, ApiOperation, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 
 @Controller('gift')
 export class GiftController {
@@ -24,8 +19,8 @@ export class GiftController {
     schema: {
       type: 'object',
       properties: {
-        receiverPhone: { type: 'string', example: '970593411165s' },
-        receiverName: { type: 'string', example: 'ali' },
+        receiverPhone: { type: 'string', example: '970593411165' },
+        receiverName: { type: 'string', example: 'Ali' },
         giftTemplateId: { type: 'number', example: 1 },
         amount: { type: 'number', example: 100 },
       },
@@ -34,20 +29,19 @@ export class GiftController {
   })
   @ApiResponse({
     status: 201,
-    description: 'Gift  sended successfully',
+    description: 'Gift sent successfully',
     schema: {
-      example: {
-        message: 'Sended successfully',
-      },
+      example: { message: 'Sent successfully' },
     },
   })
   @Post('create')
   @UseGuards(CustomerGuard, CompletedProfileGuard)
-  CreateGiftDto(
+  sendGift(
     @Body() body: CreateGiftDto,
     @CurrentUser() sender: Customer,
-    @Req() req,
+    @I18n() i18n: I18nContext
   ) {
-    return this.giftService.createGift(sender.id, body, req.lang);
+    const lang = getLang(i18n);
+    return this.giftService.createGift(sender.id, body, lang);
   }
 }

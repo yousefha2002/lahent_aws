@@ -1,27 +1,24 @@
-import { AdminEmailDto } from './dto/admin-email.dto';
-import {
+import { 
   Body,
   Controller,
   Patch,
   Post,
-  Query,
-  Req,
-  UseGuards,
+  UseGuards
 } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { authAdminDto } from './dto/auth-admin.dto';
 import { AdminDto } from './dto/admin.dto';
+import { AdminEmailDto } from './dto/admin-email.dto';
+import { AdminPasswordDto } from './dto/admin-password.dto';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { AdminGuard } from 'src/common/guards/admin.guard';
-import { AdminPasswordDto } from './dto/admin-password.dto';
-import { Language } from 'src/common/enums/language';
-import { ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiResponse, ApiSecurity } from '@nestjs/swagger';
+import { I18n, I18nContext } from 'nestjs-i18n';
+import { getLang } from 'src/common/utils/get-lang.util';
 
 @Controller('admin')
 export class AdminController {
-  constructor(
-    private readonly adminService: AdminService,
-  ) {}
+  constructor(private readonly adminService: AdminService) {}
 
   @ApiOperation({ summary: 'Signup a new admin' })
   @ApiBody({ type: authAdminDto })
@@ -35,15 +32,18 @@ export class AdminController {
     },
   })
   @Post('signup')
-  async signupAdmin(@Body() body: authAdminDto, @Req() req) {
+  async signupAdmin(
+    @Body() body: authAdminDto,
+    @I18n() i18n: I18nContext,
+  ) {
     const { email, password } = body;
-    return this.adminService.signup(email, password,req.lang);
+    const lang = getLang(i18n);
+    return this.adminService.signup(email, password, lang);
   }
 
   @Post('login')
   @ApiOperation({ summary: 'Login as admin' })
   @ApiBody({ type: authAdminDto })
-  @ApiQuery({ name: 'lang', enum: Language, required: false })
   @ApiResponse({
     status: 200,
     schema: {
@@ -53,9 +53,13 @@ export class AdminController {
       },
     },
   })
-  async loginAdmin(@Body() body: authAdminDto, @Req() req) {
+  async loginAdmin(
+    @Body() body: authAdminDto,
+    @I18n() i18n: I18nContext,
+  ) {
     const { email, password } = body;
-    return this.adminService.login(email, password,req.lang);
+    const lang = getLang(i18n);
+    return this.adminService.login(email, password, lang);
   }
 
   @Serilaize(AdminDto)
@@ -64,19 +68,27 @@ export class AdminController {
   @ApiOperation({ summary: 'Change admin email' })
   @ApiSecurity('access-token')
   @ApiBody({ type: AdminEmailDto })
-  @ApiResponse({status: 200,type: AdminDto})
-  changeAdminEmail(@Body() body: AdminEmailDto, @Req() req) {
-    return this.adminService.changeEmail(body.newEmail,req.lang);
+  @ApiResponse({ status: 200, type: AdminDto })
+  changeAdminEmail(
+    @Body() body: AdminEmailDto,
+    @I18n() i18n: I18nContext,
+  ) {
+    const lang = getLang(i18n);
+    return this.adminService.changeEmail(body.newEmail, lang);
   }
 
   @Serilaize(AdminDto)
   @Patch('password')
+  @UseGuards(AdminGuard)
   @ApiOperation({ summary: 'Change admin password' })
   @ApiSecurity('access-token')
   @ApiBody({ type: AdminPasswordDto })
-  @ApiResponse({status: 200,type: AdminDto,})
-  @UseGuards(AdminGuard)
-  changeAdminPassword(@Body() body: AdminPasswordDto, @Req() req) {
-    return this.adminService.changePassword(body,req.lang);
+  @ApiResponse({ status: 200, type: AdminDto })
+  changeAdminPassword(
+    @Body() body: AdminPasswordDto,
+    @I18n() i18n: I18nContext,
+  ) {
+    const lang = getLang(i18n);
+    return this.adminService.changePassword(body, lang);
   }
 }

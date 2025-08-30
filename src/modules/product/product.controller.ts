@@ -32,8 +32,9 @@ import { PaginatedProductWithOfferDto } from './dto/productwithoffer.dto';
 import { PaginatedSimpleProductDto } from './dto/product-for-store.dto';
 import { FullProductDetailsDto } from './dto/full-product-with-details.dto';
 import { ApprovedStoreGuard } from 'src/common/guards/approvedStore.guard';
-import { Language } from 'src/common/enums/language';
 import { ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
+import { I18n, I18nContext } from 'nestjs-i18n';
+import { getLang } from 'src/common/utils/get-lang.util';
 
 @Controller('product')
 export class ProductController {
@@ -66,7 +67,6 @@ export class ProductController {
       required: ['categoryId','basePrice','preparationTime','languages','images'],
     },
   })
-  @ApiQuery({ name: 'lang', enum: Language, required: false })
   @ApiResponse({
     status: 201,
     schema: {
@@ -83,7 +83,7 @@ export class ProductController {
     @CurrentUser() store: Store,
     @Body() body: CreateProductDto,
     @UploadedFiles() files: Express.Multer.File[],
-    @Req() req,
+    @I18n() i18n: I18nContext,
   ) {
     if (!files || files.length === 0) {
       throw new BadRequestException('يجب إرسال صورة واحدة على الأقل للمنتج');
@@ -91,7 +91,8 @@ export class ProductController {
     if (files.length > 5) {
       throw new BadRequestException('يمكن رفع 5 صور فقط للمنتج');
     }
-    return this.productService.createProduct(store.id, body, files, req.lang);
+    const lang = getLang(i18n);
+    return this.productService.createProduct(store.id, body, files, lang);
   }
 
   @Put('update/:productId')
@@ -144,7 +145,7 @@ export class ProductController {
   async updateProductWithImage(
     @Param('productId') productId: string,
     @Body() body: UpdateProductWithImageDto,
-    @Req() req,
+    @I18n() i18n: I18nContext,
     @UploadedFiles() files: { images?: Express.Multer.File[] },
   ) {
     let existingImages: ExistingImage[] = [];
@@ -154,10 +155,11 @@ export class ProductController {
       throw new BadRequestException(error.message);
     }
     const images = files.images || [];
+    const lang = getLang(i18n);
     return this.productService.updateProductWithImages(
       +productId,
       body,
-      req.lang,
+      lang,
       existingImages,
       images,
     );
@@ -174,14 +176,15 @@ export class ProductController {
   async getCustomerStoreProducts(
     @Param('storeId') storeId: number,
     @Query('categoryId') categoryId: number,
-    @Req() req,
+    @I18n() i18n: I18nContext,
     @Query('page') page = 1,
     @Query('limit') limit = 10,
     @Query('name') name: string,
   ) {
+    const lang = getLang(i18n);
     return this.productService.getCustomerStoreProducts(
       storeId,
-      req.lang,
+      lang,
       +page,
       +limit,
       categoryId,
@@ -202,11 +205,12 @@ export class ProductController {
     @Query('page') page = 1,
     @Query('limit') limit = 10,
     @Query('name') name: string,
-    @Req() req
+    @I18n() i18n: I18nContext
   ) {
+    const lang = getLang(i18n);
     return this.productService.getProductsByStore(
       store.id,
-      req.lang,
+      lang,
       +page,
       +limit,
       categoryId,
@@ -219,7 +223,8 @@ export class ProductController {
   @ApiOperation({ summary: 'Get full details of a product' })
   @ApiParam({ name: 'productId', example: 1 })
   @ApiResponse({ status: 200, type: FullProductDetailsDto })
-  getFullProductDetails(@Param('productId') productId: string,@Query('lang') lang=Language.ar,) {
+  getFullProductDetails(@Param('productId') productId: string,@I18n() i18n: I18nContext,) {
+    const lang = getLang(i18n);
     return this.productService.getFullProductDetails(+productId,lang);
   }
 
@@ -231,7 +236,8 @@ export class ProductController {
   @ApiQuery({ name: 'storeId', required: false, example: '1' })
   @ApiParam({ name: 'productId', example: 101 })
   @ApiResponse({ status: 200, type: FullProductDetailsDto })
-  getFullProductDetailsForStore(@Param('productId') productId: string,@Query('lang') lang=Language.ar,) {
+  getFullProductDetailsForStore(@Param('productId') productId: string, @I18n() i18n: I18nContext,) {
+    const lang = getLang(i18n);
     return this.productService.getFullProductDetails(+productId,lang,{ includeInactive: true });
   }
 
@@ -252,8 +258,9 @@ export class ProductController {
   changeProductActivity(
     @Param('productId') productId: string,
     @CurrentUser() store: Store,
-    @Query('lang') lang = Language.en,
+    @I18n() i18n: I18nContext,
   ) {
+    const lang = getLang(i18n);
     return this.productService.changeProductActivity(
       +productId,
       store.id,

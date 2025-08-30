@@ -6,6 +6,8 @@ import { VariantCategoryDto } from './dto/variant_category.dto';
 import { CreateVariantCategoryDto } from './dto/create_variant_category.dto';
 import { Language } from 'src/common/enums/language';
 import { ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
+import { getLang } from 'src/common/utils/get-lang.util';
+import { I18n, I18nContext } from 'nestjs-i18n';
 
 @Controller('variant-category')
 export class VariantCategoryController {
@@ -35,8 +37,9 @@ export class VariantCategoryController {
     description: 'List of all variant categories',
     type: [VariantCategoryDto],
   })
-  getAll(@Req() req)
+  getAll(@I18n() i18n: I18nContext)
   {
-    return this.variantCategoryService.getAll(req.lang)
+    const lang = getLang(i18n);
+    return this.variantCategoryService.getAll(lang)
   }
 }

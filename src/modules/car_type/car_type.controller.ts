@@ -6,25 +6,23 @@ import {
   Post,
   Put,
   ParseIntPipe,
-  Query,
   UseGuards,
-  Req,
 } from '@nestjs/common';
 import { AdminGuard } from 'src/common/guards/admin.guard';
 import { CarTypeService } from './car_type.service';
 import { CreateCarTypeDto } from './dto/create_car_type.dto';
 import { UpdateCarTypeDto } from './dto/update_car_type.dto';
-import { Language } from 'src/common/enums/language';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { CarTypeDto } from './dto/car-type.dto';
 import {
   ApiBody,
   ApiOperation,
   ApiParam,
-  ApiQuery,
   ApiResponse,
   ApiSecurity,
 } from '@nestjs/swagger';
+import { I18n, I18nContext } from 'nestjs-i18n';
+import { getLang } from 'src/common/utils/get-lang.util';
 
 @Controller('car-type')
 export class CarTypeController {
@@ -44,27 +42,17 @@ export class CarTypeController {
   @ApiResponse({
     status: 201,
     description: 'Car type created successfully',
-    schema: {
-      example: {
-        message: 'Created successfully',
-      },
-    },
+    schema: { example: { message: 'Created successfully' } },
   })
   @UseGuards(AdminGuard)
   @Post()
-  create(
-    @Body() dto: CreateCarTypeDto,
-    @Req() req,
-  ) {
-    return this.carTypeService.create(dto, req.lang);
+  create(@Body() dto: CreateCarTypeDto, @I18n() i18n: I18nContext) {
+    const lang = getLang(i18n);
+    return this.carTypeService.create(dto, lang);
   }
 
-  @ApiOperation({ summary: 'update a car type by ID (admin only)' })
-  @ApiParam({
-    name: 'id',
-    description: 'ID of the car type to update',
-    example: 1,
-  })
+  @ApiOperation({ summary: 'Update a car type by ID (admin only)' })
+  @ApiParam({ name: 'id', description: 'ID of the car type to update', example: 1 })
   @ApiSecurity('access-token')
   @ApiBody({
     schema: {
@@ -78,37 +66,35 @@ export class CarTypeController {
   @ApiResponse({
     status: 201,
     description: 'Car type updated successfully',
-    schema: {
-      example: {
-        message: 'Updated successfully',
-      },
-    },
+    schema: { example: { message: 'Updated successfully' } },
   })
   @UseGuards(AdminGuard)
   @Put(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateCarTypeDto,
-    @Req() req,
+    @I18n() i18n: I18nContext,
   ) {
-    return this.carTypeService.update(id, dto, req.lang);
+    const lang = getLang(i18n);
+    return this.carTypeService.update(id, dto, lang);
   }
 
-  @ApiOperation({ summary: 'Get all car types and its languages' })
+  @ApiOperation({ summary: 'Get all car types and their languages' })
   @ApiResponse({
     status: 200,
-    description: 'car types',
+    description: 'List of car types',
     type: CarTypeDto,
     isArray: true,
   })
   @Get()
   @Serilaize(CarTypeDto)
-  getAll(@Req() req) {
-    return this.carTypeService.getAll(req.lang);
+  getAll(@I18n() i18n: I18nContext) {
+    const lang = getLang(i18n);
+    return this.carTypeService.getAll(lang);
   }
 
   @ApiOperation({ summary: 'Get a car type by ID with its languages' })
-  @ApiParam({ name: 'id', description: 'ID of the car brand', example: 1 })
+  @ApiParam({ name: 'id', description: 'ID of the car type', example: 1 })
   @ApiResponse({
     status: 200,
     description: 'Car type details',
@@ -118,8 +104,9 @@ export class CarTypeController {
   @Serilaize(CarTypeDto)
   getOne(
     @Param('id', ParseIntPipe) id: number,
-    @Req() req,
+    @I18n() i18n: I18nContext,
   ) {
-    return this.carTypeService.getOneOrFail(id, req.lang);
+    const lang = getLang(i18n);
+    return this.carTypeService.getOneOrFail(id, lang);
   }
 }

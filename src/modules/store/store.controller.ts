@@ -41,6 +41,8 @@ import { PaginatedStoreDto, StoreDto } from './dto/Store.dto';
 import { StoreWithTokenDto } from './dto/simple-store.dto';
 import { FullDetailsStoreDto } from './dto/full-details-store.dto';
 import { ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
+import { I18n, I18nContext } from 'nestjs-i18n';
+import { getLang } from 'src/common/utils/get-lang.util';
 
 @Controller('store')
 export class StoreController {
@@ -109,7 +111,7 @@ export class StoreController {
       multerOptions,
     ),
   )
-  async create(@Body() body: CreateStoreDto,@CurrentUser() user: any,@Req() req,@UploadedFiles()    
+  async create(@Body() body: CreateStoreDto,@CurrentUser() user: any,@I18n() i18n: I18nContext,@UploadedFiles()    
     files: {
       logo?: Express.Multer.File[];
       cover?: Express.Multer.File[];
@@ -124,13 +126,14 @@ export class StoreController {
 
     const openingHours2 = validateAndParseOpeningHours(body.openingHours);
 
+    const lang = getLang(i18n);
     return this.storeAuthService.create(
       body,
       user.id,
       openingHours2 as OpeningHourEnum[],
       logoImage,
       coverImage,
-      req.lang
+      lang
     );
   }
 
@@ -139,8 +142,9 @@ export class StoreController {
   @ApiOperation({ summary: 'Login store and return access & refresh tokens' })
   @ApiBody({ type: LoginStoreDto })
   @ApiResponse({status: 200,description: 'Store login successful',type: StoreWithTokenDto})
-  login(@Body() body: LoginStoreDto,@Req() req) {
-    return this.storeAuthService.login(body,req.lang);
+  login(@Body() body: LoginStoreDto,@I18n() i18n: I18nContext) {
+    const lang = getLang(i18n);
+    return this.storeAuthService.login(body,lang);
   }
 
   @Get('details')
@@ -160,8 +164,9 @@ export class StoreController {
   @ApiSecurity('access-token')
   @Serilaize(StoreDto)
   @UseGuards(OwnerGuard)
-  findStoresByOwner(@CurrentUser() owner: Owner,@Req() req) {
-    return this.storeService.findStoresByOwner(owner.id,req.lang);
+  findStoresByOwner(@CurrentUser() owner: Owner,@I18n() i18n: I18nContext) {
+    const lang = getLang(i18n);
+    return this.storeService.findStoresByOwner(owner.id,lang);
   }
 
   @Post('nearby')
@@ -176,16 +181,17 @@ export class StoreController {
   async getNearbyStores(
     @Body() dto: GetNearbyStoresDto,
     @CurrentUser() customer: Customer,
-    @Req() req,
+    @I18n() i18n: I18nContext,
     @Query('type') type: number,
     @Query('subType') subType: number,
     @Query('page') page = 1,
     @Query('limit') limit = 20
   ) {
+    const lang = getLang(i18n);
     return this.storeGeolocationService.findStoresNearbyOrBetween(
       dto,
       customer.id,
-      req.lang,
+      lang,
       +page,
       +limit,
       type,
@@ -206,12 +212,13 @@ export class StoreController {
     @Query('type') type: number,
     @Query('subType') subType: number,
     @Query('page') page = 1,
-    @Req() req,
-    @Query('lang') name: string,
+    @I18n() i18n: I18nContext,
+    @Query('name') name: string,
     @Query('limit') limit = 10,
   ) {
+    const lang = getLang(i18n);
     return this.storeService.findAllStores(
-      req.lang,
+      lang,
       page,
       limit,
       type,
@@ -229,10 +236,11 @@ export class StoreController {
   @ApiResponse({status: 200,description: 'full details of store',type: FullDetailsStoreDto,})
   async getFullDetailsStore(
     @Param('id') storeId: number,
-    @Req() req,
+    @I18n() i18n: I18nContext,
     @CurrentUser() customer:Customer
   ) {
-    return this.storeService.getFullDetailsStore(storeId,customer.id, req.lang);
+    const lang = getLang(i18n);
+    return this.storeService.getFullDetailsStore(storeId,customer.id, lang);
   }
 
   @Put('/:storeId/approved')
@@ -250,8 +258,9 @@ export class StoreController {
       },
     },
   })
-  acceptStore(@Param('storeId') storeId: string,@Req() req) {
-    return this.storeService.changeStoreStatus(StoreStatus.APPROVED, +storeId,req.lang);
+  acceptStore(@Param('storeId') storeId: string,@I18n() i18n: I18nContext) {
+    const lang = getLang(i18n);
+    return this.storeService.changeStoreStatus(StoreStatus.APPROVED, +storeId,lang);
   }
 
   @Put('/:storeId/rejected')
@@ -269,8 +278,9 @@ export class StoreController {
     },
   })
   @UseGuards(AdminGuard)
-  rejectStore(@Param('storeId') storeId: string,@Req() req) {
-    return this.storeService.changeStoreStatus(StoreStatus.REJECTED, +storeId,req.lang);
+  rejectStore(@Param('storeId') storeId: string,@I18n() i18n: I18nContext) {
+    const lang = getLang(i18n);
+    return this.storeService.changeStoreStatus(StoreStatus.REJECTED, +storeId,lang);
   }
 
   @Put()
@@ -284,8 +294,9 @@ export class StoreController {
   })
   @UseGuards(StoreOrOwnerGuard)
 
-  updateStore(@CurrentUser() store: Store, @Body() dto: UpdateStoreDto,@Req() req) {
-    return this.storeService.updateStore(store, dto,req.lang);
+  updateStore(@CurrentUser() store: Store, @Body() dto: UpdateStoreDto,@I18n() i18n: I18nContext) {
+    const lang = getLang(i18n);
+    return this.storeService.updateStore(store, dto,lang);
   }
 
   @Put('update-images')
@@ -331,7 +342,7 @@ export class StoreController {
   )
   updateImages(
     @CurrentUser() store: Store,
-    @Req() req,
+    @I18n() i18n: I18nContext,
     @UploadedFiles()
     files: {
       logo?: Express.Multer.File[];
@@ -340,7 +351,8 @@ export class StoreController {
   ) {
     const logo = files.logo?.[0];
     const cover = files.cover?.[0];
-    return this.storeService.updateStoreImages(store, logo, cover,req.lang);
+    const lang = getLang(i18n);
+    return this.storeService.updateStoreImages(store, logo, cover,lang);
   }
 
   @Get('favourite/byCustomer')
@@ -351,8 +363,9 @@ export class StoreController {
   @ApiResponse({status: 200,description: 'List of favourite stores with pagination',type: PaginatedStoreDto})
   @Serilaize(PaginatedStoreDto)
   @UseGuards(CustomerGuard)
-  getFavouriteStoresByCustomer(@CurrentUser() user: Customer,@Req() req,@Query('page') page = 1,@Query('limit') limit = 10) {
-    return this.storeService.getFavouriteStoresByCustomer(user.id,req.lang,page,limit);
+  getFavouriteStoresByCustomer(@CurrentUser() user: Customer,@I18n() i18n: I18nContext,@Query('page') page = 1,@Query('limit') limit = 10) {
+    const lang = getLang(i18n);
+    return this.storeService.getFavouriteStoresByCustomer(user.id,lang,page,limit);
   }
 
   @Post('refresh-token')

@@ -7,6 +7,8 @@ import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { Customer } from '../customer/entities/customer.entity';
 import { Language } from 'src/common/enums/language';
 import { ApiOperation, ApiParam, ApiResponse, ApiSecurity } from '@nestjs/swagger';
+import { I18n, I18nContext } from 'nestjs-i18n';
+import { getLang } from 'src/common/utils/get-lang.util';
 
 @Controller('recent-address')
 export class RecentAddressController {
@@ -27,8 +29,9 @@ export class RecentAddressController {
     @ApiParam({ name: 'id', description: 'ID of the recent address to delete', example: 1 })
     @ApiResponse({status: 200,description: 'Recent address deleted successfully',schema: { example: { message: 'Deleted successfully' } },})
     @Delete(':id')
-    remove(@CurrentUser() user: Customer,@Param('id') addressId: number,@Req() req) 
+    remove(@CurrentUser() user: Customer,@Param('id') addressId: number,@I18n() i18n: I18nContext) 
     {
-      return this.recentAddressService.removeRecentAddress(addressId,user.id,req.lang);
+      const lang = getLang(i18n);
+      return this.recentAddressService.removeRecentAddress(addressId,user.id,lang);
     }
 }

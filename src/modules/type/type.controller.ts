@@ -22,6 +22,8 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { TypeDto } from './dto/type.dto';
 import { ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiResponse, ApiSecurity } from '@nestjs/swagger';
+import { I18n, I18nContext } from 'nestjs-i18n';
+import { getLang } from 'src/common/utils/get-lang.util';
 
 @Controller('type')
 export class TypeController {
@@ -55,14 +57,15 @@ export class TypeController {
   @UseInterceptors(FileInterceptor('image', multerOptions))
   @UseFilters(MulterExceptionFilter)
   createType(
-    @Req() req,
+    @I18n() i18n: I18nContext,
     @Body() dto: CreateTypeDto,
     @UploadedFile() file?: Express.Multer.File,
   ) {
     if (!file) {
       throw new BadRequestException('upload icon is required');
     }
-    return this.typeService.createType(dto, file, req.lang);
+    const lang = getLang(i18n);
+    return this.typeService.createType(dto, file, lang);
   }
 
   @ApiOperation({ summary: 'Update type by ID (admin only)' })
@@ -92,12 +95,13 @@ export class TypeController {
   @UseInterceptors(FileInterceptor('image', multerOptions))
   @UseFilters(MulterExceptionFilter)
   updateType(
-    @Req() req,
+    @I18n() i18n: I18nContext,
     @Param('typeId') typeId: string,
     @Body() dto: CreateTypeDto,
     @UploadedFile() file?: Express.Multer.File,
   ) {
-    return this.typeService.updateType(+typeId, dto, req.lang, file);
+    const lang = getLang(i18n);
+    return this.typeService.updateType(+typeId, dto, lang, file);
   }
 
   @ApiOperation({ summary: 'Delete a type by ID (admin only)' })
@@ -112,17 +116,19 @@ export class TypeController {
   @UseGuards(AdminGuard)
   deleteType(
     @Param('typeId') typeId: string,
-    @Req() req,
+    @I18n() i18n: I18nContext,
   ) {
-    return this.typeService.deleteType(+typeId, req.lang);
+    const lang = getLang(i18n);
+    return this.typeService.deleteType(+typeId,lang);
   }
 
   @ApiOperation({ summary: 'Get all types with their languages' })
   @ApiResponse({ status: 200, description: 'List of types', type: [TypeDto] })
   @Get('all')
   @Serilaize(TypeDto)
-  getAllTypes(@Req() req) {
-    return this.typeService.getAllTypes(req.lang);
+  getAllTypes(@I18n() i18n: I18nContext) {
+    const lang = getLang(i18n);
+    return this.typeService.getAllTypes(lang);
   }
 
   @ApiOperation({ summary: 'Get a single type by ID with its languages' })
@@ -132,8 +138,9 @@ export class TypeController {
   @Serilaize(TypeDto)
   getOne(
     @Param('typeId') typeId: string,
-    @Req() req,
+    @I18n() i18n: I18nContext
   ) {
-    return this.typeService.getOneType(+typeId, req.lang);
+    const lang = getLang(i18n);
+    return this.typeService.getOneType(+typeId, lang);
   }
 }

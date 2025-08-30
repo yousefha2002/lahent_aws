@@ -1,12 +1,13 @@
-import { Body, Controller, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { LoyaltyOfferService } from './loyalty_offer.service';
 import { AdminGuard } from 'src/common/guards/admin.guard';
 import { UpdateLoyaltyOfferDto } from './dto/update-loyalty-offer.dto';
 import { CreateLoyaltyOfferDto } from './dto/create-loyalty-offer.dto';
 import { BaseloyaltyOfferDto, ExtendedLoyaltyOfferDto } from './dto/loyalty-offer.dt';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
-import { Language } from 'src/common/enums/language';
-import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
+import { I18n, I18nContext } from 'nestjs-i18n';
+import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiSecurity } from '@nestjs/swagger';
+import { getLang } from 'src/common/utils/get-lang.util';
 
 @Controller('loyalty-offer')
 export class LoyaltyOfferController {
@@ -19,8 +20,8 @@ export class LoyaltyOfferController {
   @ApiSecurity('access-token')
   @ApiBody({ type: CreateLoyaltyOfferDto })
   @ApiResponse({ status: 201, description: 'Created loyalty offer', type: ExtendedLoyaltyOfferDto })
-  async create(@Body() dto: CreateLoyaltyOfferDto,@Req() req) {
-    return this.loyaltyOfferService.create(dto,req.lang);
+  async create(@Body() dto: CreateLoyaltyOfferDto, @I18n() i18n: I18nContext) {
+    return this.loyaltyOfferService.create(dto, getLang(i18n));
   }
 
   @Serilaize(ExtendedLoyaltyOfferDto)
@@ -49,8 +50,8 @@ export class LoyaltyOfferController {
   @ApiParam({ name: 'id', description: 'ID of the loyalty offer', example: 1 })
   @ApiBody({ type: UpdateLoyaltyOfferDto })
   @ApiResponse({ status: 200, description: 'Updated loyalty offer', type: ExtendedLoyaltyOfferDto })
-  async update(@Param('id') id: number, @Body() dto: UpdateLoyaltyOfferDto,@Req() req) {
-    return this.loyaltyOfferService.update(+id, dto,req.lang);
+  async update(@Param('id') id: number, @Body() dto: UpdateLoyaltyOfferDto, @I18n() i18n: I18nContext) {
+    return this.loyaltyOfferService.update(+id, dto, getLang(i18n));
   }
 
   @Serilaize(ExtendedLoyaltyOfferDto)
@@ -60,7 +61,7 @@ export class LoyaltyOfferController {
   @ApiSecurity('access-token')
   @ApiParam({ name: 'id', description: 'ID of the loyalty offer', example: 1 })
   @ApiResponse({ status: 200, description: 'Loyalty offer status toggled successfully', type: ExtendedLoyaltyOfferDto })
-  async toggleStatus(@Param('id') id: number,@Req() req) {
-    return this.loyaltyOfferService.toggleStatus(+id,req.lang);
+  async toggleStatus(@Param('id') id: number, @I18n() i18n: I18nContext) {
+    return this.loyaltyOfferService.toggleStatus(+id, getLang(i18n));
   }
 }

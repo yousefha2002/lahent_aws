@@ -1,24 +1,38 @@
-import { Controller, Get, Post, Query, Req, UploadedFile, UseFilters, UseGuards, UseInterceptors } from '@nestjs/common';
+import { 
+  Controller, 
+  Get, 
+  Post, 
+  UploadedFile, 
+  UseFilters, 
+  UseGuards, 
+  UseInterceptors 
+} from '@nestjs/common';
 import { AvatarService } from './avatar.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { MulterExceptionFilter } from 'src/multer/multer.exception.filter';
 import { multerOptions } from 'src/multer/multer.options';
 import { AdminGuard } from 'src/common/guards/admin.guard';
-import { Language } from 'src/common/enums/language';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { AvatarDto } from './dto/avatar.dto';
-import { ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiSecurity } from '@nestjs/swagger';
+import { I18n, I18nContext } from 'nestjs-i18n';
+import { getLang } from 'src/common/utils/get-lang.util';
 
 @Controller('avatar')
 export class AvatarController {
   constructor(private readonly avatarService: AvatarService) {}
-  
+
   @ApiOperation({ summary: 'Get list of avatars' })
-  @ApiResponse({status: 200,description: 'List of avatars',type: AvatarDto,isArray: true})
+  @ApiResponse({
+    status: 200,
+    description: 'List of avatars',
+    type: AvatarDto,
+    isArray: true,
+  })
   @Serilaize(AvatarDto)
   @Get()
   getAvatars() {
-    return this.avatarService.findAll()
+    return this.avatarService.findAll();
   }
 
   @ApiOperation({ summary: 'Create a new avatar (admin only)' })
@@ -31,7 +45,7 @@ export class AvatarController {
         image: {
           type: 'string',
           format: 'binary',
-        }
+        },
       },
     },
   })
@@ -39,17 +53,18 @@ export class AvatarController {
     status: 201,
     description: 'Avatar created successfully',
     schema: {
-      example: {
-        message: 'Created successfully',
-      },
+      example: { message: 'Created successfully' },
     },
   })
   @UseGuards(AdminGuard)
   @Post()
   @UseInterceptors(FileInterceptor('image', multerOptions))
   @UseFilters(MulterExceptionFilter)
-  createAvatar( @Req() req,@UploadedFile() file?: Express.Multer.File)
-  {
-    return this.avatarService.create(req.lang,file)
+  createAvatar(
+    @I18n() i18n: I18nContext,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    const lang = getLang(i18n);
+    return this.avatarService.create(lang, file);
   }
 }

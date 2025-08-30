@@ -6,21 +6,20 @@ import {
   Param,
   Post,
   Put,
-  Query,
-  Req,
   UseGuards,
 } from '@nestjs/common';
 import { CarService } from './car.service';
 import { CustomerGuard } from 'src/common/guards/customer.guard';
+import { CompletedProfileGuard } from 'src/common/guards/completed-profile.guard';
 import { CreateCarDto } from './dto/create_car.dto';
+import { UpdateCarDto } from './dto/update-car.dto';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { Customer } from '../customer/entities/customer.entity';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { CustomerCarListDto } from './dto/customer-car-list.dto';
-import { UpdateCarDto } from './dto/update-car.dto';
-import { Language } from 'src/common/enums/language';
-import { CompletedProfileGuard } from 'src/common/guards/completed-profile.guard';
-import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiSecurity } from '@nestjs/swagger';
+import { I18n, I18nContext } from 'nestjs-i18n';
+import { getLang } from 'src/common/utils/get-lang.util';
 
 @Controller('car')
 export class CarController {
@@ -34,19 +33,15 @@ export class CarController {
   @ApiResponse({
     status: 201,
     description: 'Car created successfully',
-    schema: {
-      example: {
-        message: 'Car created successfully',
-        carId: 1,
-      },
-    },
+    schema: { example: { message: 'Car created successfully', carId: 1 } },
   })
   create(
     @Body() dto: CreateCarDto,
     @CurrentUser() user: Customer,
-    @Req() req,
+    @I18n() i18n: I18nContext,
   ) {
-    return this.carService.create(user.id, dto, req.lang);
+    const lang = getLang(i18n);
+    return this.carService.create(user.id, dto, lang);
   }
 
   @Serilaize(CustomerCarListDto)
@@ -54,12 +49,17 @@ export class CarController {
   @Get('all/byCustomer/saved')
   @ApiOperation({ summary: 'Get all saved cars for the current customer' })
   @ApiSecurity('access-token')
-  @ApiResponse({status: 200,description: 'List of saved cars for the customer',type: CustomerCarListDto})
+  @ApiResponse({
+    status: 200,
+    description: 'List of saved cars for the customer',
+    type: CustomerCarListDto,
+  })
   getAllCustomerCars(
     @CurrentUser() user: Customer,
-    @Req() req,
+    @I18n() i18n: I18nContext,
   ) {
-    return this.carService.getAllCustomerCars(user.id, req.lang);
+    const lang = getLang(i18n);
+    return this.carService.getAllCustomerCars(user.id, lang);
   }
 
   @Serilaize(CustomerCarListDto)
@@ -68,13 +68,18 @@ export class CarController {
   @ApiOperation({ summary: 'Get details of a specific car for the current customer' })
   @ApiSecurity('access-token')
   @ApiParam({ name: 'carId', description: 'ID of the car', example: 1 })
-  @ApiResponse({status: 200,type: CustomerCarListDto,description: 'Details of the requested car for the customer'})
+  @ApiResponse({
+    status: 200,
+    type: CustomerCarListDto,
+    description: 'Details of the requested car for the customer',
+  })
   getCustomerCar(
     @CurrentUser() user: Customer,
     @Param('carId') carId: number,
-    @Req() req,
+    @I18n() i18n: I18nContext,
   ) {
-    return this.carService.getCustomerCar(user.id, carId, req.lang);
+    const lang = getLang(i18n);
+    return this.carService.getCustomerCar(user.id, carId, lang);
   }
 
   @UseGuards(CustomerGuard)
@@ -82,14 +87,17 @@ export class CarController {
   @ApiOperation({ summary: 'Delete a specific car for the current customer' })
   @ApiSecurity('access-token')
   @ApiParam({ name: 'carId', description: 'ID of the car to delete', example: 1 })
-  @ApiQuery({ name: 'lang', required: false, enum: Language, example: 'en' })
-  @ApiResponse({status: 200,schema: {example: { message: 'Car deleted successfully' }}})
+  @ApiResponse({
+    status: 200,
+    schema: { example: { message: 'Car deleted successfully' } },
+  })
   deleteCustomerCar(
     @CurrentUser() user: Customer,
     @Param('carId') carId: number,
-    @Req() req,
+    @I18n() i18n: I18nContext,
   ) {
-    return this.carService.delete(user.id, carId, req.lang);
+    const lang = getLang(i18n);
+    return this.carService.delete(user.id, carId, lang);
   }
 
   @UseGuards(CustomerGuard)
@@ -98,13 +106,17 @@ export class CarController {
   @ApiSecurity('access-token')
   @ApiParam({ name: 'carId', description: 'ID of the car to update', example: 1 })
   @ApiBody({ type: UpdateCarDto })
-  @ApiResponse({status: 200,schema: {example: { message: 'Car updated successfully' }}})
+  @ApiResponse({
+    status: 200,
+    schema: { example: { message: 'Car updated successfully' } },
+  })
   update(
     @Body() dto: UpdateCarDto,
     @CurrentUser() user: Customer,
     @Param('carId') carId: number,
-    @Req() req,
+    @I18n() i18n: I18nContext,
   ) {
-    return this.carService.update(user.id, carId, dto, req.lang);
+    const lang = getLang(i18n);
+    return this.carService.update(user.id, carId, dto, lang);
   }
 }

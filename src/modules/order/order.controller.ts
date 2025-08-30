@@ -20,6 +20,8 @@ import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } f
 import { CreateOrderResponseDto } from './dto/create-order-response.dto';
 import { PaymentResponseDto } from './dto/payment-order-respone.dto';
 import { OrderActionResponseDto } from './dto/order-action-response.dto';
+import { I18n, I18nContext } from 'nestjs-i18n';
+import { getLang } from 'src/common/utils/get-lang.util';
 
 @Controller('order')
 export class OrderController {
@@ -36,9 +38,10 @@ export class OrderController {
   @ApiSecurity('access-token')
   @ApiBody({ type: createOrderDto })
   @ApiResponse({ status: 201, type: CreateOrderResponseDto })
-  placeOrder(@CurrentUser() user:Customer,@Body() dto:createOrderDto,@Req() req)
+  placeOrder(@CurrentUser() user:Customer,@Body() dto:createOrderDto,@I18n() i18n: I18nContext)
   {
-    return this.orderService.placeOrder(user,dto,req.lang)
+    const lang = getLang(i18n);
+    return this.orderService.placeOrder(user,dto,lang)
   }
 
   @Serilaize(PaymentResponseDto)
@@ -48,9 +51,10 @@ export class OrderController {
   @ApiSecurity('access-token')
   @ApiParam({ name: 'orderId', description: 'ID of the order to pay', example: 1 })
   @ApiResponse({ status: 200, description: 'Payment result', type: PaymentResponseDto })
-  payOrder(@CurrentUser() user:Customer,@Param('orderId',ParseIntPipe) orderId:number,@Req() req)
+  payOrder(@CurrentUser() user:Customer,@Param('orderId',ParseIntPipe) orderId:number,@I18n() i18n: I18nContext)
   {
-    return this.orderPaymentService.payOrder(orderId,user,req.lang)
+    const lang = getLang(i18n);
+    return this.orderPaymentService.payOrder(orderId,user,lang)
   }
 
   @Serilaize(OrderActionResponseDto)
@@ -60,9 +64,10 @@ export class OrderController {
   @ApiSecurity('access-token')
   @ApiParam({ name: 'orderId', description: 'ID of the order to reject', example: 123 })
   @ApiResponse({ status: 200, description: 'Order rejected successfully', type: OrderActionResponseDto })
-  rejectOrder(@CurrentUser() store:Store,@Param('orderId') orderId:number,@Req() req)
+  rejectOrder(@CurrentUser() store:Store,@Param('orderId') orderId:number,@I18n() i18n: I18nContext)
   {
-    return this.orderStatusService.rejectOrderByStore(orderId,store.id,req.lang)
+    const lang = getLang(i18n);
+    return this.orderStatusService.rejectOrderByStore(orderId,store.id,lang)
   }
 
   @Serilaize(OrderActionResponseDto)
@@ -72,9 +77,10 @@ export class OrderController {
   @ApiSecurity('access-token')
   @ApiParam({ name: 'orderId', description: 'ID of the order to accept', example: 123 })
   @ApiResponse({ status: 200, description: 'Order accepted successfully', type: OrderActionResponseDto })
-  acceptOrder(@CurrentUser() store:Store,@Param('orderId') orderId:number,@Req() req)
+  acceptOrder(@CurrentUser() store:Store,@Param('orderId') orderId:number,@I18n() i18n: I18nContext)
   {
-    return this.orderStatusService.acceptOrderByStore(orderId,store.id,req.lang)
+    const lang = getLang(i18n);
+    return this.orderStatusService.acceptOrderByStore(orderId,store.id,lang)
   }
 
   @Serilaize(OrderActionResponseDto)
@@ -89,9 +95,10 @@ export class OrderController {
     @CurrentUser() user: Customer,
     @Param('orderId', ParseIntPipe) orderId: number,
     @Body() body: ExtendOrderTimeDto,
-    @Req() req
+    @I18n() i18n: I18nContext
   ) {
-    return this.orderStatusService.extendCustomerDecisionTimeout(orderId, user.id, body.extraMinutes,req.lang);
+    const lang = getLang(i18n);
+    return this.orderStatusService.extendCustomerDecisionTimeout(orderId, user.id, body.extraMinutes,lang);
   }
 
   @Serilaize(OrderActionResponseDto)
@@ -104,9 +111,10 @@ export class OrderController {
   cancelOrder(
     @CurrentUser() user: Customer,
     @Param('orderId', ParseIntPipe) orderId: number,
-    @Req() req
+    @I18n() i18n: I18nContext
   ) {
-    return this.orderStatusService.refundOrder(orderId, user,req.lang);
+    const lang = getLang(i18n);
+    return this.orderStatusService.refundOrder(orderId, user,lang);
   }
 
   @Serilaize(OrderActionResponseDto)
@@ -119,9 +127,10 @@ export class OrderController {
   markArrived(
     @CurrentUser() user: Customer,
     @Param('orderId', ParseIntPipe) orderId: number,
-    @Req() req
+    @I18n() i18n: I18nContext
   ) {
-    return this.orderStatusService.markOrderArrived(orderId, user.id,req.lang);
+    const lang = getLang(i18n);
+    return this.orderStatusService.markOrderArrived(orderId, user.id,lang);
   }
 
   @Serilaize(OrderActionResponseDto)
@@ -135,9 +144,10 @@ export class OrderController {
   markReceived(
     @CurrentUser() user: Customer,
     @Param('orderId', ParseIntPipe) orderId: number,
-   @Req() req
+    @I18n() i18n: I18nContext
   ) {
-    return this.orderStatusService.markOrderReceived(orderId, user.id,req.lang);
+    const lang = getLang(i18n);
+    return this.orderStatusService.markOrderReceived(orderId, user.id,lang);
   }
 
   @Serilaize(OrderActionResponseDto)
@@ -150,9 +160,10 @@ export class OrderController {
   markReady(
     @CurrentUser() store: Store,
     @Param('orderId', ParseIntPipe) orderId: number,
-   @Req() req
+    @I18n() i18n: I18nContext
   ) {
-    return this.orderStatusService.markOrderReady(orderId, store.id,req.lang);
+    const lang = getLang(i18n);
+    return this.orderStatusService.markOrderReady(orderId, store.id,lang);
   }
 
   @Serilaize(PaginatedOrderListDto)

@@ -14,7 +14,6 @@ import { SubtypeService } from './subtype.service';
 import { CreateSubTypeDto } from './dto/create-subType.dto';
 import { AdminGuard } from 'src/common/guards/admin.guard';
 import { UpdateSubTypeDto } from './dto/update-subType.dto';
-import { Language } from 'src/common/enums/language';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { SubTypeDto } from './dto/subType.dto';
 import {
@@ -24,6 +23,8 @@ import {
   ApiResponse,
   ApiSecurity,
 } from '@nestjs/swagger';
+import { getLang } from 'src/common/utils/get-lang.util';
+import { I18n, I18nContext } from 'nestjs-i18n';
 
 @Controller('subtype')
 export class SubtypeController {
@@ -122,8 +123,9 @@ export class SubtypeController {
   @Serilaize(SubTypeDto)
   fetchAllByTypeId(
     @Param('typeId') typeId: string,
-    @Req() req,
+    @I18n() i18n: I18nContext,
   ) {
-    return this.subtypeService.getAllSubTypesByTypeId(+typeId, req.lang);
+    const lang = getLang(i18n);
+    return this.subtypeService.getAllSubTypesByTypeId(+typeId, lang);
   }
 }

@@ -7,8 +7,6 @@ import {
   ParseIntPipe,
   Post,
   Put,
-  Query,
-  Req,
   UseGuards,
 } from '@nestjs/common';
 import { CartService } from './cart.service';
@@ -20,9 +18,10 @@ import { UpdateCartProductQuantityDto } from './dto/update-productCart-quantity'
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { CartItemWithOfferDto } from './dto/cart-item-with-offer.dto';
 import { CartWithStoreDto } from './dto/cart-with-store.dto';
-import { Language } from 'src/common/enums/language';
 import { CompletedProfileGuard } from 'src/common/guards/completed-profile.guard';
-import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiSecurity } from '@nestjs/swagger';
+import { I18n, I18nContext } from 'nestjs-i18n';
+import { getLang } from 'src/common/utils/get-lang.util';
 
 @Controller('cart')
 export class CartController {
@@ -35,19 +34,16 @@ export class CartController {
   @ApiResponse({
     status: 201,
     description: 'Product successfully added to cart',
-    schema: {
-      example: {
-        message: 'Product added to cart successfully',
-      },
-    },
+    schema: { example: { message: 'Product added to cart successfully' } },
   })
-  @UseGuards(CustomerGuard,CompletedProfileGuard)
+  @UseGuards(CustomerGuard, CompletedProfileGuard)
   addProductForCart(
     @CurrentUser() customer: Customer,
     @Body() body: CreateCartProductDto,
-    @Req() req
+    @I18n() i18n: I18nContext
   ) {
-    return this.cartService.createProductCart(body, customer.id,req.lang);
+    const lang = getLang(i18n);
+    return this.cartService.createProductCart(body, customer.id, lang);
   }
 
   @Put('update-product/:cartItemId')
@@ -65,14 +61,10 @@ export class CartController {
     @CurrentUser() customer: Customer,
     @Body() body: CreateCartProductDto,
     @Param('cartItemId') cartItemId: string,
-    @Req() req
+    @I18n() i18n: I18nContext
   ) {
-    return this.cartService.updateProductCartItem(
-      +cartItemId,
-      body,
-      customer.id,
-      req.lang
-    );
+    const lang = getLang(i18n);
+    return this.cartService.updateProductCartItem(+cartItemId, body, customer.id, lang);
   }
 
   @Delete('remove-product/:cartItemId')
@@ -88,9 +80,10 @@ export class CartController {
   removeProductForCart(
     @CurrentUser() customer: Customer,
     @Param('cartItemId') cartItemId: string,
-    @Req() req
+    @I18n() i18n: I18nContext
   ) {
-    return this.cartService.deleteProductFromCart(+cartItemId, customer.id,req.lang);
+    const lang = getLang(i18n);
+    return this.cartService.deleteProductFromCart(+cartItemId, customer.id, lang);
   }
 
   @Put('update-product-qty/:cartItemId')
@@ -108,14 +101,10 @@ export class CartController {
     @CurrentUser() customer: Customer,
     @Param('cartItemId') cartItemId: string,
     @Body() dto: UpdateCartProductQuantityDto,
-    @Req() req
+    @I18n() i18n: I18nContext
   ) {
-    return this.cartService.updateProductQuantity(
-      +cartItemId,
-      customer.id,
-      dto,
-      req.lang
-    );
+    const lang = getLang(i18n);
+    return this.cartService.updateProductQuantity(+cartItemId, customer.id, dto, lang);
   }
 
   @Serilaize(CartItemWithOfferDto)
@@ -132,9 +121,10 @@ export class CartController {
   getCartItemsWithOffers(
     @CurrentUser() user: Customer,
     @Param('storeId', ParseIntPipe) storeId: number,
-    @Req() req
+    @I18n() i18n: I18nContext
   ) {
-    return this.cartService.getCartItemsWithOffers(storeId, user.id,req.lang);
+    const lang = getLang(i18n);
+    return this.cartService.getCartItemsWithOffers(storeId, user.id, lang);
   }
 
   @Serilaize(CartWithStoreDto)
@@ -147,7 +137,9 @@ export class CartController {
     description: 'List of carts with their store details',
     type: [CartWithStoreDto],
   })
-  findAllCartsByCustomer(@CurrentUser() user: Customer) {
+  findAllCartsByCustomer(
+    @CurrentUser() user: Customer
+  ) {
     return this.cartService.findAllCartsByCustomer(user.id);
   }
 }
