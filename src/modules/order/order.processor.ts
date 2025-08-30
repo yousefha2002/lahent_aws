@@ -2,7 +2,7 @@ import { Processor, Process } from '@nestjs/bull';
 import { Job } from 'bull';
 import { OrderStatusService } from './services/order_status.service';
 
-@Processor('order')
+@Processor('orders')
 export class OrderProcessor {
     constructor(private readonly orderStatusService: OrderStatusService) {}
 
