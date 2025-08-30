@@ -4,7 +4,7 @@ import { PaymentSessionService } from '../../payment_session/payment_session.ser
 import { TransactionService } from '../../transaction/transaction.service';
 import { CustomerService } from '../../customer/customer.service';
 import { StoreService } from 'src/modules/store/services/store.service';
-import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
 import { Order } from '../entities/order.entity';
 import { OrderStatus } from 'src/common/enums/order_status';
@@ -20,6 +20,7 @@ import { StoreStatus } from 'src/common/enums/store_status';
 import { OrderPointsService } from './order_points.service';
 import { I18nService } from 'nestjs-i18n';
 import { Language } from 'src/common/enums/language';
+import { PaymentSession } from 'src/modules/payment_session/entities/payment_session.entity';
 
 @Injectable()
 export class OrderPaymentService {
@@ -28,8 +29,13 @@ export class OrderPaymentService {
         private readonly storeService: StoreService,
         @Inject('SEQUELIZE') private readonly sequelize: Sequelize,
         private readonly customerService: CustomerService,
+
+        @Inject(forwardRef(() => TransactionService))
         private readonly transactionService: TransactionService,
+        
+        @Inject(forwardRef(() => PaymentSessionService))
         private readonly paymentSessionService: PaymentSessionService,
+
         private readonly userPointHistoryService: UserPointHistoryService,
         private orderPointsService: OrderPointsService,
         private orderService: OrderService,
@@ -114,16 +120,10 @@ export class OrderPaymentService {
         }
     }
 
-    async confirmOrderPayment(sessionId: number, lang: Language = Language.en) {
+    async confirmOrderPayment(session: PaymentSession, lang: Language = Language.ar) {
         const transaction = await this.sequelize.transaction();
         try {
-            const result = await this.paymentSessionService.confirmPayment(sessionId);
-            if (false) {
-                await transaction.rollback();
-                return { success: false };
-            }
-
-            const order = await this.orderRepo.findOne({ where: { id: result.orderId }, transaction });
+            const order = await this.orderRepo.findOne({ where: { id: session.orderId }, transaction });
             if (!order) {
                 await transaction.rollback();
                 throw new NotFoundException(this.i18n.translate('translation.orders.not_found', { lang }));
@@ -136,14 +136,13 @@ export class OrderPaymentService {
 
             await this.transactionService.createTransaction({
                 customerId: order.customerId,
-                amount: result.amount ?? 0,
+                amount: session.amount ?? 0,
                 direction: 'OUT',
                 type: TransactionType.PURCHASE_GATEWAY,
                 orderId: order.id,
             }, transaction);
 
             await transaction.commit();
-            return { success: true };
         } catch (error) {
             await transaction.rollback();
             throw error;

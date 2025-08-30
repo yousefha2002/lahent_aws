@@ -14,6 +14,7 @@ import { LoyaltyOffer } from '../loyalty_offer/entites/loyalty_offer.entity';
 import { Store } from '../store/entities/store.entity';
 import { Customer } from '../customer/entities/customer.entity';
 import { Avatar } from '../avatar/entities/avatar.entity';
+import { PaymentSession } from '../payment_session/entities/payment_session.entity';
 
 @Injectable()
 export class TransactionService {
@@ -21,7 +22,10 @@ export class TransactionService {
     @Inject(repositories.transaction_repository)
     private transactionRepo: typeof Transaction,
     private readonly loyaltyOfferService: LoyaltyOfferService,
+
+    @Inject(forwardRef(() => PaymentSessionService))
     private readonly paymentSessionService: PaymentSessionService,
+
     @Inject(forwardRef(() => CustomerService))
     private customerService: CustomerService,
   ) {}
@@ -34,19 +38,15 @@ export class TransactionService {
     return { checkoutUrl};
   }
 
-  async confirmCharge(sessionId: number) {
-    const result = await this.paymentSessionService.confirmPayment(sessionId);
+  async confirmChargeWallet(session: PaymentSession) {
     await this.createTransaction({
-      customerId: result.customerId,
-      amount: result.amount,
+      customerId: session.customerId,
+      amount: session.amount,
       direction: 'IN',
       type: TransactionType.TOP_UP,
-      loyaltyOfferId: result.loyaltyOfferId,
+      loyaltyOfferId: session.loyaltyOfferId,
     });
-      if (result.customerId !== undefined) {
-        await this.customerService.addToWallet(result.customerId,result.amount);
-      }
-    return result;
+    await this.customerService.addToWallet(session.customerId,session.amount);
   }
 
   async createTransaction(

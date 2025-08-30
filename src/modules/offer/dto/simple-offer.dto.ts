@@ -6,6 +6,10 @@ export class SimpleOfferDto {
     @Expose()
     id: number;
 
+    @ApiProperty({ example: 'fixed',description:"fixed or percentage or incentive" })
+    @Expose() 
+    type: string;
+
     @ApiProperty({ example: 2 })
     @Expose()
     buyQty: number | null;

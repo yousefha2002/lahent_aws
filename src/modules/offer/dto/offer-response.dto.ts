@@ -33,9 +33,6 @@ export class OfferResponseDto extends SimpleOfferDto {
     @ApiProperty({ example: 'Back to School Offer' })
     @Expose() name: string;
 
-    @ApiProperty({ example: 'DISCOUNT_PERCENTAGE' })
-    @Expose() type: string;
-
     @ApiProperty({ example: '2025-09-01T00:00:00Z', type: String, format: 'date-time' })
     @Expose() startDate: Date;
 

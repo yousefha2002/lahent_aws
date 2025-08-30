@@ -55,11 +55,6 @@ export class OrderController {
     return this.orderPaymentService.payOrder(orderId,user,lang)
   }
 
-  // @Post('payment/callback/:sessionId')
-  // async paymentCallback(@Param('sessionId', ParseIntPipe) sessionId: number,@Query('lang') lang=Language.en) {
-  //   return this.orderPaymentService.confirmOrderPayment(sessionId,lang);
-  // }
-
   @Serilaize(OrderActionResponseDto)
   @UseGuards(StoreOrOwnerGuard,ApprovedStoreGuard)
   @Put('reject/:orderId')

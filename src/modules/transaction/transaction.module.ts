@@ -14,7 +14,7 @@ import { GiftModule } from '../gift/gift.module';
     LoyaltyOfferModule,
     forwardRef(() => CustomerModule),
     PaymentSessionModule,
-    forwardRef(() => GiftModule), // ← أضف هذا
+    forwardRef(() => GiftModule),
   ],
   exports: [TransactionService],
 })

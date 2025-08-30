@@ -43,20 +43,10 @@ export class EdFapayGateway implements PaymentGateway {
         const response = await axios.post(this.apiUrl, formData, {
             headers: formData.getHeaders(), // الآن تعمل بدون مشاكل
         });
-        console.log('Gateway Response:', response.data);
 
         const checkoutUrl = response.data.redirect_url;
 
         return { checkoutUrl,paymentOrderId,hash};
     }
 
-    async verifyPayment(sessionId: string) {
-        console.log(`[EdFapay] Verifying transaction ${sessionId}`);
-        // لحد الآن مش واضح API التحقق عند EdFapay
-        // ممكن تستدعي API تحقق إذا عندهم، حالياً نرجع نجاح وهمي
-        return {
-        success: true,
-        amount: 100, // لازم يكون القيمة الفعلية من الـ API
-        };
-    }
 }
