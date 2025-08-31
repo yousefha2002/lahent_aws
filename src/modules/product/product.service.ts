@@ -236,11 +236,12 @@ export class ProductService {
           required: true,
         },
         { model: ProductImage, order: [['id', 'ASC']] },
-        { model: Category },
+        { model: Category, include: [{ model: CategoryLanguage, where: { languageCode: lang } }] },
         {model:ProductLanguage,where:{languageCode:lang,...(name ? { name: { [Op.like]: `%${name}%` } } : {})}}
       ],
       limit,
       offset,
+      distinct:true,
       order: [['createdAt', 'DESC']],
     });
 
@@ -286,7 +287,7 @@ export class ProductService {
       },
       include: [
         { model: ProductImage, order: [['id', 'ASC']] },
-        { model: Category },
+        { model: Category, include: [{ model: CategoryLanguage, where: { languageCode: lang } }] },
         {model:ProductLanguage,where:{languageCode:lang,...(name ? { name: { [Op.like]: `%${name}%` } } : {})}}
       ],
       limit,
