@@ -38,7 +38,8 @@ import { OrderQueueScheduler } from './order.scheduler';
     BullModule.forRoot({
       redis: {
         host: process.env.REDIS_HOST,
-        port: Number(process.env.REDIS_PORT)
+        port: Number(process.env.REDIS_PORT),
+        tls: {}
       },
     }),
     BullModule.registerQueue({
