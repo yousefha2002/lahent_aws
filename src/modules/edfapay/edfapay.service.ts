@@ -5,6 +5,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { GatewaySource } from 'src/common/enums/gateway-source';
 import { generateHash } from 'src/common/utils/generateHash';
 import { ConfigService } from '@nestjs/config';
+import { verifyPaymentHash } from 'src/common/utils/verifyPaymentHash';
 
 @Injectable()
 export class EdfapayService {
@@ -28,7 +29,7 @@ export class EdfapayService {
         }
         const secretKey = this.configService.get<string>('EDFA_SECRET_KEY')!;
         console.log(secretKey)
-        const generatedHash = generateHash(
+        const generatedHash = verifyPaymentHash(
             order_id,
             amount,
             currency,
