@@ -22,7 +22,7 @@ export class OtpCodeService {
     @Inject(forwardRef(() => CustomerService)) private customerService: CustomerService
   ) {}
 
-  async sendOtp(dto: SendOtpDto, type: 'customer' | 'owner', lang: Language = Language.en) {
+  async sendOtp(dto: SendOtpDto, type: 'customer' | 'owner') {
     const {phone} = dto
     if (type === 'owner') {
         const owner = await this.ownerService.findByPhone(dto.phone)

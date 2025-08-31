@@ -60,14 +60,13 @@ import { ConfigModule } from '@nestjs/config';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     I18nModule.forRoot({
-      fallbackLanguage: 'en',
+      fallbackLanguage: 'ar',
       loaderOptions: {
         path: path.resolve(process.cwd(), 'src/i18n'),
         watch: false,
       },
       resolvers: [
-        { use: QueryResolver, options: ['lang', 'locale'] },
-        new HeaderResolver(['accept-language']), 
+        new HeaderResolver(['Accept-Language', 'accept-language']), 
       ],
     }),    
     JwtModule.register({ global: true, secret: 'token' }),

@@ -58,10 +58,8 @@ export class OtpCodeController {
   @Post('send/owner')
   sendOtpForOwner(
     @Body() body: SendOtpDto,
-    @I18n() i18n: I18nContext
   ) {
-    const lang = getLang(i18n);
-    return this.otpCodeService.sendOtp(body, 'owner', lang);
+    return this.otpCodeService.sendOtp(body, 'owner');
   }
 
   @ApiOperation({ summary: 'Send OTP to customer' })
@@ -74,9 +72,7 @@ export class OtpCodeController {
   @Post('send/customer')
   sendOtpForCustomer(
     @Body() body: SendOtpDto,
-    @I18n() i18n: I18nContext
   ) {
-    const lang = getLang(i18n);
-    return this.otpCodeService.sendOtp(body, 'customer', lang);
+    return this.otpCodeService.sendOtp(body, 'customer');
   }
 }

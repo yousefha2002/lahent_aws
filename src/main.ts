@@ -35,6 +35,10 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document);
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(bodyParser.json()); 
+  app.use((req, res, next) => {
+    console.log('Headers:', req.headers);
+    next();
+  });
   app.enableCors();
   app.useGlobalPipes(
     new ValidationPipe({
