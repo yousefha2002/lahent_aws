@@ -197,7 +197,11 @@ export class ProductController {
   @UseGuards(StoreOrOwnerGuard, ApprovedStoreGuard)
   @Get('all')
   @ApiOperation({ summary: 'Get all products of the current store' })
-  @ApiQuery({ name: 'storeId', required: false, example: '1' })
+  @ApiQuery({ name: 'storeId', required: false, type: Number })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'categoryId', required: false, type: Number })
+  @ApiQuery({ name: 'name', required: false, type: String })
   @ApiSecurity('access-token')
   @ApiResponse({ status: 200, description: 'Paginated list of products for the store', type: PaginatedSimpleProductDto})
   async getProductsByStore(

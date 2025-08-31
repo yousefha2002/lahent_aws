@@ -16,15 +16,18 @@ export class EdfapayService {
     ){}
     async handleNotification(body:any)
     {
+        console.log(body)
         const { order_id, amount, currency, hash, status,trans_id } = body;
         if (!order_id || !amount || !currency || !hash || !status) {
             throw new BadRequestException('Invalid payload');
         }
         const session = await this.paymentSessionService.getByPaymentOrderId(order_id)
+        console.log(session)
         if (session.status === 'success') {
             return { message: 'Payment already processed' };
         }
         const secretKey = this.configService.get<string>('EDFA_SECRET_KEY')!;
+        console.log(secretKey)
         const generatedHash = generateHash(
             session.paymentOrderId,
             session.amount.toString(),
@@ -32,6 +35,8 @@ export class EdfapayService {
             session.description,
             secretKey
         );
+        console.log(generatedHash)
+        console.log(body.hash)
         if (body.hash !== generatedHash) {
             throw new BadRequestException('Invalid hash');
         }

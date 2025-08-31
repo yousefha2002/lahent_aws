@@ -30,7 +30,7 @@ import { I18n, I18nContext } from 'nestjs-i18n';
 export class SubtypeController {
   constructor(private readonly subtypeService: SubtypeService) {}
 
-  @ApiOperation({ summary: 'Create a new sub type with icon (admin only)' })
+  @ApiOperation({ summary: 'Create a new sub type (admin only)' })
   @ApiSecurity('access-token')
   @ApiBody({
     schema: {

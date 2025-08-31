@@ -45,4 +45,9 @@ export class PaymentSessionService {
         if (!session) throw new NotFoundException('Payment session not found');
         return session;
     }
+
+    findAll()
+    {
+        return this.paymentSessionRepo.findAll()
+    }
 }
