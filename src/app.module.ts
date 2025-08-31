@@ -30,7 +30,7 @@ import { CarModule } from './modules/car/car.module';
 import { MulterConfigService } from './multer/multer.config';
 import { MulterModule } from '@nestjs/platform-express';
 import { AvatarModule } from './modules/avatar/avatar.module';
-import { I18nModule, QueryResolver, HeaderResolver } from 'nestjs-i18n';
+import { I18nModule, AcceptLanguageResolver } from 'nestjs-i18n';
 import { CarTypeModule } from './modules/car_type/car_type.module';
 import { CarBrandModule } from './modules/car_brand/car_brand.module';
 import { CarModelModule } from './modules/car_model/car_model.module';
@@ -66,7 +66,7 @@ import { ConfigModule } from '@nestjs/config';
         watch: false,
       },
       resolvers: [
-        new HeaderResolver(['Accept-Language', 'accept-language']), 
+        new AcceptLanguageResolver(), 
       ],
     }),    
     JwtModule.register({ global: true, secret: 'token' }),
