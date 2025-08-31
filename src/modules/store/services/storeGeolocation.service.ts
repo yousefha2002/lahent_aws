@@ -1,7 +1,7 @@
 import { StoreUtilsService } from './storeUtils.service';
 import { RecentAddressService } from '../../recent_address/recent_address.service';
 import { AddressService } from '../../address/address.service';
-import {BadRequestException,Inject,Injectable,NotFoundException,} from '@nestjs/common';
+import {BadRequestException,Inject,Injectable,} from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
 import { Store } from '../entities/store.entity';
 import { GetNearbyStoresDto } from '../dto/get-nearby-store.dto';

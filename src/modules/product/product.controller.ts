@@ -35,6 +35,7 @@ import { ApprovedStoreGuard } from 'src/common/guards/approvedStore.guard';
 import { ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
+import { AdminGuard } from 'src/common/guards/admin.guard';
 
 @Controller('product')
 export class ProductController {
@@ -242,7 +243,7 @@ export class ProductController {
   }
 
   @Put('active/:productId')
-  @UseGuards(StoreOrOwnerGuard, ApprovedStoreGuard)
+  @UseGuards(AdminGuard)
   @ApiOperation({ summary: 'Toggle product active status' })
   @ApiSecurity('access-token')
   @ApiQuery({ name: 'storeId', required: false, example: '1' })

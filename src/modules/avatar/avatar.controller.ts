@@ -68,10 +68,4 @@ export class AvatarController {
     const lang = getLang(i18n);
     return this.avatarService.create(lang, file);
   }
-
-  @Get('test')
-  checkHeaders(@Req() req: Request) {
-    console.log(req.headers);
-    return req.headers;
-  }
 }

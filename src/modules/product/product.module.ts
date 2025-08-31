@@ -14,6 +14,7 @@ import { CategoryModule } from '../category/category.module';
 import { OfferModule } from '../offer/offer.module';
 import { ProductCategoryVariantModule } from '../product_category_variant/product_category_variant.module';
 import { ProductLanguageProvider } from './providers/product_language.provider';
+import { AdminModule } from '../admin/admin.module';
 
 @Module({
   controllers: [ProductController],
@@ -30,7 +31,8 @@ import { ProductLanguageProvider } from './providers/product_language.provider';
     forwardRef(() => ProductExtraModule),
     forwardRef(() => ProductInstructionModule),
     forwardRef(() => ProuductVariantModule),
-    ProductCategoryVariantModule
+    ProductCategoryVariantModule,
+    AdminModule
   ],
 })
 export class ProductModule {}
