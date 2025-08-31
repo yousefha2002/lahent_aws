@@ -32,8 +32,10 @@ export class EdfapayService {
             String(session.description),
             String(secretKey)
         );
+        console.log('start')
         console.log(generatedHash)
         console.log(body.hash)
+        console.log('finish')
         if (body.hash !== generatedHash) {
             throw new BadRequestException('Invalid hash');
         }
