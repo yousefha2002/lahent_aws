@@ -18,7 +18,7 @@ export class EdfapayService {
     async handleNotification(body:any)
     {
         console.log(body)
-        const { order_id, amount, currency, hash, status,trans_id,description} = body;
+        const { order_id, amount, currency, hash, status,trans_id} = body;
         if (!order_id || !amount || !currency || !hash || !status) {
             throw new BadRequestException('Invalid payload');
         }
@@ -33,7 +33,7 @@ export class EdfapayService {
             order_id,
             amount,
             currency,
-            description,
+            session.description,
             secretKey
         );
         console.log(generatedHash)
