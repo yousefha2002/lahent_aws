@@ -32,19 +32,19 @@ import { OrderQueueScheduler } from './order.scheduler';
     OrderPointsService,
     OrderStatusService,
     ...OrderProvider,
-    OrderQueueScheduler
+    // OrderQueueScheduler
   ],
   imports: [
-    BullModule.forRoot({
-      redis: {
-        host: process.env.REDIS_HOST,
-        port: Number(process.env.REDIS_PORT),
-        tls: {}
-      },
-    }),
-    BullModule.registerQueue({
-      name: 'orders',
-    }),
+    // BullModule.forRoot({
+    //   redis: {
+    //     host: process.env.REDIS_HOST,
+    //     port: Number(process.env.REDIS_PORT),
+    //     tls: {}
+    //   },
+    // }),
+    // BullModule.registerQueue({
+    //   name: 'orders',
+    // }),
     CartModule,
     CustomerModule,
     CouponModule,

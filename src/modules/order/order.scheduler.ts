@@ -6,9 +6,9 @@ import { Queue } from 'bull';
 export class OrderQueueScheduler {
     constructor(@InjectQueue('orders') private readonly orderQueue: Queue) {}
 
-    async onApplicationBootstrap() {
-        await this.scheduleJobs();
-    }
+    // async onApplicationBootstrap() {
+    //     await this.scheduleJobs();
+    // }
 
     async scheduleJobs() {
         const cron = '* * * * *'; // كل دقيقة
