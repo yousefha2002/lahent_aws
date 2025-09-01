@@ -1,3 +1,4 @@
+import { TypeService } from './../../type/type.service';
 import { StoreService } from './store.service';
 import {BadRequestException,forwardRef,Inject,Injectable,NotFoundException,} from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
@@ -27,6 +28,7 @@ export class StoreAuthService {
         private readonly openingHourService: OpeningHourService,
         @Inject(forwardRef(() => SubtypeService))
         private subTypeService: SubtypeService,
+        private typeService:TypeService,
         private readonly i18n: I18nService, 
         private jwtService: JwtService,
         private storeService:StoreService

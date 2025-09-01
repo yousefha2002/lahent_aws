@@ -222,7 +222,7 @@ export class StoreController {
   @ApiOperation({ summary: 'Get full details of a store by ID (customer only)' })
   @ApiSecurity('access-token')
   @ApiParam({ name: 'id', description: 'ID of the store', example: 1 })
-  @ApiResponse({status: 200,description: 'full details of store',type: FullDetailsStoreDto,})
+  @ApiResponse({status: 200,description: 'full details of store',type: FullDetailsStoreDto})
   async getFullDetailsStore(
     @Param('id') storeId: number,
     @I18n() i18n: I18nContext,
@@ -230,6 +230,17 @@ export class StoreController {
   ) {
     const lang = getLang(i18n);
     return this.storeService.getFullDetailsStore(storeId,customer.id, lang);
+  }
+
+  @Serilaize(StoreDto)
+  @Get(':id/action')
+  @ApiOperation({ summary: 'Get full details of a store by ID for actions (owner or store only)' })
+  @ApiParam({ name: 'id', description: 'ID of the store', example: 1 })
+  @ApiResponse({status: 200,description: 'full details of store',type: StoreDto})
+  async getStoreDetailsForAction(@Param('id') storeId: number,@I18n() i18n: I18nContext)
+  {
+    const lang = getLang(i18n);
+    return this.storeService.getStoreDetailsForAction(storeId,lang)
   }
 
   @Put('/:storeId/approved')
@@ -282,7 +293,6 @@ export class StoreController {
     schema: { example: { message: 'Store updated successfully' } },
   })
   @UseGuards(StoreOrOwnerGuard)
-
   updateStore(@CurrentUser() store: Store, @Body() dto: UpdateStoreDto,@I18n() i18n: I18nContext) {
     const lang = getLang(i18n);
     return this.storeService.updateStore(store, dto,lang);

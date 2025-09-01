@@ -21,7 +21,6 @@ export class TypeService {
     @Inject(repositories.type_repository) private typeRepo: typeof Type,
     @Inject(repositories.typeLanguage_repository)
     private typeLangRepo: typeof TypeLanguage,
-    @Inject(forwardRef(() => StoreService)) private storeService: StoreService,
     private readonly cloudinaryService: CloudinaryService,
     private readonly i18n: I18nService,
     @Inject(forwardRef(() => SubtypeService))

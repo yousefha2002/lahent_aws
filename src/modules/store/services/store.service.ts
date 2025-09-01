@@ -1,3 +1,4 @@
+import { TypeService } from './../../type/type.service';
 import { FaviroteService } from './../../favirote/favirote.service';
 import { StoreUtilsService } from './storeUtils.service';
 import {
@@ -24,6 +25,7 @@ import { Op } from 'sequelize';
 import { I18nService } from 'nestjs-i18n';
 import { Customer } from 'src/modules/customer/entities/customer.entity';
 import { StoreLanguage } from '../entities/store_language.entity';
+import { SubtypeService } from 'src/modules/subtype/subtype.service';
 
 @Injectable()
 export class StoreService {
@@ -35,6 +37,7 @@ export class StoreService {
     private readonly storeUtilsService: StoreUtilsService,
     @Inject(repositories.store_langauge_repository) private storeLanguageRepo: typeof StoreLanguage,
     private readonly i18n: I18nService,
+    private subTypeService: SubtypeService,
     @Inject(forwardRef(() => FaviroteService)) private faviroteService: FaviroteService,
   ) {}
 
@@ -116,6 +119,35 @@ export class StoreService {
     );
   }
 
+  async getStoreDetailsForAction(storeId: number,lang:Language)
+  {
+    const store = await this.storeRepo.findOne({
+      where: {
+        id: storeId,
+        status: StoreStatus.APPROVED,
+      },
+      include: [
+        {
+          model: StoreLanguage,
+        },
+        {
+          model: SubType,
+          include: [
+            { model: SubTypeLanguage,where:{languageCode:lang}},
+            { model: Type, include: [{model:TypeLanguage,where:{languageCode:lang}}] },
+          ],
+        },
+        { model: OpeningHour },
+      ],
+    });
+    if (!store) {
+      throw new NotFoundException(
+        this.i18n.t('translation.store.not_found_or_not_approved'),
+      );
+    }
+    return store
+  }
+
   async getFullDetailsStore(storeId: number,customerId:number, lang: Language = Language.en) {
     const store = await this.storeRepo.findOne({
       where: {
@@ -177,15 +209,20 @@ export class StoreService {
         throw new BadRequestException(this.i18n.t('translation.store.phone_in_use',{lang}));
       }
     }
+    if(dto.subType!==undefined)
+    {
+      await this.subTypeService.subTypeById(+dto.subType)
+    }
     Object.assign(store, {
       ...(dto.phone !== undefined && { phone: dto.phone }),
       ...(dto.in_store !== undefined && { in_store: dto.in_store }),
       ...(dto.drive_thru !== undefined && { drive_thru: dto.drive_thru }),
       ...(dto.city !== undefined && { city: dto.city }),
-      ...(dto.commercialRegister !== undefined && {
-        commercialRegister: dto.commercialRegister,
-      }),
+      ...(dto.commercialRegister !== undefined && {commercialRegister: dto.commercialRegister}),
       ...(dto.taxNumber !== undefined && { taxNumber: dto.taxNumber }),
+      ...(dto.lat !== undefined && { lat: dto.lat }),
+      ...(dto.lng !== undefined && { lng: dto.lng }),
+      ...(dto.subType !== undefined && { subType: dto.subType })
     });
     await store.save();
     if (dto.openingHours && dto.openingHours.length > 0) {

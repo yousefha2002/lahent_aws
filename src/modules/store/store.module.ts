@@ -23,7 +23,7 @@ import { StoreLanguageProvider } from './providers/storeLangauge.provider';
   imports: [
     OwnerModule,
     CloudinaryModule,
-    forwardRef(() => TypeModule),
+    TypeModule,
     forwardRef(() => SubtypeModule),
     OpeningHourModule,
     AddressModule,

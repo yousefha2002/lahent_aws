@@ -13,7 +13,6 @@ import { SubtypeModule } from '../subtype/subtype.module';
   imports: [
     CloudinaryModule,
     AdminModule,
-    forwardRef(() => StoreModule),
     forwardRef(() => SubtypeModule),
   ],
   exports: [TypeService],
