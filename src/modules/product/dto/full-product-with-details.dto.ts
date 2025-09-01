@@ -9,7 +9,7 @@ import { ProductExtraDto } from 'src/modules/product_extra/dto/extra-dto';
 export class FullProductDetailsDto extends BaseProductDto {
     @Expose()
     @ApiProperty({ example: 49.99 })
-    finalPrice: number;
+    discountedPrice: number;
 
     @Expose()
     @Type(() => CategoryWithVariantsDto)

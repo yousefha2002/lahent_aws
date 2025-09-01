@@ -250,14 +250,14 @@ export class ProductService {
         const offer = await this.offerService.getActiveOfferForProduct(
           product.id,
         );
-        const finalPrice = offer
+        const discountedPrice = offer
           ? this.offerService.getDiscountedPrice(product.basePrice, offer)
           : product.basePrice;
 
         return {
           ...product.toJSON(),
           images: product.images?.map((img) => img.imageUrl) || [],
-          finalPrice,
+          discountedPrice,
           offer: offer || null,
         };
       }),
@@ -394,13 +394,13 @@ export class ProductService {
     if (!product) throw new BadRequestException('Product not found');
 
     const offer = await this.offerService.getActiveOfferForProduct(product.id);
-    const finalPrice = offer
+    const discountedPrice = offer
       ? this.offerService.getDiscountedPrice(product.basePrice, offer)
       : product.basePrice;
 
     return {
       ...product.toJSON(),
-      finalPrice,
+      discountedPrice,
       images: product.images?.map((img) => img.imageUrl) || [],
       extras: product.extras || [],
       instructions: product.instructions || [],

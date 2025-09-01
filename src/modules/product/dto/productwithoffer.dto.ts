@@ -4,6 +4,10 @@ import { BaseProductDto } from './base-product.dto';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class ProductWithOfferDto extends BaseProductDto {
+    @ApiProperty({ example: 25 })
+    @Expose() 
+    discountedPrice: number;
+
     @ApiProperty({ type: SimpleOfferDto, nullable: true })
     @Expose()
     @Type(() => SimpleOfferDto)
