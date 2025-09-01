@@ -22,6 +22,7 @@ import { UpdateCartProductQuantityDto } from './dto/update-productCart-quantity'
 import { Store } from '../store/entities/store.entity';
 import { I18nService } from 'nestjs-i18n';
 import { Language } from 'src/common/enums/language';
+import { UpdateCartProductDto } from './dto/update-product-cart.dto';
 
 @Injectable()
 export class CartService {
@@ -270,7 +271,7 @@ export class CartService {
 
   async updateProductCartItem(
     cartItemId: number,
-    dto: CreateCartProductDto,
+    dto: UpdateCartProductDto,
     customerId: number,
     lang = Language.en,
   ) {

@@ -22,6 +22,7 @@ import { CompletedProfileGuard } from 'src/common/guards/completed-profile.guard
 import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
+import { UpdateCartProductDto } from './dto/update-product-cart.dto';
 
 @Controller('cart')
 export class CartController {
@@ -59,7 +60,7 @@ export class CartController {
   })
   updateProductForCart(
     @CurrentUser() customer: Customer,
-    @Body() body: CreateCartProductDto,
+    @Body() body: UpdateCartProductDto,
     @Param('cartItemId') cartItemId: string,
     @I18n() i18n: I18nContext
   ) {
