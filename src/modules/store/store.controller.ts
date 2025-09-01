@@ -13,6 +13,7 @@ import {
   Put,
   Param,
   Req,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { CreateStoreDto } from './dto/create-store.dto';
@@ -211,10 +212,10 @@ export class StoreController {
   getAllStores(
     @Query('type') type: number,
     @Query('subType') subType: number,
-    @Query('page') page = 1,
+    @Query('page',ParseIntPipe) page = 1,
     @I18n() i18n: I18nContext,
     @Query('name') name: string,
-    @Query('limit') limit = 10,
+    @Query('limit',ParseIntPipe) limit = 10,
   ) {
     const lang = getLang(i18n);
     return this.storeService.findAllStores(
@@ -363,7 +364,7 @@ export class StoreController {
   @ApiResponse({status: 200,description: 'List of favourite stores with pagination',type: PaginatedStoreDto})
   @Serilaize(PaginatedStoreDto)
   @UseGuards(CustomerGuard)
-  getFavouriteStoresByCustomer(@CurrentUser() user: Customer,@I18n() i18n: I18nContext,@Query('page') page = 1,@Query('limit') limit = 10) {
+  getFavouriteStoresByCustomer(@CurrentUser() user: Customer,@I18n() i18n: I18nContext,@Query('page',ParseIntPipe) page = 1,@Query('limit',ParseIntPipe) limit = 10) {
     const lang = getLang(i18n);
     return this.storeService.getFavouriteStoresByCustomer(user.id,lang,page,limit);
   }

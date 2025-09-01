@@ -39,7 +39,7 @@ export class StoreService {
   ) {}
 
   async findAllStores(
-    lang: Language = Language.en,
+    lang:Language,
     page = 1,
     limit = 10,
     typeId?: number,
@@ -92,7 +92,6 @@ export class StoreService {
     const stores = await this.storeRepo.findAll({
       where: {
         ownerId,
-        status: StoreStatus.APPROVED,
       },
       include: [
         {

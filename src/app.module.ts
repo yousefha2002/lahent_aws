@@ -54,6 +54,7 @@ import { EdfapayModule } from './modules/edfapay/edfapay.module';
 import { VariantCategoryModule } from './modules/variant_category/variant_category.module';
 import { ProductCategoryVariantModule } from './modules/product_category_variant/product_category_variant.module';
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -71,6 +72,7 @@ import { ConfigModule } from '@nestjs/config';
     JwtModule.register({ global: true, secret: 'token' }),
     JwtModule.register({ global: true, secret: 'refresh_token' }),
     DatabaseModule,
+    // ScheduleModule.forRoot(),
     AdminModule,
     AppModule,
     CartModule,

@@ -4,6 +4,7 @@ import {
   Controller,
   Get,
   Param,
+  ParseIntPipe,
   Post,
   Put,
   Query,
@@ -178,8 +179,8 @@ export class ProductController {
     @Param('storeId') storeId: number,
     @Query('categoryId') categoryId: number,
     @I18n() i18n: I18nContext,
-    @Query('page') page = 1,
-    @Query('limit') limit = 10,
+    @Query('page',ParseIntPipe) page = 1,
+    @Query('limit',ParseIntPipe) limit = 10,
     @Query('name') name: string,
   ) {
     const lang = getLang(i18n);
@@ -207,8 +208,8 @@ export class ProductController {
   async getProductsByStore(
     @CurrentUser() store: Store,
     @Query('categoryId') categoryId: number,
-    @Query('page') page = 1,
-    @Query('limit') limit = 10,
+    @Query('page',ParseIntPipe) page = 1,
+    @Query('limit',ParseIntPipe) limit = 10,
     @Query('name') name: string,
     @I18n() i18n: I18nContext
   ) {

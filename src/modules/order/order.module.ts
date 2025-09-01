@@ -23,6 +23,7 @@ import { OfferModule } from '../offer/offer.module';
 import { ProductModule } from '../product/product.module';
 import { BullModule } from '@nestjs/bull';
 import { OrderQueueScheduler } from './order.scheduler';
+import { OrderCronService } from './services/order_corn.service';
 
 @Module({
   controllers: [OrderController],
@@ -31,6 +32,7 @@ import { OrderQueueScheduler } from './order.scheduler';
     OrderPaymentService,
     OrderPointsService,
     OrderStatusService,
+    // OrderCronService,
     ...OrderProvider,
     // OrderQueueScheduler
   ],
