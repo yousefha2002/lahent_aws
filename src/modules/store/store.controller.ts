@@ -12,7 +12,6 @@ import {
   Query,
   Put,
   Param,
-  Req,
   ParseIntPipe,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
@@ -35,7 +34,6 @@ import { StoreOrOwnerGuard } from 'src/common/guards/StoreOrOwner.guard';
 import { Store } from './entities/store.entity';
 import { UpdateStoreDto } from './dto/update-store.dto';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
-import { StoreDetailsDto } from './dto/store-details.dto';
 import { Owner } from '../owner/entities/owner.entity';
 import { OwnerStoreDto, PaginatedStoreDto, StoreDto } from './dto/Store.dto';
 import { StoreWithTokenDto } from './dto/simple-store.dto';
@@ -145,17 +143,6 @@ export class StoreController {
   login(@Body() body: LoginStoreDto,@I18n() i18n: I18nContext) {
     const lang = getLang(i18n);
     return this.storeAuthService.login(body,lang);
-  }
-
-  @Get('details')
-  @ApiOperation({ summary: 'Get store details for update action' })
-  @ApiResponse({status: 200,description: 'Store login successful',type: StoreDetailsDto})
-  @ApiQuery({ name: 'storeId', required: false, example: '1' })
-  @ApiSecurity('access-token')
-  @Serilaize(StoreDetailsDto)
-  @UseGuards(StoreOrOwnerGuard)
-  getStoreDetails(@CurrentUser() store: Store) {
-    return this.storeService.getStoreDetails(store.id);
   }
 
   @Get('byOwner')

@@ -95,6 +95,11 @@ export class StoreService {
       },
       include: [
         {
+          model: StoreLanguage,
+          where: { languageCode: lang },
+          required: false
+        },
+        {
           model: SubType,
           include: [
             { model: SubTypeLanguage,where:{languageCode:lang} },
@@ -285,13 +290,6 @@ export class StoreService {
     }
 
     return date >= openDate && date <= closeDate;
-  }
-
-  async getStoreDetails(storeId: number) {
-    return this.storeRepo.findOne({
-      where: { id: storeId },
-      include: [{ model: OpeningHour }],
-    });
   }
 
   async getFavouriteStoresByCustomer(customerId: number, lang: Language = Language.en,page:number,limit:number,type?:number)

@@ -15,7 +15,7 @@ import { StoreLanguageActionDto } from './store-language-action.dto';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateStoreDto {
- @ApiProperty({ example: '0501234567', required: false })
+  @ApiProperty({ example: '0501234567', required: false })
   @Transform(({ value }) => value?.replace(/\D/g, ''))
   @IsOptional()
   @IsMobilePhone()
