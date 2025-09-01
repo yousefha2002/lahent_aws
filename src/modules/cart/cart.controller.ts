@@ -52,7 +52,7 @@ export class CartController {
   @ApiOperation({ summary: 'Update a product in the customer cart' })
   @ApiSecurity('access-token')
   @ApiParam({ name: 'cartItemId', type: Number, description: 'ID of the cart item', example: 10 })
-  @ApiBody({ type: CreateCartProductDto })
+  @ApiBody({ type: UpdateCartProductDto })
   @ApiResponse({
     status: 200,
     description: 'Cart product updated successfully',
