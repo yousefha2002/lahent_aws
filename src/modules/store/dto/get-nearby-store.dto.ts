@@ -19,19 +19,4 @@ export class GetNearbyStoresDto {
   @IsOptional()
   @IsNumber()
   targetLng?: number;
-
-  @ApiPropertyOptional({ example: 'Riyadh, Saudi Arabia', description: 'Address (optional, for range search)' })
-  @IsOptional()
-  @IsString()
-  address?: string;
-
-  @ApiPropertyOptional({ example: 1, description: 'Address ID to search nearby stores from (optional)' })
-  @IsOptional()
-  @IsNumber()
-  addressId?: number;
-
-  @ApiPropertyOptional({ example: 2, description: 'Recent address ID to search nearby stores from (optional)' })
-  @IsOptional()
-  @IsNumber()
-  recentAddressId?: number;
 }

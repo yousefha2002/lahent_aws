@@ -57,37 +57,4 @@ export class AddressService {
         }
         return address
     }
-
-    calculateDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
-        const R = 6371; // نصف قطر الأرض بالكيلومتر
-        const dLat = (lat2 - lat1) * (Math.PI / 180);
-        const dLng = (lng2 - lng1) * (Math.PI / 180);
-        const a =
-            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-            Math.cos(lat1 * (Math.PI / 180)) *
-            Math.cos(lat2 * (Math.PI / 180)) *
-            Math.sin(dLng / 2) * Math.sin(dLng / 2);
-
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        const distance = R * c;
-        return distance; // بالكيلومتر
-    }
-
-    isBetween(lat: number,lng: number,lat1: number,lng1: number,lat2: number,lng2: number,bufferMeters = 300): boolean {
-        // تقريب الإحداثيات إلى كيلومتر
-        const toKm = (deg: number) => deg * 111;
-        const x0 = toKm(lat);
-        const y0 = toKm(lng);
-        const x1 = toKm(lat1);
-        const y1 = toKm(lng1);
-        const x2 = toKm(lat2);
-        const y2 = toKm(lng2);
-
-        // المسافة العمودية من النقطة إلى الخط
-        const num = Math.abs((y2 - y1) * (x0 - x1) - (x2 - x1) * (y0 - y1));
-        const den = Math.sqrt((y2 - y1) ** 2 + (x2 - x1) ** 2);
-        const distanceKm = num / den;
-
-        return distanceKm * 1000 <= bufferMeters; // بالمتر
-    }
 }

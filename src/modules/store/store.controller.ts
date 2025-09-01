@@ -158,18 +158,15 @@ export class StoreController {
 
   @Post('nearby')
   @Serilaize(PaginatedStoreDto)
-  @UseGuards(CustomerGuard)
-  @ApiOperation({ summary: 'Get nearby stores based on customer location' })
+  @ApiOperation({ summary: 'Get nearby stores based on  location' })
   @ApiQuery({ name: 'type', type: Number, required: false, example: 1 })
   @ApiQuery({ name: 'subType', type: Number, required: false, example: 2 })
   @ApiQuery({ name: 'page', type: Number, required: false, example: 2 })
   @ApiQuery({ name: 'limit', type: Number, required: false, example: 2 })
-  @ApiSecurity('access-token')
   @ApiResponse({status: 200,type: [PaginatedStoreDto]})
   @ApiBody({ type: GetNearbyStoresDto })
   async getNearbyStores(
     @Body() dto: GetNearbyStoresDto,
-    @CurrentUser() customer: Customer,
     @I18n() i18n: I18nContext,
     @Query('type', new ParseIntPipe({ optional: true })) type?: number,
     @Query('subType', new ParseIntPipe({ optional: true })) subType?: number,
@@ -179,7 +176,6 @@ export class StoreController {
     const lang = getLang(i18n);
     return this.storeGeolocationService.findStoresNearbyOrBetween(
       dto,
-      customer.id,
       lang,
       +page,
       +limit,
@@ -229,7 +225,20 @@ export class StoreController {
     @CurrentUser() customer:Customer
   ) {
     const lang = getLang(i18n);
-    return this.storeService.getFullDetailsStore(storeId,customer.id, lang);
+    return this.storeService.getFullDetailsStore(storeId, lang,customer.id);
+  }
+
+  @Serilaize(StoreDto)
+  @Get('guest/:id')
+  @ApiOperation({ summary: 'Get full details of a store by ID (guest)' })
+  @ApiParam({ name: 'id', description: 'ID of the store', example: 1 })
+  @ApiResponse({ status: 200, description: 'full details of store', type: StoreDto })
+  async getFullDetailsStoreGuest(
+    @Param('id') storeId: number,
+    @I18n() i18n: I18nContext,
+  ) {
+    const lang = getLang(i18n);
+    return this.storeService.getFullDetailsStore(storeId, lang);
   }
 
   @Serilaize(StoreDto)

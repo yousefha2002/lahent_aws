@@ -34,7 +34,6 @@ import { I18nModule, AcceptLanguageResolver } from 'nestjs-i18n';
 import { CarTypeModule } from './modules/car_type/car_type.module';
 import { CarBrandModule } from './modules/car_brand/car_brand.module';
 import { CarModelModule } from './modules/car_model/car_model.module';
-import { RecentAddressModule } from './modules/recent_address/recent_address.module';
 import { OfferProductModule } from './modules/offer_product/offer_product.module';
 import { CouponModule } from './modules/coupon/coupon.module';
 import { SmsModule } from './modules/sms/sms.module';
@@ -107,7 +106,6 @@ import { ScheduleModule } from '@nestjs/schedule';
     CarTypeModule,
     CarBrandModule,
     CarModelModule,
-    RecentAddressModule,
     OfferProductModule,
     CouponModule,
     SmsModule,

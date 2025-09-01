@@ -6,9 +6,7 @@ import { OwnerModule } from '../owner/owner.module';
 import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
 import { TypeModule } from '../type/type.module';
 import { OpeningHourModule } from '../opening_hour/opening_hour.module';
-import { AddressModule } from '../address/address.module';
 import { CustomerModule } from '../customer/customer.module';
-import { RecentAddressModule } from '../recent_address/recent_address.module';
 import { AdminModule } from '../admin/admin.module';
 import { SubtypeModule } from '../subtype/subtype.module';
 import { StoreAuthService } from './services/storeAuth.service';
@@ -26,9 +24,7 @@ import { StoreLanguageProvider } from './providers/storeLangauge.provider';
     TypeModule,
     forwardRef(() => SubtypeModule),
     OpeningHourModule,
-    AddressModule,
     CustomerModule,
-    RecentAddressModule,
     AdminModule,
     forwardRef(()=>FaviroteModule)
   ],

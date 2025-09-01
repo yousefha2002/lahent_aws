@@ -148,7 +148,7 @@ export class StoreService {
     return store
   }
 
-  async getFullDetailsStore(storeId: number,customerId:number, lang: Language = Language.en) {
+  async getFullDetailsStore(storeId: number, lang: Language,customerId?:number) {
     const store = await this.storeRepo.findOne({
       where: {
         id: storeId,
@@ -175,11 +175,15 @@ export class StoreService {
         this.i18n.t('translation.store.not_found_or_not_approved'),
       );
     }
-    let isFavorite = false
-    const favorite = await this.faviroteService.findFavoriteStore(storeId,customerId)
-    isFavorite = favorite ? true : false
-    const storeResponce = await this.storeUtilsService.mapStoreWithExtras(store);
-    return {store:storeResponce,isFavorite}
+    if(customerId)
+    {
+      let isFavorite = false
+      const favorite = await this.faviroteService.findFavoriteStore(storeId,customerId)
+      isFavorite = favorite ? true : false
+      const storeResponce = await this.storeUtilsService.mapStoreWithExtras(store);
+      return {store:storeResponce,isFavorite}
+    }
+    return store
   }
 
   async changeStoreStatus(status: StoreStatus, storeId: number,lang = Language.en) {

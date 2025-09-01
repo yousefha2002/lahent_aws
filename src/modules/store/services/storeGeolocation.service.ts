@@ -1,5 +1,4 @@
 import { StoreUtilsService } from './storeUtils.service';
-import { RecentAddressService } from '../../recent_address/recent_address.service';
 import { AddressService } from '../../address/address.service';
 import {BadRequestException,Inject,Injectable,} from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
@@ -22,29 +21,24 @@ export class StoreGeolocationService {
         @Inject(repositories.store_repository)
         private storeRepo: typeof Store,
         private readonly storeUtilsService: StoreUtilsService,
-        private readonly addressService: AddressService,
-        private readonly recentAddressService: RecentAddressService,
     ) {}
 
 
     async findStoresNearbyOrBetween(
-    dto: GetNearbyStoresDto,
-    customerId: number,
+    dto: GetNearbyStoresDto ,
     lang :Language,
     page:number,
     limit:number,
     typeId?: number,
     subTypeId?: number,
     ) {
-    const { currentLat, currentLng, targetLat, targetLng, addressId, recentAddressId } = dto;
-
-    if (addressId || recentAddressId || (targetLat !== undefined && targetLng !== undefined)) {
-        const targetCoords = await this.getFinalTargetCoordinates(dto, customerId, lang);
+    const {currentLat,currentLng,targetLat,targetLng} = dto
+    if (targetLat !== undefined && targetLng !== undefined) {
         return this.findStoresBetweenPoints(
         currentLat,
         currentLng,
-        targetCoords.lat,
-        targetCoords.lng,
+        targetLat,
+        targetLng,
         lang,
         page,
         limit,
@@ -120,138 +114,70 @@ export class StoreGeolocationService {
     }
 
     async findStoresBetweenPoints(
-        currentLat: number,
-        currentLng: number,
-        finalTargetLat: number,
-        finalTargetLng: number,
-        lang: Language,
-        page:number,
-        limit:number,
-        typeId?: number,
-        subTypeId?: number,
+    currentLat: number,
+    currentLng: number,
+    finalTargetLat: number,
+    finalTargetLng: number,
+    lang: Language,
+    page: number,
+    limit: number,
+    typeId?: number,
+    subTypeId?: number,
     ) {
-        // نحسب مركز الخط
-        const centerLat = (currentLat + finalTargetLat) / 2;
-        const centerLng = (currentLng + finalTargetLng) / 2;
-
-        // نصف طول الخط بالكيلومتر
-        const lineDistanceKm = this.addressService.calculateDistance(
-            currentLat,
-            currentLng,
-            finalTargetLat,
-            finalTargetLng
-        ) / 1000; // إذا الدالة بالميتر
-        const bufferKm = 0.3; // 300 متر حول الخط
-        const radiusKm = lineDistanceKm / 2 + bufferKm;
-
         const offset = (page - 1) * limit;
+        const bufferMeters = 300; // مسافة السماح حول الخط بالمتر
 
-        // نحسب العدد الإجمالي قبل الـ pagination
+        // نحول المسافة بالمتر إلى درجة تقريباً
+        const degToKm = 111; // 1 درجة ~ 111 كم تقريباً
+        const bufferDeg = bufferMeters / 1000 / degToKm;
+
+        // معادلة تقريبية للمسافة العمودية على الخط
+        const distanceSql = `
+            ABS((${finalTargetLng} - ${currentLng}) * (lat - ${currentLat}) - (${finalTargetLat} - ${currentLat}) * (lng - ${currentLng})) 
+            / SQRT(POWER((${finalTargetLng} - ${currentLng}), 2) + POWER((${finalTargetLat} - ${currentLat}), 2))
+        `;
+
+        // تعداد إجمالي
         const totalItems = await this.storeRepo.count({
             where: {
-                status: StoreStatus.APPROVED,
-                ...(subTypeId && { subTypeId }),
-                [Op.and]: literal(`
-                    6371 * 2 * ASIN(
-                    SQRT(
-                        POWER(SIN((lat - ${centerLat}) * PI()/180 / 2), 2) +
-                        COS(${centerLat} * PI()/180) * COS(lat * PI()/180) *
-                        POWER(SIN((lng - ${centerLng}) * PI()/180 / 2), 2)
-                    )
-                    ) <= ${radiusKm}
-                `),
+            status: StoreStatus.APPROVED,
+            ...(subTypeId && { subTypeId }),
+            [Op.and]: literal(`${distanceSql} <= ${bufferDeg}`),
             },
         });
 
-        // نجيب المتاجر حول مركز الخط مع pagination
+        // جلب المتاجر مع pagination وترتيب حسب الأقرب للخط
         const stores = await this.storeRepo.findAll({
             where: {
-                status: StoreStatus.APPROVED,
-                ...(subTypeId && { subTypeId }),
-                [Op.and]: literal(`
-                    6371 * 2 * ASIN(
-                    SQRT(
-                        POWER(SIN((lat - ${centerLat}) * PI()/180 / 2), 2) +
-                        COS(${centerLat} * PI()/180) * COS(lat * PI()/180) *
-                        POWER(SIN((lng - ${centerLng}) * PI()/180 / 2), 2)
-                    )
-                    ) <= ${radiusKm}
-                `),
+            status: StoreStatus.APPROVED,
+            ...(subTypeId && { subTypeId }),
+            [Op.and]: literal(`${distanceSql} <= ${bufferDeg}`),
             },
             include: [
-                {
-                    model: SubType,
-                    ...(typeId && { where: { typeId } }),
-                    include: [
-                        { model: SubTypeLanguage, where: { languageCode: lang } },
-                        { model: Type, include: [{ model: TypeLanguage, where: { languageCode: lang } }] },
-                    ],
-                },
-                { model: StoreLanguage, where: { languageCode: lang } },
-                { model: OpeningHour },
+            {
+                model: SubType,
+                ...(typeId && { where: { typeId } }),
+                include: [
+                { model: SubTypeLanguage, where: { languageCode: lang } },
+                { model: Type, include: [{ model: TypeLanguage, where: { languageCode: lang } }] },
+                ],
+            },
+            { model: StoreLanguage, where: { languageCode: lang } },
+            { model: OpeningHour },
             ],
             offset,
             limit,
             order: literal(`
-                6371 * 2 * ASIN(
-                    SQRT(
-                        POWER(SIN((lat - ${centerLat}) * PI()/180 / 2), 2) +
-                        COS(${centerLat} * PI()/180) * COS(lat * PI()/180) *
-                        POWER(SIN((lng - ${centerLng}) * PI()/180 / 2), 2)
-                    )
-                )
-            `), // ترتيب حسب الأقرب
-        });
-
-        // نصفي المتاجر بدقة أعلى على الخط
-        const filtered = stores.filter(store =>
-            this.addressService.isBetween(
-                store.lat,
-                store.lng,
-                currentLat,
-                currentLng,
-                finalTargetLat,
-                finalTargetLng,
-                300 // buffer بالمتر
+            SQRT(
+                POWER(lat - ${currentLat}, 2) + POWER(lng - ${currentLng}, 2)
             )
-        );
+            `), // ترتيب حسب الأقرب من نقطة البداية
+        });
 
         return {
             totalItems,
-            stores: filtered.map(store => this.storeUtilsService.mapStoreWithExtras(store)),
+            stores: stores.map(store => this.storeUtilsService.mapStoreWithExtras(store)),
+            totalPages: Math.ceil(totalItems / limit)
         };
-    }
-
-    async getFinalTargetCoordinates(
-        dto: GetNearbyStoresDto,
-        customerId: number,
-        lang = Language.en,
-    ): Promise<{ lat: number; lng: number }> {
-        const { addressId, recentAddressId, targetLat, targetLng, address } = dto;
-        if (addressId) {
-        const addressEntity = await this.addressService.findOneOrFail(
-            addressId,
-            customerId,
-            lang,
-        );
-        return { lat: addressEntity.lat, lng: addressEntity.lng };
-        }
-        if (recentAddressId) {
-        const recent = await this.recentAddressService.findOneOrFail(
-            recentAddressId,
-            customerId,
-            lang,
-        );
-        return { lat: recent.lat, lng: recent.lng };
-        }
-        if (targetLat && targetLng) {
-        await this.recentAddressService.addRecentAddress(customerId, {
-            lat: targetLat,
-            lng: targetLng,
-            address: address ?? 'Unknown',
-        });
-        return { lat: targetLat, lng: targetLng };
-        }
-        throw new BadRequestException('Target address information is required');
     }
 }
