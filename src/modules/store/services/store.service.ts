@@ -294,7 +294,7 @@ export class StoreService {
     });
   }
 
-  async getFavouriteStoresByCustomer(customerId: number, lang: Language = Language.en,page:number,limit:number)
+  async getFavouriteStoresByCustomer(customerId: number, lang: Language = Language.en,page:number,limit:number,type?:number)
   {
     const offset = (page - 1) * limit;
     const { rows, count } = await this.storeRepo.findAndCountAll({
@@ -303,6 +303,7 @@ export class StoreService {
         {model:StoreLanguage,where:{languageCode:lang}},
         {
           model: SubType,
+          ...(type && { where: { typeId:type } }),
           include: [
             { model: SubTypeLanguage,where:{languageCode:lang} },
             { model: Type, include: [{model:TypeLanguage,where:{languageCode:lang}}] },

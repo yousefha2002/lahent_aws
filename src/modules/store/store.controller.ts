@@ -362,16 +362,19 @@ export class StoreController {
   @ApiSecurity('access-token')
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
+  @ApiQuery({ name: 'type', required: false, type: Number, description: 'Filter by store type ID' })
   @ApiResponse({status: 200,description: 'List of favourite stores with pagination',type: PaginatedStoreDto})
   @Serilaize(PaginatedStoreDto)
   @UseGuards(CustomerGuard)
   getFavouriteStoresByCustomer(
     @CurrentUser() user: Customer,
     @I18n() i18n: I18nContext,
+    @Query('type', new ParseIntPipe({ optional: true })) type?: number,
     @Query('page', new ParseIntPipe({ optional: true })) page = 1,
-    @Query('limit', new ParseIntPipe({ optional: true })) limit = 10) {
+    @Query('limit', new ParseIntPipe({ optional: true })) limit = 10) 
+    {
     const lang = getLang(i18n);
-    return this.storeService.getFavouriteStoresByCustomer(user.id,lang,page,limit);
+    return this.storeService.getFavouriteStoresByCustomer(user.id,lang,page,limit,type);
   }
 
   @Post('refresh-token')
