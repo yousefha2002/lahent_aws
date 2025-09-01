@@ -188,8 +188,8 @@ export class ProductController {
     return this.productService.getCustomerStoreProducts(
       storeId,
       lang,
-      +page,
-      +limit,
+      page,
+      limit,
       categoryId,
       name,
     );
@@ -199,18 +199,18 @@ export class ProductController {
   @UseGuards(StoreOrOwnerGuard, ApprovedStoreGuard)
   @Get('all')
   @ApiOperation({ summary: 'Get all products of the current store' })
-  @ApiQuery({ name: 'storeId', required: false, type: String })
-  @ApiQuery({ name: 'page', required: false, type: String })
-  @ApiQuery({ name: 'limit', required: false, type: String })
-  @ApiQuery({ name: 'categoryId', required: false, type: String })
+  @ApiQuery({ name: 'storeId', required: false, type: Number })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'categoryId', required: false, type: Number })
   @ApiQuery({ name: 'name', required: false, type: String })
   @ApiSecurity('access-token')
   @ApiResponse({ status: 200, description: 'Paginated list of products for the store', type: PaginatedSimpleProductDto})
   async getProductsByStore(
     @CurrentUser() store: Store,
     @Query('categoryId') categoryId: number,
-    @Query('page',ParseIntPipe) page = 1,
-    @Query('limit',ParseIntPipe) limit = 10,
+    @Query('page',new ParseIntPipe({ optional: true })) page = 1,
+    @Query('limit',new ParseIntPipe({ optional: true })) limit = 10,
     @Query('name') name: string,
     @I18n() i18n: I18nContext
   ) {
@@ -218,8 +218,8 @@ export class ProductController {
     return this.productService.getProductsByStore(
       store.id,
       lang,
-      +page,
-      +limit,
+      page,
+      limit,
       categoryId,
       name,
     );
