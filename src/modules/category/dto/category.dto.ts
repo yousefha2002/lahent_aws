@@ -12,9 +12,9 @@ export class CategoryTranslationDto {
 }
 
 export class SimpleCategoryDto {
-  @ApiProperty({ example: '1' })
+  @ApiProperty({ example: 1 })
   @Expose()
-  id: string;
+  id: number;
 
   @ApiProperty({ type: [CategoryTranslationDto] })
   @Expose()

@@ -31,7 +31,6 @@ import { CustomerGuard } from 'src/common/guards/customer.guard';
 import { Customer } from '../customer/entities/customer.entity';
 import { StoreStatus } from 'src/common/enums/store_status';
 import { AdminGuard } from 'src/common/guards/admin.guard'; // تأكد أنك مستورد هذا
-import { Language } from 'src/common/enums/language';
 import { StoreOrOwnerGuard } from 'src/common/guards/StoreOrOwner.guard';
 import { Store } from './entities/store.entity';
 import { UpdateStoreDto } from './dto/update-store.dto';
@@ -176,6 +175,8 @@ export class StoreController {
   @ApiOperation({ summary: 'Get nearby stores based on customer location' })
   @ApiQuery({ name: 'type', type: Number, required: false, example: 1 })
   @ApiQuery({ name: 'subType', type: Number, required: false, example: 2 })
+  @ApiQuery({ name: 'page', type: Number, required: false, example: 2 })
+  @ApiQuery({ name: 'limit', type: Number, required: false, example: 2 })
   @ApiSecurity('access-token')
   @ApiResponse({status: 200,type: [PaginatedStoreDto]})
   @ApiBody({ type: GetNearbyStoresDto })
@@ -183,10 +184,10 @@ export class StoreController {
     @Body() dto: GetNearbyStoresDto,
     @CurrentUser() customer: Customer,
     @I18n() i18n: I18nContext,
-    @Query('type') type: number,
-    @Query('subType') subType: number,
-    @Query('page') page = 1,
-    @Query('limit') limit = 20
+    @Query('type', new ParseIntPipe({ optional: true })) type?: number,
+    @Query('subType', new ParseIntPipe({ optional: true })) subType?: number,
+    @Query('page', new ParseIntPipe({ optional: true })) page = 1,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit = 10
   ) {
     const lang = getLang(i18n);
     return this.storeGeolocationService.findStoresNearbyOrBetween(
@@ -210,12 +211,12 @@ export class StoreController {
   @ApiResponse({status: 200,description: 'Paginated list of stores',type: PaginatedStoreDto,})
   @Serilaize(PaginatedStoreDto)
   getAllStores(
-    @Query('type') type: number,
-    @Query('subType') subType: number,
-    @Query('page',ParseIntPipe) page = 1,
     @I18n() i18n: I18nContext,
     @Query('name') name: string,
-    @Query('limit',ParseIntPipe) limit = 10,
+    @Query('type', new ParseIntPipe({ optional: true })) type?: number,
+    @Query('subType', new ParseIntPipe({ optional: true })) subType?: number,
+    @Query('page', new ParseIntPipe({ optional: true })) page = 1,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit = 10,
   ) {
     const lang = getLang(i18n);
     return this.storeService.findAllStores(
@@ -364,7 +365,11 @@ export class StoreController {
   @ApiResponse({status: 200,description: 'List of favourite stores with pagination',type: PaginatedStoreDto})
   @Serilaize(PaginatedStoreDto)
   @UseGuards(CustomerGuard)
-  getFavouriteStoresByCustomer(@CurrentUser() user: Customer,@I18n() i18n: I18nContext,@Query('page',ParseIntPipe) page = 1,@Query('limit',ParseIntPipe) limit = 10) {
+  getFavouriteStoresByCustomer(
+    @CurrentUser() user: Customer,
+    @I18n() i18n: I18nContext,
+    @Query('page', new ParseIntPipe({ optional: true })) page = 1,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit = 10) {
     const lang = getLang(i18n);
     return this.storeService.getFavouriteStoresByCustomer(user.id,lang,page,limit);
   }

@@ -145,7 +145,7 @@ export class ProductController {
     FileFieldsInterceptor([{ name: 'images', maxCount: 5 }], multerOptions),
   )
   async updateProductWithImage(
-    @Param('productId') productId: string,
+    @Param('productId',ParseIntPipe) productId: number,
     @Body() body: UpdateProductWithImageDto,
     @I18n() i18n: I18nContext,
     @UploadedFiles() files: { images?: Express.Multer.File[] },
@@ -174,14 +174,15 @@ export class ProductController {
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiQuery({ name: 'name', required: false, type: String })
+  @ApiParam({ name: 'storeId', type: Number })
   @ApiResponse({status: 200,description: 'Paginated list of products with offers',type: PaginatedProductWithOfferDto})
   async getCustomerStoreProducts(
-    @Param('storeId') storeId: number,
-    @Query('categoryId') categoryId: number,
+    @Param('storeId',ParseIntPipe) storeId: number,
     @I18n() i18n: I18nContext,
-    @Query('page',ParseIntPipe) page = 1,
-    @Query('limit',ParseIntPipe) limit = 10,
     @Query('name') name: string,
+    @Query('categoryId',new ParseIntPipe({ optional: true })) categoryId?: number,
+    @Query('page',new ParseIntPipe({ optional: true })) page = 1,
+    @Query('limit',new ParseIntPipe({ optional: true })) limit = 10,
   ) {
     const lang = getLang(i18n);
     return this.productService.getCustomerStoreProducts(
@@ -198,10 +199,10 @@ export class ProductController {
   @UseGuards(StoreOrOwnerGuard, ApprovedStoreGuard)
   @Get('all')
   @ApiOperation({ summary: 'Get all products of the current store' })
-  @ApiQuery({ name: 'storeId', required: false, type: Number })
-  @ApiQuery({ name: 'page', required: false, type: Number })
-  @ApiQuery({ name: 'limit', required: false, type: Number })
-  @ApiQuery({ name: 'categoryId', required: false, type: Number })
+  @ApiQuery({ name: 'storeId', required: false, type: String })
+  @ApiQuery({ name: 'page', required: false, type: String })
+  @ApiQuery({ name: 'limit', required: false, type: String })
+  @ApiQuery({ name: 'categoryId', required: false, type: String })
   @ApiQuery({ name: 'name', required: false, type: String })
   @ApiSecurity('access-token')
   @ApiResponse({ status: 200, description: 'Paginated list of products for the store', type: PaginatedSimpleProductDto})
@@ -229,7 +230,7 @@ export class ProductController {
   @ApiOperation({ summary: 'Get full details of a product' })
   @ApiParam({ name: 'productId', example: 1 })
   @ApiResponse({ status: 200, type: FullProductDetailsDto })
-  getFullProductDetails(@Param('productId') productId: string,@I18n() i18n: I18nContext,) {
+  getFullProductDetails(@Param('productId',ParseIntPipe) productId: string,@I18n() i18n: I18nContext,) {
     const lang = getLang(i18n);
     return this.productService.getFullProductDetails(+productId,lang);
   }
@@ -242,7 +243,7 @@ export class ProductController {
   @ApiQuery({ name: 'storeId', required: false, example: '1' })
   @ApiParam({ name: 'productId', example: 101 })
   @ApiResponse({ status: 200, type: fullProductDetailsWihtPrivateDetails })
-  getFullProductDetailsForStore(@Param('productId') productId: string, @I18n() i18n: I18nContext,) {
+  getFullProductDetailsForStore(@Param('productId',ParseIntPipe) productId: string, @I18n() i18n: I18nContext,) {
     const lang = getLang(i18n);
     return this.productService.getFullProductDetails(+productId,lang,{ includeInactive: true });
   }
@@ -262,7 +263,7 @@ export class ProductController {
     },
   })
   changeProductActivity(
-    @Param('productId') productId: string,
+    @Param('productId',ParseIntPipe) productId: number,
     @CurrentUser() store: Store,
     @I18n() i18n: I18nContext,
   ) {

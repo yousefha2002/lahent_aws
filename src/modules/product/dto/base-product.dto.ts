@@ -1,6 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Expose, Type } from "class-transformer";
-import { Language } from "src/common/enums/language";
 import { SimpleCategoryDto } from "src/modules/category/dto/category.dto";
 
 export class ProductLanguageDto {
