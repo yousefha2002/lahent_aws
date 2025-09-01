@@ -38,7 +38,7 @@ import { UpdateStoreDto } from './dto/update-store.dto';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { StoreDetailsDto } from './dto/store-details.dto';
 import { Owner } from '../owner/entities/owner.entity';
-import { PaginatedStoreDto, StoreDto } from './dto/Store.dto';
+import { OwnerStoreDto, PaginatedStoreDto, StoreDto } from './dto/Store.dto';
 import { StoreWithTokenDto } from './dto/simple-store.dto';
 import { FullDetailsStoreDto } from './dto/full-details-store.dto';
 import { ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
@@ -161,9 +161,9 @@ export class StoreController {
 
   @Get('byOwner')
   @ApiOperation({ summary: 'Get all stores of the owner' })
-  @ApiResponse({status: 200,description: 'Store login successful',type: [StoreDto]})
+  @ApiResponse({status: 200,type: [OwnerStoreDto]})
   @ApiSecurity('access-token')
-  @Serilaize(StoreDto)
+  @Serilaize(OwnerStoreDto)
   @UseGuards(OwnerGuard)
   findStoresByOwner(@CurrentUser() owner: Owner,@I18n() i18n: I18nContext) {
     const lang = getLang(i18n);

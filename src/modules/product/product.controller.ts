@@ -31,7 +31,7 @@ import {
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { PaginatedProductWithOfferDto } from './dto/productwithoffer.dto';
 import { PaginatedSimpleProductDto } from './dto/product-for-store.dto';
-import { FullProductDetailsDto } from './dto/full-product-with-details.dto';
+import { FullProductDetailsDto, fullProductDetailsWihtPrivateDetails } from './dto/full-product-with-details.dto';
 import { ApprovedStoreGuard } from 'src/common/guards/approvedStore.guard';
 import { ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { I18n, I18nContext } from 'nestjs-i18n';
@@ -235,13 +235,13 @@ export class ProductController {
   }
 
   @UseGuards(StoreOrOwnerGuard, ApprovedStoreGuard)
-  @Serilaize(FullProductDetailsDto)
+  @Serilaize(fullProductDetailsWihtPrivateDetails)
   @Get('/:productId/byStore')
   @ApiOperation({ summary: 'Get full product details for the store (including inactive)' })
   @ApiSecurity('access-token')
   @ApiQuery({ name: 'storeId', required: false, example: '1' })
   @ApiParam({ name: 'productId', example: 101 })
-  @ApiResponse({ status: 200, type: FullProductDetailsDto })
+  @ApiResponse({ status: 200, type: fullProductDetailsWihtPrivateDetails })
   getFullProductDetailsForStore(@Param('productId') productId: string, @I18n() i18n: I18nContext,) {
     const lang = getLang(i18n);
     return this.productService.getFullProductDetails(+productId,lang,{ includeInactive: true });
