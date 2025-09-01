@@ -111,6 +111,7 @@ export class StoreAuthService {
         drive_thru: dto.drive_thru,
         commercialRegister: dto.commercialRegister,
         taxNumber: dto.taxNumber,
+        preparationTime:dto.preparationTime
         });
         return storeCreated;
     }

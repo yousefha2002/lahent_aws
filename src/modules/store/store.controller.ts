@@ -191,7 +191,9 @@ export class StoreController {
   @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number, default is 1' })
   @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Number of items per page, default is 10' })
   @ApiQuery({ name: 'name', required: false, type: String, description: 'Filter by store name' })
-  @ApiResponse({status: 200,description: 'Paginated list of stores',type: PaginatedStoreDto,})
+  @ApiQuery({ name: 'lat', required: false, type: Number, description: 'Latitude of user location' })
+  @ApiQuery({ name: 'lng', required: false, type: Number, description: 'Longitude of user location' })
+  @ApiResponse({status: 200,description: 'Paginated list of stores',type: PaginatedStoreDto})
   @Serilaize(PaginatedStoreDto)
   getAllStores(
     @I18n() i18n: I18nContext,
@@ -200,6 +202,8 @@ export class StoreController {
     @Query('subType', new ParseIntPipe({ optional: true })) subType?: number,
     @Query('page', new ParseIntPipe({ optional: true })) page = 1,
     @Query('limit', new ParseIntPipe({ optional: true })) limit = 10,
+    @Query('lat') lat?: number,
+    @Query('lng') lng?: number
   ) {
     const lang = getLang(i18n);
     return this.storeService.findAllStores(
@@ -209,6 +213,8 @@ export class StoreController {
       type,
       subType,
       name,
+      lat,
+      lng
     );
   }
 

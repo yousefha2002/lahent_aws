@@ -21,7 +21,7 @@ import { UpdateStoreDto } from '../dto/update-store.dto';
 import { SubType } from '../../subtype/entities/subtype.entity';
 import { SubTypeLanguage } from '../../subtype/entities/sybtype_language.entity';
 import { getDayOfWeek } from 'src/common/utils/getDayOfWeek';
-import { Op } from 'sequelize';
+import { Op, Sequelize } from 'sequelize';
 import { I18nService } from 'nestjs-i18n';
 import { Customer } from 'src/modules/customer/entities/customer.entity';
 import { StoreLanguage } from '../entities/store_language.entity';
@@ -48,8 +48,25 @@ export class StoreService {
     typeId?: number,
     subTypeId?: number,
     name?: string,
+    lat?:number,
+    lng?:number
   ) {
     const offset = (page - 1) * limit;
+    const attributes: any = { include: [] };
+
+    let order: any = [['id', 'DESC']];
+
+    if (lat && lng) {
+      const distanceLiteral = Sequelize.literal(`
+        ST_Distance_Sphere(
+          point(Store.lng, Store.lat),
+          point(${lng}, ${lat})
+        )
+      `);
+      attributes.include.push([distanceLiteral, 'distance']);
+      order = [[distanceLiteral, 'ASC']];
+    }
+  
     const { rows, count } = await this.storeRepo.findAndCountAll({
       where: {
         status: StoreStatus.APPROVED,
@@ -80,7 +97,7 @@ export class StoreService {
       limit,
       distinct: true,
       col: 'id',
-      order: [['id', 'DESC']],
+      order
     });
 
     const stores = rows.map((store) =>this.storeUtilsService.mapStoreWithExtras(store));
@@ -226,7 +243,8 @@ export class StoreService {
       ...(dto.taxNumber !== undefined && { taxNumber: dto.taxNumber }),
       ...(dto.lat !== undefined && { lat: dto.lat }),
       ...(dto.lng !== undefined && { lng: dto.lng }),
-      ...(dto.subType !== undefined && { subType: dto.subType })
+      ...(dto.subType !== undefined && { subType: dto.subType }),
+      ...(dto.preparationTime !== undefined && { preparationTime: dto.preparationTime })
     });
     await store.save();
     if (dto.openingHours && dto.openingHours.length > 0) {

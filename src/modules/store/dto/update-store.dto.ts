@@ -9,6 +9,7 @@ import {
   IsNotEmpty,
   IsNumber,
   IsInt,
+  Min,
 } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 import { ActionOpeningHourDto } from 'src/modules/opening_hour/dto/action-open-hour.dto';
@@ -64,6 +65,12 @@ export class UpdateStoreDto {
   @IsOptional()
   @IsString()
   taxNumber?: string;
+
+  @ApiProperty({ example: 15, required: false, description: 'Preparation time in minutes' })
+  @IsOptional()
+  @IsInt({ message: 'Preparation time must be an integer' })
+  @Min(0, { message: 'Preparation time must be at least 1 minute' })
+  preparationTime?: number;
 
   @ApiProperty({ type: [ActionOpeningHourDto] })
   @IsOptional()

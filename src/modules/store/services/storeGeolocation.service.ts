@@ -1,6 +1,5 @@
 import { StoreUtilsService } from './storeUtils.service';
-import { AddressService } from '../../address/address.service';
-import {BadRequestException,Inject,Injectable,} from '@nestjs/common';
+import {Inject,Injectable,} from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
 import { Store } from '../entities/store.entity';
 import { GetNearbyStoresDto } from '../dto/get-nearby-store.dto';
@@ -22,7 +21,6 @@ export class StoreGeolocationService {
         private storeRepo: typeof Store,
         private readonly storeUtilsService: StoreUtilsService,
     ) {}
-
 
     async findStoresNearbyOrBetween(
     dto: GetNearbyStoresDto ,
