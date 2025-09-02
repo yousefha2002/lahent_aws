@@ -80,7 +80,6 @@ export class StoreService {
             [Op.like]: `%${name}%`,
           },
         })},
-          required: false
         },
         {
           model: SubType,
