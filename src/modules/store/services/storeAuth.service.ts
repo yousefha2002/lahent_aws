@@ -163,9 +163,9 @@ export class StoreAuthService {
             where:{id:storeId,ownerId},
             include:[{model:StoreLanguage,where:{languageCode:lang}}]
         })
-        if(!store || store.ownerId!==ownerId)
+        if(!store)
         {
-            throw new ForbiddenException('You are the owner of the store')
+            throw new ForbiddenException('You are not the owner of the store')
         }
         const payload = { id: store.id, role: RoleStatus.STORE };
         const accessToken = generateAccessToken(payload);
