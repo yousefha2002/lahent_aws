@@ -49,7 +49,7 @@ export class EdFapayGateway implements PaymentGateway {
         formData.append('hash', hash);
         
         const response = await axios.post(this.apiUrl, formData, {
-            headers: formData.getHeaders(), // الآن تعمل بدون مشاكل
+            headers: formData.getHeaders()
         });
 
         const checkoutUrl = response.data.redirect_url;

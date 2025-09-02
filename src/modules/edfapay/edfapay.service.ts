@@ -4,7 +4,7 @@ import { PaymentSessionService } from './../payment_session/payment_session.serv
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { GatewaySource } from 'src/common/enums/gateway-source';
 import { ConfigService } from '@nestjs/config';
-import { generateHash } from 'src/common/utils/generateHash';
+import {generateWebhookHash } from 'src/common/utils/generateHash';
 
 @Injectable()
 export class EdfapayService {
@@ -16,6 +16,8 @@ export class EdfapayService {
     ){}
     async handleNotification(body:any)
     {
+        console.log('function start')
+        console.log(body)
         const { order_id, amount, currency, hash, status,trans_id} = body;
         if (!order_id || !amount || !currency || !hash || !status) {
             throw new BadRequestException('Invalid payload');
@@ -25,7 +27,9 @@ export class EdfapayService {
             return { message: 'Payment already processed' };
         }
         const secretKey = this.configService.get<string>('EDFA_SECRET_KEY')!;
-        const generatedHash = generateHash(
+        const merchant_Id = this.configService.get<string>('EDFA_MERCHANT_ID')!;
+        const generatedHash = generateWebhookHash(
+            String(merchant_Id),
             String(order_id),
             String(amount),
             String(currency),
@@ -35,7 +39,7 @@ export class EdfapayService {
         console.log('start')
         console.log(generatedHash)
         console.log(body.hash)
-        console.log('finish')
+        console.log('function end')
         if (body.hash !== generatedHash) {
             throw new BadRequestException('Invalid hash');
         }
