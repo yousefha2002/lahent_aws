@@ -12,6 +12,10 @@ export class OrderQueueScheduler implements OnApplicationBootstrap {
 
     async scheduleJobs() {
         const cron = '* * * * *'; // كل دقيقة
+        const repeatableJobs = await this.orderQueue.getRepeatableJobs();
+        for (const job of repeatableJobs) {
+            await this.orderQueue.removeRepeatableByKey(job.key);
+        }
 
         await this.orderQueue.add('expire-unpaid-orders', {}, { jobId: 'expire-unpaid-orders', repeat: { cron } });
         await this.orderQueue.add('update-pending-confirmation', {}, { jobId: 'update-pending-confirmation', repeat: { cron } });
