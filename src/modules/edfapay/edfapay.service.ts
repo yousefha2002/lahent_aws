@@ -26,6 +26,7 @@ export class EdfapayService {
         }
         console.log("body")
         console.log(body)
+        console.log(session.description)
         const secretKey = this.configService.get<string>('EDFA_SECRET_KEY')!;
         const merchantId = this.configService.get<string>('EDFA_MERCHANT_ID')!;
         const generatedHash = generateWebhookHash(
