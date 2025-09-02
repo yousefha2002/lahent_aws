@@ -19,7 +19,9 @@ export function generateWebhookHashWithDesc(order_number: string,order_amount: s
 
     const upperString = rawString.toUpperCase();
     const md5Hash = crypto.createHash('md5').update(upperString).digest('hex');
-    return md5Hash;
+    console.log(md5Hash)
+    const sha1Hash = crypto.createHash('sha1').update(md5Hash).digest('hex');
+    return sha1Hash;
 }
 
 export function generateWebhookHashWithout(order_number: string,order_amount: string,order_currency: string,password: string) 
@@ -32,7 +34,9 @@ export function generateWebhookHashWithout(order_number: string,order_amount: st
 
     const upperString = rawString.toUpperCase();
     const md5Hash = crypto.createHash('md5').update(upperString).digest('hex');
-    return md5Hash;
+    console.log(md5Hash)
+    const sha1Hash = crypto.createHash('sha1').update(md5Hash).digest('hex');
+    return sha1Hash;
 }
 
 export function generateWebhookHashWithIdAndDesc(id:string,order_number: string,order_amount: string,order_currency: string,order_description: string,password: string) 
@@ -47,7 +51,9 @@ export function generateWebhookHashWithIdAndDesc(id:string,order_number: string,
 
     const upperString = rawString.toUpperCase();
     const md5Hash = crypto.createHash('md5').update(upperString).digest('hex');
-    return md5Hash;
+    console.log(md5Hash)
+    const sha1Hash = crypto.createHash('sha1').update(md5Hash).digest('hex');
+    return sha1Hash;
 }
 
 export function generateWebhookHashWithId(id:string,order_number: string,order_amount: string,order_currency: string,password: string) 
@@ -61,5 +67,7 @@ export function generateWebhookHashWithId(id:string,order_number: string,order_a
 
     const upperString = rawString.toUpperCase();
     const md5Hash = crypto.createHash('md5').update(upperString).digest('hex');
-    return md5Hash;
+    console.log(md5Hash)
+    const sha1Hash = crypto.createHash('sha1').update(md5Hash).digest('hex');
+    return sha1Hash;
 }
