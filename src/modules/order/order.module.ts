@@ -34,19 +34,19 @@ import { OrderCronService } from './services/order_corn.service';
     OrderStatusService,
     // OrderCronService,
     ...OrderProvider,
-    OrderQueueScheduler
+    // OrderQueueScheduler
   ],
   imports: [
-    BullModule.forRoot({
-      redis: {
-        host: "clustercfg.lahent-redis.dwzz2w.memorydb.us-east-1.amazonaws.com",
-        port: 6380,
-        tls: { rejectUnauthorized: false },
-      },
-    }),
-    BullModule.registerQueue({
-      name: 'orders',
-    }),
+    // BullModule.forRoot({
+    //   redis: {
+    //     host: "clustercfg.lahent-redis.dwzz2w.memorydb.us-east-1.amazonaws.com",
+    //     port: 6380,
+    //     tls: { rejectUnauthorized: false },
+    //   },
+    // }),
+    // BullModule.registerQueue({
+    //   name: 'orders',
+    // }),
     CartModule,
     CustomerModule,
     CouponModule,
