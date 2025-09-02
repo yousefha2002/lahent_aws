@@ -24,6 +24,15 @@ export class EdfapayService {
         if (session.status === 'success') {
             return { message: 'Payment already processed' };
         }
+        console.log("body")
+        console.log(order_id)
+        console.log(amount)
+        console.log(currency)
+        console.log("session")
+        console.log(session.paymentOrderId)
+        console.log(session.amount)
+        console.log(session.currency)
+        console.log(session.description)
         const secretKey = this.configService.get<string>('EDFA_SECRET_KEY')!;
         const generatedHash = generateWebhookHash(
             String(order_id),
