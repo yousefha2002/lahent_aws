@@ -169,6 +169,13 @@ export class StoreAuthService {
         }
         const payload = { id: store.id, role: RoleStatus.STORE };
         const accessToken = generateAccessToken(payload);
-        return { accessToken ,refreshToken:store.refreshToken,store};
+        let refreshToken = store.refreshToken
+        if(!refreshToken)
+        {
+            refreshToken = generateRefreshToken(payload)
+            store.refreshToken = refreshToken
+            await store.save()
+        }
+        return { accessToken ,refreshToken,store};
     }
 }
