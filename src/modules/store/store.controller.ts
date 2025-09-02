@@ -412,4 +412,16 @@ export class StoreController {
   async refreshToken(@Body('refreshToken') refreshToken: string) {
     return this.storeAuthService.refreshToken(refreshToken)
   }
+
+  @Post(':storeId/select/byOwner')
+  @Serilaize(StoreWithTokenDto)
+  @ApiOperation({ summary: 'Select a store for the current owner' })
+  @ApiParam({ name: 'storeId', description: 'ID of the store to select', type: Number })
+  @ApiResponse({ status: 200, description: 'Store selected successfully', type: StoreWithTokenDto })
+  @UseGuards(OwnerGuard)
+  selectStoreForOwner(@CurrentUser() owner:Owner,@Param('storeId') storeId:number,@I18n() i18n: I18nContext)
+  {
+    const lang = getLang(i18n)
+    return this.storeAuthService.selectStoreForOnwer(storeId,owner.id,lang)
+  }
 }

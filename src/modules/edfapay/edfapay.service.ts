@@ -4,7 +4,7 @@ import { PaymentSessionService } from './../payment_session/payment_session.serv
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { GatewaySource } from 'src/common/enums/gateway-source';
 import { ConfigService } from '@nestjs/config';
-import {generateWebhookHash } from 'src/common/utils/generateHash';
+import {generateHash, generateWebhookHash } from 'src/common/utils/generateHash';
 
 @Injectable()
 export class EdfapayService {
@@ -16,8 +16,6 @@ export class EdfapayService {
     ){}
     async handleNotification(body:any)
     {
-        console.log('function start')
-        console.log(body)
         const { order_id, amount, currency, hash, status,trans_id} = body;
         if (!order_id || !amount || !currency || !hash || !status) {
             throw new BadRequestException('Invalid payload');
@@ -28,6 +26,13 @@ export class EdfapayService {
         }
         const secretKey = this.configService.get<string>('EDFA_SECRET_KEY')!;
         const merchant_Id = this.configService.get<string>('EDFA_MERCHANT_ID')!;
+        const firstHash = generateHash(
+            String(order_id),
+            String(amount),
+            String(currency),
+            String(session.description),
+            String(secretKey)
+        )
         const generatedHash = generateWebhookHash(
             String(merchant_Id),
             String(order_id),
@@ -36,10 +41,20 @@ export class EdfapayService {
             String(session.description),
             String(secretKey)
         );
-        console.log('start')
-        console.log(generatedHash)
-        console.log(body.hash)
-        console.log('function end')
+
+        const generatedHashWIthtrans = generateWebhookHash(
+            String(trans_id),
+            String(order_id),
+            String(amount),
+            String(currency),
+            String(session.description),
+            String(secretKey)
+        );
+        
+        console.log("👉 hash from webhook:", body.hash);
+        console.log("👉 hash from initi:", firstHash);
+        console.log("👉 hash we generated:", generatedHash);
+        console.log("👉 hash we generated from transId:", generatedHashWIthtrans);
         if (body.hash !== generatedHash) {
             throw new BadRequestException('Invalid hash');
         }

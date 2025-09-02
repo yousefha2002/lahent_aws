@@ -1,6 +1,5 @@
-import { TypeService } from './../../type/type.service';
 import { StoreService } from './store.service';
-import {BadRequestException,forwardRef,Inject,Injectable,NotFoundException,} from '@nestjs/common';
+import {BadRequestException,ForbiddenException,forwardRef,Inject,Injectable,NotFoundException,} from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
 import { Store } from '../entities/store.entity';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
@@ -28,7 +27,6 @@ export class StoreAuthService {
         private readonly openingHourService: OpeningHourService,
         @Inject(forwardRef(() => SubtypeService))
         private subTypeService: SubtypeService,
-        private typeService:TypeService,
         private readonly i18n: I18nService, 
         private jwtService: JwtService,
         private storeService:StoreService
@@ -119,6 +117,7 @@ export class StoreAuthService {
     async login(dto: LoginStoreDto,lang=Language.en) {
         const storeByPass = await this.storeRepo.findOne({
         where: { phoneLogin: dto.phone },
+        include:[{model:StoreLanguage,where:{languageCode:lang}}]
         });
         if (!storeByPass) {
         throw new NotFoundException(this.i18n.t('translation.auth.invalidPhone',{lang})); // ✅ مترجمة
@@ -156,5 +155,21 @@ export class StoreAuthService {
         } catch (err) {
             throw new BadRequestException('Invalid or expired refresh token');
         }
+    }
+
+    async selectStoreForOnwer(storeId:number,ownerId:number,lang:Language)
+    {
+        const store = await this.storeRepo.findOne({
+            where:{id:storeId,ownerId},
+            include:[{model:StoreLanguage,where:{languageCode:lang}}]
+        })
+        if(!store || store.ownerId!==ownerId)
+        {
+            throw new ForbiddenException('You are the owner of the store')
+        }
+        const payload = { id: store.id, role: RoleStatus.STORE };
+        const accessToken = generateAccessToken(payload);
+        const refreshToken = generateRefreshToken(payload)
+        return { accessToken ,refreshToken,store};
     }
 }
