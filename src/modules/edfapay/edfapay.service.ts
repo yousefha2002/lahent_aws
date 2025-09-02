@@ -16,7 +16,7 @@ export class EdfapayService {
     ){}
     async handleNotification(body:any)
     {
-        const { order_id, amount, currency, hash, status,trans_id} = body;
+        const { order_id, amount, currency, hash, status,trans_id,rrn} = body;
         if (!order_id || !amount || !currency || !hash || !status) {
             throw new BadRequestException('Invalid payload');
         }
@@ -28,9 +28,8 @@ export class EdfapayService {
         console.log(body)
         console.log(session.description)
         const secretKey = this.configService.get<string>('EDFA_SECRET_KEY')!;
-        const merchantId = this.configService.get<string>('EDFA_MERCHANT_ID')!;
         const generatedHash = generateWebhookHash(
-            String(merchantId),
+            String(rrn),
             String(order_id),
             String(amount),
             String(currency),

@@ -10,6 +10,9 @@ export function generateHash(order_number: string,order_amount: string,order_cur
 
 export function generateWebhookHash(id:string,order_number: string,order_amount: string,order_currency: string,order_description: string,password: string) 
 {
+    console.log('data')
+    console.log(id)
+    console.log(order_number,order_amount,order_currency,order_description,password)
     const rawString = 
         id+
         order_number +
