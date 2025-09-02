@@ -40,8 +40,7 @@ import { OrderCronService } from './services/order_corn.service';
     BullModule.forRoot({
       redis: {
         host: "clustercfg.lahent-redis.dwzz2w.memorydb.us-east-1.amazonaws.com",
-        port: 6380,
-        tls: { rejectUnauthorized: false }
+        port: 6379,
       },
     }),
     BullModule.registerQueue({
