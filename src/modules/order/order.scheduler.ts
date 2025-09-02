@@ -12,15 +12,36 @@ export class OrderQueueScheduler implements OnApplicationBootstrap {
 
     async scheduleJobs() {
         const cron = '* * * * *'; // كل دقيقة
+
+        try {
+        // إزالة جميع الـ repeatable jobs القديمة
         const repeatableJobs = await this.orderQueue.getRepeatableJobs();
         for (const job of repeatableJobs) {
             await this.orderQueue.removeRepeatableByKey(job.key);
         }
 
-        await this.orderQueue.add('expire-unpaid-orders', {}, { jobId: 'expire-unpaid-orders', repeat: { cron } });
-        await this.orderQueue.add('update-pending-confirmation', {}, { jobId: 'update-pending-confirmation', repeat: { cron } });
-        await this.orderQueue.add('cancel-expired-customer-decision', {}, { jobId: 'cancel-expired-customer-decision', repeat: { cron } });
-        await this.orderQueue.add('update-preparing-orders', {}, { jobId: 'update-preparing-orders', repeat: { cron } });
-        await this.orderQueue.add('update-scheduled-to-preparing', {}, { jobId: 'update-scheduled-to-preparing', repeat: { cron } });
+        // إضافة الـ jobs الجديدة مع jobId لتجنب التكرار
+        const jobs = [
+            'expire-unpaid-orders',
+            'update-pending-confirmation',
+            'cancel-expired-customer-decision',
+            'update-preparing-orders',
+            'update-scheduled-to-preparing',
+        ];
+
+        for (const name of jobs) {
+            try {
+            await this.orderQueue.add(
+                name,
+                {},
+                { jobId: name, repeat: { cron } }
+            );
+            } catch (err) {
+            console.error(`Failed to add job ${name}:`, err);
+            }
+        }
+        } catch (err) {
+        console.error('Failed to schedule repeatable jobs:', err);
+        }
     }
 }
