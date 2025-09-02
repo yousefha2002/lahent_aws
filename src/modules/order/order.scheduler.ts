@@ -1,9 +1,9 @@
 import { InjectQueue } from '@nestjs/bull';
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnApplicationBootstrap } from '@nestjs/common';
 import { Queue } from 'bull';
 
 @Injectable()
-export class OrderQueueScheduler {
+export class OrderQueueScheduler implements OnApplicationBootstrap {
     constructor(@InjectQueue('orders') private readonly orderQueue: Queue) {}
 
     async onApplicationBootstrap() {
@@ -12,10 +12,11 @@ export class OrderQueueScheduler {
 
     async scheduleJobs() {
         const cron = '* * * * *'; // كل دقيقة
-        await this.orderQueue.add('expire-unpaid-orders', {}, { repeat: { cron } });
-        await this.orderQueue.add('update-pending-confirmation', {}, { repeat: { cron } });
-        await this.orderQueue.add('cancel-expired-customer-decision', {}, { repeat: { cron } });
-        await this.orderQueue.add('update-preparing-orders', {}, { repeat: { cron } });
-        await this.orderQueue.add('update-scheduled-to-preparing', {}, { repeat: { cron } });
+
+        await this.orderQueue.add('expire-unpaid-orders', {}, { jobId: 'expire-unpaid-orders', repeat: { cron } });
+        await this.orderQueue.add('update-pending-confirmation', {}, { jobId: 'update-pending-confirmation', repeat: { cron } });
+        await this.orderQueue.add('cancel-expired-customer-decision', {}, { jobId: 'cancel-expired-customer-decision', repeat: { cron } });
+        await this.orderQueue.add('update-preparing-orders', {}, { jobId: 'update-preparing-orders', repeat: { cron } });
+        await this.orderQueue.add('update-scheduled-to-preparing', {}, { jobId: 'update-scheduled-to-preparing', repeat: { cron } });
     }
 }
