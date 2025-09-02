@@ -71,16 +71,15 @@ export class StoreService {
       where: {
         status: StoreStatus.APPROVED,
         ...(subTypeId && { subTypeId }),
-        ...(name && {
-          name: {
-            [Op.like]: `%${name}%`,
-          },
-        }),
       },
       include: [
         {
           model: StoreLanguage,
-          where: { languageCode: lang },
+          where: { languageCode: lang ,...(name && {
+          name: {
+            [Op.like]: `%${name}%`,
+          },
+        })},
           required: false
         },
         {
