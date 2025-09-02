@@ -25,36 +25,16 @@ export class EdfapayService {
             return { message: 'Payment already processed' };
         }
         const secretKey = this.configService.get<string>('EDFA_SECRET_KEY')!;
-        const merchant_Id = this.configService.get<string>('EDFA_MERCHANT_ID')!;
-        const firstHash = generateHash(
+        const generatedHash = generateWebhookHash(
             String(order_id),
             String(amount),
             String(currency),
             String(session.description),
             String(secretKey)
         )
-        const generatedHash = generateWebhookHash(
-            String(merchant_Id),
-            String(order_id),
-            String(amount),
-            String(currency),
-            String(session.description),
-            String(secretKey)
-        );
-
-        const generatedHashWIthtrans = generateWebhookHash(
-            String(trans_id),
-            String(order_id),
-            String(amount),
-            String(currency),
-            String(session.description),
-            String(secretKey)
-        );
         
         console.log("👉 hash from webhook:", body.hash);
-        console.log("👉 hash from initi:", firstHash);
-        console.log("👉 hash we generated:", generatedHash);
-        console.log("👉 hash we generated from transId:", generatedHashWIthtrans);
+        console.log("👉 hash from generatedHash:", generatedHash);
         if (body.hash !== generatedHash) {
             throw new BadRequestException('Invalid hash');
         }
