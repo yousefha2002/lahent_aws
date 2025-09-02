@@ -8,9 +8,10 @@ export function generateHash(order_number: string,order_amount: string,order_cur
     return sha1Hash; 
 }
 
-export function generateWebhookHash(order_number: string,order_amount: string,order_currency: string,order_description: string,password: string) 
+export function generateWebhookHash(id:string,order_number: string,order_amount: string,order_currency: string,order_description: string,password: string) 
 {
     const rawString = 
+        id+
         order_number +
         order_amount +
         order_currency +

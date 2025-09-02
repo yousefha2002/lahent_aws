@@ -34,7 +34,11 @@ export class EdfapayService {
         console.log(session.currency)
         console.log(session.description)
         const secretKey = this.configService.get<string>('EDFA_SECRET_KEY')!;
+        const merchantId = this.configService.get<string>('EDFA_MERCHANT_ID')!;
+        console.log(secretKey)
+        console.log(merchantId)
         const generatedHash = generateWebhookHash(
+            String(merchantId),
             String(order_id),
             String(amount),
             String(currency),
