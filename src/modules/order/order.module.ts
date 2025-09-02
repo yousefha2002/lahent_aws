@@ -39,8 +39,8 @@ import { OrderCronService } from './services/order_corn.service';
   imports: [
     BullModule.forRoot({
       redis: {
-        host: process.env.REDIS_HOST,
-        port: Number(process.env.REDIS_PORT),
+        host: "clustercfg.lahent-redis.dwzz2w.memorydb.us-east-1.amazonaws.com",
+        port: 6379,
         tls: {}
       },
     }),
