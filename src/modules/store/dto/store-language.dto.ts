@@ -6,6 +6,10 @@ export class StoreLanguageDto {
     @Expose()
     name: string;
 
+    @ApiProperty({ example: 'أديداس' })
+    @Expose()
+    brand: string;
+
     @ApiProperty({ example: 'ar' })
     @Expose()
     languageCode: string;

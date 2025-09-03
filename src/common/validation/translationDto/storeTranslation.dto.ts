@@ -4,6 +4,7 @@ import { validateRequiredLanguages } from 'src/common/utils/validateLanguages';
 export interface StoreTranslationDto {
     languageCode: string;
     name: string;
+    brand?: string
 }
 
 export function validateAndParseStoreTranslations(raw: string): StoreTranslationDto[] {
@@ -28,7 +29,7 @@ export function validateAndParseStoreTranslations(raw: string): StoreTranslation
         throw new BadRequestException(`Item at index ${index} must be an object.`);
         }
 
-        const { languageCode, name } = item;
+        const { languageCode, name,brand } = item;
 
         if (typeof languageCode !== 'string' || !['en', 'ar'].includes(languageCode)) {
         throw new BadRequestException(
@@ -44,6 +45,12 @@ export function validateAndParseStoreTranslations(raw: string): StoreTranslation
 
         // ✅ احفظ الاسم بعد التعديل (trim)
         item.name = name.trim();
+
+        if (brand !== undefined && typeof brand !== 'string') {
+        throw new BadRequestException(
+        `"brand" at index ${index} must be a string if provided.`
+        );
+    }
     });
 
     const languages = parsed.map((t) => t.languageCode);

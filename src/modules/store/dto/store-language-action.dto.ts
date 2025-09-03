@@ -1,4 +1,4 @@
-import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { Language } from 'src/common/enums/language';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -11,4 +11,10 @@ export class StoreLanguageActionDto {
     @IsString()
     @IsNotEmpty()
     name: string;
+
+    @ApiProperty({ example: 'Nike' })
+    @IsString()
+    @IsNotEmpty()
+    @IsOptional()
+    brand: string;
 }

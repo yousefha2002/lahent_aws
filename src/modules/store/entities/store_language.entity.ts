@@ -18,8 +18,12 @@ export class StoreLanguage extends Model {
     @BelongsTo(() => Store)
     store: Store;
 
+    @AllowNull(false)
     @Column(DataType.STRING)
     name: string;
+
+    @Column(DataType.STRING)
+    brand: string;
 
     @AllowNull(false)
     @Column(DataType.ENUM(...Object.values(Language)))

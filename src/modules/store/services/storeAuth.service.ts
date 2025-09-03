@@ -65,6 +65,7 @@ export class StoreAuthService {
                 storeId: newStore.id,
                 languageCode: t.languageCode,
                 name: t.name,
+                ...(t.brand ? { brand: t.brand } : {})
             }),
             ),
         );

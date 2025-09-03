@@ -275,6 +275,7 @@ export class StoreService {
           storeId: store.id,
           languageCode: t.languageCode,
           name: t.name,
+          ...(t.brand ? { brand: t.brand } : {})
         });
       }
     }
