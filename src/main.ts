@@ -3,8 +3,8 @@ import { ValidationPipe } from '@nestjs/common';
 import * as bodyParser from 'body-parser';
 import * as dotenv from 'dotenv';
 dotenv.config();
-// import * as crypto from 'crypto';
-// (global as any).crypto = crypto;
+import * as crypto from 'crypto';
+(global as any).crypto = crypto;
 
 import {
   ExpressAdapter,

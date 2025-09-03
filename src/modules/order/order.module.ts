@@ -32,7 +32,7 @@ import { OrderCronService } from './services/order_corn.service';
     OrderPaymentService,
     OrderPointsService,
     OrderStatusService,
-    // OrderCronService,
+    OrderCronService,
     ...OrderProvider,
     // OrderQueueScheduler
   ],
