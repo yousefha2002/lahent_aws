@@ -1,3 +1,4 @@
+import { SectorService } from './../../sector/sector.service';
 import { TypeService } from './../../type/type.service';
 import { FaviroteService } from './../../favirote/favirote.service';
 import { StoreUtilsService } from './storeUtils.service';
@@ -39,6 +40,7 @@ export class StoreService {
     private readonly i18n: I18nService,
     private subTypeService: SubtypeService,
     @Inject(forwardRef(() => FaviroteService)) private faviroteService: FaviroteService,
+    private sectorService:SectorService
   ) {}
 
   async findAllStores(
@@ -232,6 +234,11 @@ export class StoreService {
     {
       await this.subTypeService.subTypeById(+dto.subType)
     }
+    if(dto.sector!==undefined)
+    {
+      await this.sectorService.findOne(+dto.sector)
+    }
+      
     Object.assign(store, {
       ...(dto.phone !== undefined && { phone: dto.phone }),
       ...(dto.in_store !== undefined && { in_store: dto.in_store }),
@@ -241,7 +248,8 @@ export class StoreService {
       ...(dto.taxNumber !== undefined && { taxNumber: dto.taxNumber }),
       ...(dto.lat !== undefined && { lat: dto.lat }),
       ...(dto.lng !== undefined && { lng: dto.lng }),
-      ...(dto.subType !== undefined && { subType: dto.subType }),
+      ...(dto.subType !== undefined && { subTypeId: dto.subType }),
+      ...(dto.sector !== undefined && { sectorId: dto.sector })
     });
     await store.save();
     if (dto.openingHours && dto.openingHours.length > 0) {

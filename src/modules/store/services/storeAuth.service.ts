@@ -1,3 +1,4 @@
+import { SectorService } from './../../sector/sector.service';
 import { UserTokenService } from './../../user_token/user_token.service';
 import { StoreService } from './store.service';
 import {BadRequestException,ForbiddenException,forwardRef,Inject,Injectable,NotFoundException,} from '@nestjs/common';
@@ -32,7 +33,8 @@ export class StoreAuthService {
         private readonly i18n: I18nService, 
         private jwtService: JwtService,
         private storeService:StoreService,
-        private userTokenService:UserTokenService
+        private userTokenService:UserTokenService,
+        private sectorService:SectorService
     ) {}
 
     async create(dto: CreateStoreDto,ownerId: string,hours: OpeningHourEnum[],logo: Express.Multer.File,cover: Express.Multer.File,lang=Language.en) 
@@ -42,6 +44,7 @@ export class StoreAuthService {
         this.checkIfPhoneUsed(dto.phone),
         this.checkIfPhoneLoginUsed(dto.phoneLogin),
         this.subTypeService.subTypeById(+dto.subTypeId),
+        this.sectorService.findOne(+dto.sectorId)
         ]);
 
         const [logoUpload, coverUpload] = await Promise.all([
@@ -112,6 +115,7 @@ export class StoreAuthService {
         drive_thru: dto.drive_thru,
         commercialRegister: dto.commercialRegister,
         taxNumber: dto.taxNumber,
+        sectorId:dto.sectorId
         });
         return storeCreated;
     }

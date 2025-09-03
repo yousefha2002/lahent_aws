@@ -1,3 +1,4 @@
+import { Sector } from './../../sector/entities/sector.entity';
 import {
   Table,
   Column,
@@ -50,6 +51,13 @@ export class Store extends Model {
 
   @BelongsTo(() => SubType)
   subType: SubType;
+
+  @ForeignKey(() => Sector)
+  @Column(DataType.INTEGER)
+  sectorId: number;
+
+  @BelongsTo(() => Sector)
+  sector: Sector;
 
   @HasMany(() => StoreLanguage)
   languages: StoreLanguage[];

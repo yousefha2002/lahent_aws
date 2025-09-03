@@ -41,6 +41,11 @@ export class UpdateStoreDto {
   @IsInt()
   subType?: number;
 
+  @ApiProperty({ example: 2, required: false })
+  @IsOptional()
+  @IsInt()
+  sector?: number;
+
   @ApiProperty({ example: 24.7136, required: false })
   @IsOptional()
   @IsNumber()

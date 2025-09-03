@@ -15,6 +15,7 @@ import { StoreUtilsService } from './services/storeUtils.service';
 import { FaviroteModule } from '../favirote/favirote.module';
 import { StoreLanguageProvider } from './providers/storeLangauge.provider';
 import { UserTokenModule } from '../user_token/user_token.module';
+import { SectorModule } from '../sector/sector.module';
 
 @Module({
   controllers: [StoreController],
@@ -28,7 +29,8 @@ import { UserTokenModule } from '../user_token/user_token.module';
     CustomerModule,
     AdminModule,
     UserTokenModule,
-    forwardRef(()=>FaviroteModule)
+    forwardRef(()=>FaviroteModule),
+    SectorModule
   ],
   exports: [StoreService,StoreUtilsService],
 })

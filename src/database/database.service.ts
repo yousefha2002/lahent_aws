@@ -58,6 +58,8 @@ import { ProductVariantLanguage } from 'src/modules/prouduct_variant/entities/pr
 import { ProductInstructionLanguage } from 'src/modules/product_instruction/entities/product_instruction_language.dto';
 import { GiftCategoryLanguage } from 'src/modules/gift_category/entites/gift_category_language.entity';
 import { UserToken } from 'src/modules/user_token/entities/user_token.entity';
+import { Sector } from 'src/modules/sector/entities/sector.entity';
+import { SectorLanguage } from 'src/modules/sector/entities/sectore_langauge.entity';
 
 export const databaseProviders = [
   {
@@ -141,7 +143,9 @@ export const databaseProviders = [
         ProductVariantLanguage,
         ProductInstructionLanguage,
         GiftCategoryLanguage,
-        UserToken
+        UserToken,
+        Sector,
+        SectorLanguage
       ]);
       await sequelize.sync({ alter: true });
       return sequelize;
