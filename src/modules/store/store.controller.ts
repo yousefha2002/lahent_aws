@@ -37,7 +37,7 @@ import { Store } from './entities/store.entity';
 import { UpdateStoreDto } from './dto/update-store.dto';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { Owner } from '../owner/entities/owner.entity';
-import { OwnerStoreDto, PaginatedStoreDto, StoreDto } from './dto/Store.dto';
+import { OwnerStoreDto, PaginatedStoreDto, StoreDto, storeForAction } from './dto/Store.dto';
 import { StoreWithTokenDto } from './dto/simple-store.dto';
 import { FullDetailsStoreDto } from './dto/full-details-store.dto';
 import { ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
@@ -250,11 +250,11 @@ export class StoreController {
     return this.storeService.getFullDetailsStore(storeId, lang);
   }
 
-  @Serilaize(StoreDto)
+  @Serilaize(storeForAction)
   @Get(':id/action')
   @ApiOperation({ summary: 'Get full details of a store by ID for actions (owner or store only)' })
   @ApiParam({ name: 'id', description: 'ID of the store', example: 1 })
-  @ApiResponse({status: 200,description: 'full details of store',type: StoreDto})
+  @ApiResponse({status: 200,description: 'full details of store',type: storeForAction})
   async getStoreDetailsForAction(@Param('id') storeId: number,@I18n() i18n: I18nContext)
   {
     const lang = getLang(i18n);

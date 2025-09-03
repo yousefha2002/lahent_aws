@@ -3,9 +3,10 @@ import { SimpleStoreDto } from './simple-store.dto';
 import { StoreSubTypeDto } from 'src/modules/subtype/dto/storeSubType.dto';
 import { ApiProperty } from '@nestjs/swagger';
 import { StoreStatus } from 'src/common/enums/store_status';
+import { SectorDto } from 'src/modules/sector/dto/sector.dto';
 
 export class StoreDto extends SimpleStoreDto{
-    @ApiProperty({ type: [StoreSubTypeDto] })
+    @ApiProperty({ type: StoreSubTypeDto })
     @Expose()
     @Type(() => StoreSubTypeDto)
     subType: StoreSubTypeDto[];
@@ -15,6 +16,13 @@ export class OwnerStoreDto extends StoreDto{
     @ApiProperty({example:"approved"})
     @Expose()
     status:StoreStatus
+}
+
+export class storeForAction extends StoreDto{
+    @ApiProperty({ type: SectorDto })
+    @Type(() => SectorDto)
+    @Expose()
+    sector:SectorDto
 }
 
 export class PaginatedStoreDto {

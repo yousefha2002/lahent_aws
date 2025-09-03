@@ -27,6 +27,8 @@ import { I18nService } from 'nestjs-i18n';
 import { Customer } from 'src/modules/customer/entities/customer.entity';
 import { StoreLanguage } from '../entities/store_language.entity';
 import { SubtypeService } from 'src/modules/subtype/subtype.service';
+import { Sector } from 'src/modules/sector/entities/sector.entity';
+import { SectorLanguage } from 'src/modules/sector/entities/sectore_langauge.entity';
 
 @Injectable()
 export class StoreService {
@@ -147,6 +149,7 @@ export class StoreService {
         {
           model: StoreLanguage,
         },
+        {model:Sector,include:[{model:SectorLanguage,where:{languageCode:lang}}]},
         {
           model: SubType,
           include: [
