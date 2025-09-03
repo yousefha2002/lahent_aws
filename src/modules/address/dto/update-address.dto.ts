@@ -7,11 +7,6 @@ export class UpdateAddressDto {
     @IsString()
     label?: string;
 
-    @ApiProperty({ example: '456 Second St, City, Country', required: false })
-    @IsOptional()
-    @IsString()
-    address?: string;
-
     @ApiProperty({ example: 31.7683, required: false })
     @IsOptional()
     @IsNumber()

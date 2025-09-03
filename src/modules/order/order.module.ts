@@ -21,8 +21,6 @@ import { OrderPointsService } from './services/order_points.service';
 import { OrderStatusService } from './services/order_status.service';
 import { OfferModule } from '../offer/offer.module';
 import { ProductModule } from '../product/product.module';
-import { BullModule } from '@nestjs/bull';
-import { OrderQueueScheduler } from './order.scheduler';
 import { OrderCronService } from './services/order_corn.service';
 
 @Module({
@@ -34,19 +32,8 @@ import { OrderCronService } from './services/order_corn.service';
     OrderStatusService,
     OrderCronService,
     ...OrderProvider,
-    // OrderQueueScheduler
   ],
   imports: [
-    // BullModule.forRoot({
-    //   redis: {
-    //     host: "clustercfg.lahent-redis.dwzz2w.memorydb.us-east-1.amazonaws.com",
-    //     port: 6380,
-    //     tls: { rejectUnauthorized: false },
-    //   },
-    // }),
-    // BullModule.registerQueue({
-    //   name: 'orders',
-    // }),
     CartModule,
     CustomerModule,
     CouponModule,

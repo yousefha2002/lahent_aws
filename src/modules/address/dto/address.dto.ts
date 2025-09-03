@@ -6,10 +6,6 @@ export class AddressDto {
     @Expose()
     id: number;
 
-    @ApiProperty({ example: '123 Main St, City, Country' })
-    @Expose()
-    address: string;
-
     @ApiProperty({ example: 'Home' })
     @Expose()
     label: string;

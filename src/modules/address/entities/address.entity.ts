@@ -28,10 +28,6 @@ export class Address extends Model{
     customer: Customer;
 
     @AllowNull(false)
-    @Column(DataType.STRING)
-    address: string;
-
-    @AllowNull(false)
     @Column(DataType.FLOAT)
     lat: number;
 

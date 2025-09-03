@@ -7,11 +7,6 @@ export class CreateAddressDto {
     @IsString()
     label: string;
 
-    @ApiProperty({ example: '123 Main St, City, Country' })
-    @IsNotEmpty()
-    @IsString()
-    address: string;
-
     @ApiProperty({ example: 31.7683 })
     @IsNotEmpty()
     @IsNumber()
