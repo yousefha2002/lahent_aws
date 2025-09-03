@@ -86,11 +86,6 @@ export class Store extends Model {
   @Column(DataType.STRING)
   coverPublicId: string;
 
-  @Default(0)
-  @AllowNull(false)
-  @Column({ type: DataType.INTEGER })
-  preparationTime: number;
-
   @AllowNull(false)
   @Column({ type: DataType.STRING, unique: true })
   phone: string;
@@ -149,7 +144,4 @@ export class Store extends Model {
 
   @HasMany(() => Review)
   reviews: Review[];
-
-  @Column(DataType.STRING)
-  refreshToken: string ;
 }

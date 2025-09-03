@@ -5,5 +5,5 @@ export const generateAccessToken = (payload: any) => {
 };
 
 export const generateRefreshToken = (payload: any) => {
-  return jwt.sign(payload, 'refresh_token', { expiresIn: '365d' });
+  return jwt.sign(payload, 'refresh_token', { expiresIn: '30d' });
 };

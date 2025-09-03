@@ -66,12 +66,6 @@ export class UpdateStoreDto {
   @IsString()
   taxNumber?: string;
 
-  @ApiProperty({ example: 15, required: false, description: 'Preparation time in minutes' })
-  @IsOptional()
-  @IsInt({ message: 'Preparation time must be an integer' })
-  @Min(0, { message: 'Preparation time must be at least 1 minute' })
-  preparationTime?: number;
-
   @ApiProperty({ type: [ActionOpeningHourDto] })
   @IsOptional()
   @IsArray()

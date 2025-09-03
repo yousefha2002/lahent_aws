@@ -242,7 +242,6 @@ export class StoreService {
       ...(dto.lat !== undefined && { lat: dto.lat }),
       ...(dto.lng !== undefined && { lng: dto.lng }),
       ...(dto.subType !== undefined && { subType: dto.subType }),
-      ...(dto.preparationTime !== undefined && { preparationTime: dto.preparationTime })
     });
     await store.save();
     if (dto.openingHours && dto.openingHours.length > 0) {

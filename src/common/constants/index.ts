@@ -11,3 +11,5 @@ export const MIN_POINTS_TO_USE = 200;  // الحد الأدنى للنقاط ل�
 export const CONFIRMATION_EXTENSION_MINUTES = 3;
 export const UNPAID_EXPIRATION_MINUTES = 30;
 export const CONFIRMATION_PENDING_MINUTES = 5;
+
+export const REFRESH_TOKEN_EXPIRES_MS = 30 * 24 * 60 * 60 * 1000;

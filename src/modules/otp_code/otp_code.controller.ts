@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Ip, Post, Req } from '@nestjs/common';
 import { OtpCodeService } from './otp_code.service';
 import { SendOtpDto } from './dto/send_otp.dto';
 import { VerifyOtpDto } from './dto/verify_opt.dto';
@@ -24,10 +24,12 @@ export class OtpCodeController {
   @Post('verify/owner')
   async verifyOtpOwner(
     @Body() body: VerifyOtpDto,
-    @I18n() i18n: I18nContext
+    @I18n() i18n: I18nContext,
+    @Req() req: Request,@Ip() ip:string
   ) {
     const lang = getLang(i18n);
-    return this.otpCodeService.verifyOtp(body.phone, 'owner', body.code, lang);
+    const device = req.headers['user-agent'] || 'unknown';
+    return this.otpCodeService.verifyOtp(body.phone, 'owner', body.code, lang,device,ip);
   }
 
   @ApiOperation({ summary: 'Verify OTP for customer' })
@@ -41,10 +43,12 @@ export class OtpCodeController {
   @Post('verify/customer')
   async verifyOtpCustomer(
     @Body() body: VerifyOtpDto,
-    @I18n() i18n: I18nContext
+    @I18n() i18n: I18nContext,
+    @Req() req: Request,@Ip() ip:string
   ) {
     const lang = getLang(i18n);
-    return this.otpCodeService.verifyOtp(body.phone, 'customer', body.code, lang);
+    const device = req.headers['user-agent'] || 'unknown';
+    return this.otpCodeService.verifyOtp(body.phone, 'customer', body.code, lang,device,ip);
   }
 
   @ApiOperation({ summary: 'Send OTP to owner' })

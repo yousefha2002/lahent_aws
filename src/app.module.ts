@@ -54,6 +54,7 @@ import { VariantCategoryModule } from './modules/variant_category/variant_catego
 import { ProductCategoryVariantModule } from './modules/product_category_variant/product_category_variant.module';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
+import { UserTokenModule } from './modules/user_token/user_token.module';
 
 @Module({
   imports: [
@@ -123,6 +124,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     EdfapayModule,
     VariantCategoryModule,
     ProductCategoryVariantModule,
+    UserTokenModule,
   ],
   providers: [MulterConfigService],
 })

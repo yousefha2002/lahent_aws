@@ -18,9 +18,6 @@ export class Owner extends Model {
   @Column(DataType.INTEGER)
   id: number;
 
-  @Column(DataType.STRING)
-  refreshToken: string ;
-
   @AllowNull(true)
   @Column(DataType.STRING)
   name: string;

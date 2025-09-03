@@ -57,6 +57,7 @@ import { ProductExtraLanguage } from 'src/modules/product_extra/entities/product
 import { ProductVariantLanguage } from 'src/modules/prouduct_variant/entities/product_variant_language.entity';
 import { ProductInstructionLanguage } from 'src/modules/product_instruction/entities/product_instruction_language.dto';
 import { GiftCategoryLanguage } from 'src/modules/gift_category/entites/gift_category_language.entity';
+import { UserToken } from 'src/modules/user_token/entities/user_token.entity';
 
 export const databaseProviders = [
   {
@@ -140,8 +141,9 @@ export const databaseProviders = [
         ProductVariantLanguage,
         ProductInstructionLanguage,
         GiftCategoryLanguage,
+        UserToken
       ]);
-      await sequelize.sync({ alter: false });
+      await sequelize.sync({ alter: true });
       return sequelize;
     },
   },

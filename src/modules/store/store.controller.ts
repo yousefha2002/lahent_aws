@@ -13,6 +13,8 @@ import {
   Put,
   Param,
   ParseIntPipe,
+  Req,
+  Ip,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { CreateStoreDto } from './dto/create-store.dto';
@@ -140,9 +142,10 @@ export class StoreController {
   @ApiOperation({ summary: 'Login store and return access & refresh tokens' })
   @ApiBody({ type: LoginStoreDto })
   @ApiResponse({status: 200,description: 'Store login successful',type: StoreWithTokenDto})
-  login(@Body() body: LoginStoreDto,@I18n() i18n: I18nContext) {
+  login(@Body() body: LoginStoreDto,@I18n() i18n: I18nContext,@Req() req: Request,@Ip() ip:string) {
     const lang = getLang(i18n);
-    return this.storeAuthService.login(body,lang);
+    const device = req.headers['user-agent'] || 'unknown';
+    return this.storeAuthService.login(body,lang,device,ip);
   }
 
   @Get('byOwner')
@@ -396,6 +399,7 @@ export class StoreController {
       type: 'object',
       properties: {
         refreshToken: { type: 'string', example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' },
+        accessToken: { type: 'string', example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' },
       },
       required: ['refreshToken'],
     },
@@ -419,9 +423,10 @@ export class StoreController {
   @ApiParam({ name: 'storeId', description: 'ID of the store to select', type: Number })
   @ApiResponse({ status: 200, description: 'Store selected successfully', type: StoreWithTokenDto })
   @UseGuards(OwnerGuard)
-  selectStoreForOwner(@CurrentUser() owner:Owner,@Param('storeId') storeId:number,@I18n() i18n: I18nContext)
+  selectStoreForOwner(@CurrentUser() owner:Owner,@Param('storeId') storeId:number,@I18n() i18n: I18nContext,@Req() req: Request,@Ip() ip:string)
   {
     const lang = getLang(i18n)
-    return this.storeAuthService.selectStoreForOnwer(storeId,owner.id,lang)
+    const device = req.headers['user-agent'] || 'unknown';
+    return this.storeAuthService.selectStoreForOnwer(storeId,owner.id,lang,device,ip)
   }
 }

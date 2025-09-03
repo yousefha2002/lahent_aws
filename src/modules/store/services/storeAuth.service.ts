@@ -1,3 +1,4 @@
+import { UserTokenService } from './../../user_token/user_token.service';
 import { StoreService } from './store.service';
 import {BadRequestException,ForbiddenException,forwardRef,Inject,Injectable,NotFoundException,} from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
@@ -17,6 +18,7 @@ import { generateAccessToken, generateRefreshToken } from 'src/common/utils/gene
 import { JwtService } from '@nestjs/jwt';
 import { validateAndParseStoreTranslations } from 'src/common/validation/translationDto/storeTranslation.dto';
 import { StoreLanguage } from '../entities/store_language.entity';
+import { REFRESH_TOKEN_EXPIRES_MS } from 'src/common/constants';
 
 @Injectable()
 export class StoreAuthService {
@@ -29,7 +31,8 @@ export class StoreAuthService {
         private subTypeService: SubtypeService,
         private readonly i18n: I18nService, 
         private jwtService: JwtService,
-        private storeService:StoreService
+        private storeService:StoreService,
+        private userTokenService:UserTokenService
     ) {}
 
     async create(dto: CreateStoreDto,ownerId: string,hours: OpeningHourEnum[],logo: Express.Multer.File,cover: Express.Multer.File,lang=Language.en) 
@@ -109,17 +112,16 @@ export class StoreAuthService {
         drive_thru: dto.drive_thru,
         commercialRegister: dto.commercialRegister,
         taxNumber: dto.taxNumber,
-        preparationTime:dto.preparationTime
         });
         return storeCreated;
     }
 
-    async login(dto: LoginStoreDto,lang=Language.en) {
+    async login(dto: LoginStoreDto,lang:Language,device?: string, ip?: string) {
         const storeByPass = await this.storeRepo.findOne({
-        where: { phoneLogin: dto.phone },
-        include:[{model:StoreLanguage,where:{languageCode:lang}}]
-        });
-        if (!storeByPass) {
+            where: { phoneLogin: dto.phone },
+            include:[{model:StoreLanguage,where:{languageCode:lang}}]
+            });
+            if (!storeByPass) {
         throw new NotFoundException(this.i18n.t('translation.auth.invalidPhone',{lang})); // ✅ مترجمة
         }
 
@@ -131,7 +133,14 @@ export class StoreAuthService {
         const payload = { id: storeByPass.id, role: RoleStatus.STORE };
         const accessToken = generateAccessToken(payload);
         const refreshToken = generateRefreshToken(payload)
-        storeByPass.refreshToken = refreshToken
+        await this.userTokenService.createToken({
+            storeId: storeByPass.id,
+            role: RoleStatus.STORE,
+            refreshToken,
+            expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS),
+            device,
+            ip,
+        });
         await storeByPass.save()
 
         return {
@@ -145,19 +154,25 @@ export class StoreAuthService {
     {
         try {
             const decoded = await this.jwtService.verifyAsync(refreshToken, {secret: 'refresh_token',});
-            const store = await this.storeService.storeById(decoded.id);
-            
-            if (store&&store.refreshToken !== refreshToken) {
-            throw new BadRequestException('Invalid refresh token');
+            const tokenRecord = await this.userTokenService.findToken(refreshToken);
+            if (!tokenRecord) {
+                throw new BadRequestException('Invalid or expired refresh token');
             }
-            const accessToken = generateAccessToken({ id: store?.id, role: decoded.role });
-            return { accessToken };
+            const store = await this.storeService.storeById(decoded.id);
+            if (!store) {
+                throw new BadRequestException('store is not found');
+            }
+            const accessToken = generateAccessToken({ id: store.id, role: decoded.role });
+            const newRefreshToken = generateRefreshToken({ id: store.id, role: decoded.role });
+            await this.userTokenService.rotateToken(tokenRecord,newRefreshToken,new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS),);
+
+            return {accessToken,refreshToken: newRefreshToken,};
         } catch (err) {
             throw new BadRequestException('Invalid or expired refresh token');
         }
     }
 
-    async selectStoreForOnwer(storeId:number,ownerId:number,lang:Language)
+    async selectStoreForOnwer(storeId:number,ownerId:number,lang:Language,device?:string,ip?:string)
     {
         const store = await this.storeRepo.findOne({
             where:{id:storeId,ownerId},
@@ -169,12 +184,25 @@ export class StoreAuthService {
         }
         const payload = { id: store.id, role: RoleStatus.STORE };
         const accessToken = generateAccessToken(payload);
-        let refreshToken = store.refreshToken
-        if(!refreshToken)
-        {
-            refreshToken = generateRefreshToken(payload)
-            store.refreshToken = refreshToken
-            await store.save()
+        const refreshToken = generateRefreshToken(payload);
+        const existingToken = await this.userTokenService.findTokenByStoreAndOwner(storeId, ownerId, device, ip);
+
+        if (existingToken) {
+            await this.userTokenService.rotateToken(
+                existingToken,
+                refreshToken,
+                new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS),
+            );
+        } else {
+            await this.userTokenService.createToken({
+            ownerId:ownerId,
+            storeId: store.id,
+            role: RoleStatus.STORE,
+            refreshToken,
+            expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS),
+            device,
+            ip,
+        });
         }
         return { accessToken ,refreshToken,store};
     }

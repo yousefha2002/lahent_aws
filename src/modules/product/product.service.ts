@@ -108,6 +108,7 @@ export class ProductService {
 
       return {
         message: this.i18n.translate('translation.product.created', { lang }),
+        productId:product.id
       };
     } catch (error) {
       await transaction.rollback();

@@ -16,10 +16,6 @@ export class SimpleStoreDto {
     @Expose()
     city: string;
 
-    @ApiProperty({ example: 20 })
-    @Expose()
-    preparationTime:number
-
     @ApiProperty({ example: 'https://example.com/logo.png' })
     @Expose()
     logoUrl: string;

@@ -1,11 +1,13 @@
+import { UserTokenService } from './../user_token/user_token.service';
 import {BadRequestException,Inject,Injectable, NotFoundException} from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
 import { Owner } from './entities/owner.entity';
 import { UpdateOwnerDto } from './dto/updateOwner.dto';
 import { I18nService } from 'nestjs-i18n';
 import { Language } from 'src/common/enums/language';
-import { generateAccessToken } from 'src/common/utils/generateToken';
+import { generateAccessToken, generateRefreshToken } from 'src/common/utils/generateToken';
 import { JwtService } from '@nestjs/jwt';
+import { REFRESH_TOKEN_EXPIRES_MS } from 'src/common/constants';
 
 @Injectable()
 export class OwnerService {
@@ -13,7 +15,8 @@ export class OwnerService {
     @Inject(repositories.owner_repository)
     private ownerRepo: typeof Owner,
     private readonly i18n: I18nService,
-    private jwtService: JwtService
+    private jwtService: JwtService,
+    private userTokenService:UserTokenService
   ) {}
 
   async createOwner(phone: string, lang: Language = Language.en) {
@@ -48,27 +51,23 @@ export class OwnerService {
     return owner;
   }
 
-  async login(phone: string, lang = Language.en) {
-    const owner = await this.ownerRepo.findOne({where: { phone }});
-    if (!owner) {
-      const message = this.i18n.translate('translation.invalid_credentials', {lang});
-      throw new NotFoundException(message);
-    }
-    await owner.save()
-    return {owner};
-  }
-
   async refreshToken(refreshToken:string)
     {
       try {
-        const decoded = await this.jwtService.verifyAsync(refreshToken, {secret: 'refresh_token',});
-        const owner = await this.findById(decoded.id);
-        
-        if (owner&&owner.refreshToken !== refreshToken) {
-          throw new BadRequestException('Invalid refresh token');
+        const decoded = await this.jwtService.verifyAsync(refreshToken, {secret: 'refresh_token'});
+        const tokenRecord = await this.userTokenService.findToken(refreshToken)
+        if (!tokenRecord) {
+          throw new BadRequestException('Invalid or expired refresh token');
         }
-        const accessToken = generateAccessToken({ id: owner?.id, role: decoded.role });
-        return { accessToken };
+        const owner = await this.findById(decoded.id);
+        if(!owner)
+        {
+          throw new BadRequestException('owner is not found')
+        }
+        const accessToken = generateAccessToken({ id: owner.id, role: decoded.role });
+        const newRefreshToken = generateRefreshToken({id: owner.id,role: decoded.role});
+        await this.userTokenService.rotateToken(tokenRecord,newRefreshToken,new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS));
+        return { accessToken, refreshToken: newRefreshToken };
       } catch (err) {
         throw new BadRequestException('Invalid or expired refresh token');
       }

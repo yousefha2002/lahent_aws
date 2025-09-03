@@ -6,6 +6,7 @@ import { OtpCodeModule } from '../otp_code/otp_code.module';
 import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
 import { AvatarModule } from '../avatar/avatar.module';
 import { GiftModule } from '../gift/gift.module';
+import { UserTokenModule } from '../user_token/user_token.module';
 
 @Module({
   controllers: [CustomerController],
@@ -15,6 +16,7 @@ import { GiftModule } from '../gift/gift.module';
     CloudinaryModule,
     AvatarModule,
     forwardRef(() => GiftModule),
+    UserTokenModule
   ],
   exports: [CustomerService],
 })

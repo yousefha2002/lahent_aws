@@ -66,10 +66,4 @@ export class CreateStoreDto {
   @IsString()
   @IsNotEmpty()
   translations: string;
-
-  @IsNotEmpty()
-  @Transform(({ value }) => parseInt(value, 10))
-  @IsInt({ message: 'Preparation time must be an integer' })
-  @Min(0, { message: 'Preparation time cannot be negative' })
-  preparationTime: number;
 }

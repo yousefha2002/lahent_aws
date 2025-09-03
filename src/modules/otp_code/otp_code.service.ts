@@ -1,3 +1,4 @@
+import { UserTokenService } from './../user_token/user_token.service';
 import { OwnerService } from 'src/modules/owner/owner.service';
 import { BadRequestException, forwardRef, Inject, Injectable } from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
@@ -10,6 +11,7 @@ import { SendOtpDto } from './dto/send_otp.dto';
 import { CustomerService } from '../customer/customer.service';
 import { generateAccessToken, generateRefreshToken } from 'src/common/utils/generateToken';
 import { RoleStatus } from 'src/common/enums/role_status';
+import { REFRESH_TOKEN_EXPIRES_MS } from 'src/common/constants';
 
 @Injectable()
 export class OtpCodeService {
@@ -17,6 +19,7 @@ export class OtpCodeService {
     @Inject(repositories.otpCode_repository)
     private otpCodeRepo: typeof OtpCode,
     private readonly smsService: SmsService,
+    private readonly userTokenService:UserTokenService,
     private readonly i18n: I18nService,
     private readonly ownerService:OwnerService,
     @Inject(forwardRef(() => CustomerService)) private customerService: CustomerService
@@ -53,7 +56,7 @@ export class OtpCodeService {
     throw new BadRequestException('Invalid type');
   }
 
-  async verifyOtp(phone: string,type: 'customer' | 'owner', code: string, lang: Language = Language.en) {
+  async verifyOtp(phone: string,type: 'customer' | 'owner', code: string, lang:Language,device?:string,ip?:string) {
     const record = await this.otpCodeRepo.findOne({
       where: { phone, code, isVerified: false,type },
       order: [['createdAt', 'DESC']],
@@ -63,55 +66,55 @@ export class OtpCodeService {
       const msg = this.i18n.translate('translation.otp.invalid', { lang });
       throw new BadRequestException(msg);
     }
+    record.isVerified = true;
+    await record.save();
     if (type === 'owner') {
-      record.isVerified = true;
-      await record.save();
-      const owner = await this.ownerService.findByPhone(phone);
-      if(owner)
+      let owner = await this.ownerService.findByPhone(phone);
+      let status: 'login' | 'signup' = 'login';
+      if(!owner)
       {
-        const payload = { id: owner.id, role: RoleStatus.OWNER };
-        const accessToken = generateAccessToken(payload);
-        const refreshToken = generateRefreshToken(payload);
-        const login_data = await this.ownerService.login(phone);
-        owner.refreshToken = refreshToken
-        await owner.save()
-        return { status: 'login', owner: login_data.owner,accessToken,refreshToken};
+        owner = await this.ownerService.createOwner(phone);
+        status = 'signup';
       }
-      else{
-        const owner = await this.ownerService.createOwner(phone)
-        const payload = { id: owner.id, role: RoleStatus.OWNER };
-        const accessToken = generateAccessToken(payload);
-        const refreshToken = generateRefreshToken(payload);
-        owner.refreshToken = refreshToken;
-        await owner.save();
-        return { status: 'signup',owner, phone, accessToken, refreshToken};
-      }
+      const payload = { id: owner.id, role: RoleStatus.OWNER };
+      const accessToken = generateAccessToken(payload);
+      const refreshToken = generateRefreshToken(payload);
+
+      await this.userTokenService.createToken({
+        ownerId: owner.id,
+        role: RoleStatus.OWNER,
+        refreshToken,
+        expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS),
+        device,
+        ip,
+      });
+
+      return { status, owner, accessToken, refreshToken };
     }
 
-    if(type==='customer')
-    {
-      record.isVerified = true;
-      await record.save();
-      const customer = await this.customerService.findByPhone(phone);
-      if(customer)
-      {
-        const payload = { id: customer.id, role: RoleStatus.CUSTOMER };
-        const accessToken = generateAccessToken(payload);
-        const refreshToken = generateRefreshToken(payload);
-        const login_data = await this.customerService.login(phone);
-        customer.refreshToken = refreshToken;
-        await customer.save();
-        return { status: 'login', customer: login_data.customer,accessToken,refreshToken};
-      }
-      else{
-        const customer = await this.customerService.createCustomer(phone)
-        const payload = { id: customer.id, role: RoleStatus.CUSTOMER };
-        const accessToken = generateAccessToken(payload);
-        const refreshToken = generateRefreshToken(payload);
-        customer.refreshToken = refreshToken;
-        await customer.save();
-        return { status: 'signup',customer, phone, accessToken, refreshToken};
-      }
+    if (type === 'customer') {
+    let customer = await this.customerService.findByPhone(phone);
+    let status: 'login' | 'signup' = 'login';
+
+    if (!customer) {
+      customer = await this.customerService.createCustomer(phone);
+      status = 'signup';
     }
+
+    const payload = { id: customer.id, role: RoleStatus.CUSTOMER };
+    const accessToken = generateAccessToken(payload);
+    const refreshToken = generateRefreshToken(payload);
+
+    await this.userTokenService.createToken({
+      customerId: customer.id,
+      role: RoleStatus.CUSTOMER,
+      refreshToken,
+      expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS),
+      device,
+      ip,
+    });
+
+    return { status, customer, phone, accessToken, refreshToken };
+  }
   }
 }

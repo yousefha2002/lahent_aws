@@ -1,3 +1,4 @@
+import { UserTokenService } from './../user_token/user_token.service';
 import { AvatarService } from './../avatar/avatar.service';
 import {
   BadRequestException,
@@ -14,8 +15,9 @@ import { Language } from 'src/common/enums/language';
 import { Avatar } from '../avatar/entities/avatar.entity';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { GiftService } from '../gift/gift.service';
-import {generateAccessToken } from 'src/common/utils/generateToken';
+import {generateAccessToken, generateRefreshToken } from 'src/common/utils/generateToken';
 import { JwtService } from '@nestjs/jwt';
+import { REFRESH_TOKEN_EXPIRES_MS } from 'src/common/constants';
 
 @Injectable()
 export class CustomerService {
@@ -27,7 +29,8 @@ export class CustomerService {
     private readonly i18n: I18nService,
     @Inject(forwardRef(() => GiftService))
     private giftService: GiftService,
-    private jwtService: JwtService
+    private jwtService: JwtService,
+    private userTokenService:UserTokenService
   ) {}
   async createCustomer(phone:string,lang=Language.en)
   {
@@ -61,33 +64,19 @@ export class CustomerService {
     return customer;
   }
 
-  async login(phone: string, lang = Language.en) {
-    const customer = await this.customerRepo.findOne({
-      where: { phone },include:[Avatar],
-    });
-    if (!customer) {
-      const message = this.i18n.translate('translation.invalid_credentials', {lang});
-      throw new NotFoundException(message);
-    }
-
-    await customer.save()
-
-    return {customer};
-  }
-
   async refreshToken(refreshToken:string)
   {
     try {
-      const decoded = await this.jwtService.verifyAsync(refreshToken, {
-        secret: 'refresh_token',
-      });
-      const customer = await this.findById(decoded.id);
-
-      if (customer.refreshToken !== refreshToken) {
-        throw new BadRequestException('Invalid access token');
+      const decoded = await this.jwtService.verifyAsync(refreshToken, {secret: 'refresh_token'});
+      const tokenRecord = await this.userTokenService.findToken(refreshToken)
+      if (!tokenRecord) {
+        throw new BadRequestException('Invalid or expired refresh token');
       }
+      const customer = await this.findById(decoded.id);
       const accessToken = generateAccessToken({ id: customer.id, role: decoded.role });
-      return { accessToken };
+      const newRefreshToken = generateRefreshToken({id: customer.id,role: decoded.role});
+      await this.userTokenService.rotateToken(tokenRecord,newRefreshToken,new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS));
+      return { accessToken, refreshToken: newRefreshToken };
     } catch (err) {
       throw new BadRequestException('Invalid or expired acess token');
     }
@@ -171,7 +160,7 @@ export class CustomerService {
   }
 
   async findByPhone(phone: string) {
-    const customer = await this.customerRepo.findOne({ where: { phone } });
+    const customer = await this.customerRepo.findOne({ where: { phone },include:[Avatar] });
     return customer;
   }
 }

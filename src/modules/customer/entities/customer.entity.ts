@@ -53,9 +53,6 @@ export class Customer extends Model {
   @Column(DataType.STRING)
   imagePublicId: string | null;
 
-  @Column(DataType.STRING)
-  refreshToken: string ;
-
   @ForeignKey(() => Avatar)
   @AllowNull(true)
   @Column(DataType.INTEGER)

@@ -14,6 +14,7 @@ import { StoreGeolocationService } from './services/storeGeolocation.service';
 import { StoreUtilsService } from './services/storeUtils.service';
 import { FaviroteModule } from '../favirote/favirote.module';
 import { StoreLanguageProvider } from './providers/storeLangauge.provider';
+import { UserTokenModule } from '../user_token/user_token.module';
 
 @Module({
   controllers: [StoreController],
@@ -26,6 +27,7 @@ import { StoreLanguageProvider } from './providers/storeLangauge.provider';
     OpeningHourModule,
     CustomerModule,
     AdminModule,
+    UserTokenModule,
     forwardRef(()=>FaviroteModule)
   ],
   exports: [StoreService,StoreUtilsService],

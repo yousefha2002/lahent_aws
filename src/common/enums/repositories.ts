@@ -61,4 +61,5 @@ export enum repositories {
   favirote_repository = 'favirote_repository',
   review_repository = 'review_repository',
   gift_categorylanguage__repository = 'gift_category_language_repository',
+  user_token_repository = 'user_token_repository',
 }
