@@ -55,6 +55,7 @@ import { ProductCategoryVariantModule } from './modules/product_category_variant
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { UserTokenModule } from './modules/user_token/user_token.module';
+import { SectorModule } from './modules/sector/sector.module';
 
 @Module({
   imports: [
@@ -125,6 +126,7 @@ import { UserTokenModule } from './modules/user_token/user_token.module';
     VariantCategoryModule,
     ProductCategoryVariantModule,
     UserTokenModule,
+    SectorModule,
   ],
   providers: [MulterConfigService],
 })

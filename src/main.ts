@@ -35,7 +35,10 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document);
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(bodyParser.json()); 
-  app.enableCors();
+  app.enableCors({
+  origin: ['http://localhost:3000'],
+  credentials: true,
+});
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
