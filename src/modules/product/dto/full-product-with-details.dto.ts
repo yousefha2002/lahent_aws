@@ -40,4 +40,8 @@ export class fullProductDetailsWihtPrivateDetails extends FullProductDetailsDto 
     @Expose()
     @ApiProperty({ example: 250 })
     sales: number;
+
+    @Expose()
+    @ApiProperty({ example: true })
+    isActive: boolean;
 }
