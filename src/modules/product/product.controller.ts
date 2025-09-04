@@ -1,3 +1,4 @@
+import { StoreOrOwnerGuard } from './../../common/guards/StoreOrOwner.guard';
 import {
   BadRequestException,
   Body,
@@ -248,7 +249,7 @@ export class ProductController {
   }
 
   @Put('active/:productId')
-  @UseGuards(AdminGuard)
+  @UseGuards(StoreOrOwnerGuard)
   @ApiOperation({ summary: 'Toggle product active status' })
   @ApiSecurity('access-token')
   @ApiQuery({ name: 'storeId', required: false, example: '1' })
