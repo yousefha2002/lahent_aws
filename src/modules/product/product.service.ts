@@ -318,9 +318,10 @@ export class ProductService {
     return product;
   }
 
-  async getFullProductDetails(productId: number,lang: Language,options?: { includeInactive?: boolean }) 
+  async getFullProductDetails(productId: number,lang: Language,options?: { includeInactive?: boolean,includeAllLanguages?:boolean }) 
   {
-    const { includeInactive = false } = options || {};
+    const { includeInactive = false ,includeAllLanguages = false} = options || {};
+    const langCondition = includeAllLanguages ? {} : { where: { languageCode: lang } };
 
     const product = await this.productRepo.findOne({
       where: { id: productId, ...(includeInactive ? {} : { isActive: true }) },
@@ -346,7 +347,7 @@ export class ProductService {
               include: [
                 {
                   model: ProductVariantLanguage,
-                  where: { languageCode: lang },
+                  ...langCondition,
                   required: false,
                 },
               ],
@@ -371,7 +372,7 @@ export class ProductService {
           include: [
             {
               model: ProductExtraLanguage,
-              where: { languageCode: lang },
+              ...langCondition,
               required: false,
             },
           ],
@@ -383,7 +384,7 @@ export class ProductService {
           include: [
             {
               model: ProductInstructionLanguage,
-              where: { languageCode: lang },
+              ...langCondition,
               required: false,
             },
           ],

@@ -244,7 +244,7 @@ export class ProductController {
   @ApiResponse({ status: 200, type: fullProductDetailsWihtPrivateDetails })
   getFullProductDetailsForStore(@Param('productId',ParseIntPipe) productId: string, @I18n() i18n: I18nContext,) {
     const lang = getLang(i18n);
-    return this.productService.getFullProductDetails(+productId,lang,{ includeInactive: true });
+    return this.productService.getFullProductDetails(+productId,lang,{ includeInactive: true,includeAllLanguages:true });
   }
 
   @Put('active/:productId')
