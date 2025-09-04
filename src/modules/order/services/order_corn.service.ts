@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { repositories } from 'src/common/enums/repositories';
 import { Order } from '../entities/order.entity';
@@ -8,13 +8,13 @@ import { CONFIRMATION_EXTENSION_MINUTES, UNPAID_EXPIRATION_MINUTES } from 'src/c
 import { OrderStatusService } from './order_status.service';
 
 @Injectable()
-export class OrderCronService {
+export class OrderCronService{
     private readonly logger = new Logger(OrderCronService.name);
 
     constructor(
         @Inject(repositories.order_repository) private orderRepo: typeof Order,
         private readonly orderStatusService:OrderStatusService
-    ) {}
+    ) {console.log('OrderCronService initialized');}
 
     /***  إلغاء الطلبات التي لم يتم دفعها خلال 30 دقيقة*/
     @Cron(CronExpression.EVERY_MINUTE)

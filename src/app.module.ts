@@ -73,7 +73,7 @@ import { SectorModule } from './modules/sector/sector.module';
     JwtModule.register({ global: true, secret: 'token' }),
     JwtModule.register({ global: true, secret: 'refresh_token' }),
     DatabaseModule,
-    // ScheduleModule.forRoot(),
+    ScheduleModule.forRoot(),
     AdminModule,
     AppModule,
     CartModule,
