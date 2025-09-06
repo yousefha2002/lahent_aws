@@ -5,7 +5,9 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  Max,
   MaxLength,
+  Min,
   MinLength,
 } from 'class-validator';
 
@@ -22,10 +24,11 @@ export class CreateCarDto {
   @IsOptional()
   isSave:boolean
 
-  @ApiProperty({ description: 'Car type ID', example: 1 })
-  @IsNumber()
+  @ApiProperty({ description: 'Car type ID (1-9)', example: 1 })
+  @Min(1, { message: 'Car type must be at least 1' })
+  @Max(9, { message: 'Car type must be at most 9' })
   @IsNotEmpty()
-  carTypeId: number;
+  carType: number;
 
   @ApiProperty({ description: 'Color of the car', example: '#333' })
   @IsString()
@@ -36,11 +39,6 @@ export class CreateCarDto {
   @IsNumber()
   @IsNotEmpty()
   brandId: number;
-
-  @ApiProperty({ description: 'Model ID of the car', example: 3 })
-  @IsNumber()
-  @IsNotEmpty()
-  modelId: number;
 
   @ApiPropertyOptional({ description: 'Plate number of the car', example: '1234' })
   @IsString()

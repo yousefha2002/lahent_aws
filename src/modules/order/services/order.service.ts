@@ -44,12 +44,8 @@ import { OpeningHour } from 'src/modules/opening_hour/entites/opening_hour.entit
 import { I18nService } from 'nestjs-i18n';
 import { Language } from 'src/common/enums/language';
 import { StoreLanguage } from 'src/modules/store/entities/store_language.entity';
-import { CarType } from 'src/modules/car_type/entites/car_type.entity';
-import { CarTypeLanguage } from 'src/modules/car_type/entites/car_type_language.entity';
 import { CarBrand } from 'src/modules/car_brand/entities/car_brand.entity';
 import { CarBrandLanguage } from 'src/modules/car_brand/entities/car_brand.languae.entity';
-import { CarModel } from 'src/modules/car_model/entites/car_model.entity';
-import { CarModelLanguage } from 'src/modules/car_model/entites/car_mode_language.entity';
 
 @Injectable()
 export class OrderService {
@@ -436,9 +432,7 @@ export class OrderService {
       include: [
         { model: Customer, include: [Avatar] },
         { model: Car, include: [
-          {model:CarType,include:[{model:CarTypeLanguage,where:{languageCode:lang}}]},
           {model:CarBrand,include:[{model:CarBrandLanguage,where:{languageCode:lang}}]},
-          {model:CarModel,include:[{model:CarModelLanguage,where:{languageCode:lang}}]}
         ] 
         },
         {
@@ -470,9 +464,7 @@ export class OrderService {
       include: [
         { model: Store, include: [{ model: OpeningHour},{model:StoreLanguage,required:false,where:{languageCode:lang}}] },
         { model: Car, include: [
-          {model:CarType,include:[{model:CarTypeLanguage,where:{languageCode:lang}}]},
           {model:CarBrand,include:[{model:CarBrandLanguage,where:{languageCode:lang}}]},
-          {model:CarModel,include:[{model:CarModelLanguage,where:{languageCode:lang}}]}
         ] 
         },
         {

@@ -11,9 +11,6 @@ import {
   Default,
 } from 'sequelize-typescript';
 import { CarBrand } from 'src/modules/car_brand/entities/car_brand.entity';
-import { CarModel } from 'src/modules/car_model/entites/car_model.entity';
-import { CarType } from 'src/modules/car_type/entites/car_type.entity';
-
 import { Customer } from 'src/modules/customer/entities/customer.entity';
 
 @Table({ tableName: 'cars' })
@@ -35,14 +32,6 @@ export class Car extends Model {
   @Column(DataType.STRING)
   carName: string;
 
-  @ForeignKey(() => CarType)
-  @AllowNull(false)
-  @Column(DataType.INTEGER)
-  carTypeId: number;
-
-  @BelongsTo(() => CarType)
-  carType: CarType;
-
   @AllowNull(false)
   @Column(DataType.STRING)
   color: string;
@@ -55,13 +44,15 @@ export class Car extends Model {
   @BelongsTo(() => CarBrand)
   brand: CarBrand;
 
-  @ForeignKey(() => CarModel)
   @AllowNull(false)
-  @Column(DataType.INTEGER)
-  modelId: number;
-
-  @BelongsTo(() => CarModel)
-  model: CarModel;
+  @Column({
+  type: DataType.INTEGER,
+    validate: {
+      min: 1,
+      max: 9,
+    },
+  })
+  carType: number; 
 
   @AllowNull(true)
   @Column(DataType.STRING)

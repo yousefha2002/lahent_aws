@@ -238,7 +238,14 @@ export class ProductService {
         },
         { model: ProductImage, order: [['id', 'ASC']] },
         { model: Category, include: [{ model: CategoryLanguage, where: { languageCode: lang } }] },
-        {model:ProductLanguage,where:{languageCode:lang,...(name ? { name: { [Op.like]: `%${name}%` } } : {})}}
+        {model:ProductLanguage,where:{languageCode:lang,...(name ? { name: { [Op.like]: `%${name}%` } } : {})}},
+        {
+          model: ProductCategoryVariant,
+          include: [
+            { model: ProductVariant, attributes: ['id'], required: false }
+          ],
+          required: false,
+        }
       ],
       limit,
       offset,
@@ -255,14 +262,18 @@ export class ProductService {
           ? this.offerService.getDiscountedPrice(product.basePrice, offer)
           : product.basePrice;
 
+          const hasVariants = product.productCategoryVariants?.some((pcv) => pcv.variants && pcv.variants.length > 0);
+
         return {
           ...product.toJSON(),
+          hasVariants,
           images: product.images?.map((img) => img.imageUrl) || [],
           discountedPrice,
           offer: offer || null,
         };
       }),
     );
+    
 
     return {
       data: final,

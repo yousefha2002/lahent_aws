@@ -9,25 +9,18 @@ import { repositories } from 'src/common/enums/repositories';
 import { Car } from './entities/car.entity';
 import { CreateCarDto } from './dto/create_car.dto';
 import { UpdateCarDto } from './dto/update-car.dto';
-import { CarModelService } from './../car_model/car_model.service';
 import { CarBrandService } from './../car_brand/car_brand.service';
-import { CarTypeService } from './../car_type/car_type.service';
 import { Op } from 'sequelize';
 import { Language } from 'src/common/enums/language';
 import { CarType } from '../car_type/entites/car_type.entity';
 import { CarBrand } from '../car_brand/entities/car_brand.entity';
-import { CarModel } from '../car_model/entites/car_model.entity';
-import { CarTypeLanguage } from '../car_type/entites/car_type_language.entity';
 import { CarBrandLanguage } from '../car_brand/entities/car_brand.languae.entity';
-import { CarModelLanguage } from '../car_model/entites/car_mode_language.entity';
 
 @Injectable()
 export class CarService {
   constructor(
     @Inject(repositories.car_repository) private carRepo: typeof Car,
-    private carTypeService: CarTypeService,
     private carBrandService: CarBrandService,
-    private carModelService: CarModelService,
     private readonly i18n: I18nService,
   ) {}
 
@@ -59,12 +52,7 @@ export class CarService {
       throw new BadRequestException(message);
     }
 
-    await Promise.all([
-      this.carTypeService.getOneOrFail(dto.carTypeId),
-      this.carBrandService.getOneOrFail(dto.brandId),
-      this.carModelService.getOneOrFail(dto.modelId),
-    ]);
-
+    await this.carBrandService.getOneOrFail(dto.brandId)
     let isDefault = false;
 
     if (isSave) {
@@ -102,38 +90,20 @@ export class CarService {
       order: [['createdAt', 'DESC']],
       include: [
         {
-          model: CarType,
-          include: [{ model: CarTypeLanguage, where: { languageCode: lang },required:false }],
-        },
-        {
           model: CarBrand,
           include: [{ model: CarBrandLanguage, where: { languageCode: lang },required:false }],
-        },
-        {
-          model: CarModel,
-          include: [{ model: CarModelLanguage, where: { languageCode: lang },required:false }],
         },
       ],
     });
   }
 
   async getCustomerCar(customerId: number, carId: number, lang = Language.en) {
-    console.log(customerId);
-    console.log(carId);
     const car = await this.carRepo.findOne({
       where: { id: carId, customerId },
       include: [
         {
-          model: CarType,
-          include: [{ model: CarTypeLanguage, where: { languageCode: lang },required:false }],
-        },
-        {
           model: CarBrand,
           include: [{ model: CarBrandLanguage, where: { languageCode: lang },required:false}],
-        },
-        {
-          model: CarModel,
-          include: [{ model: CarModelLanguage, where: { languageCode: lang },required:false }],
         },
       ],
     });
@@ -180,13 +150,9 @@ export class CarService {
         throw new BadRequestException(message);
       }
     }
-    await Promise.all([
-      this.carTypeService.getOneOrFail(dto.carTypeId),
-      this.carBrandService.getOneOrFail(dto.brandId),
-      this.carModelService.getOneOrFail(dto.modelId),
-    ]);
+    await this.carBrandService.getOneOrFail(dto.brandId);
 
-    if (dto.isDefault) {
+      if (dto.isDefault) {
       await this.carRepo.update(
         { isDefault: false },
         { where: { customerId } },

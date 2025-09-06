@@ -29,7 +29,6 @@ import { OrderItemInstruction } from 'src/modules/order_item_instruction/entitie
 import { Avatar } from 'src/modules/avatar/entities/avatar.entity';
 import { CarType } from 'src/modules/car_type/entites/car_type.entity';
 import { CarBrand } from 'src/modules/car_brand/entities/car_brand.entity';
-import { CarModel } from 'src/modules/car_model/entites/car_model.entity';
 import { OfferProduct } from 'src/modules/offer_product/entites/offer_product.entity';
 import { Coupon } from 'src/modules/coupon/entities/coupon.entity';
 import { GiftCategory } from 'src/modules/gift_category/entites/gift_category.entity';
@@ -49,8 +48,6 @@ import { ProductCategoryVariant } from 'src/modules/product_category_variant/ent
 import { StoreLanguage } from 'src/modules/store/entities/store_language.entity';
 import { CarBrandLanguage } from 'src/modules/car_brand/entities/car_brand.languae.entity';
 import { CategoryLanguage } from 'src/modules/category/entities/category_language.entity';
-import { CarTypeLanguage } from 'src/modules/car_type/entites/car_type_language.entity';
-import { CarModelLanguage } from 'src/modules/car_model/entites/car_mode_language.entity';
 import { VariantCategoryLanguage } from 'src/modules/variant_category/entities/variant_category_language.entity';
 import { ProductLanguage } from 'src/modules/product/entities/product_language.entity';
 import { ProductExtraLanguage } from 'src/modules/product_extra/entities/product_extra_language.entity';
@@ -113,9 +110,7 @@ export const databaseProviders = [
         Address,
         Car,
         Avatar,
-        CarType,
         CarBrand,
-        CarModel,
         OfferProduct,
         Coupon,
         GiftCategory,
@@ -135,8 +130,6 @@ export const databaseProviders = [
         StoreLanguage,
         CarBrandLanguage,
         CategoryLanguage,
-        CarTypeLanguage,
-        CarModelLanguage,
         VariantCategoryLanguage,
         ProductLanguage,
         ProductExtraLanguage,
@@ -147,7 +140,7 @@ export const databaseProviders = [
         Sector,
         SectorLanguage
       ]);
-      await sequelize.sync({ alter: false});
+      await sequelize.sync({ alter: true});
       return sequelize;
     },
   },

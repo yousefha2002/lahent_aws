@@ -34,7 +34,7 @@ async function bootstrap() {
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(bodyParser.json()); 
   app.enableCors({
-  origin: ['http://localhost:3000'],
+  origin: ['http://localhost:3000','https://lah-dashboard-xzp3.vercel.app'],
   credentials: true,
 });
   app.useGlobalPipes(

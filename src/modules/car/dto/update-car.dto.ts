@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsBoolean, IsInt } from 'class-validator';
+import { IsOptional, IsString, IsBoolean, IsInt, Max, Min } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateCarDto {
@@ -8,7 +8,9 @@ export class UpdateCarDto {
 
   @ApiProperty({ example: 1 })
   @IsInt()
-  carTypeId: number;
+  @Min(1, { message: 'Car type must be at least 1' })
+  @Max(9, { message: 'Car type must be at most 9' })
+  carType: number;
 
   @ApiProperty({ example: '#333333' })
   @IsString()
@@ -18,9 +20,6 @@ export class UpdateCarDto {
   @IsInt()
   brandId: number;
 
-  @ApiProperty({ example: 3 })
-  @IsInt()
-  modelId: number;
 
   @ApiProperty({ example: '1234', required: false })
   @IsOptional()

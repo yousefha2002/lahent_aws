@@ -31,9 +31,7 @@ import { MulterConfigService } from './multer/multer.config';
 import { MulterModule } from '@nestjs/platform-express';
 import { AvatarModule } from './modules/avatar/avatar.module';
 import { I18nModule, AcceptLanguageResolver } from 'nestjs-i18n';
-import { CarTypeModule } from './modules/car_type/car_type.module';
 import { CarBrandModule } from './modules/car_brand/car_brand.module';
-import { CarModelModule } from './modules/car_model/car_model.module';
 import { OfferProductModule } from './modules/offer_product/offer_product.module';
 import { CouponModule } from './modules/coupon/coupon.module';
 import { SmsModule } from './modules/sms/sms.module';
@@ -106,9 +104,7 @@ import { RealtimeModule } from './modules/realtime/realtime.module';
       useClass: MulterConfigService,
     }),
     AvatarModule,
-    CarTypeModule,
     CarBrandModule,
-    CarModelModule,
     OfferProductModule,
     CouponModule,
     SmsModule,

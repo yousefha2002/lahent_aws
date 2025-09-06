@@ -1,8 +1,6 @@
 import { Expose, Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { CarBrandDto } from 'src/modules/car_brand/dto/car-brand.dto';
-import { CarModelDto } from 'src/modules/car_model/dto/car-model.dto';
-import { CarTypeDto } from 'src/modules/car_type/dto/car-type.dto';
 
 export class CustomerCarListDto {
   @Expose()
@@ -30,17 +28,11 @@ export class CustomerCarListDto {
   color: string;
 
   @Expose()
-  @Type(() => CarTypeDto)
-  @ApiProperty({ type: CarTypeDto })
-  carType: CarTypeDto;
+  @ApiProperty({example:1})
+  carType: number;
 
   @Expose()
   @Type(() => CarBrandDto)
   @ApiProperty({ type: CarBrandDto })
   brand: CarBrandDto;
-
-  @Expose()
-  @Type(() => CarModelDto)
-  @ApiProperty({ type: CarModelDto })
-  model: CarModelDto;
 }
