@@ -43,6 +43,7 @@ import { FullDetailsStoreDto } from './dto/full-details-store.dto';
 import { ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
+import { StoreOptionsDto } from './dto/store-options.dto';
 
 @Controller('store')
 export class StoreController {
@@ -429,5 +430,15 @@ export class StoreController {
     const lang = getLang(i18n)
     const device = req.headers['user-agent'] || 'unknown';
     return this.storeAuthService.selectStoreForOnwer(storeId,owner.id,lang,device,ip)
+  }
+
+  @Serilaize(StoreOptionsDto)
+  @Get(':id/withOpeningHours')
+  @ApiOperation({ summary: 'Get store with opening hours and picked methods' })
+  @ApiParam({ name: 'id', description: 'Store ID', example: 1 })
+  async getStoreWithOpeningHours(
+    @Param('id') storeId: number,
+  ) {
+    return this.storeService.getStoreServiceOptions(storeId);
   }
 }

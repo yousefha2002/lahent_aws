@@ -140,7 +140,7 @@ export const databaseProviders = [
         Sector,
         SectorLanguage
       ]);
-      await sequelize.sync({ alter: true});
+      await sequelize.sync({ alter: false});
       return sequelize;
     },
   },

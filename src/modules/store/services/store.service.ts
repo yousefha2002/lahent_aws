@@ -396,4 +396,23 @@ export class StoreService {
       totalItems: count,
     };
   }
+
+  async getStoreServiceOptions(storeId: number) 
+  {
+    const store = await this.storeRepo.findByPk(storeId, {
+      attributes: ['id', 'drive_thru', 'in_store'], 
+      include: [
+        {
+          association: 'openingHours', // اسم العلاقة
+          attributes: ['id', 'day', 'openTime', 'closeTime'],
+        },
+      ],
+    });
+
+    if (!store) {
+      throw new NotFoundException('Store not found');
+    }
+
+    return store;
+  }
 }
