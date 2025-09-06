@@ -144,11 +144,11 @@ export class ProductService {
         transaction,
       );
 
-      const imagePublicIdsToKeep = existingImages.map(
-        (img) => img.imagePublicId,
+      const imagesIDToKeep = existingImages.map(
+        (img) => img.imageUrl,
       );
       const imagesToDelete = currentImages.filter(
-        (img) => !imagePublicIdsToKeep.includes(img.imagePublicId),
+        (img) => !imagesIDToKeep.includes(img.imageUrl),
       );
 
       for (const img of imagesToDelete) {
@@ -333,7 +333,7 @@ export class ProductService {
         },
         {
           model: ProductLanguage,
-          where: { languageCode: lang },
+          ...langCondition,
         },
         { model: ProductImage, required: false, order: [['id', 'ASC']] },
         {

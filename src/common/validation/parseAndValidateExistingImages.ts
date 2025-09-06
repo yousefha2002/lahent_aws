@@ -1,6 +1,5 @@
 export interface ExistingImage {
   imageUrl: string;
-  imagePublicId: string;
 }
 
 export function parseAndValidateExistingImages(raw: string): ExistingImage[] {
@@ -14,12 +13,10 @@ export function parseAndValidateExistingImages(raw: string): ExistingImage[] {
     for (const item of parsed) {
       if (
         !item.imageUrl ||
-        typeof item.imageUrl !== 'string' ||
-        !item.imagePublicId ||
-        typeof item.imagePublicId !== 'string'
+        typeof item.imageUrl !== 'string'
       ) {
         throw new Error(
-          'Each existing image imageUrl (string), and imagePublicId (string)',
+          'Each existing image imageUrl (string)',
         );
       }
     }

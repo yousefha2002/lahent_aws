@@ -22,6 +22,8 @@ import { OrderStatusService } from './services/order_status.service';
 import { OfferModule } from '../offer/offer.module';
 import { ProductModule } from '../product/product.module';
 import { OrderCronService } from './services/order_corn.service';
+import { OrderNotificationService } from './services/orde_notification.service';
+import { RealtimeModule } from '../realtime/realtime.module';
 
 @Module({
   controllers: [OrderController],
@@ -32,6 +34,7 @@ import { OrderCronService } from './services/order_corn.service';
     OrderStatusService,
     OrderCronService,
     ...OrderProvider,
+    OrderNotificationService
   ],
   imports: [
     CartModule,
@@ -49,7 +52,8 @@ import { OrderCronService } from './services/order_corn.service';
     OwnerModule,
     OfferModule,
     ProductModule,
-    forwardRef(()=>PaymentSessionModule)
+    forwardRef(()=>PaymentSessionModule),
+    RealtimeModule
   ],
   exports: [OrderService,OrderPaymentService],
 })

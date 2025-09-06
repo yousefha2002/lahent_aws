@@ -56,6 +56,7 @@ import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { UserTokenModule } from './modules/user_token/user_token.module';
 import { SectorModule } from './modules/sector/sector.module';
+import { RealtimeModule } from './modules/realtime/realtime.module';
 
 @Module({
   imports: [
@@ -127,6 +128,7 @@ import { SectorModule } from './modules/sector/sector.module';
     ProductCategoryVariantModule,
     UserTokenModule,
     SectorModule,
+    RealtimeModule,
   ],
   providers: [MulterConfigService],
 })
