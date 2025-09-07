@@ -2,7 +2,6 @@ import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { Expose, Transform, Type } from "class-transformer";
 import { OrderStatus } from "src/common/enums/order_status";
 import { PickupType } from "src/common/enums/pickedup_type";
-import { getOrderDate } from "src/common/utils/getOrderDate";
 import { SimpleCustomerDto } from "src/modules/customer/dto/simple-customer.dto";
 import { SimpleStoreDto } from "src/modules/store/dto/simple-store.dto";
 
@@ -36,14 +35,37 @@ export class OrderListDto {
     @Type(() => SimpleCustomerDto)
     customer?: SimpleCustomerDto;
 
-    @ApiProperty({ description: 'Order date', example: '2025-08-29T10:00:00.000Z' })
+    @ApiProperty({ example: '2025-08-29T10:00:00.000Z', description: 'وقت دفع العميل (قد يكون null)' })
     @Expose()
-    @Transform(({ obj }) => getOrderDate(obj))
-    orderDate: Date;
+    paidAt: Date | null;
 
-    @ApiProperty({ description: 'Creation date', example: '2025-08-29T09:55:00.000Z' })
+    @ApiProperty({ example: '2025-08-29T10:00:00.000Z', description: 'وقت قبول العرض من قبل العميل أو المتجر (قد يكون null)' })
     @Expose()
-    createdAt: string;
+    placedAt: Date | null;
+
+    @ApiProperty({ example: '2025-08-29T10:00:00.000Z', description: 'وقت جدولة الطلب أو العرض (قد يكون null)' })
+    @Expose()
+    scheduledAt: Date | null;
+
+    @ApiProperty({ example: '2025-08-29T10:00:00.000Z', description: 'وقت إلغاء الطلب (قد يكون null)' })
+    @Expose()
+    canceledAt: Date | null;
+
+    @ApiProperty({ example: '2025-08-29T10:00:00.000Z', description: 'وقت وصول العميل أو الطلب (قد يكون null)' })
+    @Expose()
+    arrivedAt: Date | null;
+
+    @ApiProperty({ example: '2025-08-29T10:00:00.000Z', description: 'وقت تجهيز الطلب من قبل المتجر (قد يكون null)' })
+    @Expose()
+    readyAt: Date | null;
+
+    @ApiProperty({ example: '2025-08-29T10:00:00.000Z', description: 'وقت استلام العميل للطلب (قد يكون null)' })
+    @Expose()
+    receivedAt: Date | null;
+
+    @ApiProperty({ example: '2025-08-29T10:00:00.000Z', description: 'وقت إنشاء الطلب بواسطة العميل (غير قابل لأن يكون null)' })
+    @Expose()
+    createdAt: Date;
 
     @ApiProperty({ example: 250.5, description: 'Final price to pay' })
     @Expose()
