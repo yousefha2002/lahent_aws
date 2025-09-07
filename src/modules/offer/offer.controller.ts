@@ -21,7 +21,7 @@ import { ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiSecurity } from '@nest
 import { AdminGuard } from 'src/common/guards/admin.guard';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
-import { TargetType } from 'src/common/enums/target_type';
+import { OfferType } from 'src/common/enums/offer_type';
 
 @Controller('offer')
 export class OfferController {
@@ -85,7 +85,7 @@ export class OfferController {
   @ApiSecurity('access-token')
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
-  @ApiQuery({ name: 'type', required: false, enum: TargetType,example: TargetType.ALL 
+  @ApiQuery({ name: 'type', required: false, enum: OfferType,example: OfferType.FIXED 
 })
   @ApiQuery({ name: 'storeId', required: false, type: Number, example: 5 })
   @ApiResponse({ status: 200, description: 'Paginated list of offers for the store', type: PaginatedOfferResponseDto })
