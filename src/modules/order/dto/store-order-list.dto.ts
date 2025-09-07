@@ -39,6 +39,10 @@ export class OrderListDto {
     @Expose()
     paidAt: Date | null;
 
+    @ApiProperty({ example: '2025-08-29T10:00:00.000Z', description: 'وقت استلام العميل للطلب (قد يكون null)' })
+    @Expose()
+    preparedAt: Date | null;
+
     @ApiProperty({ example: '2025-08-29T10:00:00.000Z', description: 'وقت قبول العرض من قبل العميل أو المتجر (قد يكون null)' })
     @Expose()
     placedAt: Date | null;
