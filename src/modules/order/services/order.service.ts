@@ -330,7 +330,6 @@ export class OrderService {
     page = 1,
     limit = 10,
     filterStatus?: filterStatusByStore,
-    lang = Language.en,
   ) {
     const offset = (page - 1) * limit;
     const statusMap: Record<string, OrderStatus[]> = {
@@ -348,6 +347,12 @@ export class OrderService {
         OrderStatus.CANCELLED,
         OrderStatus.EXPIRED,
       ],
+      completedOrCanceled: [
+        OrderStatus.RECEIVED,
+        OrderStatus.REJECTED,
+        OrderStatus.CANCELLED,
+        OrderStatus.EXPIRED,
+    ]
     };
 
     const whereClause: any = { storeId };
