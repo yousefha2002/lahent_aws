@@ -1,3 +1,4 @@
+import { OrderNotificationService } from './orde_notification.service';
 import { ProductService } from './../../product/product.service';
 import { CouponService } from './../../coupon/coupon.service';
 import { OfferService } from './../../offer/offer.service';
@@ -27,7 +28,8 @@ export class OrderStatusService {
         private offerService: OfferService,
         private couponService: CouponService,
         private productService: ProductService,
-        private readonly i18n: I18nService
+        private readonly i18n: I18nService,
+        private readonly orderNotificationService:OrderNotificationService
     ){}
 
     async refundOrder(orderId: number, customer: Customer, lang: Language = Language.en) {
@@ -45,6 +47,7 @@ export class OrderStatusService {
             await this.orderPaymentService.processOrderRefund(order, OrderStatus.CANCELLED, transaction);
 
             await transaction.commit();
+            this.orderNotificationService.notifyBoth({orderId: order.id,status: OrderStatus.CANCELLED,customerId: order.customerId,storeId: order.storeId});
             return { success: true, message: this.i18n.translate('translation.orders.refund_success', { lang }) };
 
         } catch (error) {
@@ -65,6 +68,7 @@ export class OrderStatusService {
 
             await this.orderPaymentService.processOrderRefund(order, OrderStatus.REJECTED, transaction);
 
+            this.orderNotificationService.notifyCustomer({orderId: order.id,status: OrderStatus.REJECTED,customerId: order.customerId});
             await transaction.commit();
             return { success: true, message: this.i18n.translate('translation.orders.reject_success', { lang }) };
 
@@ -76,7 +80,6 @@ export class OrderStatusService {
 
     async acceptOrderByStore(orderId: number, storeId: number, lang: Language = Language.en) {
         const transaction = await this.sequelize.transaction();
-
         try {
             const order = await this.orderRepo.findOne({ where: { id: orderId, storeId }, include:[OrderItem], transaction });
             if (!order) throw new NotFoundException(this.i18n.translate('translation.orders.not_found', { lang }));
@@ -118,6 +121,7 @@ export class OrderStatusService {
 
             await order.save({ transaction });
             await transaction.commit();
+            this.orderNotificationService.notifyCustomer({orderId: order.id,status: order.status,customerId: order.customerId});
 
             return { success: true, message: this.i18n.translate('translation.orders.accept_success', { lang }) };
 
@@ -139,6 +143,7 @@ export class OrderStatusService {
         order.status = OrderStatus.READY;
 
         await order.save();
+        this.orderNotificationService.notifyCustomer({orderId: order.id,status: order.status,customerId: order.customerId});
 
         return { message: this.i18n.translate('translation.orders.ready_success', { lang }), order };
     }
@@ -159,6 +164,7 @@ export class OrderStatusService {
             await order.save({ transaction });
             await transaction.commit();
 
+            this.orderNotificationService.notifyStore({orderId: order.id,status: order.status,storeId: order.storeId});
             return { success: true, message: this.i18n.translate('translation.orders.arrived_success', { lang }) };
         } catch (error) {
             await transaction.rollback();
@@ -181,6 +187,7 @@ export class OrderStatusService {
 
             await order.save({ transaction });
             await transaction.commit();
+            this.orderNotificationService.notifyStore({orderId: order.id,status: order.status,storeId: order.storeId});
 
             return { success: true, message: this.i18n.translate('translation.orders.received_success', { lang }) };
         } catch (error) {
@@ -197,7 +204,7 @@ export class OrderStatusService {
             throw new BadRequestException(this.i18n.translate('translation.orders.invalid_status_for_extend', { lang }));
         }
 
-        const maxExtensionMinutes = 15;
+        const maxExtensionMinutes = 60;
         const currentTimeout = order.confirmationTimeoutAt.getTime();
         const now = Date.now();
 
@@ -209,5 +216,18 @@ export class OrderStatusService {
         await order.save();
 
         return { success: true, message: this.i18n.translate('translation.orders.extended_success', { lang }) };
+    }
+
+    async markCustomerOnTheWay(orderId: number, customerId: number, lang: Language = Language.en) 
+    {
+        const order = await this.orderRepo.findOne({ where: { id: orderId, customerId } });
+        if (!order) throw new NotFoundException(this.i18n.translate('translation.orders.not_found', { lang }));
+
+        if (![OrderStatus.PREPARING, OrderStatus.READY].includes(order.status)) {
+            throw new BadRequestException(this.i18n.translate('translation.orders.invalid_status_for_on_the_way', { lang }));
+        }
+        this.orderNotificationService.notifyStore({orderId: order.id,status: 'CUSTOMER_ON_THE_WAY',storeId: order.storeId});
+
+        return { success: true, message: this.i18n.translate('translation.orders.customer_on_the_way', { lang }) };
     }
 }

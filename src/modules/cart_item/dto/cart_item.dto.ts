@@ -86,5 +86,5 @@ export class CartItemWithProductOptionsDto {
     @Expose()
     @Type(() => ProductInstructionWithSelectedDto)
     @ApiProperty({ type: [ProductInstructionWithSelectedDto] })
-  instructions: ProductInstructionWithSelectedDto[];
+    instructions: ProductInstructionWithSelectedDto[];
 }

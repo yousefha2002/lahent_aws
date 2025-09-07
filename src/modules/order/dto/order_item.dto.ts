@@ -7,6 +7,8 @@ import { VariantDto } from 'src/modules/prouduct_variant/dto/variant-dto';
 import { SimpleCustomerDto } from 'src/modules/customer/dto/simple-customer.dto';
 import { SimpleStoreDto } from 'src/modules/store/dto/simple-store.dto';
 import { CustomerCarListDto } from 'src/modules/car/dto/customer-car-list.dto';
+import { OrderStatus } from 'src/common/enums/order_status';
+import { PickupType } from 'src/common/enums/pickedup_type';
 
 export class OrderItemDto {
     @ApiProperty({ example: 1 }) @Expose() id: number;
@@ -28,8 +30,8 @@ export class OrderItemDto {
 export class OrderDto {
     @ApiProperty({ example: 1 }) @Expose() id: number;
     @ApiProperty({ example: 1001 }) @Expose() orderNumber: number;
-    @ApiProperty({ example: 'pending' }) @Expose() status: string;
-    @ApiProperty({ example: 'delivery' }) @Expose() pickupType: string;
+    @ApiProperty({ example: OrderStatus.PENDING_PAYMENT ,enum: OrderStatus}) @Expose() status: OrderStatus;
+    @ApiProperty({ example: 'delivery' ,enum:PickupType}) @Expose() pickupType: PickupType;
     @ApiProperty({ example: 30 }) @Expose() estimatedTime: number;
     @ApiProperty({ example: 50 }) @Expose() finalPriceToPay: number;
     @ApiProperty({ example: 60 }) @Expose() subtotalBeforeDiscount: number;

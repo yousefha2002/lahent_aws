@@ -3,6 +3,7 @@ import { SimpleOfferDto } from './simple-offer.dto';
 import { StoreLanguageDto } from 'src/modules/store/dto/store-language.dto';
 import { SimpleCategoryDto } from 'src/modules/category/dto/category.dto';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { TargetType } from 'src/common/enums/target_type';
 
 export class OfferProductDto {
     @ApiProperty({ example: 1 })
@@ -42,8 +43,8 @@ export class OfferResponseDto extends SimpleOfferDto {
     @ApiProperty({ example: true })
     @Expose() isActive: boolean;
 
-    @ApiProperty({ example: 'PRODUCT' })
-    @Expose() target: string;
+    @ApiProperty({ example: TargetType.ALL,enum:TargetType })
+    @Expose() target: TargetType;
 
     @ApiPropertyOptional({ example: 5 })
     @Expose() usedCount?: number;

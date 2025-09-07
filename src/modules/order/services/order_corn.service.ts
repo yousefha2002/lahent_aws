@@ -6,6 +6,7 @@ import { OrderStatus } from 'src/common/enums/order_status';
 import { Op } from 'sequelize';
 import { CONFIRMATION_EXTENSION_MINUTES, UNPAID_EXPIRATION_MINUTES } from 'src/common/constants';
 import { OrderStatusService } from './order_status.service';
+import { OrderNotificationService } from './orde_notification.service';
 
 @Injectable()
 export class OrderCronService{
@@ -13,8 +14,9 @@ export class OrderCronService{
 
     constructor(
         @Inject(repositories.order_repository) private orderRepo: typeof Order,
-        private readonly orderStatusService:OrderStatusService
-    ) {console.log('OrderCronService initialized');}
+        private readonly orderStatusService:OrderStatusService,
+        private readonly orderNotificationService: OrderNotificationService
+    ) {}
 
     /***  إلغاء الطلبات التي لم يتم دفعها خلال 30 دقيقة*/
     @Cron(CronExpression.EVERY_MINUTE)
@@ -32,6 +34,7 @@ export class OrderCronService{
             order.status = OrderStatus.EXPIRED;
             order.canceledAt = new Date()
             await order.save();
+            this.orderNotificationService.notifyCustomer({orderId: order.id,status: order.status,customerId: order.customerId});
         }
         if (orders.length) {
             this.logger.warn(`Expired ${orders.length} unpaid orders`);
@@ -54,6 +57,7 @@ export class OrderCronService{
             order.status = OrderStatus.CUSTOMER_DECISION;
             order.confirmationTimeoutAt = new Date(order.confirmationTimeoutAt.getTime() + CONFIRMATION_EXTENSION_MINUTES * 60 * 1000); // زيادة 3 دقائق
             await order.save();
+            this.orderNotificationService.notifyCustomer({orderId: order.id,status: order.status,customerId: order.customerId});
         }
 
         if (orders.length) {
@@ -114,11 +118,13 @@ export class OrderCronService{
                 order.status = OrderStatus.READY;
                 order.readyAt = now;
                 await order.save();
+                this.orderNotificationService.notifyBoth({orderId: order.id,status: order.status,customerId: order.customerId,storeId: order.storeId});
                 this.logger.log(`Order ${order.id} status updated to READY`);
             } else if (elapsedMs >= estimatedMs / 2 && order.status !== OrderStatus.HALF_PREPARATION) {
                 // مضى نصف الوقت => نصف تحضير
                 order.status = OrderStatus.HALF_PREPARATION;
                 await order.save();
+                this.orderNotificationService.notifyBoth({orderId: order.id,status: order.status,customerId: order.customerId,storeId: order.storeId});
                 this.logger.log(`Order ${order.id} status updated to HALF_PREPARING`);
             }
         }
@@ -142,6 +148,12 @@ export class OrderCronService{
             order.status = OrderStatus.PREPARING;
             order.preparedAt = now;
             await order.save();
+            this.orderNotificationService.notifyBoth({
+                orderId: order.id,
+                status: order.status,
+                customerId: order.customerId,
+                storeId: order.storeId,
+            });
             this.logger.log(`Order ${order.id} moved from SCHEDULED to PREPARING at scheduled time.`);
         }
     }

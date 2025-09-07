@@ -1,3 +1,4 @@
+import { OrderNotificationService } from './orde_notification.service';
 import { OrderService } from './order.service';
 import { UserPointHistoryService } from '../../user_point_history/user_point_history.service';
 import { PaymentSessionService } from '../../payment_session/payment_session.service';
@@ -40,6 +41,7 @@ export class OrderPaymentService {
         private orderPointsService: OrderPointsService,
         private orderService: OrderService,
         private readonly i18n: I18nService,
+        private readonly orderNotificationService:OrderNotificationService
     ) {}
 
     async payOrder(orderId: number, customer: Customer, lang: Language = Language.en) {
@@ -76,6 +78,7 @@ export class OrderPaymentService {
                 await this.updateOrderPaymentInfo(order, transaction);
                 await this.orderPointsService.handlePointsAfterPayment(customer.id, order.pointsRedeemed, order.id, transaction);
                 await transaction.commit();
+                this.orderNotificationService.notifyStore({orderId: order.id,status: order.status,storeId: order.storeId});
                 return { success: true, message: this.i18n.translate('translation.orders.paid_with_points', { lang }) };
             }
 
@@ -97,7 +100,7 @@ export class OrderPaymentService {
                     type: TransactionType.PURCHASE_WALLET,
                     orderId: order.id,
                 }, transaction);
-
+                this.orderNotificationService.notifyStore({orderId: order.id,status: order.status,storeId: order.storeId});
                 await transaction.commit();
                 return { success: true, message: this.i18n.translate('translation.orders.paid_with_points_and_wallet', { lang }) };
             }
@@ -143,6 +146,7 @@ export class OrderPaymentService {
             }, transaction);
 
             await transaction.commit();
+            this.orderNotificationService.notifyStore({orderId: order.id,status: order.status,storeId: order.storeId});
         } catch (error) {
             await transaction.rollback();
             throw error;

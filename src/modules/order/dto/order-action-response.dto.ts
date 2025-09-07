@@ -7,6 +7,6 @@ export class OrderActionResponseDto {
     success: boolean;
 
     @Expose()
-    @ApiProperty({ description: 'Message describing the result of the action', example: 'Order rejected successfully' })
+    @ApiProperty({ description: 'Message describing the result of the action', example: 'the result of the action' })
     message: string;
 }

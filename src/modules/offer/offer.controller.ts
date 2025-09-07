@@ -17,11 +17,11 @@ import { ChangeOfferActiveDto } from './dto/change-offer-active.dto';
 import { ApprovedStoreGuard } from 'src/common/guards/approvedStore.guard';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { PaginatedOfferResponseDto } from './dto/offer-response.dto';
-import { Language } from 'src/common/enums/language';
 import { ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { AdminGuard } from 'src/common/guards/admin.guard';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
+import { TargetType } from 'src/common/enums/target_type';
 
 @Controller('offer')
 export class OfferController {
@@ -85,7 +85,8 @@ export class OfferController {
   @ApiSecurity('access-token')
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
-  @ApiQuery({ name: 'type', required: false, type: String, example: 'DISCOUNT_AMOUNT' })
+  @ApiQuery({ name: 'type', required: false, enum: TargetType,example: TargetType.ALL 
+})
   @ApiQuery({ name: 'storeId', required: false, type: Number, example: 5 })
   @ApiResponse({ status: 200, description: 'Paginated list of offers for the store', type: PaginatedOfferResponseDto })
   getAllOffersForStore(

@@ -1,5 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { Expose, Transform, Type } from "class-transformer";
+import { OrderStatus } from "src/common/enums/order_status";
+import { PickupType } from "src/common/enums/pickedup_type";
 import { getOrderDate } from "src/common/utils/getOrderDate";
 import { SimpleCustomerDto } from "src/modules/customer/dto/simple-customer.dto";
 import { SimpleStoreDto } from "src/modules/store/dto/simple-store.dto";
@@ -9,13 +11,13 @@ export class OrderListDto {
     @Expose()
     id: number;
 
-    @ApiProperty({ example: 'pending', description: 'Order status' })
+    @ApiProperty({ example:OrderStatus.CANCELLED, description: 'Order status',enum:OrderStatus })
     @Expose()
-    status: string;
+    status: OrderStatus;
 
-    @ApiProperty({ example: 'delivery', description: 'Pickup type' })
+    @ApiProperty({ example: PickupType.DRIVE_THRU,enum:PickupType, description: 'Pickup type' })
     @Expose()
-    pickupType: string;
+    pickupType: PickupType;
 
     @ApiProperty({ example: 30, description: 'Estimated time in minutes' })
     @Expose()

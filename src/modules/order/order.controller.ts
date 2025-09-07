@@ -28,7 +28,7 @@ export class OrderController {
   constructor(
     private readonly orderService: OrderService,
     private readonly orderPaymentService:OrderPaymentService,
-    private readonly orderStatusService:OrderStatusService
+    private readonly orderStatusService:OrderStatusService,
   ) {}
 
   @Serilaize(CreateOrderResponseDto)
@@ -187,10 +187,11 @@ export class OrderController {
   @ApiSecurity('access-token')
   @ApiQuery({ name: 'page', required: false, description: 'Page number', example: 1 })
   @ApiQuery({ name: 'limit', required: false, description: 'Number of items per page', example: 10 })
+  @ApiQuery({ name: 'storeId', required: false, description: 'Filter by store ID', example: 5 })
   @ApiResponse({ status: 200, description: 'Paginated list of orders for customer', type: PaginatedOrderListDto })
-  getOrdersByCustomer(@CurrentUser() customer:Customer,@Query('page',) page=1,@Query('limit') limit=10)
+  getOrdersByCustomer(@CurrentUser() customer:Customer,@Query('page',) page=1,@Query('limit') limit=10,@Query('storeId') storeId?: number)
   {
-    return this.orderService.getOrdersForCustomer(customer.id,+page,+limit)
+    return this.orderService.getOrdersForCustomer(customer.id,+page,+limit,undefined,storeId)
   }
 
   @Serilaize(OrderDto)
@@ -215,5 +216,21 @@ export class OrderController {
   getOrderByCustomer(@CurrentUser() customer:Customer,@Param('orderId',) orderId:number)
   {
     return this.orderService.getOrderByCustomer(customer.id,orderId)
+  }
+
+  @Serilaize(OrderActionResponseDto)
+  @UseGuards(CustomerGuard)
+  @Put('on-the-way/:orderId')
+  @ApiOperation({ summary: 'Customer marks that they are on the way' })
+  @ApiSecurity('access-token')
+  @ApiParam({ name: 'orderId', description: 'ID of the order', example: 123 })
+  @ApiResponse({ status: 200, description: 'Store notified that customer is on the way', type: OrderActionResponseDto })
+  markOnTheWay(
+    @CurrentUser() user: Customer,
+    @Param('orderId', ParseIntPipe) orderId: number,
+    @I18n() i18n: I18nContext
+  ) {
+    const lang = getLang(i18n);
+    return this.orderStatusService.markCustomerOnTheWay(orderId, user.id, lang);
   }
 }

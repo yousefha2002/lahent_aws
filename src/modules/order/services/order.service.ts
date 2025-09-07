@@ -395,10 +395,15 @@ export class OrderService {
     page = 1,
     limit = 10,
     lang = Language.en,
+    storeId?:number
   ) {
     const offset = (page - 1) * limit;
+    const where: any = { customerId };
+    if (storeId) {
+      where.storeId = storeId; // إضافة شرط على storeId إذا وُجد
+    }
     const { rows: orders, count } = await this.orderRepo.findAndCountAll({
-      where: { customerId },
+      where,
       include: [{ model: Store,include:[{model:StoreLanguage,required:false,where:{languageCode:lang}}]}],
       attributes: {
         include: [
