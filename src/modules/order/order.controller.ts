@@ -173,7 +173,7 @@ export class OrderController {
   @ApiSecurity('access-token')
   @ApiQuery({ name: 'page', required: false, description: 'Page number', example: 1 })
   @ApiQuery({ name: 'limit', required: false, description: 'Number of items per page', example: 10 })
-  @ApiQuery({ name: 'status', required: false, description: 'Filter orders by status', enum: ['incoming', 'preparing', 'ready', 'arrived', 'completed', 'canceled'] })
+  @ApiQuery({ name: 'status', required: false, description: 'Filter orders by status', enum: ['incoming', 'preparing', 'ready', 'arrived', 'completed', 'cancelled'] })
   @ApiResponse({ status: 200, description: 'Paginated list of orders for store', type: PaginatedOrderListDto })
   getOrdersByStore(@CurrentUser() store:Store,@Query('page',) page=1,@Query('limit') limit=10,@Query('status') filterStatus:filterStatusByStore)
   {

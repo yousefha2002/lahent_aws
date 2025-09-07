@@ -1,6 +1,6 @@
 import { Expose, Type } from 'class-transformer';
 import { SimpleCustomerDto } from 'src/modules/customer/dto/simple-customer.dto';
-import { BaseloyaltyOfferDto } from 'src/modules/loyalty_offer/dto/loyalty-offer.dt';
+import { BaseloyaltyOfferDto } from 'src/modules/loyalty_offer/dto/loyalty-offer.dto';
 
 export class RelatedStoreDto {
     @Expose()

@@ -17,20 +17,20 @@ export class LoyaltyOfferService {
     async create(dto: CreateLoyaltyOfferDto, lang = Language.en) {
         const now = new Date();
 
-        if (dto.startDate && new Date(dto.startDate) <= now) {
+        if (dto.startDate <= now) {
             const msg = this.i18n.translate('translation.loyalty_offer.start_date_future', { lang });
             throw new BadRequestException(msg);
         }
 
-        if (dto.endDate && new Date(dto.endDate) < now) {
+        if (dto.endDate <= now) {
             const msg = this.i18n.translate('translation.loyalty_offer.end_date_past', { lang });
             throw new BadRequestException(msg);
         }
-        const offer = await this.loyaltyOfferModel.create({
-            ...dto,
-            startDate: dto.startDate ?? new Date(),
-        });
-
+        if (dto.startDate >= dto.endDate) {
+            const msg = this.i18n.translate('translation.loyalty_offer.invalid_dates', { lang });
+            throw new BadRequestException(msg);
+        }
+        const offer = await this.loyaltyOfferModel.create({ ...dto });
         return offer
     }
 
@@ -56,22 +56,25 @@ export class LoyaltyOfferService {
 
         const now = new Date();
 
-        // تحقق من startDate
-        if (dto.startDate && new Date(dto.startDate) <= now) {
+        if (dto.startDate && dto.startDate <= now) {
             const msg = this.i18n.translate('translation.loyalty_offer.start_date_future', { lang });
             throw new BadRequestException(msg);
         }
 
-        if (dto.endDate && new Date(dto.endDate) < now) {
+        if (dto.endDate && dto.endDate <= now) {
             const msg = this.i18n.translate('translation.loyalty_offer.end_date_past', { lang });
             throw new BadRequestException(msg);
         }
 
-        await offer.update(dto);
+        if (dto.startDate && dto.endDate && dto.startDate >= dto.endDate) {
+            const msg = this.i18n.translate('translation.loyalty_offer.invalid_dates', { lang });
+            throw new BadRequestException(msg);
+        }
 
-        const msg = this.i18n.translate('translation.loyalty_offer.updated', { lang });
-        return { message: msg, data: offer };
-}
+
+        await offer.update(dto);
+        return offer
+    }
 
     async toggleStatus(id: number, lang = Language.en) {
         const offer = await this.loyaltyOfferModel.findByPk(id);
@@ -109,10 +112,8 @@ export class LoyaltyOfferService {
         const now = new Date();
         return {
             isActive: true,
-            [Op.and]: [
-                { [Op.or]: [{ startDate: null }, { startDate: { [Op.lte]: now } }] },
-                { [Op.or]: [{ endDate: null }, { endDate: { [Op.gte]: now } }] }
-            ]
+            startDate: { [Op.lte]: now },
+            endDate: { [Op.gte]: now },
         };
     }
 }

@@ -13,6 +13,11 @@ export class BaseloyaltyOfferDto {
     @ApiProperty({ example: 10, description: 'Bonus amount received' })
     @Expose()
     bonusAmount: number;
+
+    @ApiPropertyOptional({ example: '2025-09-30T00:00:00.000Z', description: 'Offer end date' })
+    @Transform(({ value }) => value ?? null)
+    @Expose()
+    endDate: Date;
 }
 
 export class ExtendedLoyaltyOfferDto extends BaseloyaltyOfferDto {
@@ -24,9 +29,4 @@ export class ExtendedLoyaltyOfferDto extends BaseloyaltyOfferDto {
     @Transform(({ value }) => value ?? null)
     @Expose()
     startDate: Date;
-
-    @ApiPropertyOptional({ example: '2025-09-30T00:00:00.000Z', description: 'Offer end date' })
-    @Transform(({ value }) => value ?? null)
-    @Expose()
-    endDate: Date;
 }

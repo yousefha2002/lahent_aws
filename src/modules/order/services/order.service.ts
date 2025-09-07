@@ -342,7 +342,7 @@ export class OrderService {
       ready: [OrderStatus.READY],
       arrived: [OrderStatus.ARRIVED],
       completed: [OrderStatus.RECEIVED],
-      canceled: [
+      cancelled: [
         OrderStatus.REJECTED,
         OrderStatus.CANCELLED,
         OrderStatus.EXPIRED,

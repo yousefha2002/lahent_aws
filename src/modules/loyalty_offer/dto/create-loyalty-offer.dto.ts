@@ -1,6 +1,6 @@
-import { IsDate, IsNumber, IsOptional, Min } from 'class-validator';
+import { IsDate, IsNumber, Min } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateLoyaltyOfferDto {
     @ApiProperty({ example: 100, description: 'Amount required to redeem offer' })
@@ -13,15 +13,13 @@ export class CreateLoyaltyOfferDto {
     @Min(1)
     bonusAmount: number;
 
-    @ApiPropertyOptional({ example: '2025-08-29T00:00:00.000Z', description: 'Offer start date' })
-    @IsOptional()
+    @ApiProperty({ example: '2025-08-29T00:00:00.000Z', description: 'Offer start date' })
     @Type(() => Date)
     @IsDate()
-    startDate?: Date;
+    startDate: Date;
 
-    @ApiPropertyOptional({ example: '2025-09-30T00:00:00.000Z', description: 'Offer end date' })
-    @IsOptional()
+    @ApiProperty({ example: '2025-09-30T00:00:00.000Z', description: 'Offer end date' })
     @Type(() => Date)
     @IsDate()
-    endDate?: Date;
+    endDate: Date;
 }

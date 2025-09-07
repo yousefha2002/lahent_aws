@@ -24,12 +24,12 @@ export class LoyaltyOffer extends Model {
     @Column(DataType.INTEGER)
     bonusAmount: number;
 
-    @AllowNull(true)
-    @Column(DataType.DATE)
+    @AllowNull(false)
+    @Column({type: DataType.DATE,defaultValue: DataType.NOW})
     startDate: Date;
 
-    @AllowNull(true)
-    @Column(DataType.DATE)
+    @AllowNull(false)
+    @Column({type: DataType.DATE,defaultValue: DataType.NOW})
     endDate: Date;
 
     @Default(true)
