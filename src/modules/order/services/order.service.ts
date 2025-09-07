@@ -82,6 +82,23 @@ export class OrderService {
             } = dto;
 
       const pointsUsedSafe = pointsUsed ?? 0;
+      const store = await this.storeService.storeById(storeId);
+      if (!store || store.status !== StoreStatus.APPROVED) {
+        throw new BadRequestException(
+          this.i18n.translate('translation.orders.store_unavailable', { lang }),
+        );
+      }
+      if (pickupType === PickupType.DRIVE_THRU && !store.drive_thru) {
+        throw new BadRequestException(
+            this.i18n.translate('translation.orders.store_no_drive_thru', { lang }),
+        );
+    }
+
+      if (pickupType === PickupType.IN_STORE && !store.in_store) {
+          throw new BadRequestException(
+              this.i18n.translate('translation.orders.store_no_in_store', { lang }),
+          );
+      }
 
       if (pointsUsedSafe > 0 && user.points < MIN_POINTS_TO_USE) {
         throw new BadRequestException(
@@ -153,12 +170,6 @@ export class OrderService {
       }
 
       const cartItems = await this.cartService.getCartItemsWithOffers(storeId,user.id,lang);
-      const store = await this.storeService.storeById(storeId);
-      if (!store || store.status !== StoreStatus.APPROVED) {
-        throw new BadRequestException(
-          this.i18n.translate('translation.orders.store_unavailable', { lang }),
-        );
-      }
 
       const estimatedTime = Math.max(
         ...cartItems.map((item) => item.product.preparationTime || 0),
