@@ -1,1 +1,1 @@
-export type filterTypeTransaction =  'all' | 'deposit' | 'purchase' | 'refund'
+export type filterTypeTransaction =  'all' | 'deposit' | 'purchase' | 'refund' | 'gift'

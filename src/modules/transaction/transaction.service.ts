@@ -74,11 +74,15 @@ export class TransactionService {
     const where: any = { customerId };
 
     if (typeFilter === 'deposit') {
-      where.type = [TransactionType.TOP_UP, TransactionType.GIFT_RECEIVED];
+      where.type = [TransactionType.TOP_UP];
     } else if (typeFilter === 'purchase') {
-      where.type = [TransactionType.PURCHASE_GATEWAY, TransactionType.PURCHASE_WALLET, TransactionType.GIFT_SENT];
+      where.type = [TransactionType.PURCHASE_GATEWAY, TransactionType.PURCHASE_WALLET];
     } else if (typeFilter === 'refund') {
       where.type = [TransactionType.REFUND_WALLET];
+    }
+    else if(typeFilter==='gift')
+    {
+      where.type = [TransactionType.GIFT_SENT,TransactionType.GIFT_RECEIVED];
     }
 
     const { rows, count } = await this.transactionRepo.findAndCountAll({
