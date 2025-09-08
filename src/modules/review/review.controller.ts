@@ -66,6 +66,7 @@ export class ReviewController {
   @ApiSecurity('access-token')
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
+  @ApiQuery({ name: 'rating', required: false, type: Number, example: 5 })
   @ApiResponse({
     status: 200,
     description: 'Paginated list of reviews for the store',
@@ -74,8 +75,9 @@ export class ReviewController {
   getAllReviewsForStore(
     @CurrentUser() store: Store,
     @Query('page') page = 1,
-    @Query('limit') limit = 10
+    @Query('limit') limit = 10,
+    @Query('rating') rating?: number
   ) {
-    return this.reviewService.getStoreReviews(store.id, +page, +limit);
+    return this.reviewService.getStoreReviews(store.id, +page, +limit,rating);
   }
 }

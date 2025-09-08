@@ -97,11 +97,15 @@ export class ReviewService {
     return { message: 'Review deleted successfully' };
   }
 
-  async getStoreReviews(storeId: number, page = 1, limit = 10) {
+  async getStoreReviews(storeId: number, page = 1, limit = 10,rating?: number) {
     const offset = (page - 1) * limit;
+    const where: any = { storeId };
+    if (rating) {
+      where.rating = rating;
+    }
 
     const { rows, count } = await this.reviewRepo.findAndCountAll({
-      where: { storeId },
+      where,
       include: [Customer],
       order: [['createdAt', 'DESC']],
       limit,
