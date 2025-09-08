@@ -55,6 +55,9 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { UserTokenModule } from './modules/user_token/user_token.module';
 import { SectorModule } from './modules/sector/sector.module';
 import { RealtimeModule } from './modules/realtime/realtime.module';
+import { LoyaltySettingModule } from './modules/loyalty_setting/loyalty_setting.module';
+import { StoreCommissionModule } from './modules/store_commission/store_commission.module';
+import { StoreTransactionModule } from './modules/store_transaction/store_transaction.module';
 
 @Module({
   imports: [
@@ -125,6 +128,9 @@ import { RealtimeModule } from './modules/realtime/realtime.module';
     UserTokenModule,
     SectorModule,
     RealtimeModule,
+    LoyaltySettingModule,
+    StoreCommissionModule,
+    StoreTransactionModule,
   ],
   providers: [MulterConfigService],
 })

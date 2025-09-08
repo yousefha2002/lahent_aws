@@ -56,6 +56,9 @@ import { GiftCategoryLanguage } from 'src/modules/gift_category/entites/gift_cat
 import { UserToken } from 'src/modules/user_token/entities/user_token.entity';
 import { Sector } from 'src/modules/sector/entities/sector.entity';
 import { SectorLanguage } from 'src/modules/sector/entities/sectore_langauge.entity';
+import { LoyaltySetting } from 'src/modules/loyalty_setting/entities/loyalty_setting.entity';
+import { StoreCommission } from 'src/modules/store_commission/entities/store_commission.entity';
+import { StoreTransaction } from 'src/modules/store_transaction/entities/store_transaction.entity';
 
 export const databaseProviders = [
   {
@@ -136,7 +139,10 @@ export const databaseProviders = [
         GiftCategoryLanguage,
         UserToken,
         Sector,
-        SectorLanguage
+        SectorLanguage,
+        LoyaltySetting,
+        StoreCommission,
+        StoreTransaction
       ]); 
       await sequelize.sync({ alter: false});
       return sequelize;
