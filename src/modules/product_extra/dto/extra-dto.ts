@@ -14,7 +14,7 @@ export class ExtraDto {
 
     @Expose()
     @ApiProperty({ example: 5 })
-    additional_price: number;
+    additionalPrice: number;
 }
 
 export class ProductExtraLanguageDto {
@@ -39,7 +39,7 @@ export class ProductExtraDto {
     @Expose()
     @IsNumber()
     @ApiProperty({ example: 5 })
-    additional_price: number;
+    additionalPrice: number;
 
     @Expose()
     @IsArray()

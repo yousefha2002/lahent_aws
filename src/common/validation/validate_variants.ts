@@ -7,7 +7,7 @@ export interface VariantLanguageDto {
 }
 
 export interface VariantDto {
-    additional_price: number;
+    additionalPrice: number;
     categoryId: number;
     languages: VariantLanguageDto[];
 }
@@ -31,12 +31,12 @@ export function validateAndParseVariants(raw: string): VariantDto[] {
         throw new BadRequestException(`Variant at index ${index} must be an object.`);
         }
 
-        const { additional_price, categoryId, languages } = item;
+        const { additionalPrice, categoryId, languages } = item;
 
         // ✅ تحقق من additional_price
-        if (typeof additional_price !== 'number' || isNaN(additional_price)) {
+        if (typeof additionalPrice !== 'number' || isNaN(additionalPrice)) {
         throw new BadRequestException(
-            `"additional_price" at index ${index} must be a valid number.`
+            `"additionalPrice" at index ${index} must be a valid number.`
         );
         }
 

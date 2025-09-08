@@ -191,8 +191,8 @@ export class CartService {
         if (offer) {
           discountedPrice = this.offerService.getDiscountedPrice(product.basePrice,offer);
         }
-        const extrasTotal =item.extras.reduce((sum, e) => sum + (e.productExtra.additional_price || 0), 0) |0;
-        const variantsTotal =item.variants?.reduce((sum, v) => sum + (v.productVariant.additional_price || 0),0,) | 0;
+        const extrasTotal =item.extras.reduce((sum, e) => sum + (e.productExtra.additionalPrice || 0), 0) |0;
+        const variantsTotal =item.variants?.reduce((sum, v) => sum + (v.productVariant.additionalPrice || 0),0,) | 0;
         const originalPrice = product.basePrice + extrasTotal + variantsTotal;
         const finalPrice = discountedPrice + extrasTotal + variantsTotal;
         const totalPrice = finalPrice * item.quantity;

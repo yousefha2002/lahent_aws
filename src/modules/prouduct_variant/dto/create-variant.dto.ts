@@ -5,7 +5,7 @@ import { ProductVariantLanguageDto } from './variant-dto';
 export class SingleVariantDto {
   @IsNumber()
   @IsNotEmpty()
-  additional_price: number;
+  additionalPrice: number;
 
   @IsNumber()
   @IsNotEmpty()

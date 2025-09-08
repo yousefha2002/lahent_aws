@@ -210,7 +210,7 @@ export class CartItemService {
       languages: catVar.variantCategory.languages || [],
       variants: catVar.variants.map(v => ({
         id: v.id,
-        additional_price: v.additional_price,
+        additional_price: v.additionalPrice,
         languages: v.langauges || [],
         imageUrl: v.imageUrl,
         selected: selectedVariantsIds.has(v.id),
@@ -225,8 +225,8 @@ export class CartItemService {
 
     // Calculate prices
     const discountedPrice = offer ? this.offerService.getDiscountedPrice(cartItem.product.basePrice, offer) : cartItem.product.basePrice;
-    const extrasTotal = cartItem.extras.reduce((sum, extra) => sum + (extra.productExtra?.additional_price || 0), 0);
-    const variantsTotal = cartItem.variants.reduce((sum, variant) => sum + (variant.productVariant?.additional_price || 0), 0);
+    const extrasTotal = cartItem.extras.reduce((sum, extra) => sum + (extra.productExtra?.additionalPrice || 0), 0);
+    const variantsTotal = cartItem.variants.reduce((sum, variant) => sum + (variant.productVariant?.additionalPrice || 0), 0);
     const finalPrice = discountedPrice + extrasTotal + variantsTotal;
     const originalPrice = cartItem.product.basePrice + extrasTotal + variantsTotal;
     const totalPrice = finalPrice * cartItem.quantity;

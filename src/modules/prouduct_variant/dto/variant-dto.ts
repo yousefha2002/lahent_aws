@@ -14,7 +14,7 @@ export class VariantDto {
 
     @Expose()
     @ApiProperty({ example: 5 })
-    additional_price: number;
+    additionalPrice: number;
 
     @Expose()
     @ApiProperty({ example: 'https://example.com/image.png', nullable: true })
@@ -42,7 +42,7 @@ export class ProductVariantDto {
 
     @Expose()
     @ApiProperty({ example: 5 })
-    additional_price: number;
+    additionalPrice: number;
 
     @Expose()
     @ApiProperty({ example: 'https://example.com/image.png', nullable: true })

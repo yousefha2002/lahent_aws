@@ -57,7 +57,7 @@ export class Product extends Model{
 
     @AllowNull(false)
     @Column(DataType.INTEGER)
-    product_number: number;
+    productNumber: number;
 
     @Default(0)
     @Column(DataType.INTEGER)

@@ -62,7 +62,7 @@ export class ProductService {
       storeId,
     );
     try {
-      const product_number = await this.generateProductNumber(
+      const productNumber = await this.generateProductNumber(
         storeId,
         transaction,
       );
@@ -81,7 +81,7 @@ export class ProductService {
           categoryId: dto.categoryId,
           basePrice: parseFloat(dto.basePrice),
           preparationTime: parseInt(dto.preparationTime),
-          product_number,
+          productNumber,
         },
         { transaction },
       );

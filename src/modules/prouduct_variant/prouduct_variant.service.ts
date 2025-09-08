@@ -58,7 +58,7 @@ export class ProuductVariantService {
       variant.imagePublicId = result.public_id;
     }
 
-    variant.additional_price = dto.additional_price;
+    variant.additionalPrice = dto.additionalPrice;
 
     if (dto.languages) {
       const parsedLanguages = validateVariantLanguages(dto.languages);
@@ -151,7 +151,7 @@ export class ProuductVariantService {
           {
             productId,
             productCategoryVariantId: productCategoryVariant.id,
-            additional_price: variantDto.additional_price,
+            additionalPrice: variantDto.additionalPrice,
             imageUrl,
             imagePublicId,
           },

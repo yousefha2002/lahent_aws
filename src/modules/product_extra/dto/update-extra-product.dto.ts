@@ -12,7 +12,7 @@ export class UpdateProductExtraDto {
   @ApiPropertyOptional({ example: 5.5, description: 'Additional price for this extra' })
   @IsNumber()
   @IsOptional()
-  additional_price?: number;
+  additionalPrice?: number;
 
   @ApiPropertyOptional({
     type: [ProductExtraLanguageDto],

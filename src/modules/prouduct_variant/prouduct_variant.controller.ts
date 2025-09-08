@@ -40,7 +40,7 @@ export class ProuductVariantController {
     schema: {
       type: 'object',
       properties: {
-        additional_price: { type: 'number', example: 10 },
+        additionalPrice: { type: 'number', example: 10 },
         languages: {
           type: 'string',
           description: 'JSON string of variant languages',
@@ -110,7 +110,7 @@ export class ProuductVariantController {
           type: 'string',
           example: JSON.stringify([
             {
-              additional_price: 10,
+              additionalPrice: 10,
               categoryId: 2,
               languages: [
                 { languageCode: 'en', name: 'Small' },

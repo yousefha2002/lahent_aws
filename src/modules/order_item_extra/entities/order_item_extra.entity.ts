@@ -41,5 +41,5 @@ export class OrderItemExtra extends Model{
 
     @AllowNull(false)
     @Column(DataType.FLOAT)
-    additional_price: number;
+    additionalPrice: number;
 }

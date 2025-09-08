@@ -41,7 +41,7 @@ export class ProductExtraService {
           const createdExtra = await this.productExtraRepo.create(
             {
               productId: dto.productId,
-              additional_price: extra.additional_price,
+              additional_price: extra.additionalPrice,
             },
             { transaction }
           );
@@ -83,8 +83,8 @@ export class ProductExtraService {
       throw new BadRequestException('Invalid Process');
     }
 
-    if (dto.additional_price !== undefined) {
-      extra.additional_price = dto.additional_price;
+    if (dto.additionalPrice !== undefined) {
+      extra.additionalPrice = dto.additionalPrice;
       await extra.save();
     }
 

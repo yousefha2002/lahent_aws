@@ -6,7 +6,7 @@ export class UpdateProductVariantDto {
     @IsNumber({}, { message: 'price must be a number' })
     @Min(0, { message: 'price must be a positive number' })
     @IsNotEmpty()
-    additional_price: number;
+    additionalPrice: number;
 
     @IsOptional()
     @IsString()

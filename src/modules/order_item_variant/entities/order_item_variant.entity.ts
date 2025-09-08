@@ -41,7 +41,7 @@ export class OrderItemVariant extends Model{
 
     @AllowNull(false)
     @Column(DataType.FLOAT)
-    additional_price: number;
+    additionalPrice: number;
 
     @AllowNull(true)
     @Column(DataType.STRING)
