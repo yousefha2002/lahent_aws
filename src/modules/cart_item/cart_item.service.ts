@@ -232,7 +232,7 @@ export class CartItemService {
     const totalPrice = finalPrice * cartItem.quantity;
 
     return {
-      cartItemId: cartItem.id,
+      id: cartItem.id,
       quantity: cartItem.quantity,
       note: cartItem.note,
       originalPrice,

@@ -46,7 +46,7 @@ export class CartItemProductDto extends BaseProductDto {
 export class CartItemWithProductOptionsDto {
     @Expose()
     @ApiProperty({ description: 'Cart item ID', example: 1 })
-    cartItemId: number;
+    id: number;
 
     @Expose()
     @ApiProperty({ description: 'Quantity of the item', example: 2 })

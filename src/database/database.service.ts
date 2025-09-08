@@ -138,7 +138,7 @@ export const databaseProviders = [
         UserToken,
         Sector,
         SectorLanguage
-      ]);
+      ]); 
       await sequelize.sync({ alter: false});
       return sequelize;
     },
