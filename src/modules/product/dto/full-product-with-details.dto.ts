@@ -35,7 +35,7 @@ export class FullProductDetailsDto extends BaseProductDto {
 export class fullProductDetailsWihtPrivateDetails extends FullProductDetailsDto {
     @Expose()
     @ApiProperty({ example: 101 })
-    product_number: number;
+    productNumber: number;
 
     @Expose()
     @ApiProperty({ example: 250 })

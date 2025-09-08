@@ -9,7 +9,7 @@ export class ProductForStoreDto extends BaseProductDto {
 
     @ApiProperty({example:222})
     @Expose()
-    product_number:number
+    productNumber:number
 
     @ApiProperty({example:6})
     @Expose()

@@ -41,7 +41,7 @@ export class ProductExtraService {
           const createdExtra = await this.productExtraRepo.create(
             {
               productId: dto.productId,
-              additional_price: extra.additionalPrice,
+              additionalPrice: extra.additionalPrice,
             },
             { transaction }
           );
