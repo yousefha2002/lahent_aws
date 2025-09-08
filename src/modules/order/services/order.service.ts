@@ -19,11 +19,7 @@ import { createOrderDto } from '../dto/create-order.dto';
 import { OrderStatus } from 'src/common/enums/order_status';
 import { PickupType } from 'src/common/enums/pickedup_type';
 import { PaymentMethod } from 'src/common/enums/payment_method';
-import {
-  EARNING_RATE,
-  MIN_POINTS_TO_USE,
-  POINT_VALUE,
-} from 'src/common/constants';
+import {EARNING_RATE,MIN_POINTS_TO_USE,POINT_VALUE} from 'src/common/constants';
 import { Customer } from '../../customer/entities/customer.entity';
 import { round2 } from 'src/common/utils/round2';
 import { Sequelize } from 'sequelize';
@@ -202,9 +198,7 @@ export class OrderService {
         }
       }
 
-            const subtotalBeforeDiscount = round2(
-                cartItems.reduce((sum, item) => sum + item.finalPrice * item.quantity, 0),
-            );
+      const subtotalBeforeDiscount = round2(cartItems.reduce((sum, item) => sum + item.finalPrice * item.quantity, 0),);
 
       let coupon: Coupon | null = null;
       if (couponCode) {
@@ -215,13 +209,10 @@ export class OrderService {
         );
       }
 
-            const discountCouponAmount = coupon
-                ? round2(subtotalBeforeDiscount * (coupon.discountPercentage / 100))
-                : 0;
-
-            const finalPriceToPay = round2(subtotalBeforeDiscount - discountCouponAmount);
-
-            const pointsAmountUsed = round2(pointsUsedSafe * POINT_VALUE);
+      const discountCouponAmount = coupon? round2(subtotalBeforeDiscount * (coupon.discountPercentage / 100)): 0;
+      const finalPriceToPay = round2(subtotalBeforeDiscount - discountCouponAmount);
+      // change to use from loyalty setting table
+      const pointsAmountUsed = round2(pointsUsedSafe * POINT_VALUE);
 
       if (pointsAmountUsed > finalPriceToPay) {
         throw new BadRequestException(
@@ -236,6 +227,7 @@ export class OrderService {
         remainingAmount = 0;
       }
 
+      // change to use from loyalty setting table
       const pointsEarned = Math.floor(remainingAmount * EARNING_RATE);
 
       let walletAmountUsed = 0;
@@ -293,34 +285,34 @@ export class OrderService {
         { transaction },
       );
 
-            for (const item of cartItems) {
-                const productName = item.product.languages?.find(l => l.languageCode === lang)?.name ?? item.product.languages?.[0]?.name ?? '';
-                const extrasForDb = item.extras.map(e => ({...e,name: e.languages?.find(l => l.languageCode === lang)?.name ?? e.languages?.[0]?.name ?? '',}));
-                const instructionsForDb = item.instructions.map(i => ({...i,name: i.languages?.find(l => l.languageCode === lang)?.name ?? i.languages?.[0]?.name ?? ''}));
-                const variantsForDb = item.variants.map(v => ({...v,name: v.languages?.find(l => l.languageCode === lang)?.name ?? v.languages?.[0]?.name ?? '',}));
-                const orderItem = await this.orderItemService.createOrderItem(
-                    {
-                        orderId: order.id,
-                        productId: item.product.id,
-                        productName: productName,
-                        productImageUrl: item.product.images[0],
-                        unitBasePrice: item.product.basePrice,
-                        unitDiscountedPrice:item.product.discountedPrice,
-                        unitFinalPrice:item.finalPrice,
-                        finalSubtotal:round2(item.finalPrice * item.quantity),
-                        quantity: item.quantity,
-                        offerId: item.product.offer?.id ?? null,
-                        freeQty: 0,
-                        note:item.note,
-                    },
-                    transaction,
-                );
-                await Promise.all([
-                    this.orderItemExtraService.createExtras(orderItem.id, extrasForDb, transaction),
-                    this.orderItemVariantService.createVariants(orderItem.id, variantsForDb, transaction),
-                    this.orderItemInstructionService.createInstructions(orderItem.id,instructionsForDb,transaction),
-                ]);
-            }
+      for (const item of cartItems) {
+        const productName = item.product.languages?.find(l => l.languageCode === lang)?.name ?? item.product.languages?.[0]?.name ?? '';
+        const extrasForDb = item.extras.map(e => ({...e,name: e.languages?.find(l => l.languageCode === lang)?.name ?? e.languages?.[0]?.name ?? '',}));
+        const instructionsForDb = item.instructions.map(i => ({...i,name: i.languages?.find(l => l.languageCode === lang)?.name ?? i.languages?.[0]?.name ?? ''}));
+        const variantsForDb = item.variants.map(v => ({...v,name: v.languages?.find(l => l.languageCode === lang)?.name ?? v.languages?.[0]?.name ?? '',}));
+        const orderItem = await this.orderItemService.createOrderItem(
+          {
+            orderId: order.id,
+            productId: item.product.id,
+            productName: productName,
+            productImageUrl: item.product.images[0],
+            unitBasePrice: item.product.basePrice,
+            unitDiscountedPrice:item.product.discountedPrice,
+            unitFinalPrice:item.finalPrice,
+            finalSubtotal:round2(item.finalPrice * item.quantity),
+            quantity: item.quantity,
+            offerId: item.product.offer?.id ?? null,
+            freeQty: 0,
+            note:item.note,
+          },
+          transaction,
+        );
+        await Promise.all([
+          this.orderItemExtraService.createExtras(orderItem.id, extrasForDb, transaction),
+          this.orderItemVariantService.createVariants(orderItem.id, variantsForDb, transaction),
+          this.orderItemInstructionService.createInstructions(orderItem.id,instructionsForDb,transaction),
+          ]);
+        }
 
       await this.cartService.deleteCart(storeId, user.id, transaction);
 

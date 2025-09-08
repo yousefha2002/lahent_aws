@@ -63,5 +63,8 @@ export enum repositories {
   gift_categorylanguage__repository = 'gift_category_language_repository',
   user_token_repository = 'user_token_repository',
   sector_repository = 'sector_repository',
-  sector_language_repository = 'sector_language_repository'
+  sector_language_repository = 'sector_language_repository',
+  store_transaction_repository = 'store_transaction_repository',
+  store_commission_repository = 'store_commission_repository',
+  loyalty_setting_repository = 'loyalty_setting_repository'
 }

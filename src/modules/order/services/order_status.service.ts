@@ -78,6 +78,7 @@ export class OrderStatusService {
         }
     }
 
+    // add another function for create transaction with store comission
     async acceptOrderByStore(orderId: number, storeId: number, lang: Language = Language.en) {
         const transaction = await this.sequelize.transaction();
         try {
