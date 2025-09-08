@@ -27,7 +27,6 @@ import { OrderItemExtra } from 'src/modules/order_item_extra/entities/order_item
 import { OrderItemVariant } from 'src/modules/order_item_variant/entities/order_item_variant.entity';
 import { OrderItemInstruction } from 'src/modules/order_item_instruction/entities/order_item_instruction.entity';
 import { Avatar } from 'src/modules/avatar/entities/avatar.entity';
-import { CarType } from 'src/modules/car_type/entites/car_type.entity';
 import { CarBrand } from 'src/modules/car_brand/entities/car_brand.entity';
 import { OfferProduct } from 'src/modules/offer_product/entites/offer_product.entity';
 import { Coupon } from 'src/modules/coupon/entities/coupon.entity';

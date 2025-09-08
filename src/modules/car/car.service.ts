@@ -12,7 +12,6 @@ import { UpdateCarDto } from './dto/update-car.dto';
 import { CarBrandService } from './../car_brand/car_brand.service';
 import { Op } from 'sequelize';
 import { Language } from 'src/common/enums/language';
-import { CarType } from '../car_type/entites/car_type.entity';
 import { CarBrand } from '../car_brand/entities/car_brand.entity';
 import { CarBrandLanguage } from '../car_brand/entities/car_brand.languae.entity';
 
