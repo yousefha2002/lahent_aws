@@ -252,15 +252,15 @@ export class StoreController {
     return this.storeService.getFullDetailsStore(storeId, lang);
   }
 
+  @UseGuards(StoreOrOwnerGuard)
   @Serilaize(storeForAction)
-  @Get(':id/action')
+  @Get('action')
   @ApiOperation({ summary: 'Get full details of a store by ID for actions (owner or store only)' })
-  @ApiParam({ name: 'id', description: 'ID of the store', example: 1 })
   @ApiResponse({status: 200,description: 'full details of store',type: storeForAction})
-  async getStoreDetailsForAction(@Param('id') storeId: number,@I18n() i18n: I18nContext)
+  async getStoreDetailsForAction(@CurrentUser() store:Store,@I18n() i18n: I18nContext)
   {
     const lang = getLang(i18n);
-    return this.storeService.getStoreDetailsForAction(storeId,lang)
+    return this.storeService.getStoreDetailsForAction(store.id,lang)
   }
 
   @Put('/:storeId/approved')
