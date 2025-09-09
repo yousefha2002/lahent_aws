@@ -24,6 +24,7 @@ import { ProductModule } from '../product/product.module';
 import { OrderCronService } from './services/order_corn.service';
 import { OrderNotificationService } from './services/orde_notification.service';
 import { RealtimeModule } from '../realtime/realtime.module';
+import { StoreCommissionModule } from '../store_commission/store_commission.module';
 
 @Module({
   controllers: [OrderController],
@@ -53,7 +54,8 @@ import { RealtimeModule } from '../realtime/realtime.module';
     OfferModule,
     ProductModule,
     forwardRef(()=>PaymentSessionModule),
-    RealtimeModule
+    RealtimeModule,
+    StoreCommissionModule
   ],
   exports: [OrderService,OrderPaymentService],
 })

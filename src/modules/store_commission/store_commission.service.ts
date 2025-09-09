@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
 import { StoreCommission } from './entities/store_commission.entity';
 
@@ -9,6 +9,25 @@ export class StoreCommissionService {
         private storeCommissionRepo: typeof StoreCommission,
     ) {}
 
-    // create one for each store - update and create in the same function
-    // if is created update or create
+    async setCommission(storeId: number, commissionPercent: number){
+        const existing = await this.storeCommissionRepo.findOne({ where: { storeId } });
+        if (existing) {
+            existing.commissionPercent = commissionPercent;
+            return existing.save();
+        }
+
+        return this.storeCommissionRepo.create({
+            storeId,
+            commissionPercent,
+        });
+    }
+
+    async getCommission(storeId: number): Promise<number | null> {
+        const commission = await this.storeCommissionRepo.findOne({ where: { storeId } });
+        if(!commission)
+        {
+            throw new BadRequestException('comission for store is not found')
+        }
+        return commission.commissionPercent
+    }
 }
