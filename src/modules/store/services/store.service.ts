@@ -1,5 +1,4 @@
 import { SectorService } from './../../sector/sector.service';
-import { TypeService } from './../../type/type.service';
 import { FaviroteService } from './../../favirote/favirote.service';
 import { StoreUtilsService } from './storeUtils.service';
 import {

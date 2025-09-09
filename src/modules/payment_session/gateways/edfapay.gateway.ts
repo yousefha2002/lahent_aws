@@ -26,6 +26,8 @@ export class EdFapayGateway implements PaymentGateway {
 
         const formData = new NodeFormData()
         const hash = generateHash(paymentOrderId,amount.toString(),currency,description,this.secretKey);
+        console.log('initial')
+        console.log(hash)
 
         formData.append('action', 'SALE');
         formData.append('edfa_merchant_id', this.merchantId);

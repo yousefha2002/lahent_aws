@@ -4,7 +4,6 @@ import { PaymentSessionService } from './../payment_session/payment_session.serv
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { GatewaySource } from 'src/common/enums/gateway-source';
 import { ConfigService } from '@nestjs/config';
-import {generateWebhookHashWithDesc,generateWebhookHashWithId,generateWebhookHashWithIdAndDesc,generateWebhookHashWithout } from 'src/common/utils/generateHash';
 
 @Injectable()
 export class EdfapayService {
@@ -28,44 +27,8 @@ export class EdfapayService {
         console.log(body)
         console.log(session.description)
         const secretKey = this.configService.get<string>('EDFA_SECRET_KEY')!;
-        const hashWithDesc = generateWebhookHashWithDesc(
-            String(order_id),
-            String(amount),
-            String(currency),
-            String(session.description),
-            String(secretKey)
-        )
 
-        const hashWithId = generateWebhookHashWithId(
-            String(rrn),
-            String(order_id),
-            String(amount),
-            String(currency),
-            String(secretKey)
-        )
-
-        const hashWithIdAndDesc = generateWebhookHashWithIdAndDesc(
-            String(rrn),
-            String(order_id),
-            String(amount),
-            String(currency),
-            String(session.description),
-            String(secretKey)
-        )
-
-        const hashWithout = generateWebhookHashWithout(
-            String(order_id),
-            String(amount),
-            String(currency),
-            String(secretKey)
-        )
-        
-        console.log("👉 hash from webhook:", body.hash);
-        console.log("👉 hash without:", hashWithout);
-        console.log("👉 hashWithDesc:", hashWithDesc);
-        console.log("👉 hashWithId:", hashWithId);
-        console.log("👉 hashWithIdAndDesc:", hashWithIdAndDesc);
-        if (body.hash !== hashWithout) {
+        if (body.hash !== "") {
             throw new BadRequestException('Invalid hash');
         }
         session.transactionId = trans_id;
