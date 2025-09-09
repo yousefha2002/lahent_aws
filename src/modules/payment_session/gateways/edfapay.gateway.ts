@@ -66,8 +66,7 @@ export class EdFapayGateway implements PaymentGateway {
             merchant_id: this.merchantId,
             hash: hash
         });
-        console.log(response)
-        if (response.data.status === 'settled') {
+        if (response.data.responseBody.status === 'settled') {
             return true
         } else {
             return false
