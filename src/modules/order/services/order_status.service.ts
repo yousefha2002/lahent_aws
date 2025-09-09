@@ -31,7 +31,7 @@ export class OrderStatusService {
         private productService: ProductService,
         private readonly i18n: I18nService,
         private readonly orderNotificationService:OrderNotificationService,
-        private readonly storeTransactionService:StoreTransactionService
+        private readonly storeTransactionService:StoreTransactionService,
     ){}
 
     async refundOrder(orderId: number, customer: Customer, lang: Language = Language.en) {

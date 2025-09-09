@@ -48,10 +48,14 @@ export class createOrderDto {
     @IsNotEmpty()
     pickupByCustomer: boolean;
 
-    @ApiPropertyOptional({ description: 'Points used for this order', example: 10, minimum: 0 })
+    @ApiPropertyOptional({ 
+    description: 'Points used for this order', 
+    example: 500, 
+    minimum: 500 
+    })
     @IsNumber()
     @IsOptional()
-    @Min(0)
+    @Min(500, { message: 'Points used must be at least 500' })
     pointsUsed?: number;
 
     @ApiPropertyOptional({ description: 'Payment gateway type', enum: GatewayType })

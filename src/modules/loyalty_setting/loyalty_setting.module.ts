@@ -7,6 +7,7 @@ import { AdminModule } from '../admin/admin.module';
 @Module({
   controllers: [LoyaltySettingController],
   providers: [LoyaltySettingService,...LoyaltySettingProvider],
-  imports:[AdminModule]
+  imports:[AdminModule],
+  exports:[LoyaltySettingService]
 })
 export class LoyaltySettingModule {}

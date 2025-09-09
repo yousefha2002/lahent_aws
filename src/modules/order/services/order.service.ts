@@ -1,3 +1,4 @@
+import { LoyaltySettingService } from './../../loyalty_setting/loyalty_setting.service';
 import { StoreUtilsService } from './../../store/services/storeUtils.service';
 import { StoreService } from 'src/modules/store/services/store.service';
 import { CarService } from '../../car/car.service';
@@ -7,19 +8,14 @@ import { OrderItemExtraService } from '../../order_item_extra/order_item_extra.s
 import { OrderItemService } from '../../order_item/order_item.service';
 import { CouponService } from '../../coupon/coupon.service';
 import { CartService } from '../../cart/cart.service';
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import {BadRequestException,Inject,Injectable,NotFoundException} from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
 import { Order } from '../entities/order.entity';
 import { createOrderDto } from '../dto/create-order.dto';
 import { OrderStatus } from 'src/common/enums/order_status';
 import { PickupType } from 'src/common/enums/pickedup_type';
 import { PaymentMethod } from 'src/common/enums/payment_method';
-import {EARNING_RATE,MIN_POINTS_TO_USE,POINT_VALUE} from 'src/common/constants';
+import {MIN_POINTS_TO_USE} from 'src/common/constants';
 import { Customer } from '../../customer/entities/customer.entity';
 import { round2 } from 'src/common/utils/round2';
 import { Sequelize } from 'sequelize';
@@ -58,6 +54,7 @@ export class OrderService {
     private readonly storeUtilsService: StoreUtilsService,
     @Inject('SEQUELIZE') private readonly sequelize: Sequelize,
     private readonly i18n: I18nService,
+    private loyaltySettingService:LoyaltySettingService
   ) {}
 
   async placeOrder(user: Customer, dto: createOrderDto, lang = Language.en) {
@@ -209,10 +206,11 @@ export class OrderService {
         );
       }
 
+      const loyaltySetting = await this.loyaltySettingService.getSettings();
       const discountCouponAmount = coupon? round2(subtotalBeforeDiscount * (coupon.discountPercentage / 100)): 0;
       const finalPriceToPay = round2(subtotalBeforeDiscount - discountCouponAmount);
       // change to use from loyalty setting table
-      const pointsAmountUsed = round2(pointsUsedSafe * POINT_VALUE);
+      const pointsAmountUsed = round2(pointsUsedSafe * loyaltySetting.dollarPerPoint);
 
       if (pointsAmountUsed > finalPriceToPay) {
         throw new BadRequestException(
@@ -228,7 +226,7 @@ export class OrderService {
       }
 
       // change to use from loyalty setting table
-      const pointsEarned = Math.floor(remainingAmount * EARNING_RATE);
+      const pointsEarned = Math.floor(remainingAmount * loyaltySetting.pointsPerDollar);
 
       let walletAmountUsed = 0;
       let gatewayAmountUsed = 0;
