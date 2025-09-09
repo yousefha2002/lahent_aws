@@ -30,6 +30,7 @@ export class EdfapayService {
 
         session.transactionId = trans_id;
         const gateway = PaymentGatewayFactory.getProvider(GatewayType.edfapay);
+        console.log(gateway)
 
         let isSettled = false;
         if (status === 'SETTLED' || status === 'SUCCESS') {

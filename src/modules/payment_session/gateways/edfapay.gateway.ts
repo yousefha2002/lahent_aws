@@ -59,13 +59,14 @@ export class EdFapayGateway implements PaymentGateway {
     }
 
     async confirmPayment(orderId: string, gwayPaymentId: string,hash:string) {    
+        console.log(orderId,gwayPaymentId,hash)
         const response = await axios.post(this.statusUrl, {
             order_id: orderId,
             gway_payment_id: gwayPaymentId,
             merchant_id: this.merchantId,
             hash: hash
         });
-
+        console.log(response.data.status)
         if (response.data.status === 'settled') {
             return true
         } else {

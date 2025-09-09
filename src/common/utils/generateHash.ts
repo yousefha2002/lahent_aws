@@ -4,8 +4,6 @@ export function generateHash(order_number: string,order_amount: string,order_cur
 {
     const rawString = (order_number +order_amount +order_currency +order_description +password).toUpperCase();
     const md5Hash = crypto.createHash('md5').update(rawString).digest('hex');
-    console.log(md5Hash)
     const sha1Hash = crypto.createHash('sha1').update(md5Hash).digest('hex');
-    console.log(sha1Hash)
     return sha1Hash; 
 }

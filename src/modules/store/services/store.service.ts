@@ -226,13 +226,13 @@ export class StoreService {
         throw new BadRequestException(this.i18n.t('translation.store.phone_in_use',{lang}));
       }
     }
-    if(dto.subType!==undefined)
+    if(dto.subTypeId!==undefined)
     {
-      await this.subTypeService.subTypeById(+dto.subType)
+      await this.subTypeService.subTypeById(+dto.subTypeId)
     }
-    if(dto.sector!==undefined)
+    if(dto.sectorId!==undefined)
     {
-      await this.sectorService.findOne(+dto.sector)
+      await this.sectorService.findOne(+dto.sectorId)
     }
       
     Object.assign(store, {
@@ -244,8 +244,8 @@ export class StoreService {
       ...(dto.taxNumber !== undefined && { taxNumber: dto.taxNumber }),
       ...(dto.lat !== undefined && { lat: dto.lat }),
       ...(dto.lng !== undefined && { lng: dto.lng }),
-      ...(dto.subType !== undefined && { subTypeId: dto.subType }),
-      ...(dto.sector !== undefined && { sectorId: dto.sector })
+      ...(dto.subTypeId !== undefined && { subTypeId: dto.subTypeId }),
+      ...(dto.sectorId !== undefined && { sectorId: dto.sectorId })
     });
     await store.save();
     if (dto.openingHours && dto.openingHours.length > 0) {
@@ -262,6 +262,10 @@ export class StoreService {
       });
       if (existing) {
         existing.name = t.name;
+        if(t.brand )
+        {
+          existing.brand  = t.brand 
+        }
         await existing.save();
       } else {
         await this.storeLanguageRepo.create({

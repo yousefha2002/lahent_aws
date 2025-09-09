@@ -39,12 +39,12 @@ export class UpdateStoreDto {
   @ApiProperty({ example: 2, required: false })
   @IsOptional()
   @IsInt()
-  subType?: number;
+  subTypeId?: number;
 
   @ApiProperty({ example: 2, required: false })
   @IsOptional()
   @IsInt()
-  sector?: number;
+  sectorId?: number;
 
   @ApiProperty({ example: 24.7136, required: false })
   @IsOptional()
