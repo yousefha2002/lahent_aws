@@ -150,6 +150,18 @@ export class StoreController {
     return this.storeAuthService.login(body,lang,device,ip);
   }
 
+  @UseGuards(StoreOrOwnerGuard)
+  @Serilaize(storeForAction)
+  @Get('action/current')
+  @ApiOperation({ summary: 'Get full details of a store by ID for actions (owner or store only)' })
+  @ApiResponse({status: 200,description: 'full details of store',type: storeForAction})
+  @ApiQuery({ name: 'storeId', required: false, example: '1' })
+  async getStoreDetailsForAction(@CurrentUser() store:Store,@I18n() i18n: I18nContext)
+  {
+    const lang = getLang(i18n);
+    return this.storeService.getStoreDetailsForAction(store.id,lang)
+  }
+
   @Get('byOwner')
   @ApiOperation({ summary: 'Get all stores of the owner' })
   @ApiResponse({status: 200,type: [OwnerStoreDto]})
@@ -250,17 +262,6 @@ export class StoreController {
   ) {
     const lang = getLang(i18n);
     return this.storeService.getFullDetailsStore(storeId, lang);
-  }
-
-  @UseGuards(StoreOrOwnerGuard)
-  @Serilaize(storeForAction)
-  @Get('action')
-  @ApiOperation({ summary: 'Get full details of a store by ID for actions (owner or store only)' })
-  @ApiResponse({status: 200,description: 'full details of store',type: storeForAction})
-  async getStoreDetailsForAction(@CurrentUser() store:Store,@I18n() i18n: I18nContext)
-  {
-    const lang = getLang(i18n);
-    return this.storeService.getStoreDetailsForAction(store.id,lang)
   }
 
   @Put('/:storeId/approved')
