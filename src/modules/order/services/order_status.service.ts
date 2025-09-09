@@ -1,3 +1,4 @@
+import { StoreTransactionService } from './../../store_transaction/store_transaction.service';
 import { OrderNotificationService } from './orde_notification.service';
 import { ProductService } from './../../product/product.service';
 import { CouponService } from './../../coupon/coupon.service';
@@ -29,7 +30,8 @@ export class OrderStatusService {
         private couponService: CouponService,
         private productService: ProductService,
         private readonly i18n: I18nService,
-        private readonly orderNotificationService:OrderNotificationService
+        private readonly orderNotificationService:OrderNotificationService,
+        private readonly storeTransactionService:StoreTransactionService
     ){}
 
     async refundOrder(orderId: number, customer: Customer, lang: Language = Language.en) {
@@ -121,6 +123,7 @@ export class OrderStatusService {
             }
 
             await order.save({ transaction });
+            await this.storeTransactionService.create({storeId,orderId:order.id,totalAmount:order.finalPriceToPay},transaction);
             await transaction.commit();
             this.orderNotificationService.notifyCustomer({orderId: order.id,status: order.status,customerId: order.customerId});
 

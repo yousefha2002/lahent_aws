@@ -22,7 +22,7 @@ export class StoreCommissionService {
         });
     }
 
-    async getCommission(storeId: number): Promise<number | null> {
+    async getCommission(storeId: number){
         const commission = await this.storeCommissionRepo.findOne({ where: { storeId } });
         if(!commission)
         {
