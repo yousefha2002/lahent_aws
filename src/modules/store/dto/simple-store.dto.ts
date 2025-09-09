@@ -24,7 +24,7 @@ export class SimpleStoreDto {
     @Expose()
     coverUrl: string;
 
-    @ApiProperty({ example: '+966501234567' })
+    @ApiProperty({ example: '966501234567' })
     @Expose()
     phone: string;
 

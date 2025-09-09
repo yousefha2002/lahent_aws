@@ -23,6 +23,18 @@ export class storeForAction extends StoreDto{
     @Type(() => SectorDto)
     @Expose()
     sector:SectorDto
+
+    @ApiProperty({ example: '966501234567' })
+    @Expose()
+    phoneLogin: string;
+
+    @ApiProperty({ example: '966501234567' })
+    @Expose()
+    commercialRegister:string
+
+    @ApiProperty({ example: '966501234567' })
+    @Expose()
+    taxNumber:string
 }
 
 export class PaginatedStoreDto {
