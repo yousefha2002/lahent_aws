@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
 import { LoyaltySetting } from './entities/loyalty_setting.entity';
 
@@ -8,5 +8,23 @@ export class LoyaltySettingService {
         @Inject(repositories.loyalty_setting_repository) private loyaltySettingRepo: typeof LoyaltySetting
     ){}
 
-    // create just one then update on it , not more than one
+    async createOrUpdate(pointsPerDollar: number, dollarPerPoint: number) {
+        const existing = await this.loyaltySettingRepo.findOne();
+        if (existing) {
+            existing.pointsPerDollar = pointsPerDollar;
+            existing.dollarPerPoint = dollarPerPoint;
+            await existing.save();
+            return existing;
+        }
+        const newSetting = await this.loyaltySettingRepo.create({ pointsPerDollar, dollarPerPoint });
+        return newSetting;
+    }
+
+    async getSettings() {
+        const settings = await this.loyaltySettingRepo.findOne();
+        if (!settings) {
+        throw new BadRequestException('Loyalty settings not configured yet.');
+        }
+        return settings;
+    }
 }
