@@ -29,6 +29,14 @@ export class storeForAction extends StoreDto{
     @Expose()
     phoneLogin: string;
 
+    @ApiProperty({ example: true })
+    @Expose()
+    drive_thru: boolean;
+
+    @ApiProperty({ example: true })
+    @Expose()
+    in_store: boolean;
+
     @ApiProperty({ example: '966501234567' })
     @Expose()
     commercialRegister:string
