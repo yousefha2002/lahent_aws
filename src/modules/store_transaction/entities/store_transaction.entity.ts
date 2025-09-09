@@ -14,7 +14,7 @@ export class StoreTransaction extends Model {
     @Column(DataType.INTEGER)
     orderId: number;
 
-    @BelongsTo(() => Store)
+    @BelongsTo(() => Order)
     order: Order;
 
     @Column(DataType.FLOAT)

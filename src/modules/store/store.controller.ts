@@ -31,7 +31,7 @@ import { GetNearbyStoresDto } from './dto/get-nearby-store.dto';
 import { CustomerGuard } from 'src/common/guards/customer.guard';
 import { Customer } from '../customer/entities/customer.entity';
 import { StoreStatus } from 'src/common/enums/store_status';
-import { AdminGuard } from 'src/common/guards/admin.guard'; // تأكد أنك مستورد هذا
+import { AdminGuard } from 'src/common/guards/admin.guard';
 import { StoreOrOwnerGuard } from 'src/common/guards/StoreOrOwner.guard';
 import { Store } from './entities/store.entity';
 import { UpdateStoreDto } from './dto/update-store.dto';

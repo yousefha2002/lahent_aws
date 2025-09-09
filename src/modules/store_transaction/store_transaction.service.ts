@@ -3,6 +3,9 @@ import { Inject, Injectable } from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
 import { StoreTransaction } from './entities/store_transaction.entity';
 import { CreateStoreTransactionDto } from './dto/create-transaction.dto';
+import { Order } from '../order/entities/order.entity';
+import { Customer } from '../customer/entities/customer.entity';
+import { Avatar } from '../avatar/entities/avatar.entity';
 
 @Injectable()
 export class StoreTransactionService {
@@ -26,5 +29,26 @@ export class StoreTransactionService {
             commissionAmount,
             storeRevenue,
         },{transaction});
+    }
+
+    async getAllByStore(storeId: number, page = 1, limit = 10) {
+        const offset = (page - 1) * limit;
+
+        const { rows, count } = await this.storeTransactionRepo.findAndCountAll({
+            where: { storeId },
+            offset,
+            limit,
+            order: [['createdAt', 'DESC']],
+            include:[{
+                model:Order,
+                include:[{model:Customer,include:[Avatar]}]
+            }]
+        });
+
+        return {
+            data: rows,
+            total: count,
+            totalPages:Math.ceil(count / limit)
+        };
     }
 }
