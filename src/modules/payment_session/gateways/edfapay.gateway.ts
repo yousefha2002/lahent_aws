@@ -10,13 +10,15 @@ export class EdFapayGateway implements PaymentGateway {
     private apiUrl: string;
     private merchantId: string;
     private secretKey: string;
+    private statusUrl: string;
     constructor() {
-        if (!process.env.EDFA_API_URL || !process.env.EDFA_MERCHANT_ID || !process.env.EDFA_SECRET_KEY) {
+        if (!process.env.EDFA_API_URL || !process.env.EDFA_MERCHANT_ID || !process.env.EDFA_SECRET_KEY || !process.env.EDFA_STATUS_URL) {
             throw new Error('EDFAPAY environment variables are missing');
         }
         this.apiUrl = process.env.EDFA_API_URL;
         this.merchantId = process.env.EDFA_MERCHANT_ID;
         this.secretKey = process.env.EDFA_SECRET_KEY;
+        this.statusUrl = process.env.EDFA_STATUS_URL;
     }
     
     async createPayment(amount: number, currency: string, callbackUrl: string,customer:Customer,description?:string) 
@@ -26,9 +28,6 @@ export class EdFapayGateway implements PaymentGateway {
 
         const formData = new NodeFormData()
         const hash = generateHash(paymentOrderId,amount.toString(),currency,description,this.secretKey);
-        console.log('initial')
-        console.log(hash)
-
         formData.append('action', 'SALE');
         formData.append('edfa_merchant_id', this.merchantId);
         formData.append('order_id', paymentOrderId);
@@ -56,6 +55,21 @@ export class EdFapayGateway implements PaymentGateway {
 
         const checkoutUrl = response.data.redirect_url;
 
-        return { checkoutUrl,paymentOrderId,description,currency};
+        return { checkoutUrl,paymentOrderId,description,currency,hash};
     }
+
+    async confirmPayment(orderId: string, gwayPaymentId: string,hash:string) {    
+    const response = await axios.post(this.statusUrl, {
+        order_id: orderId,
+        gway_payment_id: gwayPaymentId,
+        merchant_id: this.merchantId,
+        hash: hash
+    });
+
+    if (response.data.status === 'settled') {
+        return true
+    } else {
+        return false
+    }
+}
 }

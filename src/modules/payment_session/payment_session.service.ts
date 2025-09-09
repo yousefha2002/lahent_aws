@@ -31,9 +31,10 @@ export class PaymentSessionService {
 
         // 3. إنشاء الدفع مع البوابة
         const gateway = PaymentGatewayFactory.getProvider(provider);
-        const { checkoutUrl,paymentOrderId ,description,currency} = await gateway.createPayment(amount, 'SAR', callbackUrl,customer);
+        const { checkoutUrl,paymentOrderId ,description,currency,hash} = await gateway.createPayment(amount, 'SAR', callbackUrl,customer);
         session.paymentOrderId = paymentOrderId;
         session.description = description
+        session.hash = hash
         session.currency = currency
         
         await session.save()

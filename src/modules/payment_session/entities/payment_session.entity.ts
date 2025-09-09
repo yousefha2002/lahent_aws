@@ -67,6 +67,9 @@ export class PaymentSession extends Model {
     @Column(DataType.STRING)
     paymentOrderId: string;
 
+    @Column(DataType.STRING)
+    hash: string;
+
     @AllowNull(false)
     @Default('pending')
     @Column(DataType.ENUM('pending', 'success', 'failed'))

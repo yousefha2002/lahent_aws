@@ -142,7 +142,6 @@ export class StoreService {
     const store = await this.storeRepo.findOne({
       where: {
         id: storeId,
-        status: StoreStatus.APPROVED,
       },
       include: [
         {
