@@ -159,11 +159,6 @@ export class StoreService {
         { model: OpeningHour },
       ],
     });
-    if (!store) {
-      throw new NotFoundException(
-        this.i18n.t('translation.store.not_found_or_not_approved'),
-      );
-    }
     return store
   }
 
