@@ -4,6 +4,7 @@ import { StoreSubTypeDto } from 'src/modules/subtype/dto/storeSubType.dto';
 import { ApiProperty } from '@nestjs/swagger';
 import { StoreStatus } from 'src/common/enums/store_status';
 import { SectorDto } from 'src/modules/sector/dto/sector.dto';
+import { OpeningHourDTO } from 'src/modules/opening_hour/dto/opening-hour.dto';
 
 export class StoreDto extends SimpleStoreDto{
     @ApiProperty({ type: StoreSubTypeDto })
@@ -35,6 +36,11 @@ export class storeForAction extends StoreDto{
     @ApiProperty({ example: '966501234567' })
     @Expose()
     taxNumber:string
+
+    @ApiProperty({ type: [OpeningHourDTO] })
+    @Expose()
+    @Type(() => OpeningHourDTO)
+    openingHours: OpeningHourDTO[];
 }
 
 export class PaginatedStoreDto {
