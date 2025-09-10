@@ -32,7 +32,7 @@ export class OrderItemVariant extends Model{
     @Column(DataType.INTEGER)
     variantId: number;
                 
-    @BelongsTo(() => ProductVariant)
+    @BelongsTo(() => ProductVariant,{onDelete: 'SET NULL'})
     variant: ProductVariant;
 
     @AllowNull(false)

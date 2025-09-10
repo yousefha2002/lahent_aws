@@ -22,11 +22,10 @@ export class UserPointsHistory extends Model {
     id: number;
 
     @ForeignKey(() => Customer)
-    @AllowNull(false)
     @Column(DataType.INTEGER)
     customerId: number;
 
-    @BelongsTo(() => Customer)
+    @BelongsTo(() => Customer,{onDelete: 'SET NULL'})
     customer: Customer;
 
     @AllowNull(false)

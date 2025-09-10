@@ -32,7 +32,7 @@ export class OrderItemInstruction extends Model{
     @Column(DataType.INTEGER)
     instructionId: number;
             
-    @BelongsTo(() => ProductInstruction)
+    @BelongsTo(() => ProductInstruction,{onDelete: 'SET NULL'})
     instruction: ProductInstruction;
 
     @AllowNull(false)

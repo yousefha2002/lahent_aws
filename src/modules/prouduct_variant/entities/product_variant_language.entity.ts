@@ -20,6 +20,6 @@ export class ProductVariantLanguage extends Model {
     @Column({ type: DataType.STRING, allowNull: false })
     name: string;
 
-    @BelongsTo(() => ProductVariant)
+    @BelongsTo(() => ProductVariant,{onDelete: 'CASCADE'})
     productVariant: ProductVariant;
 }

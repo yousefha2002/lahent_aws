@@ -26,7 +26,7 @@ export class ProductExtra extends Model {
   @Column(DataType.INTEGER)
   productId: number;
 
-  @BelongsTo(() => Product)
+  @BelongsTo(() => Product,{onDelete: 'CASCADE'})
   product: Product;
 
   @AllowNull(false)

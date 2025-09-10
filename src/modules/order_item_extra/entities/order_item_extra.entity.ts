@@ -32,7 +32,7 @@ export class OrderItemExtra extends Model{
     @Column(DataType.INTEGER)
     extraId: number;
         
-    @BelongsTo(() => ProductExtra)
+    @BelongsTo(() => ProductExtra,{onDelete: 'SET NULL'})
     extra: ProductExtra;
 
     @AllowNull(false)

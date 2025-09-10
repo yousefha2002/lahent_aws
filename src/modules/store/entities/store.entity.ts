@@ -148,4 +148,8 @@ export class Store extends Model {
 
   @HasMany(() => Review)
   reviews: Review[];
+
+  @Default(true)
+  @Column(DataType.BOOLEAN)
+  isOnline: boolean;
 }

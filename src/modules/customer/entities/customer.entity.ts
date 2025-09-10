@@ -22,7 +22,7 @@ import { Order } from 'src/modules/order/entities/order.entity';
 import { Review } from 'src/modules/review/entities/review.entity';
 import { Store } from 'src/modules/store/entities/store.entity';
 
-@Table({ tableName: 'customers' })
+@Table({ tableName: 'customers',paranoid: true })
 export class Customer extends Model {
   @AutoIncrement
   @PrimaryKey

@@ -17,7 +17,7 @@ export class OfferCategory extends Model {
     @Column(DataType.INTEGER)
     categoryId: number;
 
-    @BelongsTo(() => Category)
+    @BelongsTo(() => Category,{onDelete: 'CASCADE'})
     category: Category;
 
     @ForeignKey(() => Offer)

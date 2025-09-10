@@ -42,7 +42,7 @@ export class ProductVariant extends Model {
   @Column(DataType.INTEGER)
   productCategoryVariantId: number;
 
-  @BelongsTo(() => ProductCategoryVariant)
+  @BelongsTo(() => ProductCategoryVariant,{onDelete: 'CASCADE'})
   productCategoryVariant: ProductCategoryVariant;
 
   @HasMany(()=>ProductVariantLanguage)

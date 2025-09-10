@@ -18,6 +18,7 @@ import { GiftService } from '../gift/gift.service';
 import {generateAccessToken, generateRefreshToken } from 'src/common/utils/generateToken';
 import { JwtService } from '@nestjs/jwt';
 import { REFRESH_TOKEN_EXPIRES_MS } from 'src/common/constants';
+import { Sequelize } from 'sequelize';
 
 @Injectable()
 export class CustomerService {
@@ -30,7 +31,8 @@ export class CustomerService {
     @Inject(forwardRef(() => GiftService))
     private giftService: GiftService,
     private jwtService: JwtService,
-    private userTokenService:UserTokenService
+    private userTokenService:UserTokenService,
+    @Inject('SEQUELIZE') private readonly sequelize: Sequelize,
   ) {}
   async createCustomer(phone:string,lang=Language.en)
   {
@@ -162,5 +164,12 @@ export class CustomerService {
   async findByPhone(phone: string) {
     const customer = await this.customerRepo.findOne({ where: { phone },include:[Avatar] });
     return customer;
+  }
+
+  async findDeletedCustomer(customerId:number,transaction?:any)
+  {
+    const customer = await Customer.findByPk(customerId, { paranoid: false,transaction});
+    if (!customer) throw new NotFoundException('Customer not found');
+    return customer
   }
 }

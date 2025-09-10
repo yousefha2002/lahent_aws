@@ -27,12 +27,12 @@ export class Offer extends Model {
   @Column(DataType.INTEGER)
   id: number;
 
+  @AllowNull(true)
   @ForeignKey(() => Store)
-  @AllowNull(false)
   @Column(DataType.INTEGER)
   storeId: number;
 
-  @BelongsTo(() => Store)
+  @BelongsTo(() => Store,{onDelete: 'SET NULL'})
   store: Store;
 
   @AllowNull(false)

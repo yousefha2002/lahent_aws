@@ -12,7 +12,6 @@ import { PickupType } from 'src/common/enums/pickedup_type';
 export class OrderItemDto {
     @ApiProperty({ example: 1 }) @Expose() id: number;
     @ApiProperty({ example: 'No onions' }) @Expose() note: string;
-    @ApiProperty({ example: 101 }) @Expose() productId: number;
     @ApiProperty({ example: 'Burger' }) @Expose() productName: string;
     @ApiProperty({ example: 10.5 }) @Expose() unitBasePrice: number;
     @ApiProperty({ example: 9.5 }) @Expose() unitFinalPrice: number;

@@ -26,7 +26,7 @@ export class ProductInstruction extends Model {
   @Column(DataType.INTEGER)
   productId: number;
 
-  @BelongsTo(() => Product)
+  @BelongsTo(() => Product,{onDelete: 'CASCADE'})
   product: Product;
 
   @Default(true)

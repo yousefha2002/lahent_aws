@@ -22,11 +22,10 @@ export class Gift extends Model {
   id: number;
 
   @ForeignKey(() => Customer)
-  @AllowNull(false)
   @Column(DataType.INTEGER)
   senderId: number;
 
-  @BelongsTo(() => Customer, 'senderId')
+  @BelongsTo(() => Customer, { foreignKey: 'senderId', onDelete: 'SET NULL' })
   sender: Customer;
 
   @ForeignKey(() => Customer)
@@ -34,7 +33,7 @@ export class Gift extends Model {
   @Column(DataType.INTEGER)
   receiverId: number | null;
 
-  @BelongsTo(() => Customer, 'receiverId')
+  @BelongsTo(() => Customer, { foreignKey: 'receiverId', onDelete: 'SET NULL' })
   receiver: Customer;
 
   @Column(DataType.STRING)

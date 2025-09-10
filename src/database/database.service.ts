@@ -144,7 +144,12 @@ export const databaseProviders = [
         StoreCommission,
         StoreTransaction
       ]); 
-      await sequelize.sync({ alter: false});
+      // const queryInterface = sequelize.getQueryInterface();
+      // await queryInterface.changeColumn('user_points_history', 'customerId', {
+      //   type: 'INT',
+      //   allowNull: true,
+      // });
+      await sequelize.sync({ alter: true});
       return sequelize;
     },
   },

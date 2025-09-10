@@ -26,6 +26,6 @@ export class ProductLanguage extends Model {
     @Column(DataType.ENUM(...Object.values(Language)))
     languageCode: Language;
 
-    @BelongsTo(() => Product)
+    @BelongsTo(() => Product,{onDelete: 'CASCADE'})
     product: Product;
 }

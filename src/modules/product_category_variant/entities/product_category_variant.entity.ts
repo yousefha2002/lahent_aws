@@ -15,7 +15,7 @@ export class ProductCategoryVariant extends Model {
     @Column
     productId: number;
 
-    @BelongsTo(() => Product)
+    @BelongsTo(() => Product,{onDelete: 'CASCADE'})
     product: Product;
 
     @ForeignKey(() => VariantCategory)

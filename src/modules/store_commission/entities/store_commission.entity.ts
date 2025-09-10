@@ -8,7 +8,7 @@ export class StoreCommission extends Model {
     @Column(DataType.INTEGER)
     storeId: number;
 
-    @BelongsTo(() => Store)
+    @BelongsTo(() => Store,{onDelete: 'CASCADE'})
     store: Store;
 
     @AllowNull(false)

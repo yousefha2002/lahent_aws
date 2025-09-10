@@ -30,11 +30,10 @@ export class Order extends Model {
   id: number;
 
   @ForeignKey(() => Customer)
-  @AllowNull(false)
   @Column(DataType.INTEGER)
   customerId: number;
 
-  @BelongsTo(() => Customer)
+  @BelongsTo(() => Customer,{onDelete: 'SET NULL'})
   customer: Customer;
 
   @ForeignKey(() => Coupon)
@@ -46,11 +45,10 @@ export class Order extends Model {
   coupon: Coupon;
 
   @ForeignKey(() => Store)
-  @AllowNull(false)
   @Column(DataType.INTEGER)
   storeId: number;
 
-  @BelongsTo(() => Store)
+  @BelongsTo(() => Store,{onDelete: 'SET NULL'})
   store: Store;
 
   @ForeignKey(() => Car)

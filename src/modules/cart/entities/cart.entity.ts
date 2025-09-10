@@ -27,7 +27,7 @@ export class Cart extends Model{
     @Column(DataType.INTEGER)
     customerId: number;
 
-    @BelongsTo(() => Customer)
+    @BelongsTo(() => Customer,{onDelete: 'CASCADE'})
     customer: Customer;
 
     @ForeignKey(() => Store)
@@ -35,7 +35,7 @@ export class Cart extends Model{
     @Column(DataType.INTEGER)
     storeId: number;
 
-    @BelongsTo(() => Store)
+    @BelongsTo(() => Store,{onDelete: 'CASCADE'})
     store: Store;
 
     @HasMany(() => CartItem)

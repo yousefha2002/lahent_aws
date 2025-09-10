@@ -42,11 +42,10 @@ import { Product } from 'src/modules/product/entities/product.entity';
     offer: Offer;
 
     @ForeignKey(() => Product)
-    @AllowNull(false)
     @Column(DataType.INTEGER)
     productId: number;
     
-    @BelongsTo(() => Product)
+    @BelongsTo(() => Product,{onDelete: 'SET NULL'})
     product: Product;
 
     @AllowNull(false)

@@ -38,11 +38,10 @@ export class PaymentSession extends Model {
     loyaltyOffer: LoyaltyOffer;
 
     @ForeignKey(() => Customer)
-    @AllowNull(false)
     @Column(DataType.INTEGER)
     customerId: number;
 
-    @BelongsTo(() => Customer)
+    @BelongsTo(() => Customer,{onDelete: 'SET NULL'})
     customer: Customer;
 
     @Column(DataType.ENUM(...Object.values(GatewaySource)))

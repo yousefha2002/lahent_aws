@@ -7,6 +7,7 @@ import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
 import { AvatarModule } from '../avatar/avatar.module';
 import { GiftModule } from '../gift/gift.module';
 import { UserTokenModule } from '../user_token/user_token.module';
+import { DatabaseModule } from 'src/database/database.module';
 
 @Module({
   controllers: [CustomerController],
@@ -16,7 +17,8 @@ import { UserTokenModule } from '../user_token/user_token.module';
     CloudinaryModule,
     AvatarModule,
     forwardRef(() => GiftModule),
-    UserTokenModule
+    UserTokenModule,
+    DatabaseModule
   ],
   exports: [CustomerService],
 })

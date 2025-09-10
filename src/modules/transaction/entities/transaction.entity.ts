@@ -16,7 +16,7 @@ export class Transaction extends Model {
     @Column(DataType.INTEGER)
     customerId: number;
 
-    @BelongsTo(() => Customer)
+    @BelongsTo(() => Customer,{onDelete: 'SET NULL'})
     customer: Customer;
 
     @Column(DataType.FLOAT)

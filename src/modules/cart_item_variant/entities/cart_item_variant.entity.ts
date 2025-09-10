@@ -25,7 +25,7 @@ export class CartItemVariant extends Model{
     @Column(DataType.INTEGER)
     cartItemId: number;
 
-    @BelongsTo(() => CartItem)
+    @BelongsTo(() => CartItem,{onDelete: 'CASCADE'})
     cartItem: CartItem;
 
     @ForeignKey(() => ProductVariant)
@@ -33,6 +33,6 @@ export class CartItemVariant extends Model{
     @Column(DataType.INTEGER)
     productVariantId: number;
 
-    @BelongsTo(() => ProductVariant)
+    @BelongsTo(() => ProductVariant,{onDelete: 'CASCADE'})
     productVariant: ProductVariant;
 }

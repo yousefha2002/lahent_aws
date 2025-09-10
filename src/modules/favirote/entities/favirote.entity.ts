@@ -6,6 +6,7 @@ import {
   AutoIncrement,
   PrimaryKey,
   DataType,
+  BelongsTo,
 } from 'sequelize-typescript';
 import { Customer } from 'src/modules/customer/entities/customer.entity';
 import { Store } from 'src/modules/store/entities/store.entity';
@@ -24,4 +25,10 @@ export class Favorite extends Model {
   @ForeignKey(() => Store)
   @Column
   storeId: number;
+
+  @BelongsTo(() => Store,{onDelete: 'CASCADE'})
+  store: Store;
+
+  @BelongsTo(() => Customer,{onDelete: 'CASCADE'})
+  customer: Customer;
 }

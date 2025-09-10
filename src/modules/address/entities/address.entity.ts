@@ -24,7 +24,7 @@ export class Address extends Model{
     @Column(DataType.INTEGER)
     customerId: number;
 
-    @BelongsTo(() => Customer)
+    @BelongsTo(() => Customer,{onDelete: 'CASCADE'})
     customer: Customer;
 
     @AllowNull(false)

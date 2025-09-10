@@ -7,14 +7,14 @@ export class StoreTransaction extends Model {
     @Column(DataType.INTEGER)
     storeId: number;
 
-    @BelongsTo(() => Store)
+    @BelongsTo(() => Store,{onDelete: 'SET NULL'})
     store: Store;
 
     @ForeignKey(() => Order)
     @Column(DataType.INTEGER)
     orderId: number;
 
-    @BelongsTo(() => Order)
+    @BelongsTo(() => Order,{onDelete: 'SET NULL'})
     order: Order;
 
     @Column(DataType.FLOAT)

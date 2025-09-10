@@ -20,13 +20,10 @@ export class Review extends Model {
   id: number;
 
   @ForeignKey(() => Customer)
-  @Column({
-    type: DataType.INTEGER,
-    allowNull: false,
-  })
+  @Column({type: DataType.INTEGER})
   customerId: number;
 
-  @BelongsTo(() => Customer)
+  @BelongsTo(() => Customer,{onDelete: 'SET NULL'})
   customer: Customer;
 
   @ForeignKey(() => Store)
@@ -36,7 +33,7 @@ export class Review extends Model {
   })
   storeId: number;
 
-  @BelongsTo(() => Store)
+  @BelongsTo(() => Store,{onDelete: 'CASCADE'})
   store: Store;
 
   @ForeignKey(() => Order)

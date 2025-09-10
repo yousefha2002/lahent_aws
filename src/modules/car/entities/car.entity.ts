@@ -21,11 +21,10 @@ export class Car extends Model {
   id: number;
 
   @ForeignKey(() => Customer)
-  @AllowNull(false)
   @Column(DataType.INTEGER)
   customerId: number;
 
-  @BelongsTo(() => Customer)
+  @BelongsTo(() => Customer,{onDelete: 'CASCADE'})
   customer: Customer;
 
   @AllowNull(false)

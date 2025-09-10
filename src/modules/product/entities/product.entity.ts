@@ -36,7 +36,7 @@ export class Product extends Model{
     @Column(DataType.INTEGER)
     storeId: number;
 
-    @BelongsTo(() => Store)
+    @BelongsTo(() => Store,{onDelete: 'CASCADE'})
     store: Store;
 
     @ForeignKey(() => Category)

@@ -52,4 +52,9 @@ export class UserTokenService {
             },
         });
     }
+
+    deleteByCustomer(customerId:number,transaction?:any)
+    {
+        return this.userTokenRepo.destroy({where:{customerId},transaction})
+    }
 }
