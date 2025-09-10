@@ -105,7 +105,7 @@ export class OrderStatusService {
             order.placedAt = new Date();
 
             if (order.isScheduled) {
-                order.status = OrderStatus.PLACED;
+                order.status = OrderStatus.SCHEDULED;
             } else {
                 order.status = OrderStatus.PREPARING;
                 order.preparedAt = new Date()

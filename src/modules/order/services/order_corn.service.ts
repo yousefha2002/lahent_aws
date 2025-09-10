@@ -138,7 +138,7 @@ export class OrderCronService{
 
         const orders = await this.orderRepo.findAll({
             where: {
-            status: OrderStatus.PLACED,
+            status: OrderStatus.SCHEDULED,
             isScheduled: true,
             scheduledAt: { [Op.lte]: now }, 
             },

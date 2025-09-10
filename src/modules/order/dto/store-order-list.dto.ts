@@ -35,39 +35,39 @@ export class OrderListDto {
     @Type(() => SimpleCustomerDto)
     customer?: SimpleCustomerDto;
 
-    @ApiProperty({ example: '2025-08-29T10:00:00.000Z', description: 'وقت دفع العميل (قد يكون null)' })
+    @ApiProperty({ example: '2025-08-29T10:00:00.000Z', description: 'وقت دفع العميل' })
     @Expose()
     paidAt: Date | null;
 
-    @ApiProperty({ example: '2025-08-29T10:00:00.000Z', description: 'وقت استلام العميل للطلب (قد يكون null)' })
+    @ApiProperty({ example: '2025-08-29T10:00:00.000Z', description: 'وقت البدء بتحضير الطلب' })
     @Expose()
     preparedAt: Date | null;
 
-    @ApiProperty({ example: '2025-08-29T10:00:00.000Z', description: 'وقت قبول العرض من قبل العميل أو المتجر (قد يكون null)' })
+    @ApiProperty({ example: '2025-08-29T10:00:00.000Z', description: 'وقت قبول الطلب من قبل المتجر' })
     @Expose()
     placedAt: Date | null;
 
-    @ApiProperty({ example: '2025-08-29T10:00:00.000Z', description: 'وقت جدولة الطلب أو العرض (قد يكون null)' })
+    @ApiProperty({ example: '2025-08-29T10:00:00.000Z', description: 'وقت جدولة الطلب' })
     @Expose()
     scheduledAt: Date | null;
 
-    @ApiProperty({ example: '2025-08-29T10:00:00.000Z', description: 'وقت إلغاء الطلب (قد يكون null)' })
+    @ApiProperty({ example: '2025-08-29T10:00:00.000Z', description: 'وقت إلغاء الطلب' })
     @Expose()
     canceledAt: Date | null;
 
-    @ApiProperty({ example: '2025-08-29T10:00:00.000Z', description: 'وقت وصول العميل أو الطلب (قد يكون null)' })
+    @ApiProperty({ example: '2025-08-29T10:00:00.000Z', description: 'وقت وصول العميل' })
     @Expose()
     arrivedAt: Date | null;
 
-    @ApiProperty({ example: '2025-08-29T10:00:00.000Z', description: 'وقت تجهيز الطلب من قبل المتجر (قد يكون null)' })
+    @ApiProperty({ example: '2025-08-29T10:00:00.000Z', description: 'وقت تجهيز الطلب من قبل المتجر' })
     @Expose()
     readyAt: Date | null;
 
-    @ApiProperty({ example: '2025-08-29T10:00:00.000Z', description: 'وقت استلام العميل للطلب (قد يكون null)' })
+    @ApiProperty({ example: '2025-08-29T10:00:00.000Z', description: 'وقت استلام العميل للطلب' })
     @Expose()
     receivedAt: Date | null;
 
-    @ApiProperty({ example: '2025-08-29T10:00:00.000Z', description: 'وقت إنشاء الطلب بواسطة العميل (غير قابل لأن يكون null)' })
+    @ApiProperty({ example: '2025-08-29T10:00:00.000Z', description: 'وقت إنشاء الطلب بواسطة العميل' })
     @Expose()
     createdAt: Date;
 

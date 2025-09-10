@@ -334,7 +334,7 @@ export class OrderService {
     const offset = (page - 1) * limit;
     const statusMap: Record<string, OrderStatus[]> = {
       incoming: [
-        OrderStatus.PLACED,
+        OrderStatus.SCHEDULED,
         OrderStatus.PENDING_CONFIRMATION,
         OrderStatus.CUSTOMER_DECISION,
       ],

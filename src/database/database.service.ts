@@ -144,8 +144,12 @@ export const databaseProviders = [
         StoreCommission,
         StoreTransaction
       ]); 
-      // const queryInterface = sequelize.getQueryInterface();
-      // await queryInterface.changeColumn('user_points_history', 'customerId', {
+      const queryInterface = sequelize.getQueryInterface();
+      // await queryInterface.changeColumn('orders', 'customerId', {
+      //   type: 'INT',
+      //   allowNull: true,
+      // });
+      // await queryInterface.changeColumn('cars', 'customerId', {
       //   type: 'INT',
       //   allowNull: true,
       // });
