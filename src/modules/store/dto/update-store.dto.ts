@@ -61,6 +61,11 @@ export class UpdateStoreDto {
   @IsBoolean()
   driveThru?: boolean;
 
+  @ApiProperty({ example: false, required: false })
+  @IsOptional()
+  @IsBoolean()
+  isOnline?: boolean;
+
   @ApiProperty({ example: '1234567890', required: false })
   @IsOptional()
   @IsString()

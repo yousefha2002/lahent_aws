@@ -16,6 +16,10 @@ export class SimpleStoreDto {
     @Expose()
     city: string;
 
+    @ApiProperty({ example: false })
+    @Expose()
+    isOnline: boolean;
+
     @ApiProperty({ example: 'https://example.com/logo.png' })
     @Expose()
     logoUrl: string;

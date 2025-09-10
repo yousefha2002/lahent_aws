@@ -76,7 +76,7 @@ export class OrderService {
 
       const pointsUsedSafe = pointsUsed ?? 0;
       const store = await this.storeService.storeById(storeId);
-      if (!store || store.status !== StoreStatus.APPROVED) {
+      if (!store || store.status !== StoreStatus.APPROVED || !store.isOnline) {
         throw new BadRequestException(
           this.i18n.translate('translation.orders.store_unavailable', { lang }),
         );

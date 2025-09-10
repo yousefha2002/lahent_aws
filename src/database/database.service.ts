@@ -149,7 +149,7 @@ export const databaseProviders = [
       //   type: 'INT',
       //   allowNull: true,
       // });
-      await sequelize.sync({ alter: true});
+      await sequelize.sync({ alter: false});
       return sequelize;
     },
   },

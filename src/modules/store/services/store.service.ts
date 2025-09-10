@@ -249,7 +249,8 @@ export class StoreService {
         ...(dto.commercialRegister !== undefined && { commercialRegister: dto.commercialRegister }),
         ...(dto.taxNumber !== undefined && { taxNumber: dto.taxNumber }),
         ...(dto.lat !== undefined && { lat: dto.lat }),
-        ...(dto.lng !== undefined && { lng: dto.lng }),
+        ...(dto.lat !== undefined && { lat: dto.lat }),
+        ...(dto.isOnline !== undefined && { isOnline: dto.isOnline }),
         ...(dto.subTypeId !== undefined && { subTypeId: dto.subTypeId }),
         ...(dto.sectorId !== undefined && { sectorId: dto.sectorId }),
       });
@@ -447,6 +448,9 @@ export class StoreService {
 
   getCurrentStore(storeId:number)
   {
-    return this.storeRepo.findOne({where:{id:storeId}})
+    return this.storeRepo.findOne({
+      where:{id:storeId},
+      include:[OpeningHour,StoreLanguage]
+    })
   }
 }

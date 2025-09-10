@@ -44,6 +44,7 @@ import { ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse, Ap
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
 import { StoreOptionsDto } from './dto/store-options.dto';
+import { CurrentStoreDTO } from './dto/current-store.dto';
 
 @Controller('store')
 export class StoreController {
@@ -150,11 +151,13 @@ export class StoreController {
     return this.storeAuthService.login(body,lang,device,ip);
   }
 
+  @Serilaize(CurrentStoreDTO)
   @UseGuards(StoreOrOwnerGuard)
   @Get('current')
   @ApiQuery({ name: 'storeId', required: false, example: '1' })
   @ApiOperation({ summary: 'Get Current Store With Basic details (owner or store only)' })
   @ApiSecurity('access-token')
+  @ApiResponse({status: 200,type: CurrentStoreDTO})
   getCurrentStore(@CurrentUser() store:Store)
   {
     return this.storeService.getCurrentStore(store.id)
