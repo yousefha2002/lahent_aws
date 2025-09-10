@@ -151,11 +151,22 @@ export class StoreController {
   }
 
   @UseGuards(StoreOrOwnerGuard)
+  @Get('current')
+  @ApiQuery({ name: 'storeId', required: false, example: '1' })
+  @ApiOperation({ summary: 'Get Current Store With Basic details (owner or store only)' })
+  @ApiSecurity('access-token')
+  getCurrentStore(@CurrentUser() store:Store)
+  {
+    return this.storeService.getCurrentStore(store.id)
+  }
+
+  @UseGuards(StoreOrOwnerGuard)
   @Serilaize(storeForAction)
   @Get('action/current')
   @ApiOperation({ summary: 'Get full details of a store by ID for actions (owner or store only)' })
   @ApiResponse({status: 200,description: 'full details of store',type: storeForAction})
   @ApiQuery({ name: 'storeId', required: false, example: '1' })
+  @ApiSecurity('access-token')
   async getStoreDetailsForAction(@CurrentUser() store:Store,@I18n() i18n: I18nContext)
   {
     const lang = getLang(i18n);

@@ -33,7 +33,6 @@ import { Product } from 'src/modules/product/entities/product.entity';
     @BelongsTo(() => Order)
     order: Order;
 
-
     @ForeignKey(() => Offer)
     @AllowNull(true)
     @Column(DataType.INTEGER)

@@ -9,11 +9,11 @@ export class StoreOptionsDto {
 
     @ApiProperty({ example: true })
     @Expose()
-    drive_thru: boolean;
+    driveThru: boolean;
 
     @ApiProperty({ example: false })
     @Expose()
-    in_store: boolean;
+    inStore: boolean;
 
     @ApiProperty({ type: [OpeningHourDTO] })
     @Expose()

@@ -31,19 +31,6 @@ export class CouponController {
     return this.couponService.createCoupon(dto, lang);
   }
 
-  @UseGuards(StoreOrOwnerGuard, ApprovedStoreGuard)
-  @Serilaize(CouponDto)
-  @Post('/store/create')
-  @ApiOperation({ summary: 'Create a new coupon by store' })
-  @ApiSecurity('access-token')
-  @ApiBody({ type: CreateCouponDto })
-  @ApiQuery({ name: 'lang', required: false })
-  @ApiResponse({ status: 201, description: 'Created coupon', type: CouponDto })
-  createByStore(@Body() dto: CreateCouponDto, @CurrentUser() store: Store, @I18n() i18n: I18nContext) {
-    const lang = getLang(i18n);
-    return this.couponService.createCoupon(dto, lang, store.id);
-  }
-
   @Serilaize(CouponValidateDto)
   @Get('validate')
   @ApiOperation({ summary: 'Validate a coupon code' })
@@ -66,18 +53,5 @@ export class CouponController {
   update(@Param('id') id: number, @Body() dto: UpdateCouponDto, @I18n() i18n: I18nContext) {
     const lang = getLang(i18n);
     return this.couponService.updateCoupon(id, dto, lang);
-  }
-
-  @UseGuards(StoreOrOwnerGuard, ApprovedStoreGuard)
-  @Serilaize(CouponDto)
-  @Patch('/store/update/:id')
-  @ApiOperation({ summary: 'Update a coupon by store' })
-  @ApiSecurity('access-token')
-  @ApiParam({ name: 'id', description: 'Coupon ID', example: 1 })
-  @ApiBody({ type: UpdateCouponDto })
-  @ApiResponse({ status: 200, description: 'Updated coupon', type: CouponDto })
-  updateByStore(@Param('id') id: number, @Body() dto: UpdateCouponDto, @CurrentUser() store: Store, @I18n() i18n: I18nContext) {
-    const lang = getLang(i18n);
-    return this.couponService.updateCoupon(id, dto, lang, store.id);
   }
 }

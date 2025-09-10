@@ -45,17 +45,4 @@ export class Coupon extends Model {
   @Default(true)
   @Column(DataType.BOOLEAN)
   isActive: boolean;
-
-  // ✅ storeId يمكن أن يكون null إذا أنشأه الأدمن
-  @ForeignKey(() => Store)
-  @Column({ type: DataType.INTEGER, allowNull: true })
-  storeId: number;
-
-  @BelongsTo(() => Store)
-  store: Store;
-
-  // ✅ من أنشأ الكوبون: true = admin، false = store
-  @Default(false)
-  @Column(DataType.BOOLEAN)
-  byAdmin: boolean;
 }

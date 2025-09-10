@@ -31,11 +31,11 @@ export class storeForAction extends StoreDto{
 
     @ApiProperty({ example: true })
     @Expose()
-    drive_thru: boolean;
+    driveThru: boolean;
 
     @ApiProperty({ example: true })
     @Expose()
-    in_store: boolean;
+    inStore: boolean;
 
     @ApiProperty({ example: '966501234567' })
     @Expose()

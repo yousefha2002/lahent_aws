@@ -58,10 +58,10 @@ export class CreateStoreDto {
   lng: string;
 
   @IsNotEmpty()
-  in_store: boolean;
+  inStore: boolean;
 
   @IsNotEmpty()
-  drive_thru: boolean;
+  driveThru: boolean;
 
   @IsString()
   @IsNotEmpty()

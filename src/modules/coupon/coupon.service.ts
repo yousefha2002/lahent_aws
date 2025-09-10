@@ -18,30 +18,22 @@ export class CouponService {
     private readonly i18n: I18nService,
   ) {}
 
-  async createCoupon(dto: CreateCouponDto,lang = Language.en, storeId?: number) {
+  async createCoupon(dto: CreateCouponDto,lang = Language.en,) {
     const existing = await this.couponRepo.findOne({ where: { code: dto.code } });
     if (existing) {
       const message = this.i18n.translate('translation.coupon.code_used', { lang });
       throw new BadRequestException(message);
     }
-
-    let data: any = { byAdmin: storeId ? false : true };
-    if (storeId) data.storeId = storeId;
-
-    return this.couponRepo.create({ ...dto, ...data });
+    return this.couponRepo.create({ ...dto,});
   }
 
-  async updateCoupon(id: number, dto: UpdateCouponDto,lang: Language = Language.en, storeId?: number, ) {
+  async updateCoupon(id: number, dto: UpdateCouponDto,lang: Language = Language.en ) {
     const coupon = await this.couponRepo.findByPk(id);
     if (!coupon) {
       const message = this.i18n.translate('translation.coupon.not_found', { lang });
       throw new NotFoundException(message);
     }
 
-    if (storeId && coupon.storeId !== storeId) {
-      const message = this.i18n.translate('translation.coupon.not_allowed_update', { lang });
-      throw new BadRequestException(message);
-    }
 
     if (dto.code && dto.code !== coupon.code) {
       const exists = await this.couponRepo.findOne({ where: { code: dto.code } });
@@ -55,7 +47,7 @@ export class CouponService {
     return coupon;
   }
 
-  async validateCoupon(code: string,lang: Language = Language.en, storeId?: number, ) {
+  async validateCoupon(code: string,lang: Language = Language.en ) {
     const coupon = await this.couponRepo.findOne({ where: { code } });
     if (!coupon) {
       const message = this.i18n.translate('translation.coupon.not_found', { lang });
@@ -74,11 +66,6 @@ export class CouponService {
 
     if (coupon.maxUsage && coupon.usedCount >= coupon.maxUsage) {
       const message = this.i18n.translate('translation.coupon.used_up', { lang });
-      throw new BadRequestException(message);
-    }
-
-    if (storeId && coupon.byAdmin === false && coupon.storeId !== storeId) {
-      const message = this.i18n.translate('translation.coupon.not_available_for_store', { lang });
       throw new BadRequestException(message);
     }
 

@@ -81,13 +81,13 @@ export class OrderService {
           this.i18n.translate('translation.orders.store_unavailable', { lang }),
         );
       }
-      if (pickupType === PickupType.DRIVE_THRU && !store.drive_thru) {
+      if (pickupType === PickupType.DRIVE_THRU && !store.driveThru) {
         throw new BadRequestException(
             this.i18n.translate('translation.orders.store_no_drive_thru', { lang }),
         );
     }
 
-      if (pickupType === PickupType.IN_STORE && !store.in_store) {
+      if (pickupType === PickupType.IN_STORE && !store.inStore) {
           throw new BadRequestException(
               this.i18n.translate('translation.orders.store_no_in_store', { lang }),
           );
@@ -202,7 +202,6 @@ export class OrderService {
         coupon = await this.couponService.validateCoupon(
           couponCode,
           lang,
-          storeId,
         );
       }
 

@@ -41,7 +41,8 @@ export class StoreService {
     private readonly i18n: I18nService,
     private subTypeService: SubtypeService,
     @Inject(forwardRef(() => FaviroteService)) private faviroteService: FaviroteService,
-    private sectorService:SectorService
+    private sectorService:SectorService,
+    @Inject('SEQUELIZE') private readonly sequelize: Sequelize
   ) {}
 
   async findAllStores(
@@ -217,70 +218,101 @@ export class StoreService {
     return this.storeRepo.count({ where: { subTypeId } });
   }
 
-  async updateStore(store: Store, dto: UpdateStoreDto,lang = Language.en) {
-    if (dto.phone && dto.phone !== store.phone) {
-      const existingStore = await this.storeRepo.findOne({
-        where: { phone: dto.phone },
-      });
-      if (existingStore) {
-        throw new BadRequestException(this.i18n.t('translation.store.phone_in_use',{lang}));
-      }
-    }
-    if(dto.subTypeId!==undefined)
-    {
-      await this.subTypeService.subTypeById(+dto.subTypeId)
-    }
-    if(dto.sectorId!==undefined)
-    {
-      await this.sectorService.findOne(+dto.sectorId)
-    }
-      
-    Object.assign(store, {
-      ...(dto.phone !== undefined && { phone: dto.phone }),
-      ...(dto.in_store !== undefined && { in_store: dto.in_store }),
-      ...(dto.drive_thru !== undefined && { drive_thru: dto.drive_thru }),
-      ...(dto.city !== undefined && { city: dto.city }),
-      ...(dto.commercialRegister !== undefined && {commercialRegister: dto.commercialRegister}),
-      ...(dto.taxNumber !== undefined && { taxNumber: dto.taxNumber }),
-      ...(dto.lat !== undefined && { lat: dto.lat }),
-      ...(dto.lng !== undefined && { lng: dto.lng }),
-      ...(dto.subTypeId !== undefined && { subTypeId: dto.subTypeId }),
-      ...(dto.sectorId !== undefined && { sectorId: dto.sectorId })
-    });
-    await store.save();
-    if (dto.openingHours && dto.openingHours.length > 0) {
-      await this.openingHourService.updateStoreOpeningHours(
-        store.id,
-        dto.openingHours,
-      );
-    }
+  async updateStore(store: Store, dto: UpdateStoreDto, lang = Language.en) {
+    const transaction = await this.sequelize.transaction();
 
-    if (dto.languages) {
-    for (const t of dto.languages) {
-      const existing = await this.storeLanguageRepo.findOne({
-        where: { storeId: store.id, languageCode: t.languageCode },
-      });
-      if (existing) {
-        existing.name = t.name;
-        if(t.brand )
-        {
-          existing.brand  = t.brand 
-        }
-        await existing.save();
-      } else {
-        await this.storeLanguageRepo.create({
-          storeId: store.id,
-          languageCode: t.languageCode,
-          name: t.name,
-          ...(t.brand ? { brand: t.brand } : {})
+    try {
+      if (dto.phone && dto.phone !== store.phone) {
+        const existingStore = await this.storeRepo.findOne({
+          where: { phone: dto.phone },
+          transaction,
         });
+        if (existingStore) {
+          throw new BadRequestException(
+            this.i18n.t('translation.store.phone_in_use', { lang }),
+          );
+        }
       }
+
+      if (dto.subTypeId !== undefined) {
+        await this.subTypeService.subTypeById(+dto.subTypeId);
+      }
+      if (dto.sectorId !== undefined) {
+        await this.sectorService.findOne(+dto.sectorId);
+      }
+
+      Object.assign(store, {
+        ...(dto.phone !== undefined && { phone: dto.phone }),
+        ...(dto.inStore !== undefined && { inStore: dto.inStore }),
+        ...(dto.driveThru !== undefined && { drive_thru: dto.driveThru }),
+        ...(dto.city !== undefined && { city: dto.city }),
+        ...(dto.commercialRegister !== undefined && { commercialRegister: dto.commercialRegister }),
+        ...(dto.taxNumber !== undefined && { taxNumber: dto.taxNumber }),
+        ...(dto.lat !== undefined && { lat: dto.lat }),
+        ...(dto.lng !== undefined && { lng: dto.lng }),
+        ...(dto.subTypeId !== undefined && { subTypeId: dto.subTypeId }),
+        ...(dto.sectorId !== undefined && { sectorId: dto.sectorId }),
+      });
+      await store.save({ transaction });
+
+      if (dto.openingHours && dto.openingHours.length > 0) {
+        await this.openingHourService.updateStoreOpeningHours(
+          store.id,
+          dto.openingHours,
+          transaction,
+        );
+      }
+
+      if (dto.languages) {
+        for (const t of dto.languages) {
+          const duplicate = await this.storeLanguageRepo.findOne({
+            where: {
+              languageCode: t.languageCode,
+              name: t.name,
+              storeId: { [Op.ne]: store.id },
+            },
+            transaction,
+          });
+
+          if (duplicate) {
+            throw new BadRequestException(
+              this.i18n.t('translation.store.name_in_use', { lang }),
+            );
+          }
+
+          const existing = await this.storeLanguageRepo.findOne({
+            where: { storeId: store.id, languageCode: t.languageCode },
+            transaction,
+          });
+
+          if (existing) {
+            existing.name = t.name;
+            if (t.brand) existing.brand = t.brand;
+            await existing.save({ transaction });
+          } else {
+            await this.storeLanguageRepo.create(
+              {
+                storeId: store.id,
+                languageCode: t.languageCode,
+                name: t.name,
+                ...(t.brand ? { brand: t.brand } : {}),
+              },
+              { transaction },
+            );
+          }
+        }
+      }
+
+      await transaction.commit();
+      return {
+        message: this.i18n.t('translation.store.updated_successfully', { lang }),
+      };
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
     }
   }
-
-    return { message: this.i18n.t('translation.store.updated_successfully',{lang}) };
-  }
-
+  
   async updateStoreImages(
     store: Store,
     logo?: Express.Multer.File,
@@ -411,5 +443,10 @@ export class StoreService {
     }
 
     return store;
+  }
+
+  getCurrentStore(storeId:number)
+  {
+    return this.storeRepo.findOne({where:{id:storeId}})
   }
 }

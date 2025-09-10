@@ -27,7 +27,7 @@ export class UpdateStoreDto {
   @ApiProperty({ example: true, required: false })
   @IsOptional()
   @IsBoolean()
-  in_store?: boolean;
+  inStore?: boolean;
 
   @ApiProperty({ example: 'الرياض', required: false })
   @IsString()
@@ -59,7 +59,7 @@ export class UpdateStoreDto {
   @ApiProperty({ example: false, required: false })
   @IsOptional()
   @IsBoolean()
-  drive_thru?: boolean;
+  driveThru?: boolean;
 
   @ApiProperty({ example: '1234567890', required: false })
   @IsOptional()

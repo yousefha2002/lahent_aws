@@ -12,18 +12,18 @@ export class OpeningHourService {
     private openingHourRepo: typeof OpeningHour,
   ) {}
 
-  async createOpiningHourForStore(storeId: number, hours: OpeningHourEnum[]) {
+  async createOpiningHourForStore(storeId: number, hours: OpeningHourEnum[],transaction?:any) {
     const records = hours.map((hour) => ({
       storeId,
-      day: hour.day as DayOfWeek, // تأكدنا من النوع
+      day: hour.day as DayOfWeek,
       openTime: hour.openTime,
       closeTime: hour.closeTime,
     }));
 
-    await this.openingHourRepo.bulkCreate(records);
+    await this.openingHourRepo.bulkCreate(records,{transaction});
   }
 
-  async updateStoreOpeningHours(storeId: number, hoursDto: ActionOpeningHourDto[]) 
+  async updateStoreOpeningHours(storeId: number, hoursDto: ActionOpeningHourDto[],transaction?:any) 
   {
     for (const hour of hoursDto) {
       const [existingHour, created] = await this.openingHourRepo.findOrCreate({
@@ -34,13 +34,13 @@ export class OpeningHourService {
         defaults: {
           openTime: hour.openTime || null,
           closeTime: hour.closeTime || null,
-        },
+        },transaction
       });
 
       if (!created) {
         existingHour.openTime = hour.openTime || null;
         existingHour.closeTime = hour.closeTime || null;
-        await existingHour.save();
+        await existingHour.save({transaction});
       }
     }
   }

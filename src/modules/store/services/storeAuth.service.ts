@@ -20,6 +20,7 @@ import { JwtService } from '@nestjs/jwt';
 import { validateAndParseStoreTranslations } from 'src/common/validation/translationDto/storeTranslation.dto';
 import { StoreLanguage } from '../entities/store_language.entity';
 import { REFRESH_TOKEN_EXPIRES_MS } from 'src/common/constants';
+import { Sequelize } from 'sequelize';
 
 @Injectable()
 export class StoreAuthService {
@@ -34,17 +35,40 @@ export class StoreAuthService {
         private jwtService: JwtService,
         private storeService:StoreService,
         private userTokenService:UserTokenService,
-        private sectorService:SectorService
+        private sectorService:SectorService,
+        @Inject('SEQUELIZE') private readonly sequelize: Sequelize
     ) {}
 
-    async create(dto: CreateStoreDto,ownerId: string,hours: OpeningHourEnum[],logo: Express.Multer.File,cover: Express.Multer.File,lang=Language.en) 
-    {
+    async create(
+    dto: CreateStoreDto,
+    ownerId: string,
+    hours: OpeningHourEnum[],
+    logo: Express.Multer.File,
+    cover: Express.Multer.File,
+    lang = Language.en,
+    ) {
+    const transaction = await this.sequelize.transaction();
+    try {
         const translations = validateAndParseStoreTranslations(dto.translations);
+
+        // تحقق الاسم داخل نفس اللغة
+        for (const t of translations) {
+        const exists = await this.storeLanguageRepo.findOne({
+            where: { name: t.name, languageCode: t.languageCode },
+            transaction,
+        });
+        if (exists) {
+            throw new BadRequestException(
+            this.i18n.t('translation.store.nameAlreadyExists', { lang }),
+            );
+        }
+        }
+
         await Promise.all([
         this.checkIfPhoneUsed(dto.phone),
         this.checkIfPhoneLoginUsed(dto.phoneLogin),
         this.subTypeService.subTypeById(+dto.subTypeId),
-        this.sectorService.findOne(+dto.sectorId)
+        this.sectorService.findOne(+dto.sectorId),
         ]);
 
         const [logoUpload, coverUpload] = await Promise.all([
@@ -57,21 +81,33 @@ export class StoreAuthService {
         dto,
         logoUpload,
         coverUpload,
+        transaction,
         );
 
+        // إنشاء الترجمات
         await Promise.all(
-            translations.map((t) =>
-            this.storeLanguageRepo.create({
+        translations.map((t) =>
+            this.storeLanguageRepo.create(
+            {
                 storeId: newStore.id,
                 languageCode: t.languageCode,
                 name: t.name,
-                ...(t.brand ? { brand: t.brand } : {})
-            }),
+                ...(t.brand ? { brand: t.brand } : {}),
+            },
+            { transaction },
             ),
+        ),
         );
-        await this.openingHourService.createOpiningHourForStore(newStore.id, hours);
 
-        return { message: this.i18n.t('translation.store.created',{lang}) };
+        // ساعات العمل
+        await this.openingHourService.createOpiningHourForStore(newStore.id,hours,transaction,);
+
+        await transaction.commit();
+        return { message: this.i18n.t('translation.store.created', { lang }) };
+    } catch (error) {
+        await transaction.rollback();
+        throw error;
+    }
     }
 
     async checkIfPhoneUsed(phone: string,lang=Language.en) {
@@ -97,6 +133,7 @@ export class StoreAuthService {
         dto: CreateStoreDto,
         logoUpload: UploadApiResponse,
         coverUpload: UploadApiResponse,
+        transaction?:any
     ) {
         const passwordHashed = await hashPassword(dto.password);
         const storeCreated = await this.storeRepo.create({
@@ -112,12 +149,12 @@ export class StoreAuthService {
         coverUrl: coverUpload.secure_url,
         coverPublicId: coverUpload.public_id,
         ownerId: ownerId,
-        in_store: dto.in_store,
-        drive_thru: dto.drive_thru,
+        inStore: dto.inStore,
+        driveThru: dto.driveThru,
         commercialRegister: dto.commercialRegister,
         taxNumber: dto.taxNumber,
         sectorId:dto.sectorId
-        });
+        },{transaction});
         return storeCreated;
     }
 

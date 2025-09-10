@@ -18,7 +18,6 @@ import { cities } from 'src/common/constants/cities';
 import { StoreStatus } from 'src/common/enums/store_status';
 import { City } from 'src/common/types/city';
 import { Category } from 'src/modules/category/entities/category.entity';
-import { Coupon } from 'src/modules/coupon/entities/coupon.entity';
 import { Customer } from 'src/modules/customer/entities/customer.entity';
 import { Favorite } from 'src/modules/favirote/entities/favirote.entity';
 import { OpeningHour } from 'src/modules/opening_hour/entites/opening_hour.entity';
@@ -126,11 +125,11 @@ export class Store extends Model {
 
   @Default(false)
   @Column(DataType.BOOLEAN)
-  drive_thru: boolean;
+  driveThru: boolean;
 
   @Default(false)
   @Column(DataType.BOOLEAN)
-  in_store: boolean;
+  inStore: boolean;
 
   @HasMany(() => Order)
   orders: Order[];
@@ -143,9 +142,6 @@ export class Store extends Model {
 
   @HasMany(() => OpeningHour)
   openingHours: OpeningHour[];
-
-  @HasMany(() => Coupon)
-  coupon: Coupon[];
 
   @BelongsToMany(() => Customer, () => Favorite)
   customersWhoFavorited: Customer[];
