@@ -244,7 +244,7 @@ export class StoreService {
       Object.assign(store, {
         ...(dto.phone !== undefined && { phone: dto.phone }),
         ...(dto.inStore !== undefined && { inStore: dto.inStore }),
-        ...(dto.driveThru !== undefined && { drive_thru: dto.driveThru }),
+        ...(dto.driveThru !== undefined && { driveThru: dto.driveThru }),
         ...(dto.city !== undefined && { city: dto.city }),
         ...(dto.commercialRegister !== undefined && { commercialRegister: dto.commercialRegister }),
         ...(dto.taxNumber !== undefined && { taxNumber: dto.taxNumber }),
@@ -312,7 +312,7 @@ export class StoreService {
       throw error;
     }
   }
-  
+
   async updateStoreImages(
     store: Store,
     logo?: Express.Multer.File,
