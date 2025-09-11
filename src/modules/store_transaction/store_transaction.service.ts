@@ -6,6 +6,7 @@ import { CreateStoreTransactionDto } from './dto/create-transaction.dto';
 import { Order } from '../order/entities/order.entity';
 import { Customer } from '../customer/entities/customer.entity';
 import { Avatar } from '../avatar/entities/avatar.entity';
+import { literal } from 'sequelize';
 
 @Injectable()
 export class StoreTransactionService {
@@ -50,5 +51,27 @@ export class StoreTransactionService {
             total: count,
             totalPages:Math.ceil(count / limit)
         };
+    }
+
+    async findAvailableBalance(storeId:number)
+    {
+        const result = await StoreTransaction.findOne({
+        attributes: [
+            [literal(`
+            SUM(
+                CASE
+                WHEN status = 'COMPLETED' THEN storeRevenue
+                WHEN status = 'SETTLEMENT' THEN -storeRevenue
+                ELSE 0
+                END
+            )
+            `), 'availableBalance']
+        ],
+        where: { storeId }
+        });
+
+        let availableBalance = Number(result?.get('availableBalance')) || 0;
+        availableBalance = Math.round(availableBalance * 100) / 100;
+        return availableBalance
     }
 }

@@ -27,4 +27,14 @@ export class StoreTransactionController {
     ) {
         return this.storeTransactionService.getAllByStore(store.id, page,limit);
     }
+
+    @UseGuards(StoreOrOwnerGuard)
+    @ApiOperation({ summary: 'Get available balance for current store' })
+    @ApiSecurity('access-token')
+    @ApiResponse({ status: 200, description: 'Available balance of the store', type: Number})
+    @Get('available-balance')
+    async getAvailableBalance(@CurrentUser() store: Store) {
+        const availableBalance = await this.storeTransactionService.findAvailableBalance(store.id);
+        return availableBalance;
+    }
 }
