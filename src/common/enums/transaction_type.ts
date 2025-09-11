@@ -9,5 +9,7 @@ export enum TransactionType {
 
 export enum StoreTransactionType {
     REFUND = 'REFUND',
-    COMPLETED = 'COMPLETED'
+    COMPLETED = 'COMPLETED',
+    CANCELED = 'CANCELED',
+    SETTLEMENT = 'SETTLEMENT'
 }

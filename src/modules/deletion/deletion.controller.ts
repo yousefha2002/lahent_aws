@@ -1,4 +1,4 @@
-import { Controller, Delete, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { Controller, Delete, Param, Put, UseGuards } from '@nestjs/common';
 import { DeletionService } from './deletion.service';
 import { CustomerGuard } from 'src/common/guards/customer.guard';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
@@ -23,13 +23,6 @@ export class DeletionController {
   restoreCustomer(@Param('customerId') customerId:number)
   {
     return this.deletionService.restoreCustomer(customerId)
-  }
-
-  @UseGuards(AdminGuard)
-  @Delete('hard-customer/:customerId')
-  hardDeleteCustomer(@Param('customerId') customerId:number)
-  {
-    return this.deletionService.hardDeleteCustomer(customerId)
   }
 
   @UseGuards(StoreOrOwnerGuard)

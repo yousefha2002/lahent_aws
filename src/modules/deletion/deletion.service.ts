@@ -42,15 +42,17 @@ export class DeletionService {
         }
     }
 
-    async hardDeleteCustomer(customerId: number) {
+    async hardDeleteCustomersOlderThan(days: number) 
+    {
         const transaction = await this.sequelize.transaction();
         try {
-            const customer = await this.customerService.findDeletedCustomer(customerId,transaction);
-            if (!customer) throw new NotFoundException('Customer not found');
-            await this.userTokenService.deleteByCustomer(customer.id, transaction);
-            await customer.destroy({ force: true, transaction });
+            const customers = await this.customerService.findDeletedCustomersOlderThan(days, transaction);
+            for (const customer of customers) {
+                await this.userTokenService.deleteByCustomer(customer.id, transaction);
+                await customer.destroy({ force: true, transaction });
+            }
             await transaction.commit();
-            return { status: 'success', message: 'Customer deleted permanently' };
+            return { status: 'success', deletedCount: customers.length };
         } catch (error) {
             await transaction.rollback();
             throw error;
@@ -101,6 +103,22 @@ export class DeletionService {
             await this.productService.restoreProduct(store.id, transaction)
             await transaction.commit();
             return {status:"success"};
+        } catch (error) {
+            await transaction.rollback();
+            throw error;
+        }
+    }
+
+    async hardDeleteStoresOlderThan(days: number) {
+        const transaction = await this.sequelize.transaction();
+        try {
+            const stores = await this.storeService.findDeletedStoresOlderThan(days, transaction);
+            for (const store of stores) {
+                await this.userTokenService.deleteByStore(store.id, transaction);
+                await store.destroy({ force: true, transaction });
+            }
+            await transaction.commit();
+            return { status: 'success', deletedCount: stores.length };
         } catch (error) {
             await transaction.rollback();
             throw error;

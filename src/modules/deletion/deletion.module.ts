@@ -13,10 +13,11 @@ import { FaviroteModule } from '../favirote/favirote.module';
 import { ReviewModule } from '../review/review.module';
 import { CategoryModule } from '../category/category.module';
 import { StoreCommissionModule } from '../store_commission/store_commission.module';
+import { DeletionCronService } from './deletion-cron.service';
 
 @Module({
   controllers: [DeletionController],
-  providers: [DeletionService],
+  providers: [DeletionService,DeletionCronService],
   imports:[CustomerModule,DatabaseModule,AdminModule,UserTokenModule,StoreModule,OwnerModule,ProductModule,CartModule,
     FaviroteModule,CategoryModule,ReviewModule,StoreCommissionModule
   ]

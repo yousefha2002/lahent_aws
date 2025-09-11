@@ -455,9 +455,20 @@ export class StoreService {
   }
 
   async findDeletedStore(storeId:number,transaction?:any)
-    {
-      const store = await this.storeRepo.findByPk(storeId, { paranoid: false,transaction});
-      if (!store) throw new NotFoundException('Store not found');
-      return store
-    }
+  {
+    const store = await this.storeRepo.findByPk(storeId, { paranoid: false,transaction});
+    if (!store) throw new NotFoundException('Store not found');
+    return store
+  }
+
+  async findDeletedStoresOlderThan(days: number, transaction?: any) {
+      const cutoffDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000); // 30 يوم مثلاً
+      return this.storeRepo.findAll({
+          where: {
+              deletedAt: { [Op.lt]: cutoffDate },
+          },
+          paranoid: false,
+          transaction,
+      });
+  }
 }

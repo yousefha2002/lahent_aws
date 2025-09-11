@@ -19,6 +19,7 @@ import {generateAccessToken, generateRefreshToken } from 'src/common/utils/gener
 import { JwtService } from '@nestjs/jwt';
 import { REFRESH_TOKEN_EXPIRES_MS } from 'src/common/constants';
 import { Sequelize } from 'sequelize';
+import { Op } from 'sequelize';
 
 @Injectable()
 export class CustomerService {
@@ -171,5 +172,14 @@ export class CustomerService {
     const customer = await Customer.findByPk(customerId, { paranoid: false,transaction});
     if (!customer) throw new NotFoundException('Customer not found');
     return customer
+  }
+
+  async findDeletedCustomersOlderThan(days: number, transaction?: any) {
+      const cutoffDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+      return Customer.findAll({
+          where: { deletedAt: { [Op.lt]: cutoffDate } },
+          paranoid: false,
+          transaction,
+      });
   }
 }
