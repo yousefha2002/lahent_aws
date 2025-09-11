@@ -456,7 +456,7 @@ export class StoreService {
 
   async findDeletedStore(storeId:number,transaction?:any)
     {
-      const store = await Customer.findByPk(storeId, { paranoid: false,transaction});
+      const store = await this.storeRepo.findByPk(storeId, { paranoid: false,transaction});
       if (!store) throw new NotFoundException('Store not found');
       return store
     }
