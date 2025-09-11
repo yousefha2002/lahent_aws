@@ -28,7 +28,7 @@ import { Review } from 'src/modules/review/entities/review.entity';
 import { SubType } from 'src/modules/subtype/entities/subtype.entity';
 import { StoreLanguage } from './store_language.entity';
 
-@Table({ tableName: 'stores' })
+@Table({ tableName: 'stores',paranoid:true })
 export class Store extends Model {
   @AutoIncrement
   @PrimaryKey

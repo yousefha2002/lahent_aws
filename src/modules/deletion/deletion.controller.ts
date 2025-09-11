@@ -4,6 +4,8 @@ import { CustomerGuard } from 'src/common/guards/customer.guard';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { Customer } from 'src/modules/customer/entities/customer.entity';
 import { AdminGuard } from 'src/common/guards/admin.guard';
+import { StoreOrOwnerGuard } from 'src/common/guards/StoreOrOwner.guard';
+import { Store } from '../store/entities/store.entity';
 
 @Controller('deletion')
 export class DeletionController {
@@ -28,5 +30,12 @@ export class DeletionController {
   hardDeleteCustomer(@Param('customerId') customerId:number)
   {
     return this.deletionService.hardDeleteCustomer(customerId)
+  }
+
+  @UseGuards(StoreOrOwnerGuard)
+  @Delete('soft-store')
+  softDeleteStore(@CurrentUser() store:Store)
+  {
+    return this.deletionService.softDeleteStore(store)
   }
 }

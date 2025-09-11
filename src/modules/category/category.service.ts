@@ -205,4 +205,9 @@ export class CategoryService {
       throw new BadRequestException(message);
     }
   }
+
+  softDeleteCategory(storeId:number,transaction?:any)
+  {
+    return this.categoryRepo.destroy({where: { storeId},transaction})
+  }
 }

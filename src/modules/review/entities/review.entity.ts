@@ -10,7 +10,7 @@ import { Customer } from 'src/modules/customer/entities/customer.entity';
 import { Order } from 'src/modules/order/entities/order.entity';
 import { Store } from 'src/modules/store/entities/store.entity';
 
-@Table
+@Table({paranoid: true})
 export class Review extends Model {
   @Column({
     type: DataType.INTEGER,

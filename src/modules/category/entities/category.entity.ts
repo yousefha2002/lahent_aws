@@ -17,7 +17,7 @@ import { Product } from 'src/modules/product/entities/product.entity';
 import { Store } from 'src/modules/store/entities/store.entity';
 import { CategoryLanguage } from './category_language.entity';
 
-@Table({ tableName: 'store_categories' })
+@Table({ tableName: 'store_categories',paranoid: true })
 export class Category extends Model{
     @AutoIncrement
     @PrimaryKey

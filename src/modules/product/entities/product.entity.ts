@@ -24,7 +24,7 @@ import { Store } from 'src/modules/store/entities/store.entity';
 import { VariantCategory } from 'src/modules/variant_category/entities/variant_category.entity';
 import { ProductLanguage } from './product_language.entity';
 
-@Table({ tableName: 'products' })
+@Table({ tableName: 'products',paranoid: true })
 export class Product extends Model{
     @AutoIncrement
     @PrimaryKey

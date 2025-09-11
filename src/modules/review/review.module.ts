@@ -11,5 +11,6 @@ import { OrderModule } from '../order/order.module';
   controllers: [ReviewController],
   providers: [ReviewService, ...ReviewProvider],
   imports: [CustomerModule, StoreModule, OwnerModule, OrderModule],
+  exports:[ReviewService]
 })
 export class ReviewModule {}

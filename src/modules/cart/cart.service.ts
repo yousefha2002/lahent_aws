@@ -269,6 +269,13 @@ export class CartService {
     return { message };
   }
 
+  async deleteAllCartsByStore(storeId: number, transaction?: any) {
+    await this.cartRepo.destroy({
+      where: { storeId },
+      transaction,
+    });
+  }
+
   async updateProductCartItem(
     cartItemId: number,
     dto: UpdateCartProductDto,

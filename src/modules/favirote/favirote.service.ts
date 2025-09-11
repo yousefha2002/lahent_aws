@@ -52,4 +52,11 @@ export class FaviroteService {
   {
     return this.favoriteModel.findOne({where: { customerId, storeId },});
   }
+
+  async deleteAllFavoriteByStore(storeId: number, transaction?: any) {
+    await this.favoriteModel.destroy({
+      where: { storeId },
+      transaction,
+    });
+  }
 }

@@ -1,8 +1,15 @@
+import { StoreCommissionService } from './../store_commission/store_commission.service';
+import { ReviewService } from './../review/review.service';
+import { CategoryService } from './../category/category.service';
+import { FaviroteService } from './../favirote/favirote.service';
+import { CartService } from './../cart/cart.service';
+import { ProductService } from './../product/product.service';
 import { UserTokenService } from '../user_token/user_token.service';
 import { CustomerService } from '../customer/customer.service';
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { Sequelize } from 'sequelize';
 import { Customer } from 'src/modules/customer/entities/customer.entity';
+import { Store } from '../store/entities/store.entity';
 
 @Injectable()
 export class DeletionService {
@@ -10,6 +17,12 @@ export class DeletionService {
         @Inject('SEQUELIZE') private readonly sequelize: Sequelize,
         private readonly customerService:CustomerService,
         private readonly userTokenService:UserTokenService,
+        private readonly productService:ProductService,
+        private readonly cartService:CartService,
+        private readonly faviroteService:FaviroteService,
+        private readonly categoryService:CategoryService,
+        private readonly reviewService:ReviewService,
+        private readonly storeCommissionService:StoreCommissionService
     ){}
 
     async softDeleteCustomer(customer:Customer)
@@ -19,6 +32,7 @@ export class DeletionService {
             await customer.destroy({ transaction });
             await this.userTokenService.deleteByCustomer(customer.id,transaction)
             await transaction.commit()
+            return { status: 'success', message: 'Customer soft deleted' };
         }
         catch(error){
             await transaction.rollback();
@@ -48,6 +62,26 @@ export class DeletionService {
             await customer.restore({ transaction });
             await transaction.commit();
             return {status:"success"};
+        } catch (error) {
+            await transaction.rollback();
+            throw error;
+        }
+    }
+
+    async softDeleteStore(store:Store)
+    {
+        const transaction = await this.sequelize.transaction();
+        try {
+            await store.destroy({ transaction });
+            await this.userTokenService.deleteByStore(store.id,transaction)
+            await this.storeCommissionService.softDeleteCommission(store.id,transaction)
+            await this.cartService.deleteAllCartsByStore(store.id,transaction)
+            await this.faviroteService.deleteAllFavoriteByStore(store.id,transaction)
+            await this.categoryService.softDeleteCategory(store.id,transaction)
+            await this.reviewService.softDeleteReview(store.id,transaction)
+            await this.productService.softDeleteProduct(store.id,transaction)
+            await transaction.commit();
+            return { status: 'success', message: 'Store soft deleted' };
         } catch (error) {
             await transaction.rollback();
             throw error;

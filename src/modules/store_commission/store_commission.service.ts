@@ -30,4 +30,9 @@ export class StoreCommissionService {
         }
         return commission.commissionPercent
     }
+
+    softDeleteCommission(storeId:number,transaction?:any)
+    {
+        return this.storeCommissionRepo.destroy({where: { storeId},transaction})
+    }
 }

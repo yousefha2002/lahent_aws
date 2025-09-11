@@ -467,7 +467,7 @@ export class ProductService {
       where: { storeId },
       attributes: [
         [
-          Sequelize.fn('MAX', Sequelize.col('product_number')),
+          Sequelize.fn('MAX', Sequelize.col('productNumber')),
           'maxProductNumber',
         ],
       ],
@@ -487,5 +487,10 @@ export class ProductService {
       { sales: quantity },
       { where: { id: productId }, transaction },
     );
+  }
+
+  softDeleteProduct(storeId:number,transaction?:any)
+  {
+    return this.productRepo.destroy({where: { storeId},transaction})
   }
 }

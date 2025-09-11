@@ -57,4 +57,9 @@ export class UserTokenService {
     {
         return this.userTokenRepo.destroy({where:{customerId},transaction})
     }
+
+    deleteByStore(storeId:number,transaction?:any)
+    {
+        return this.userTokenRepo.destroy({where:{storeId},transaction})
+    }
 }

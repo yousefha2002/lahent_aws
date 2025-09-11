@@ -118,4 +118,9 @@ export class ReviewService {
       totalPages: Math.ceil(count / limit),
     };
   }
+
+  softDeleteReview(storeId:number,transaction?:any)
+  {
+    return this.reviewRepo.destroy({where: { storeId},transaction})
+  }
 }
