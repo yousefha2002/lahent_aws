@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose, Type } from 'class-transformer';
+import { StoreTransactionType } from 'src/common/enums/transaction_type';
 import { SimpleCustomerDto } from 'src/modules/customer/dto/simple-customer.dto';
 
 export class OrderDto {
@@ -41,6 +42,10 @@ export class StoreTransactionDto {
     @Expose()
     @ApiProperty({ description: 'Amount received by store' })
     storeRevenue: number;
+
+    @Expose()
+    @ApiProperty({ description: 'status of transaction' })
+    status: StoreTransactionType;
 
     @Expose()
     @Type(() => OrderDto)

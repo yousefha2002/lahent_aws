@@ -47,6 +47,7 @@ export class OrderStatusService {
             }
 
             await this.orderPaymentService.processOrderRefund(order, OrderStatus.CANCELLED, transaction);
+            await this.storeTransactionService.create({storeId:order.storeId,orderId:order.id,totalAmount:order.finalPriceToPay},transaction);
 
             await transaction.commit();
             this.orderNotificationService.notifyBoth({orderId: order.id,status: OrderStatus.CANCELLED,customerId: order.customerId,storeId: order.storeId});
@@ -69,6 +70,7 @@ export class OrderStatusService {
             }
 
             await this.orderPaymentService.processOrderRefund(order, OrderStatus.REJECTED, transaction);
+            await this.storeTransactionService.create({storeId,orderId:order.id,totalAmount:order.finalPriceToPay},transaction);
 
             this.orderNotificationService.notifyCustomer({orderId: order.id,status: OrderStatus.REJECTED,customerId: order.customerId});
             await transaction.commit();

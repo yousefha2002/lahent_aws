@@ -1,4 +1,5 @@
-import { Table, Column, Model, DataType, ForeignKey, BelongsTo } from 'sequelize-typescript';
+import { Table, Column, Model, DataType, ForeignKey, BelongsTo, Default } from 'sequelize-typescript';
+import { StoreTransactionType } from 'src/common/enums/transaction_type';
 import { Order } from 'src/modules/order/entities/order.entity';
 import { Store } from 'src/modules/store/entities/store.entity';
 @Table({ tableName: 'store_transactions' })
@@ -28,4 +29,8 @@ export class StoreTransaction extends Model {
 
     @Column(DataType.FLOAT)
     storeRevenue: number; // المبلغ الذي يذهب للستور بعد خصم العمولة
+
+    @Default(StoreTransactionType.COMPLETED)
+    @Column(DataType.ENUM(...Object.values(StoreTransactionType)))
+    status: StoreTransactionType;
 }

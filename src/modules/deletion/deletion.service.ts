@@ -1,5 +1,5 @@
-import { UserTokenService } from './../../modules/user_token/user_token.service';
-import { CustomerService } from './../../modules/customer/customer.service';
+import { UserTokenService } from '../user_token/user_token.service';
+import { CustomerService } from '../customer/customer.service';
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { Sequelize } from 'sequelize';
 import { Customer } from 'src/modules/customer/entities/customer.entity';

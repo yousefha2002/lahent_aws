@@ -58,7 +58,7 @@ import { RealtimeModule } from './modules/realtime/realtime.module';
 import { LoyaltySettingModule } from './modules/loyalty_setting/loyalty_setting.module';
 import { StoreCommissionModule } from './modules/store_commission/store_commission.module';
 import { StoreTransactionModule } from './modules/store_transaction/store_transaction.module';
-import { DeletionModule } from './mdoules/deletion/deletion.module';
+import { DeletionModule } from './modules/deletion/deletion.module';
 
 @Module({
   imports: [

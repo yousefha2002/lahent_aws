@@ -6,3 +6,8 @@ export enum TransactionType {
     REFUND_WALLET = 'REFUND_WALLET',
     PURCHASE_GATEWAY = 'PURCHASE_GATEWAY'
 }
+
+export enum StoreTransactionType {
+    REFUBD = 'REFUND',
+    COMPLETED = 'COMPLETED'
+}
