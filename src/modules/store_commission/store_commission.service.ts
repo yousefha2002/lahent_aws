@@ -35,4 +35,8 @@ export class StoreCommissionService {
     {
         return this.storeCommissionRepo.destroy({where: { storeId},transaction})
     }
+
+    async restoreCommission(storeId: number, transaction?: any) {
+        return this.storeCommissionRepo.restore({where: { storeId },transaction});
+    }
 }

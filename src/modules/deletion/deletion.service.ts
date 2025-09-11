@@ -95,6 +95,10 @@ export class DeletionService {
         try {
             const store = await this.storeService.findDeletedStore(storeId,transaction);
             await store.restore({ transaction });
+            await this.storeCommissionService.restoreCommission(store.id, transaction);
+            await this.categoryService.restoreCategory(store.id, transaction);
+            await this.reviewService.restoreReview(store.id, transaction);
+            await this.productService.restoreProduct(store.id, transaction)
             await transaction.commit();
             return {status:"success"};
         } catch (error) {

@@ -493,4 +493,9 @@ export class ProductService {
   {
     return this.productRepo.destroy({where: { storeId},transaction})
   }
+
+  restoreProduct(storeId:number,transaction?:any)
+  {
+    return this.productRepo.restore({where: { storeId},transaction})
+  }
 }

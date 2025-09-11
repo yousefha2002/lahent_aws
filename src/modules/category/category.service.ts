@@ -210,4 +210,9 @@ export class CategoryService {
   {
     return this.categoryRepo.destroy({where: { storeId},transaction})
   }
+
+  restoreCategory(storeId:number,transaction?:any)
+  {
+    return this.categoryRepo.restore({where: { storeId},transaction})
+  }
 }

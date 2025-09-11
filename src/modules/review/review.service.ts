@@ -123,4 +123,9 @@ export class ReviewService {
   {
     return this.reviewRepo.destroy({where: { storeId},transaction})
   }
+
+  restoreReview(storeId:number,transaction?:any)
+  {
+    return this.reviewRepo.restore({where: { storeId},transaction})
+  }
 }
