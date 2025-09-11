@@ -38,4 +38,11 @@ export class DeletionController {
   {
     return this.deletionService.softDeleteStore(store)
   }
+
+  @UseGuards(AdminGuard)
+  @Put('restore-store/:storeId')
+  restoreStore(@Param('storeId') storeId:number)
+  {
+    return this.deletionService.restoreStore(storeId)
+  }
 }

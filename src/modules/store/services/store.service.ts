@@ -453,4 +453,11 @@ export class StoreService {
       include:[OpeningHour,StoreLanguage]
     })
   }
+
+  async findDeletedStore(storeId:number,transaction?:any)
+    {
+      const store = await Customer.findByPk(storeId, { paranoid: false,transaction});
+      if (!store) throw new NotFoundException('Store not found');
+      return store
+    }
 }

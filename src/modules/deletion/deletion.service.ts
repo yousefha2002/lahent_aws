@@ -1,3 +1,4 @@
+import { StoreService } from 'src/modules/store/services/store.service';
 import { StoreCommissionService } from './../store_commission/store_commission.service';
 import { ReviewService } from './../review/review.service';
 import { CategoryService } from './../category/category.service';
@@ -22,7 +23,8 @@ export class DeletionService {
         private readonly faviroteService:FaviroteService,
         private readonly categoryService:CategoryService,
         private readonly reviewService:ReviewService,
-        private readonly storeCommissionService:StoreCommissionService
+        private readonly storeCommissionService:StoreCommissionService,
+        private readonly storeService:StoreService
     ){}
 
     async softDeleteCustomer(customer:Customer)
@@ -82,6 +84,19 @@ export class DeletionService {
             await this.productService.softDeleteProduct(store.id,transaction)
             await transaction.commit();
             return { status: 'success', message: 'Store soft deleted' };
+        } catch (error) {
+            await transaction.rollback();
+            throw error;
+        }
+    }
+
+    async restoreStore(storeId: number) {
+        const transaction = await this.sequelize.transaction();
+        try {
+            const store = await this.storeService.findDeletedStore(storeId,transaction);
+            await store.restore({ transaction });
+            await transaction.commit();
+            return {status:"success"};
         } catch (error) {
             await transaction.rollback();
             throw error;
