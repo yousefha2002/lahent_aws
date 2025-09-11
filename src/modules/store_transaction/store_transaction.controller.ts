@@ -6,6 +6,7 @@ import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { Store } from '../store/entities/store.entity';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { PaginatedStoreTransactionDto } from './dto/store_transaction.dto';
+import { StoreFinancialsFilterDto } from '../store/dto/store-financials-filter.dto';
 
 @Controller('store-transaction')
 export class StoreTransactionController {
@@ -36,5 +37,18 @@ export class StoreTransactionController {
     async getAvailableBalance(@CurrentUser() store: Store) {
         const availableBalance = await this.storeTransactionService.findAvailableBalance(store.id);
         return availableBalance;
+    }
+
+    @UseGuards(StoreOrOwnerGuard)
+    @ApiOperation({ summary: 'Get store financials with filter' })
+    @ApiSecurity('access-token')
+    @ApiResponse({ status: 200, description: 'Store financials', type: StoreFinancialsFilterDto })
+    @Get('financials')
+    async getStoreFinancials(
+        @CurrentUser() store: Store,
+        @Query() query: StoreFinancialsFilterDto
+    ) {
+        const { filter, specificDate } = query;
+        return this.storeTransactionService.getStoreFinancials(store.id, filter, specificDate);
     }
 }

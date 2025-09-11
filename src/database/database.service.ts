@@ -144,11 +144,6 @@ export const databaseProviders = [
         StoreCommission,
         StoreTransaction
       ]); 
-      const queryInterface = sequelize.getQueryInterface();
-      // await queryInterface.changeColumn('orders', 'customerId', {
-      //   type: 'INT',
-      //   allowNull: true,
-      // });
       await sequelize.sync({ alter: false});
       return sequelize;
     },

@@ -7,6 +7,9 @@ import { Order } from '../order/entities/order.entity';
 import { Customer } from '../customer/entities/customer.entity';
 import { Avatar } from '../avatar/entities/avatar.entity';
 import { literal } from 'sequelize';
+import { round2 } from 'src/common/utils/round2';
+import { getDateRange } from 'src/common/utils/getDateRange';
+import { Op } from 'sequelize';
 
 @Injectable()
 export class StoreTransactionService {
@@ -70,8 +73,54 @@ export class StoreTransactionService {
         where: { storeId }
         });
 
-        let availableBalance = Number(result?.get('availableBalance')) || 0;
-        availableBalance = Math.round(availableBalance * 100) / 100;
+        const availableBalance = round2(Number(result?.get('availableBalance')) || 0)
         return availableBalance
+    }
+
+    async getStoreFinancials(storeId: number, filter: string, specificDate?: string) 
+    {
+        const { start, end } = getDateRange(filter, specificDate);
+
+        const result = await this.storeTransactionRepo.findOne({
+            attributes: [
+                [literal(`
+                    SUM(
+                        CASE
+                            WHEN status = 'COMPLETED' THEN storeRevenue
+                            WHEN status = 'SETTLEMENT' THEN -storeRevenue
+                            ELSE 0
+                        END
+                    )
+                `), 'availableBalance'],
+
+                [literal(`
+                    SUM(
+                        CASE
+                            WHEN status = 'CANCELED' THEN totalAmount
+                            ELSE 0
+                        END
+                    )
+                `), 'totalCanceled'],
+
+                [literal(`
+                    SUM(
+                        CASE
+                            WHEN status = 'REFUNDED' THEN totalAmount
+                            ELSE 0
+                        END
+                    )
+                `), 'totalRefunded'],
+            ],
+            where: {
+                storeId,
+                createdAt: { [Op.between]: [start, end] }
+            }
+        });
+
+        return {
+            availableBalance: round2(Number(result?.get('availableBalance')) || 0),
+            totalCanceled: round2(Number(result?.get('totalCanceled')) || 0),
+            totalRefunded: round2(Number(result?.get('totalRefunded')) || 0),
+        };
     }
 }
