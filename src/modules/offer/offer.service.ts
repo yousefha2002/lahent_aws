@@ -127,6 +127,7 @@ export class OfferService {
         include: [
           {
             model: Store,
+            required:true,
             where: { status: StoreStatus.APPROVED },
             include:[{model:StoreLanguage,where:{languageCode:lang}}]
           },
