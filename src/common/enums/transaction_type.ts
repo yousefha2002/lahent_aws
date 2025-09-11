@@ -8,6 +8,6 @@ export enum TransactionType {
 }
 
 export enum StoreTransactionType {
-    REFUBD = 'REFUND',
+    REFUND = 'REFUND',
     COMPLETED = 'COMPLETED'
 }

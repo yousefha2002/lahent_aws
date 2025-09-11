@@ -17,6 +17,7 @@ import { PointActionSoucre } from 'src/common/enums/point_action_source';
 import { OrderItem } from 'src/modules/order_item/entities/order_item.entity';
 import { I18nService } from 'nestjs-i18n';
 import { Language } from 'src/common/enums/language';
+import { StoreTransactionType } from 'src/common/enums/transaction_type';
 
 @Injectable()
 export class OrderStatusService {
@@ -47,7 +48,7 @@ export class OrderStatusService {
             }
 
             await this.orderPaymentService.processOrderRefund(order, OrderStatus.CANCELLED, transaction);
-            await this.storeTransactionService.create({storeId:order.storeId,orderId:order.id,totalAmount:order.finalPriceToPay},transaction);
+            await this.storeTransactionService.create({storeId:order.storeId,orderId:order.id,totalAmount:order.finalPriceToPay,status:StoreTransactionType.REFUND},transaction);
 
             await transaction.commit();
             this.orderNotificationService.notifyBoth({orderId: order.id,status: OrderStatus.CANCELLED,customerId: order.customerId,storeId: order.storeId});
@@ -70,7 +71,7 @@ export class OrderStatusService {
             }
 
             await this.orderPaymentService.processOrderRefund(order, OrderStatus.REJECTED, transaction);
-            await this.storeTransactionService.create({storeId,orderId:order.id,totalAmount:order.finalPriceToPay},transaction);
+            await this.storeTransactionService.create({storeId,orderId:order.id,totalAmount:order.finalPriceToPay,status:StoreTransactionType.REFUND},transaction);
 
             this.orderNotificationService.notifyCustomer({orderId: order.id,status: OrderStatus.REJECTED,customerId: order.customerId});
             await transaction.commit();
@@ -125,7 +126,7 @@ export class OrderStatusService {
             }
 
             await order.save({ transaction });
-            await this.storeTransactionService.create({storeId,orderId:order.id,totalAmount:order.finalPriceToPay},transaction);
+            await this.storeTransactionService.create({storeId,orderId:order.id,totalAmount:order.finalPriceToPay,status:StoreTransactionType.COMPLETED},transaction);
             await transaction.commit();
             this.orderNotificationService.notifyCustomer({orderId: order.id,status: order.status,customerId: order.customerId});
 

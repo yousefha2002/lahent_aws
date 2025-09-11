@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsPositive } from 'class-validator';
+import { IsEnum, IsNumber, IsPositive } from 'class-validator';
+import { StoreTransactionType } from 'src/common/enums/transaction_type';
 
 export class CreateStoreTransactionDto {
     @ApiProperty({ example: 1, description: 'ID of the store' })
@@ -14,4 +15,8 @@ export class CreateStoreTransactionDto {
     @IsNumber()
     @IsPositive()
     totalAmount: number;
+
+    @ApiProperty({example:StoreTransactionType.REFUND})
+    @IsEnum(StoreTransactionType)
+    status:StoreTransactionType
 }
