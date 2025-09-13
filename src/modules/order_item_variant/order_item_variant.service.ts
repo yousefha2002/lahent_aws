@@ -7,13 +7,14 @@ export class OrderItemVariantService {
     constructor(
         @Inject(repositories.order_item_varaint_repository) private orderItemVariantRepo: typeof OrderItemVariant
     ){}
-    async createVariants(orderItemId: number, variants: { id: number; name: string; additionalPrice: number; imageUrl?: string|null }[],transaction?: any) {
+    async createVariants(orderItemId: number, variants: { id: number; name: string; additionalPrice: number;category:string, imageUrl?: string|null }[],transaction?: any) {
         const creations = variants.map(variant => this.orderItemVariantRepo.create({
         orderItemId,
         variantId: variant.id,
         name: variant.name,
         additionalPrice: variant.additionalPrice,
-        imageUrl:variant.imageUrl
+        imageUrl:variant.imageUrl,
+        category:variant.category
         },{transaction}));
         return Promise.all(creations);
     }

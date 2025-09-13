@@ -286,7 +286,13 @@ export class OrderService {
         const productName = item.product.languages?.find(l => l.languageCode === lang)?.name ?? item.product.languages?.[0]?.name ?? '';
         const extrasForDb = item.extras.map(e => ({...e,name: e.languages?.find(l => l.languageCode === lang)?.name ?? e.languages?.[0]?.name ?? '',}));
         const instructionsForDb = item.instructions.map(i => ({...i,name: i.languages?.find(l => l.languageCode === lang)?.name ?? i.languages?.[0]?.name ?? ''}));
-        const variantsForDb = item.variants.map(v => ({...v,name: v.languages?.find(l => l.languageCode === lang)?.name ?? v.languages?.[0]?.name ?? '',}));
+        const variantsForDb = item.variants.map(v => ({
+          ...v,
+          name: v.languages?.find(l => l.languageCode === lang)?.name
+                ?? v.languages?.[0]?.name ?? '',
+          category: v.variantCategory?.languages?.find(l => l.languageCode === lang)?.name
+                  ?? v.variantCategory?.languages?.[0]?.name ?? '',
+        }));
         const orderItem = await this.orderItemService.createOrderItem(
           {
             orderId: order.id,

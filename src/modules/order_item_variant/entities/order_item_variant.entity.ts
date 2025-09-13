@@ -40,6 +40,10 @@ export class OrderItemVariant extends Model{
     name: string;
 
     @AllowNull(false)
+    @Column(DataType.STRING)
+    category: string;
+
+    @AllowNull(false)
     @Column(DataType.FLOAT)
     additionalPrice: number;
 

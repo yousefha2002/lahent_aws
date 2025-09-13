@@ -81,7 +81,13 @@ export class CartItemService {
         },
         {
           model: CartItemVariant,
-          include: [{ model: ProductVariant, where: { isActive: true } ,include:[{model:ProductVariantLanguage,where: { languageCode: lang }}]}],
+          include: [
+            { model: ProductVariant, where: { isActive: true },
+            include:[
+              {model:ProductVariantLanguage,where: { languageCode: lang }},
+              {model:ProductCategoryVariant,include:[{model:VariantCategory,include:[{model:VariantCategoryLanguage,where: { languageCode: lang }}]}]}
+            ]},
+          ],
         },
         {
           model: CartItemInstruction,

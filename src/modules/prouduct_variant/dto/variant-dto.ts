@@ -1,7 +1,8 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { Expose, Type } from "class-transformer";
+import { Expose, Transform, Type } from "class-transformer";
 import { IsIn, IsNotEmpty, IsString } from "class-validator";
 import { Language } from "src/common/enums/language";
+import { VariantCategoryDto } from "src/modules/variant_category/dto/variant_category.dto";
 
 export class VariantDto {
     @Expose()
@@ -11,6 +12,10 @@ export class VariantDto {
     @Expose()
     @ApiProperty({ example: 'Extra Cheese' })
     name: string;
+
+    @Expose()
+    @ApiProperty({ example: 'Size' })
+    category: string;
 
     @Expose()
     @ApiProperty({ example: 5 })
@@ -56,4 +61,10 @@ export class ProductVariantDto {
     @Type(() => ProductVariantLanguageDto)
     @ApiProperty({ type: [ProductVariantLanguageDto] })
     languages: ProductVariantLanguageDto[];
+}
+
+export class ProductVariantWithCategoryDto extends ProductVariantDto {
+    @Expose()
+    @ApiProperty({ type: VariantCategoryDto })
+    variantCategory: VariantCategoryDto;
 }

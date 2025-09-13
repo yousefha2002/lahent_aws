@@ -4,7 +4,7 @@ import { SimpleOfferDto } from 'src/modules/offer/dto/simple-offer.dto';
 import { BaseProductDto } from 'src/modules/product/dto/base-product.dto';
 import { ProductExtraDto } from 'src/modules/product_extra/dto/extra-dto';
 import { InstructionDto, ProductInstructionDto } from 'src/modules/product_instruction/dto/instruction-dto';
-import { ProductVariantDto, VariantDto } from 'src/modules/prouduct_variant/dto/variant-dto';
+import { ProductVariantWithCategoryDto } from 'src/modules/prouduct_variant/dto/variant-dto';
 
 class ProductWithOfferDto extends BaseProductDto {
     @Expose()
@@ -48,14 +48,14 @@ export class CartItemWithOfferDto {
     product: ProductWithOfferDto;
 
     @Expose()
-    @Type(() => ProductVariantDto)
-    @ApiProperty({ type: [ProductVariantDto], description: 'Variants selected for the product' })
-    variants: ProductVariantDto[];
+    @Type(() => ProductVariantWithCategoryDto)
+    @ApiProperty({ type: [ProductVariantWithCategoryDto], description: 'Variants selected for the product' })
+    variants: ProductVariantWithCategoryDto[];
 
     @Expose()
     @Type(() => ProductInstructionDto)
-    @ApiProperty({ type: [InstructionDto], description: 'Instructions selected for the product' })
-    instructions: InstructionDto[];
+    @ApiProperty({ type: [ProductInstructionDto], description: 'Instructions selected for the product' })
+    instructions: ProductInstructionDto[];
 
     @Expose()
     @Type(() => ProductExtraDto)

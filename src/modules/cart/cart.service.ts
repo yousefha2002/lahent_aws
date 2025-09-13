@@ -213,10 +213,30 @@ export class CartService {
           extras: item.extras.map((e) => ({
             ...e.productExtra.toJSON(),
           })),
-          variants: item.variants.map((v) => ({
-            ...v.productVariant.toJSON(),
-            languages:v.productVariant.langauges
-          })),
+          variants: item.variants.map((v) => {
+          const variant = v.productVariant.toJSON();
+          const variantCategory = variant.productCategoryVariant?.variantCategory;
+
+          return {
+          id: variant.id,
+          additionalPrice: variant.additionalPrice,
+          imageUrl: variant.imageUrl,
+          isActive: variant.isActive,
+          languages: variant.langauges?.map((l: { languageCode: string; name: string }) => ({
+            languageCode: l.languageCode,
+            name: l.name,
+          })) || [],
+          variantCategory: variantCategory
+            ? {
+                id: variantCategory.id,
+                languages: variantCategory.languages?.map((l: { languageCode: string; name: string }) => ({
+                  languageCode: l.languageCode,
+                  name: l.name,
+                })) || [],
+              }
+            : null,
+        };
+        }),
           instructions: item.instructions.map((i) => ({
             ...i.productInstruction.toJSON(),
           })),
