@@ -30,16 +30,10 @@ export enum repositories {
   cartItemExtra_repository = 'cartItemExtra_repository',
   cartItemInstruction_repository = 'cartItemInstruction_repository',
   avatar_repository = 'avatar_repository',
-  car_color_repository = 'car_color_repository',
-  car_model_repository = 'car_model_repository',
-  car_model_langauge_repository = 'car_model_langauge_repository',
   car_brand_repository = 'car_brand_repository',
   car_brand_langauge_repository = 'car_brand_langauge_repository',
-  car_type_repository = 'car_type_repository',
-  car_type_langauge_repository = 'car_type_langauge_repository',
   car_repository = 'car_repository',
   address_repository = 'address_repository',
-  recent_address_repository = 'recent_address_repository',
   coupon_repository = 'coupon_repository',
   offer_product_repository = 'offer_product_repository',
   offer_category_repository = 'offer_category_repository',
@@ -66,5 +60,7 @@ export enum repositories {
   sector_language_repository = 'sector_language_repository',
   store_transaction_repository = 'store_transaction_repository',
   store_commission_repository = 'store_commission_repository',
-  loyalty_setting_repository = 'loyalty_setting_repository'
+  loyalty_setting_repository = 'loyalty_setting_repository',
+  page_repository = 'page_repository',
+  pageLanguage_repository = 'pageLanguage_repository'
 }

@@ -59,6 +59,8 @@ import { SectorLanguage } from 'src/modules/sector/entities/sectore_langauge.ent
 import { LoyaltySetting } from 'src/modules/loyalty_setting/entities/loyalty_setting.entity';
 import { StoreCommission } from 'src/modules/store_commission/entities/store_commission.entity';
 import { StoreTransaction } from 'src/modules/store_transaction/entities/store_transaction.entity';
+import { Page } from 'src/modules/page/entities/page.entity';
+import { PageLanguage } from 'src/modules/page/entities/page_language.entity';
 
 export const databaseProviders = [
   {
@@ -142,7 +144,9 @@ export const databaseProviders = [
         SectorLanguage,
         LoyaltySetting,
         StoreCommission,
-        StoreTransaction
+        StoreTransaction,
+        Page,
+        PageLanguage
       ]); 
       await sequelize.sync({ alter: false});
       return sequelize;

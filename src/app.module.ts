@@ -59,6 +59,7 @@ import { LoyaltySettingModule } from './modules/loyalty_setting/loyalty_setting.
 import { StoreCommissionModule } from './modules/store_commission/store_commission.module';
 import { StoreTransactionModule } from './modules/store_transaction/store_transaction.module';
 import { DeletionModule } from './modules/deletion/deletion.module';
+import { PageModule } from './modules/page/page.module';
 
 @Module({
   imports: [
@@ -133,6 +134,7 @@ import { DeletionModule } from './modules/deletion/deletion.module';
     StoreCommissionModule,
     StoreTransactionModule,
     DeletionModule,
+    PageModule,
   ],
   providers: [MulterConfigService],
 })
