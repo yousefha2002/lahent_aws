@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Put, UseGuards } from '@nestjs/common';
 import { OwnerService } from './owner.service';
 import { UpdateOwnerDto } from './dto/updateOwner.dto';
 import { OwnerGuard } from 'src/common/guards/owner.guard';
@@ -59,5 +59,20 @@ export class OwnerController {
   @Post('refresh-token')
   async refreshToken(@Body('refreshToken') refreshToken: string) {
     return this.ownerService.refreshToken(refreshToken);
+  }
+
+  @ApiOperation({ summary: 'Get current owner profile' })
+  @ApiSecurity('access-token')
+  @ApiResponse({
+    status: 200,
+    description: 'Current owner profile returned successfully',
+    type: OwnerDto,
+  })
+  @Serilaize(OwnerDto)
+  @UseGuards(OwnerGuard)
+  @Get('current')
+  getCurrentOwner(@CurrentUser() owner:Owner)
+  {
+    return owner
   }
 }
