@@ -61,7 +61,7 @@ export class OrderPointsService {
             }
 
             // تحقق من انتهاء صلاحية الطلب
-            if (order.status === OrderStatus.EXPIRED) {
+            if (order.status === OrderStatus.EXPIRED_PAYMENT) {
                 const orderAmountToRefund = (order.walletAmountUsed || 0) + (order.gatewayAmountUsed || 0);
                 if (orderAmountToRefund > 0) {
                     await this.customerService.addToWallet(order.customerId, orderAmountToRefund, transaction);

@@ -7,6 +7,7 @@ import { Op } from 'sequelize';
 import { CONFIRMATION_EXTENSION_MINUTES, UNPAID_EXPIRATION_MINUTES } from 'src/common/constants';
 import { OrderStatusService } from './order_status.service';
 import { OrderNotificationService } from './orde_notification.service';
+import { Language } from 'src/common/enums/language';
 
 @Injectable()
 export class OrderCronService{
@@ -31,7 +32,7 @@ export class OrderCronService{
             },
         });
         for (const order of orders) {
-            order.status = OrderStatus.EXPIRED;
+            order.status = OrderStatus.EXPIRED_PAYMENT;
             order.canceledAt = new Date()
             await order.save();
             this.orderNotificationService.notifyCustomer({orderId: order.id,status: order.status,customerId: order.customerId});
@@ -78,7 +79,7 @@ export class OrderCronService{
         });
 
         for (const order of orders) {
-            await this.orderStatusService.refundOrder(order.id, { id: order.customerId } as any);
+            await this.orderStatusService.refundOrder(order.id, { id: order.customerId } as any,Language.ar,OrderStatus.EXPIRED_CONFIRMATION);
         }
 
         if (orders.length) {

@@ -351,13 +351,13 @@ export class OrderService {
       cancelled: [
         OrderStatus.REJECTED,
         OrderStatus.CANCELLED,
-        OrderStatus.EXPIRED,
+        OrderStatus.EXPIRED_CONFIRMATION,
       ],
       completedOrCanceled: [
         OrderStatus.RECEIVED,
         OrderStatus.REJECTED,
         OrderStatus.CANCELLED,
-        OrderStatus.EXPIRED,
+        OrderStatus.EXPIRED_CONFIRMATION,
     ]
     };
 

@@ -10,5 +10,6 @@ export enum OrderStatus {
     ARRIVED = 'arrived',
     RECEIVED = 'received',
     REJECTED = 'rejected',
-    EXPIRED="expired"
+    EXPIRED_PAYMENT = 'expired_payment',
+    EXPIRED_CONFIRMATION = 'expired_confirmation'
 }

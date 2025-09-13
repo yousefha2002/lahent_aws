@@ -35,7 +35,7 @@ export class OrderStatusService {
         private readonly storeTransactionService:StoreTransactionService,
     ){}
 
-    async refundOrder(orderId: number, customer: Customer, lang: Language = Language.en) {
+    async refundOrder(orderId: number, customer: Customer,lang: Language = Language.ar,status:OrderStatus=OrderStatus.CANCELLED) {
         const transaction = await this.sequelize.transaction();
         try {
             const order = await this.orderRepo.findOne({ where: { id: orderId, customerId: customer.id }, transaction });
@@ -47,11 +47,11 @@ export class OrderStatusService {
                 throw new BadRequestException(this.i18n.translate('translation.orders.invalid_status_for_refund', { lang }));
             }
 
-            await this.orderPaymentService.processOrderRefund(order, OrderStatus.CANCELLED, transaction);
-            await this.storeTransactionService.create({storeId:order.storeId,orderId:order.id,totalAmount:order.finalPriceToPay,status:StoreTransactionType.REFUND},transaction);
+            await this.orderPaymentService.processOrderRefund(order,status, transaction);
+            await this.storeTransactionService.create({storeId:order.storeId,orderId:order.id,totalAmount:order.finalPriceToPay,status:StoreTransactionType.CANCELED},transaction);
 
             await transaction.commit();
-            this.orderNotificationService.notifyBoth({orderId: order.id,status: OrderStatus.CANCELLED,customerId: order.customerId,storeId: order.storeId});
+            this.orderNotificationService.notifyBoth({orderId: order.id,status,customerId: order.customerId,storeId: order.storeId});
             return { success: true, message: this.i18n.translate('translation.orders.refund_success', { lang }) };
 
         } catch (error) {
@@ -71,7 +71,7 @@ export class OrderStatusService {
             }
 
             await this.orderPaymentService.processOrderRefund(order, OrderStatus.REJECTED, transaction);
-            await this.storeTransactionService.create({storeId,orderId:order.id,totalAmount:order.finalPriceToPay,status:StoreTransactionType.REFUND},transaction);
+            await this.storeTransactionService.create({storeId,orderId:order.id,totalAmount:order.finalPriceToPay,status:StoreTransactionType.CANCELED},transaction);
 
             this.orderNotificationService.notifyCustomer({orderId: order.id,status: OrderStatus.REJECTED,customerId: order.customerId});
             await transaction.commit();
@@ -83,7 +83,6 @@ export class OrderStatusService {
         }
     }
 
-    // add another function for create transaction with store comission
     async acceptOrderByStore(orderId: number, storeId: number, lang: Language = Language.en) {
         const transaction = await this.sequelize.transaction();
         try {

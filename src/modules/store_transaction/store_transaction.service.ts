@@ -19,7 +19,7 @@ export class StoreTransactionService {
     ) {}
 
     async create(dto: CreateStoreTransactionDto,transaction?: any) {
-        const { storeId, orderId, totalAmount } = dto;
+        const { storeId, orderId, totalAmount,status } = dto;
 
         const commissionPercent = await this.storeCommissionService.getCommission(storeId);
         const commissionAmount = (totalAmount * commissionPercent) / 100;
@@ -32,6 +32,7 @@ export class StoreTransactionService {
             commissionPercent,
             commissionAmount,
             storeRevenue,
+            status
         },{transaction});
     }
 
@@ -80,6 +81,7 @@ export class StoreTransactionService {
     async getStoreFinancials(storeId: number, filter: string, specificDate?: string) 
     {
         const { start, end } = getDateRange(filter, specificDate);
+        console.log(storeId)
 
         const result = await this.storeTransactionRepo.findOne({
             attributes: [
