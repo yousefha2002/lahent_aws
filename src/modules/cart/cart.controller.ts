@@ -7,6 +7,7 @@ import {
   ParseIntPipe,
   Post,
   Put,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { CartService } from './cart.service';
@@ -16,10 +17,10 @@ import { Customer } from '../customer/entities/customer.entity';
 import { CreateCartProductDto } from './dto/create-product-cart.dto';
 import { UpdateCartProductQuantityDto } from './dto/update-productCart-quantity';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
-import { CartItemWithOfferDto } from './dto/cart-item-with-offer.dto';
+import { CartWithTotalsDto } from './dto/cart-item-with-offer.dto';
 import { CartWithStoreDto } from './dto/cart-with-store.dto';
 import { CompletedProfileGuard } from 'src/common/guards/completed-profile.guard';
-import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiSecurity } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
 import { UpdateCartProductDto } from './dto/update-product-cart.dto';
@@ -108,24 +109,26 @@ export class CartController {
     return this.cartService.updateProductQuantity(+cartItemId, customer.id, dto, lang);
   }
 
-  @Serilaize(CartItemWithOfferDto)
+  @Serilaize(CartWithTotalsDto)
   @UseGuards(CustomerGuard)
   @Get(':storeId')
   @ApiOperation({ summary: 'Get all cart items for a store with offers' })
   @ApiSecurity('access-token')
   @ApiParam({ name: 'storeId', type: Number, description: 'ID of the store', example: 1 })
+  @ApiQuery({ name: 'couponCode', required: false, description: 'Optional coupon code' })
   @ApiResponse({
     status: 200,
     description: 'List of cart items with applied offers',
-    type: [CartItemWithOfferDto],
+    type: [CartWithTotalsDto],
   })
   getCartItemsWithOffers(
     @CurrentUser() user: Customer,
     @Param('storeId', ParseIntPipe) storeId: number,
-    @I18n() i18n: I18nContext
+    @I18n() i18n: I18nContext,
+    @Query('couponCode') couponCode: string
   ) {
     const lang = getLang(i18n);
-    return this.cartService.getCartItemsWithOffers(storeId, user.id, lang);
+    return this.cartService.getCartItemsWithOffers(storeId, user.id, lang,couponCode);
   }
 
   @Serilaize(CartWithStoreDto)

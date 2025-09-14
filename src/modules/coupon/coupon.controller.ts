@@ -1,10 +1,6 @@
-import { Body, Controller, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { CouponService } from './coupon.service';
 import { AdminGuard } from 'src/common/guards/admin.guard';
-import { StoreOrOwnerGuard } from 'src/common/guards/StoreOrOwner.guard';
-import { ApprovedStoreGuard } from 'src/common/guards/approvedStore.guard';
-import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
-import { Store } from '../store/entities/store.entity';
 import { CreateCouponDto } from './dto/create-coupon.dto';
 import { UpdateCouponDto } from './dto/update-coupon.dto';
 import { ValidateCouponDTO } from './dto/validate-coupon';

@@ -3,7 +3,7 @@ import { Expose, Type } from 'class-transformer';
 import { SimpleOfferDto } from 'src/modules/offer/dto/simple-offer.dto';
 import { BaseProductDto } from 'src/modules/product/dto/base-product.dto';
 import { ProductExtraDto } from 'src/modules/product_extra/dto/extra-dto';
-import { InstructionDto, ProductInstructionDto } from 'src/modules/product_instruction/dto/instruction-dto';
+import { ProductInstructionDto } from 'src/modules/product_instruction/dto/instruction-dto';
 import { ProductVariantWithCategoryDto } from 'src/modules/prouduct_variant/dto/variant-dto';
 
 class ProductWithOfferDto extends BaseProductDto {
@@ -61,4 +61,27 @@ export class CartItemWithOfferDto {
     @Type(() => ProductExtraDto)
     @ApiProperty({ type: [ProductExtraDto], description: 'Extras added for the product' })
     extras: ProductExtraDto[];
+}
+
+export class CartWithTotalsDto {
+    @Expose()
+    @Type(() => CartItemWithOfferDto)
+    @ApiProperty({ type: [CartItemWithOfferDto], description: 'List of cart items' })
+    items: CartItemWithOfferDto[];
+
+    @Expose()
+    @ApiProperty({ example: 500, description: 'Discount Amount after applying offers for products' })
+    offersDiscount: number;
+
+    @Expose()
+    @ApiProperty({ example: 450, description: 'Total price after discount for all items' })
+    totalFinalPrice: number;
+
+    @Expose()
+    @ApiProperty({ example: 50, description: 'Coupon discount amount applied to the cart' })
+    couponDiscountAmount: number;
+
+    @Expose()
+    @ApiProperty({ example: 200, description: 'Total points earned' })
+    pointsEarned: number;
 }

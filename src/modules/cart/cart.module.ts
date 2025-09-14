@@ -12,6 +12,8 @@ import { CartItemInstructionModule } from '../cart_item_instruction/cart_item_in
 import { CartItemVariantModule } from '../cart_item_variant/cart_item_variant.module';
 import { OfferModule } from '../offer/offer.module';
 import { ProuductVariantModule } from '../prouduct_variant/prouduct_variant.module';
+import { LoyaltySettingModule } from '../loyalty_setting/loyalty_setting.module';
+import { CouponModule } from '../coupon/coupon.module';
 
 @Module({
   controllers: [CartController],
@@ -26,7 +28,9 @@ import { ProuductVariantModule } from '../prouduct_variant/prouduct_variant.modu
     CartItemVariantModule,
     DatabaseModule,
     OfferModule,
-    ProuductVariantModule
+    ProuductVariantModule,
+    LoyaltySettingModule,
+    CouponModule
   ],
   exports:[CartService]
 })

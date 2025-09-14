@@ -1,3 +1,5 @@
+import { CouponService } from './../coupon/coupon.service';
+import { LoyaltySettingService } from './../loyalty_setting/loyalty_setting.service';
 import { ProuductVariantService } from './../prouduct_variant/prouduct_variant.service';
 import { OfferService } from './../offer/offer.service';
 import {
@@ -23,6 +25,7 @@ import { Store } from '../store/entities/store.entity';
 import { I18nService } from 'nestjs-i18n';
 import { Language } from 'src/common/enums/language';
 import { UpdateCartProductDto } from './dto/update-product-cart.dto';
+import { round2 } from 'src/common/utils/round2';
 
 @Injectable()
 export class CartService {
@@ -39,6 +42,8 @@ export class CartService {
     private readonly prouductVariantService: ProuductVariantService,
     @Inject('SEQUELIZE') private readonly sequelize: Sequelize,
     private readonly i18n: I18nService,
+    private loyaltySettingService:LoyaltySettingService,
+    private readonly couponService:CouponService
   ) {}
 
   async createProductCart(
@@ -164,7 +169,7 @@ export class CartService {
     return { message };
   }
 
-  async getCartItemsWithOffers(storeId: number, customerId: number,lang:Language) {
+  async getCartItemsWithOffers(storeId: number, customerId: number,lang:Language,couponCode?:string) {
     const cart = await this.cartRepo.findOne({where:{customerId,storeId}});
     if(!cart)
     {
@@ -172,14 +177,11 @@ export class CartService {
       throw new ForbiddenException(message);
     }
 
-    const cartItems =
-      await this.cartItemService.findAllItemsByCartIdAndCustomerId(
-        cart.id,
-        customerId,
-        lang
-      );
+    const cartItems = await this.cartItemService.findAllItemsByCartIdAndCustomerId(cart.id,customerId,lang);
 
-    return Promise.all(
+    let totalOriginalPrice = 0;
+    let totalFinalPrice = 0;
+    const items = await Promise.all(
       cartItems.map(async (item) => {
         const product = item.product;
         const offer = await this.offerService.getActiveOfferForProduct(
@@ -196,6 +198,8 @@ export class CartService {
         const originalPrice = product.basePrice + extrasTotal + variantsTotal;
         const finalPrice = discountedPrice + extrasTotal + variantsTotal;
         const totalPrice = finalPrice * item.quantity;
+        totalOriginalPrice += originalPrice * item.quantity;
+        totalFinalPrice += totalPrice;
 
         return {
           id: item.id,
@@ -243,6 +247,22 @@ export class CartService {
         };
       }),
     );
+    const offersDiscount = round2(totalOriginalPrice - totalFinalPrice);
+    const loyaltySetting = await this.loyaltySettingService.getSettings();
+    let couponDiscountAmount = 0;
+    if (couponCode) {
+      const coupon = await this.couponService.validateCoupon(couponCode, lang);
+      couponDiscountAmount = round2((totalFinalPrice * coupon.discountPercentage) / 100);
+    }
+    totalFinalPrice = round2(totalFinalPrice - couponDiscountAmount);
+    const pointsEarned = Math.floor(totalFinalPrice * loyaltySetting.pointsPerDollar);
+    return {
+      items,
+      offersDiscount,
+      totalFinalPrice,
+      pointsEarned,
+      couponDiscountAmount
+    }
   }
 
   async findCartByCustomer(

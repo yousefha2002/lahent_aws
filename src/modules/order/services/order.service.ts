@@ -162,7 +162,7 @@ export class OrderService {
         }
       }
 
-      const cartItems = await this.cartService.getCartItemsWithOffers(storeId,user.id,lang);
+      const cartItems = (await this.cartService.getCartItemsWithOffers(storeId,user.id,lang)).items;
 
       const estimatedTime = Math.max(
         ...cartItems.map((item) => item.product.preparationTime || 0),
