@@ -3,7 +3,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { repositories } from 'src/common/enums/repositories';
 import { Order } from '../entities/order.entity';
 import { OrderStatus } from 'src/common/enums/order_status';
-import { Op } from 'sequelize';
+import { literal, Op, Sequelize } from 'sequelize';
 import { CONFIRMATION_EXTENSION_MINUTES, UNPAID_EXPIRATION_MINUTES } from 'src/common/constants';
 import { OrderStatusService } from './order_status.service';
 import { OrderNotificationService } from './orde_notification.service';
@@ -136,26 +136,34 @@ export class OrderCronService{
     async updateScheduledOrdersToPreparing() 
     {
         const now = new Date();
-
         const orders = await this.orderRepo.findAll({
             where: {
             status: OrderStatus.SCHEDULED,
             isScheduled: true,
-            scheduledAt: { [Op.lte]: now }, 
+            [Op.and]: Sequelize.literal(
+                `NOW() >= DATE_SUB(scheduledAt, INTERVAL estimatedTime MINUTE)`
+            ),
             },
         });
 
-        for (const order of orders) {
-            order.status = OrderStatus.PREPARING;
-            order.preparedAt = now;
-            await order.save();
+        if (!orders.length) return;
+
+        const orderIds = orders.map(o => o.id);
+        await this.orderRepo.update(
+            { status: OrderStatus.PREPARING, preparedAt: now },
+            { where: { id: orderIds } }
+        );
+        await Promise.all(
+            orders.map(order =>
             this.orderNotificationService.notifyBoth({
                 orderId: order.id,
-                status: order.status,
+                status: OrderStatus.PREPARING,
                 customerId: order.customerId,
                 storeId: order.storeId,
-            });
-            this.logger.log(`Order ${order.id} moved from SCHEDULED to PREPARING at scheduled time.`);
-        }
+            }),
+            ),
+        );
+
+        this.logger.log(`${orders.length} orders moved from SCHEDULED to PREPARING.`);
     }
 }
