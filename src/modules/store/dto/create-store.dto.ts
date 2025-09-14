@@ -45,10 +45,6 @@ export class CreateStoreDto {
 
   @IsString()
   @IsNotEmpty()
-  sectorId: string;
-
-  @IsString()
-  @IsNotEmpty()
   lat: string;
 
   @IsString()

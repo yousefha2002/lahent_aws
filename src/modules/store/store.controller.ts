@@ -65,7 +65,6 @@ export class StoreController {
         taxNumber: { type: 'string', example: '1234567890' },
         password: { type: 'string', example: '123456' },
         subTypeId: { type: 'string', example: '1' },
-        sectorId: { type: 'string', example: '1' },
         lat: { type: 'string', example: '24.7136' },
         lng: { type: 'string', example: '46.6753' },
         in_store: { type: 'boolean', example: true },
@@ -85,8 +84,8 @@ export class StoreController {
         translations: {
           type: 'string',
           example: JSON.stringify([
-            { languageCode: 'en', name: 'My Store',brand:"Nike" },
-            { languageCode: 'ar', name: 'متجري',brand:"نايك"},
+            { languageCode: 'en', name: 'My Store'},
+            { languageCode: 'ar', name: 'متجري'},
           ]),
         },
         logo: { type: 'string', format: 'binary' },
@@ -116,24 +115,12 @@ export class StoreController {
       cover?: Express.Multer.File[];
     },
   ) {
-    const logoImage = files.logo?.[0];
-    const coverImage = files.cover?.[0];
-
-    if (!logoImage || !coverImage) {
-      throw new BadRequestException('Both logo and cover images are required');
-    }
-
-    const openingHours2 = validateAndParseOpeningHours(body.openingHours);
-
+    const logo = files.logo?.[0];
+    const cover = files.cover?.[0]
+    const openingHours = validateAndParseOpeningHours(body.openingHours);
     const lang = getLang(i18n);
-    return this.storeAuthService.create(
-      body,
-      user.id,
-      openingHours2 as OpeningHourEnum[],
-      logoImage,
-      coverImage,
-      lang
-    );
+
+    return this.storeAuthService.create(body,user.id,openingHours as OpeningHourEnum[],lang,logo,cover);
   }
 
   @Serilaize(StoreWithTokenDto)

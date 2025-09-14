@@ -87,75 +87,60 @@ export class StoreAuthService {
         }
     }
 
-    async create(
-    dto: CreateStoreDto,
-    ownerId: string,
-    hours: OpeningHourEnum[],
-    logo: Express.Multer.File,
-    cover: Express.Multer.File,
-    lang = Language.en,
-    ) {
-    const transaction = await this.sequelize.transaction();
-    try {
-        const translations = validateAndParseStoreTranslations(dto.translations);
+    async create(dto: CreateStoreDto,ownerId: string,hours: OpeningHourEnum[],lang : Language,logo?: Express.Multer.File,cover?: Express.Multer.File)
+    {
+        const transaction = await this.sequelize.transaction();
+        try {
+            const store = await this.storeRepo.findOne({ where: { ownerId, isCompletedProfile: false }, transaction });
+            if (!store) {
+                throw new BadRequestException(this.i18n.t('translation.store.noIncompleteStore', { lang }));
+            }
 
-        // تحقق الاسم داخل نفس اللغة
-        for (const t of translations) {
-        const exists = await this.storeLanguageRepo.findOne({
-            where: { name: t.name, languageCode: t.languageCode },
-            transaction,
-        });
-        if (exists) {
-            throw new BadRequestException(
-            this.i18n.t('translation.store.nameAlreadyExists', { lang }),
-            );
+            const translations = validateAndParseStoreTranslations(dto.translations);
+            // تحقق الاسم داخل نفس اللغة
+            for (const t of translations) {
+            const exists = await this.storeLanguageRepo.findOne({
+                where: { name: t.name, languageCode: t.languageCode },
+                transaction,
+            });
+            if (exists) {
+                throw new BadRequestException(
+                this.i18n.t('translation.store.nameAlreadyExists', { lang }),
+                );
+            }
+            }
+
+            await Promise.all([
+                this.checkIfPhoneUsed(dto.phone),
+                this.checkIfPhoneLoginUsed(dto.phoneLogin),
+                this.subTypeService.subTypeById(+dto.subTypeId),
+            ]);
+
+            let logoUpload: UploadApiResponse | undefined;
+            let coverUpload: UploadApiResponse | undefined;
+            if (logo) logoUpload = await this.cloudinaryService.uploadImage(logo);
+            if (cover) coverUpload = await this.cloudinaryService.uploadImage(cover);
+
+            const newStore = await this.creataionOfStore(ownerId,dto,logoUpload,coverUpload,transaction);
+
+            for (const t of translations) {
+            const storeLang = await this.storeLanguageRepo.findOne({
+                where: { storeId: store.id, languageCode: t.languageCode },
+                transaction,
+            });
+
+            if (storeLang) {
+                await storeLang.update({ name: t.name }, { transaction });
+            }
+            }
+
+            await this.openingHourService.createOpiningHourForStore(newStore.id,hours,transaction);
+            await transaction.commit();
+            return { message: this.i18n.t('translation.store.created', { lang }) };
+        } catch (error) {
+            await transaction.rollback();
+            throw error;
         }
-        }
-
-        await Promise.all([
-        this.checkIfPhoneUsed(dto.phone),
-        this.checkIfPhoneLoginUsed(dto.phoneLogin),
-        this.subTypeService.subTypeById(+dto.subTypeId),
-        this.sectorService.findOne(+dto.sectorId),
-        ]);
-
-        const [logoUpload, coverUpload] = await Promise.all([
-        this.cloudinaryService.uploadImage(logo),
-        this.cloudinaryService.uploadImage(cover),
-        ]);
-
-        const newStore = await this.creataionOfStore(
-        ownerId,
-        dto,
-        logoUpload,
-        coverUpload,
-        transaction,
-        );
-
-        // إنشاء الترجمات
-        await Promise.all(
-        translations.map((t) =>
-            this.storeLanguageRepo.create(
-            {
-                storeId: newStore.id,
-                languageCode: t.languageCode,
-                name: t.name,
-                ...(t.brand ? { brand: t.brand } : {}),
-            },
-            { transaction },
-            ),
-        ),
-        );
-
-        // ساعات العمل
-        await this.openingHourService.createOpiningHourForStore(newStore.id,hours,transaction,);
-
-        await transaction.commit();
-        return { message: this.i18n.t('translation.store.created', { lang }) };
-    } catch (error) {
-        await transaction.rollback();
-        throw error;
-    }
     }
 
     async checkIfPhoneUsed(phone: string,lang=Language.en) {
@@ -179,8 +164,8 @@ export class StoreAuthService {
     async creataionOfStore(
         ownerId: string,
         dto: CreateStoreDto,
-        logoUpload: UploadApiResponse,
-        coverUpload: UploadApiResponse,
+        logoUpload?: UploadApiResponse,
+        coverUpload?: UploadApiResponse,
         transaction?:any
     ) {
         const passwordHashed = await hashPassword(dto.password);
@@ -192,16 +177,15 @@ export class StoreAuthService {
         city: dto.city,
         password: passwordHashed,
         subTypeId: dto.subTypeId,
-        logoUrl: logoUpload.secure_url,
-        logoPublicId: logoUpload.public_id,
-        coverUrl: coverUpload.secure_url,
-        coverPublicId: coverUpload.public_id,
+        logoUrl: logoUpload?.secure_url,
+        logoPublicId: logoUpload?.public_id,
+        coverUrl: coverUpload?.secure_url,
+        coverPublicId: coverUpload?.public_id,
         ownerId: ownerId,
         inStore: dto.inStore,
         driveThru: dto.driveThru,
         commercialRegister: dto.commercialRegister,
         taxNumber: dto.taxNumber,
-        sectorId:dto.sectorId
         },{transaction});
         return storeCreated;
     }
