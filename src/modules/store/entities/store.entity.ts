@@ -43,6 +43,7 @@ export class Store extends Model {
   @BelongsTo(() => Owner)
   owner: Owner;
 
+  @AllowNull(true)
   @ForeignKey(() => SubType)
   @Column(DataType.INTEGER)
   subTypeId: number;
@@ -60,11 +61,9 @@ export class Store extends Model {
   @HasMany(() => StoreLanguage)
   languages: StoreLanguage[];
 
-  @AllowNull(false)
   @Column(DataType.STRING)
   password: string;
 
-  @AllowNull(false)
   @Column(DataType.ENUM(...cities))
   city: City;
 

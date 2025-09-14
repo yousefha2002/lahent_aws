@@ -1,31 +1,13 @@
 import { StoreGeolocationService } from './services/storeGeolocation.service';
 import { StoreAuthService } from './services/storeAuth.service';
-import {
-  Controller,
-  Post,
-  Body,
-  UseGuards,
-  UseInterceptors,
-  UploadedFiles,
-  BadRequestException,
-  Get,
-  Query,
-  Put,
-  Param,
-  ParseIntPipe,
-  Req,
-  Ip,
-} from '@nestjs/common';
+import {Controller,Post,Body,UseGuards,UseInterceptors,UploadedFiles,BadRequestException,Get,Query,Put,Param,ParseIntPipe,Req,Ip,} from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { CreateStoreDto } from './dto/create-store.dto';
 import { StoreService } from './services/store.service';
 import { OwnerGuard } from 'src/common/guards/owner.guard';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { multerOptions } from 'src/multer/multer.options';
-import {
-  OpeningHourEnum,
-  validateAndParseOpeningHours,
-} from 'src/common/validation/validateAndParseOpeningHours';
+import {OpeningHourEnum,validateAndParseOpeningHours,} from 'src/common/validation/validateAndParseOpeningHours';
 import { LoginStoreDto } from './dto/store-login.dto';
 import { GetNearbyStoresDto } from './dto/get-nearby-store.dto';
 import { CustomerGuard } from 'src/common/guards/customer.guard';
@@ -45,6 +27,7 @@ import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
 import { StoreOptionsDto } from './dto/store-options.dto';
 import { CurrentStoreDTO } from './dto/current-store.dto';
+import { InitialCreateStoreDto } from './dto/initial-create-store.dto';
 
 @Controller('store')
 export class StoreController {
@@ -53,6 +36,18 @@ export class StoreController {
     private readonly storeAuthService: StoreAuthService,
     private readonly storeGeolocationService: StoreGeolocationService,
   ) {}
+
+  @Post('initial-create')
+  @ApiOperation({ summary: 'Initial create store (Owner only)' })
+  @ApiSecurity('access-token')
+  @ApiBody({ type: InitialCreateStoreDto })
+  @ApiResponse({status: 200,schema: {example: {message: 'Store created successfully'}}})
+  @UseGuards(OwnerGuard)
+  async initialCreate(@Body() dto: InitialCreateStoreDto,@CurrentUser() owner: Owner,@I18n() i18n: I18nContext,) 
+  {
+    const lang = getLang(i18n);
+    return this.storeAuthService.initialCreation(owner.id, dto, lang);
+  }
 
   @Post('create')
   @ApiOperation({ summary: 'Create a new store (Owner only)' })

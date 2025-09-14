@@ -148,7 +148,7 @@ export const databaseProviders = [
         Page,
         PageLanguage
       ]); 
-      await sequelize.sync({ alter: true});
+      await sequelize.sync({ alter: false});
       return sequelize;
     },
   },

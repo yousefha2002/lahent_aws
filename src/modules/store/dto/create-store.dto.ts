@@ -6,8 +6,6 @@ import {
   MinLength,
   IsMobilePhone,
   IsIn,
-  IsInt,
-  Min
 } from 'class-validator';
 import { cities } from 'src/common/constants/cities';
 

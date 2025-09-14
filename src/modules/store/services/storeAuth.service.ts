@@ -21,6 +21,8 @@ import { validateAndParseStoreTranslations } from 'src/common/validation/transla
 import { StoreLanguage } from '../entities/store_language.entity';
 import { REFRESH_TOKEN_EXPIRES_MS } from 'src/common/constants';
 import { Sequelize } from 'sequelize';
+import { InitialCreateStoreDto } from '../dto/initial-create-store.dto';
+import { validateRequiredLanguages } from 'src/common/utils/validateLanguages';
 
 @Injectable()
 export class StoreAuthService {
@@ -38,6 +40,52 @@ export class StoreAuthService {
         private sectorService:SectorService,
         @Inject('SEQUELIZE') private readonly sequelize: Sequelize
     ) {}
+
+    async initialCreation(ownerId: number, dto: InitialCreateStoreDto,lang:Language) 
+    {
+        const transaction = await this.sequelize.transaction();
+        try {
+            const languageCodes = dto.languages.map(l => l.languageCode);
+            validateRequiredLanguages(languageCodes, 'store translations');
+            await this.sectorService.findOne(+dto.sectorId);
+            const existingStore = await this.storeRepo.findOne({where: { ownerId, isCompletedProfile: false },transaction});
+            if (existingStore) {
+            for (const lang of dto.languages) {
+                const storeLang = await this.storeLanguageRepo.findOne({
+                where: { storeId: existingStore.id, languageCode: lang.languageCode },
+                transaction,
+                });
+
+                if (storeLang) {
+                await storeLang.update({ brand: lang.brand }, { transaction });
+                } else {
+                await this.storeLanguageRepo.create(
+                    { storeId: existingStore.id, languageCode: lang.languageCode, brand: lang.brand },{ transaction },
+                );
+                }
+            }
+
+            existingStore.sectorId = +dto.sectorId;
+            await existingStore.save({ transaction });
+
+            await transaction.commit();
+            return { message: this.i18n.t('translation.store.updated', { lang }) };
+            }
+            const store = await this.storeRepo.create({ownerId,sectorId: +dto.sectorId,isCompletedProfile: false},{ transaction });
+            for (const lang of dto.languages) {
+                await this.storeLanguageRepo.create(
+                    { storeId: store.id, languageCode: lang.languageCode, brand: lang.brand },
+                    { transaction },
+                );
+            }
+
+            await transaction.commit();
+            return { message: this.i18n.t('translation.store.created', { lang }) };
+        } catch (error) {
+            await transaction.rollback();
+            throw error;
+        }
+    }
 
     async create(
     dto: CreateStoreDto,
