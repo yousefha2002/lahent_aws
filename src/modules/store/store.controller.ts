@@ -29,6 +29,7 @@ import { StoreOptionsDto } from './dto/store-options.dto';
 import { CurrentStoreDTO } from './dto/current-store.dto';
 import { InitialCreateStoreDto } from './dto/initial-create-store.dto';
 import { OwnerStoresResponseDto } from './dto/owner-store-response.dto';
+import { IncompleteStoreResponseDto } from './dto/in-completed-store-response.dto';
 
 @Controller('store')
 export class StoreController {
@@ -132,6 +133,17 @@ export class StoreController {
     const lang = getLang(i18n);
     const device = req.headers['user-agent'] || 'unknown';
     return this.storeAuthService.login(body,lang,device,ip);
+  }
+
+  @Serilaize(IncompleteStoreResponseDto)
+  @Get('incomplete')
+  @UseGuards(OwnerGuard)
+  @ApiOperation({ summary: 'Get incomplete store info for owner' })
+  @ApiSecurity('access-token')
+  @ApiResponse({status: 200,description: 'Incomplete store info if exists',type: IncompleteStoreResponseDto})
+  async getIncompleteStore(@CurrentUser() owner: Owner, @I18n() i18n: I18nContext) {
+    const lang = getLang(i18n);
+    return this.storeService.getIncompleteStoreInfo(owner.id, lang);
   }
 
   @Serilaize(CurrentStoreDTO)

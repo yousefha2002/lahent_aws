@@ -412,6 +412,19 @@ export class StoreService {
     })
   }
 
+  async getIncompleteStoreInfo(ownerId:number,lang:Language)
+  {
+    const store = await this.storeRepo.findOne({where: { ownerId, isCompletedProfile: false },
+    include:[{model:StoreLanguage},{model:Sector,include:[{model:SectorLanguage,where:{languageCode:lang}}]}]})
+    if(store)
+    {
+      return {store,hasIncompleteStore:true}
+    }
+    else{
+      return {hasIncompleteStore:false}
+    }
+  }
+
   // for soft and hard delete
   async findDeletedStore(storeId:number,transaction?:any)
   {
