@@ -107,6 +107,7 @@ export class StoreService {
     const stores = await this.storeRepo.findAll({
       where: {
         ownerId,
+        isCompletedProfile:true
       },
       include: [
         {
@@ -126,9 +127,12 @@ export class StoreService {
       order: [['id', 'DESC']],
     });
 
-    return stores.map((store) =>
-      this.storeUtilsService.mapStoreWithExtras(store),
-    );
+    const mappedStores = stores.map(store =>this.storeUtilsService.mapStoreWithExtras(store));
+    const hasIncompleteStore = this.storeRepo.findOne({where:{ownerId,isCompletedProfile:false}})
+    return {
+        stores: mappedStores,
+        hasIncompleteStore:!!hasIncompleteStore
+    };
   }
 
   async getStoreDetailsForAction(storeId: number,lang:Language)

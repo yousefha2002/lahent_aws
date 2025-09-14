@@ -28,6 +28,7 @@ import { getLang } from 'src/common/utils/get-lang.util';
 import { StoreOptionsDto } from './dto/store-options.dto';
 import { CurrentStoreDTO } from './dto/current-store.dto';
 import { InitialCreateStoreDto } from './dto/initial-create-store.dto';
+import { OwnerStoresResponseDto } from './dto/owner-store-response.dto';
 
 @Controller('store')
 export class StoreController {
@@ -173,9 +174,9 @@ export class StoreController {
 
   @Get('byOwner')
   @ApiOperation({ summary: 'Get all stores of the owner' })
-  @ApiResponse({status: 200,type: [OwnerStoreDto]})
+  @ApiResponse({status: 200,type: [OwnerStoresResponseDto]})
   @ApiSecurity('access-token')
-  @Serilaize(OwnerStoreDto)
+  @Serilaize(OwnerStoresResponseDto)
   @UseGuards(OwnerGuard)
   findStoresByOwner(@CurrentUser() owner: Owner,@I18n() i18n: I18nContext) {
     const lang = getLang(i18n);
