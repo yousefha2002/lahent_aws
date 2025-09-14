@@ -263,6 +263,7 @@ export class CartService {
       couponDiscountAmount,
       totalFinalPrice,
       pointsEarned,
+      estimatedTime :Math.max(...cartItems.map((item) => item.product.preparationTime || 0))
     }
   }
 

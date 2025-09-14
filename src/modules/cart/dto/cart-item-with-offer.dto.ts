@@ -88,4 +88,8 @@ export class CartWithTotalsDto {
     @Expose()
     @ApiProperty({ example: 20, description: 'Total points earned' })
     pointsEarned: number;
+
+    @Expose()
+    @ApiProperty({ example: 15, description: 'Time of preparing order' })
+    estimatedTime:number
 }
