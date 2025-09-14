@@ -18,6 +18,7 @@ import { OrderItem } from 'src/modules/order_item/entities/order_item.entity';
 import { I18nService } from 'nestjs-i18n';
 import { Language } from 'src/common/enums/language';
 import { StoreTransactionType } from 'src/common/enums/transaction_type';
+import { AcceptOrderDto } from '../dto/accept-order.dto';
 
 @Injectable()
 export class OrderStatusService {
@@ -83,8 +84,9 @@ export class OrderStatusService {
         }
     }
 
-    async acceptOrderByStore(orderId: number, storeId: number, lang: Language = Language.en) {
+    async acceptOrderByStore(orderId: number, storeId: number,dto:AcceptOrderDto, lang: Language) {
         const transaction = await this.sequelize.transaction();
+        const {extraMinutes} = dto
         try {
             const order = await this.orderRepo.findOne({ where: { id: orderId, storeId }, include:[OrderItem], transaction });
             if (!order) throw new NotFoundException(this.i18n.translate('translation.orders.not_found', { lang }));
@@ -105,6 +107,10 @@ export class OrderStatusService {
             }
 
             order.placedAt = new Date();
+            if(extraMinutes)
+            {
+                order.estimatedTime+=extraMinutes
+            }
 
             if (order.isScheduled) {
                 order.status = OrderStatus.SCHEDULED;

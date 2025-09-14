@@ -1,13 +1,7 @@
 import { SectorService } from './../../sector/sector.service';
 import { FaviroteService } from './../../favirote/favirote.service';
 import { StoreUtilsService } from './storeUtils.service';
-import {
-  BadRequestException,
-  forwardRef,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import {BadRequestException,forwardRef,Inject,Injectable,NotFoundException} from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
 import { Store } from '../entities/store.entity';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
@@ -20,7 +14,6 @@ import { Language } from 'src/common/enums/language';
 import { UpdateStoreDto } from '../dto/update-store.dto';
 import { SubType } from '../../subtype/entities/subtype.entity';
 import { SubTypeLanguage } from '../../subtype/entities/sybtype_language.entity';
-import { getDayOfWeek } from 'src/common/utils/getDayOfWeek';
 import { Op, Sequelize } from 'sequelize';
 import { I18nService } from 'nestjs-i18n';
 import { Customer } from 'src/modules/customer/entities/customer.entity';
@@ -351,45 +344,6 @@ export class StoreService {
     };
   }
 
-  async isStoreOpenAt(storeId: number, date: Date): Promise<boolean> {
-    const dayEnum = getDayOfWeek(date);
-
-    const openingHours: OpeningHour[] =
-      await this.openingHourService.getOpeningHoursByStoreId(storeId);
-    const todayOpening = openingHours.find((hour) => hour.day === dayEnum);
-
-    if (!todayOpening) return false;
-
-    if (!todayOpening.openTime || !todayOpening.closeTime) return false;
-
-    const openTimeParts = todayOpening.openTime.split(':');
-    const closeTimeParts = todayOpening.closeTime.split(':');
-
-    const openDate = new Date(date);
-    openDate.setHours(
-      parseInt(openTimeParts[0]),
-      parseInt(openTimeParts[1]),
-      0,
-      0,
-    );
-
-    const closeDate = new Date(date);
-    closeDate.setHours(
-      parseInt(closeTimeParts[0]),
-      parseInt(closeTimeParts[1]),
-      0,
-      0,
-    );
-
-    // معالجة حالة الإغلاق بعد منتصف الليل
-    if (closeDate <= openDate) {
-      // إذا وقت الإغلاق أقل أو يساوي وقت الفتح => يعني الإغلاق في اليوم التالي
-      closeDate.setDate(closeDate.getDate() + 1);
-    }
-
-    return date >= openDate && date <= closeDate;
-  }
-
   async getFavouriteStoresByCustomer(customerId: number, lang: Language = Language.en,page:number,limit:number,type?:number)
   {
     const offset = (page - 1) * limit;
@@ -454,6 +408,7 @@ export class StoreService {
     })
   }
 
+  // for soft and hard delete
   async findDeletedStore(storeId:number,transaction?:any)
   {
     const store = await this.storeRepo.findByPk(storeId, { paranoid: false,transaction});

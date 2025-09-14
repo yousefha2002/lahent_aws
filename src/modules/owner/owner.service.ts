@@ -44,6 +44,7 @@ export class OwnerService {
       }
     }
     owner.name = dto.name;
+    owner.city = dto.city;
     owner.email = dto.email;
     owner.isCompletedProfile = true
 

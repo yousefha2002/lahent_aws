@@ -60,6 +60,7 @@ import { StoreCommissionModule } from './modules/store_commission/store_commissi
 import { StoreTransactionModule } from './modules/store_transaction/store_transaction.module';
 import { DeletionModule } from './modules/deletion/deletion.module';
 import { PageModule } from './modules/page/page.module';
+import { CityModule } from './modules/city/city.module';
 
 @Module({
   imports: [
@@ -135,6 +136,7 @@ import { PageModule } from './modules/page/page.module';
     StoreTransactionModule,
     DeletionModule,
     PageModule,
+    CityModule,
   ],
   providers: [MulterConfigService],
 })

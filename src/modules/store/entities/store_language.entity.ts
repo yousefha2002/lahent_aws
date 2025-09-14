@@ -18,7 +18,6 @@ export class StoreLanguage extends Model {
     @BelongsTo(() => Store,{onDelete: 'CASCADE'})
     store: Store;
 
-    @AllowNull(false)
     @Column(DataType.STRING)
     name: string;
 

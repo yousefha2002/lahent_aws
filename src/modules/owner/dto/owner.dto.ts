@@ -18,6 +18,10 @@ export class OwnerDto {
     @Expose()
     email: string;
 
+    @ApiProperty({example:"تبوك"})
+    @Expose()
+    city:string
+
     @ApiProperty({ example:false, description: 'Profile completion status' })
     @Expose()
     isCompletedProfile: boolean;

@@ -44,7 +44,6 @@ export class Store extends Model {
   owner: Owner;
 
   @ForeignKey(() => SubType)
-  @AllowNull(false)
   @Column(DataType.INTEGER)
   subTypeId: number;
 
@@ -69,35 +68,27 @@ export class Store extends Model {
   @Column(DataType.ENUM(...cities))
   city: City;
 
-  @AllowNull(false)
   @Column(DataType.FLOAT)
   lat: number;
 
-  @AllowNull(false)
   @Column(DataType.FLOAT)
   lng: number;
 
-  @AllowNull(false)
   @Column(DataType.STRING)
   logoUrl: string;
 
-  @AllowNull(false)
   @Column(DataType.STRING)
   logoPublicId: string;
 
-  @AllowNull(false)
   @Column(DataType.STRING)
   coverUrl: string;
 
-  @AllowNull(false)
   @Column(DataType.STRING)
   coverPublicId: string;
 
-  @AllowNull(false)
   @Column({ type: DataType.STRING, unique: true })
   phone: string;
 
-  @AllowNull(false)
   @Column({ type: DataType.STRING, unique: true })
   phoneLogin: string;
 
@@ -111,11 +102,9 @@ export class Store extends Model {
   @Column({ type: DataType.INTEGER })
   numberOfRates: number;
 
-  @AllowNull(false)
   @Column(DataType.STRING)
   commercialRegister: string;
 
-  @AllowNull(false)
   @Column(DataType.STRING)
   taxNumber: string;
 
@@ -152,4 +141,8 @@ export class Store extends Model {
   @Default(true)
   @Column(DataType.BOOLEAN)
   isOnline: boolean;
+
+  @Default(false)
+  @Column(DataType.BOOLEAN)
+  isCompletedProfile: boolean;
 }

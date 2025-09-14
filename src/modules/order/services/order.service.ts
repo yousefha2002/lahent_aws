@@ -169,7 +169,7 @@ export class OrderService {
       );
 
       if (scheduledAt) {
-        const storeIsOpen = await this.storeService.isStoreOpenAt(
+        const storeIsOpen = await this.storeUtilsService.isStoreOpenAt(
           storeId,
           scheduledAt,
         );
@@ -182,7 +182,7 @@ export class OrderService {
         }
       } else {
         const now = new Date();
-        const storeIsOpenNow = await this.storeService.isStoreOpenAt(
+        const storeIsOpenNow = await this.storeUtilsService.isStoreOpenAt(
           storeId,
           now,
         );

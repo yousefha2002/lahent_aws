@@ -22,6 +22,7 @@ import { PaymentResponseDto } from './dto/payment-order-respone.dto';
 import { OrderActionResponseDto } from './dto/order-action-response.dto';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
+import { AcceptOrderDto } from './dto/accept-order.dto';
 
 @Controller('order')
 export class OrderController {
@@ -77,10 +78,11 @@ export class OrderController {
   @ApiSecurity('access-token')
   @ApiParam({ name: 'orderId', description: 'ID of the order to accept', example: 123 })
   @ApiResponse({ status: 200, description: 'Order accepted successfully', type: OrderActionResponseDto })
-  acceptOrder(@CurrentUser() store:Store,@Param('orderId') orderId:number,@I18n() i18n: I18nContext)
+  @ApiBody({ type: AcceptOrderDto })
+  acceptOrder(@CurrentUser() store:Store,@Param('orderId') orderId:number,@Body() dto:AcceptOrderDto,@I18n() i18n: I18nContext)
   {
     const lang = getLang(i18n);
-    return this.orderStatusService.acceptOrderByStore(orderId,store.id,lang)
+    return this.orderStatusService.acceptOrderByStore(orderId,store.id,dto,lang)
   }
 
   @Serilaize(OrderActionResponseDto)
