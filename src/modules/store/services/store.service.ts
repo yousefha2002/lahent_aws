@@ -128,7 +128,7 @@ export class StoreService {
     });
 
     const mappedStores = stores.map(store =>this.storeUtilsService.mapStoreWithExtras(store));
-    const hasIncompleteStore = this.storeRepo.findOne({where:{ownerId,isCompletedProfile:false}})
+    const hasIncompleteStore = await this.storeRepo.findOne({where:{ownerId,isCompletedProfile:false}})
     return {
         stores: mappedStores,
         hasIncompleteStore:!!hasIncompleteStore
