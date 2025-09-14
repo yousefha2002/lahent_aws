@@ -121,7 +121,22 @@ export class StoreAuthService {
             if (logo) logoUpload = await this.cloudinaryService.uploadImage(logo);
             if (cover) coverUpload = await this.cloudinaryService.uploadImage(cover);
 
-            const newStore = await this.creataionOfStore(ownerId,dto,logoUpload,coverUpload,transaction);
+            const newStore = await store.update({
+                phone: dto.phone,
+                phoneLogin: dto.phoneLogin,
+                lat: dto.lat,
+                lng: dto.lng,
+                city: dto.city,
+                password: await hashPassword(dto.password),
+                subTypeId: dto.subTypeId,
+                inStore: dto.inStore,
+                driveThru: dto.driveThru,
+                commercialRegister: dto.commercialRegister,
+                taxNumber: dto.taxNumber,
+                isCompletedProfile:true,
+                ...(logoUpload ? { logoUrl: logoUpload.secure_url, logoPublicId: logoUpload.public_id } : {}),
+                ...(coverUpload ? { coverUrl: coverUpload.secure_url, coverPublicId: coverUpload.public_id } : {}),
+            }, { transaction });
 
             for (const t of translations) {
             const storeLang = await this.storeLanguageRepo.findOne({
@@ -159,35 +174,6 @@ export class StoreAuthService {
         throw new BadRequestException(this.i18n.t('translation.store.loginPhoneInUse',{lang}));
         }
         return false;
-    }
-
-    async creataionOfStore(
-        ownerId: string,
-        dto: CreateStoreDto,
-        logoUpload?: UploadApiResponse,
-        coverUpload?: UploadApiResponse,
-        transaction?:any
-    ) {
-        const passwordHashed = await hashPassword(dto.password);
-        const storeCreated = await this.storeRepo.create({
-        phone: dto.phone,
-        phoneLogin: dto.phoneLogin,
-        lat: dto.lat,
-        lng: dto.lng,
-        city: dto.city,
-        password: passwordHashed,
-        subTypeId: dto.subTypeId,
-        logoUrl: logoUpload?.secure_url,
-        logoPublicId: logoUpload?.public_id,
-        coverUrl: coverUpload?.secure_url,
-        coverPublicId: coverUpload?.public_id,
-        ownerId: ownerId,
-        inStore: dto.inStore,
-        driveThru: dto.driveThru,
-        commercialRegister: dto.commercialRegister,
-        taxNumber: dto.taxNumber,
-        },{transaction});
-        return storeCreated;
     }
 
     async login(dto: LoginStoreDto,lang:Language,device?: string, ip?: string) {
