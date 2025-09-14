@@ -17,12 +17,12 @@ export class createOrderDto {
     @IsOptional()
     couponCode?: string;
 
-    @ApiProperty({ description: 'Type of pickup', enum: PickupType })
+    @ApiProperty({ description: 'Type of pickup', enum: PickupType ,example:"IN_STORE"})
     @IsString()
     @IsNotEmpty()
     pickupType: PickupType;
 
-    @ApiPropertyOptional({ description: 'Scheduled date for pickup', type: String, format: 'date-time' })
+    @ApiPropertyOptional({ description: 'Scheduled date for pickup',example:"2020-3-2 01:20", type: String, format: 'date-time' })
     @IsOptional()
     @Type(() => Date)
     @IsDate()
@@ -58,12 +58,12 @@ export class createOrderDto {
     @Min(500, { message: 'Points used must be at least 500' })
     pointsUsed?: number;
 
-    @ApiPropertyOptional({ description: 'Payment gateway type', enum: GatewayType })
+    @ApiPropertyOptional({ description: 'Payment gateway type', enum: GatewayType,example:GatewayType.edfapay })
     @IsEnum(GatewayType)
     @IsOptional()
     gatewayType?: GatewayType;
 
-    @ApiProperty({ description: 'Payment method', enum: PaymentMethod })
+    @ApiProperty({ description: 'Payment method', enum: PaymentMethod ,example:PaymentMethod.GATEWAY})
     @IsEnum(PaymentMethod)
     @IsNotEmpty()
     paymentMethod: PaymentMethod;

@@ -258,10 +258,11 @@ export class CartService {
     const pointsEarned = Math.floor(totalFinalPrice * loyaltySetting.pointsPerDollar);
     return {
       items,
+      totalOriginalPrice:round2(totalOriginalPrice),
       offersDiscount,
+      couponDiscountAmount,
       totalFinalPrice,
       pointsEarned,
-      couponDiscountAmount
     }
   }
 

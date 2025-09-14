@@ -31,7 +31,7 @@ export class CartItemWithOfferDto {
     quantity: number;
 
     @Expose()
-    @ApiProperty({ example: 150, description: 'Original product price before discount' })
+    @ApiProperty({ example: 200, description: 'Original product price before discount' })
     originalPrice: number;
 
     @Expose()
@@ -70,18 +70,22 @@ export class CartWithTotalsDto {
     items: CartItemWithOfferDto[];
 
     @Expose()
-    @ApiProperty({ example: 500, description: 'Discount Amount after applying offers for products' })
+    @ApiProperty({ example: 500, description: 'Total base price' })
+    totalOriginalPrice: number;
+
+    @Expose()
+    @ApiProperty({ example: 40, description: 'Discount Amount after applying offers for products' })
     offersDiscount: number;
 
     @Expose()
-    @ApiProperty({ example: 450, description: 'Total price after discount for all items' })
-    totalFinalPrice: number;
-
-    @Expose()
-    @ApiProperty({ example: 50, description: 'Coupon discount amount applied to the cart' })
+    @ApiProperty({ example: 30, description: 'Coupon discount amount applied to the cart' })
     couponDiscountAmount: number;
 
     @Expose()
-    @ApiProperty({ example: 200, description: 'Total points earned' })
+    @ApiProperty({ example: 430, description: 'Total price after discount for all items' })
+    totalFinalPrice: number;
+
+    @Expose()
+    @ApiProperty({ example: 20, description: 'Total points earned' })
     pointsEarned: number;
 }
