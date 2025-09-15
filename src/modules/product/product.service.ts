@@ -27,6 +27,10 @@ import { ProductExtraLanguage } from '../product_extra/entities/product_extra_la
 import { VariantCategoryLanguage } from '../variant_category/entities/variant_category_language.entity';
 import { ProductVariantLanguage } from '../prouduct_variant/entities/product_variant_language.entity';
 import { CategoryLanguage } from '../category/entities/category_language.entity';
+import { Order } from '../order/entities/order.entity';
+import { OrderItem } from '../order_item/entities/order_item.entity';
+import { OrderStatus } from 'src/common/enums/order_status';
+import { getDateRange } from 'src/common/utils/getDateRange';
 
 @Injectable()
 export class ProductService {
@@ -499,16 +503,45 @@ export class ProductService {
     return this.productRepo.restore({where: { storeId},transaction})
   }
 
-  async getTopProductsBySales(storeId:number,lang:Language)
-  {
-      return Product.findAll({
-        where: { storeId }, 
-        order: [['sales', 'DESC']], 
-        limit: 4,
-        include: [
-          { model: ProductImage},
-          { model: ProductLanguage, where:{languageCode:lang} }
-        ]
-      });
+  async getTopProductsBySales(storeId: number, lang: Language, filter: string, specificDate?: string) {
+    let dateFilter = {};
+    if (filter) {
+      const { start, end } = getDateRange(filter, specificDate);
+      dateFilter = { createdAt: { [Op.between]: [start, end] } };
+    }
+
+    const topProductsRaw = await this.productRepo.findAll({
+      where: { storeId },
+      include: [
+        {
+          model: OrderItem,
+          as: 'orderItems',
+          include: [
+            {
+              model: Order,
+              where: { status: OrderStatus.RECEIVED, ...dateFilter },
+            },
+          ],
+        },
+        { model: ProductImage, separate: true, as: 'images' },
+        { model: ProductLanguage, separate: true, as: 'languages', where: { languageCode: lang } },
+      ],
+      attributes: [
+        'id',
+        'storeId',
+        [Sequelize.fn('SUM', Sequelize.col('orderItems.quantity')), 'totalSold'],
+      ],
+      group: ['Product.id'],
+      order: [[Sequelize.literal('totalSold'), 'DESC']],
+      subQuery: false,
+      limit: 4,
+    });
+
+    const topProducts = topProductsRaw.map(item => ({
+      ...item.toJSON(),
+      totalSold: Number(item.get('totalSold')),
+    }));
+
+    return topProducts;
   }
 }

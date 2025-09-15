@@ -1,21 +1,5 @@
-import {
-  BadRequestException,
-  Body,
-  Controller,
-  Get,
-  Param,
-  ParseIntPipe,
-  Post,
-  Put,
-  Query,
-  UploadedFiles,
-  UseGuards,
-  UseInterceptors,
-} from '@nestjs/common';
-import {
-  AnyFilesInterceptor,
-  FileFieldsInterceptor,
-} from '@nestjs/platform-express';
+import {BadRequestException,Body,Controller,Get,Param,ParseIntPipe,Post,Put,Query,UploadedFiles,UseGuards,UseInterceptors} from '@nestjs/common';
+import {AnyFilesInterceptor,FileFieldsInterceptor} from '@nestjs/platform-express';
 import { ProductService } from './product.service';
 import { StoreOrOwnerGuard } from 'src/common/guards/StoreOrOwner.guard';
 import { Store } from '../store/entities/store.entity';
@@ -23,10 +7,7 @@ import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { CreateProductDto } from './dto/create-product.dto';
 import { multerOptions } from 'src/multer/multer.options';
 import { UpdateProductWithImageDto } from './dto/update-product-withImage.dto';
-import {
-  ExistingImage,
-  parseAndValidateExistingImages,
-} from 'src/common/validation/parseAndValidateExistingImages';
+import {ExistingImage,parseAndValidateExistingImages} from 'src/common/validation/parseAndValidateExistingImages';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { PaginatedProductWithOfferDto } from './dto/productwithoffer.dto';
 import { PaginatedSimpleProductDto } from './dto/product-for-store.dto';
@@ -36,6 +17,7 @@ import { ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse, Ap
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
 import { TopProductResponseDto } from './dto/top-product-response.dto';
+import { StoreFinancialsFilterDto } from '../store/dto/store-financials-filter.dto';
 
 @Controller('product')
 export class ProductController {
@@ -166,6 +148,22 @@ export class ProductController {
     );
   }
 
+  @UseGuards(StoreOrOwnerGuard)
+  @Serilaize(TopProductResponseDto)
+  @Get('top-sales/byStore')
+  @ApiOperation({ summary: 'Get top 4 selling products for a store' })
+  @ApiResponse({ status: 200, type: [TopProductResponseDto] })
+  @ApiSecurity('access-token')
+  async getTopSellingProducts(
+    @CurrentUser() store:Store,
+    @I18n() i18n: I18nContext,
+    @Query() query: StoreFinancialsFilterDto
+  ) {
+    const lang = getLang(i18n);
+    const { filter, specificDate } = query;
+    return this.productService.getTopProductsBySales(store.id, lang,filter,specificDate);
+  }
+
   @Serilaize(PaginatedProductWithOfferDto)
   @Get('all/:storeId')
   @ApiOperation({ summary: 'Get all products of a store for customers' })
@@ -272,19 +270,5 @@ export class ProductController {
       store.id,
       lang,
     );
-  }
-
-  @UseGuards(StoreOrOwnerGuard)
-  @Serilaize(TopProductResponseDto)
-  @Get('top-sales/:storeId')
-  @ApiOperation({ summary: 'Get top 4 selling products for a store' })
-  @ApiResponse({ status: 200, type: [TopProductResponseDto] })
-  @ApiSecurity('access-token')
-  async getTopSellingProducts(
-    @CurrentUser() store:Store,
-    @I18n() i18n: I18nContext
-  ) {
-    const lang = getLang(i18n);
-    return this.productService.getTopProductsBySales(store.id, lang);
   }
 }

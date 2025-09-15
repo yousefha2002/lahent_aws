@@ -23,6 +23,7 @@ import { ProductInstruction } from 'src/modules/product_instruction/entities/pro
 import { Store } from 'src/modules/store/entities/store.entity';
 import { VariantCategory } from 'src/modules/variant_category/entities/variant_category.entity';
 import { ProductLanguage } from './product_language.entity';
+import { OrderItem } from 'src/modules/order_item/entities/order_item.entity';
 
 @Table({ tableName: 'products',paranoid: true })
 export class Product extends Model{
@@ -90,4 +91,7 @@ export class Product extends Model{
 
     @BelongsToMany(() => Offer, () => OfferProduct)
     offers: Offer[];
+
+    @HasMany(() => OrderItem)   
+    orderItems: OrderItem[];
 }

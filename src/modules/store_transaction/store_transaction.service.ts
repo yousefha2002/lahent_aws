@@ -81,8 +81,6 @@ export class StoreTransactionService {
     async getStoreFinancials(storeId: number, filter: string, specificDate?: string) 
     {
         const { start, end } = getDateRange(filter, specificDate);
-        console.log(storeId)
-
         const result = await this.storeTransactionRepo.findOne({
             attributes: [
                 [literal(`
