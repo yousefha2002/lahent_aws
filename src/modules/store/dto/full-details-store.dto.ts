@@ -5,7 +5,7 @@ import { ApiProperty } from '@nestjs/swagger';
 export class StoreWihtPickedUpMethods extends StoreDto {
     @ApiProperty({example: true})
     @Expose()
-    inSotre:boolean
+    inStore:boolean
 
     @ApiProperty({ example: true })
     @Expose()
