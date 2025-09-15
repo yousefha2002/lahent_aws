@@ -205,12 +205,12 @@ export class CartService {
           id: item.id,
           note:item.note,
           quantity: item.quantity,
-          finalPrice,
-          totalPrice,
-          originalPrice,
+          finalPrice:round2(finalPrice),
+          totalPrice:round2(totalPrice),
+          originalPrice:round2(originalPrice),
           product: {
             ...product.toJSON(),
-            discountedPrice,
+            discountedPrice:round2(discountedPrice),
             images: product.images?.map((img) => img.imageUrl) || [],
             offer: offer ?? null,
           },
@@ -250,9 +250,11 @@ export class CartService {
     const offersDiscount = round2(totalOriginalPrice - totalFinalPrice);
     const loyaltySetting = await this.loyaltySettingService.getSettings();
     let couponDiscountAmount = 0;
+    let couponId: number | null = null;
     if (couponCode) {
       const coupon = await this.couponService.validateCoupon(couponCode, lang);
       couponDiscountAmount = round2((totalFinalPrice * coupon.discountPercentage) / 100);
+      couponId = coupon.id;
     }
     totalFinalPrice = round2(totalFinalPrice - couponDiscountAmount);
     const pointsEarned = Math.floor(totalFinalPrice * loyaltySetting.pointsPerDollar);
@@ -263,7 +265,8 @@ export class CartService {
       couponDiscountAmount,
       totalFinalPrice,
       pointsEarned,
-      estimatedTime :Math.max(...cartItems.map((item) => item.product.preparationTime || 0))
+      estimatedTime :Math.max(...cartItems.map((item) => item.product.preparationTime || 0)),
+      couponId,
     }
   }
 

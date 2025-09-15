@@ -38,6 +38,7 @@ import { Language } from 'src/common/enums/language';
 import { StoreLanguage } from 'src/modules/store/entities/store_language.entity';
 import { CarBrand } from 'src/modules/car_brand/entities/car_brand.entity';
 import { CarBrandLanguage } from 'src/modules/car_brand/entities/car_brand.languae.entity';
+import { OfferType } from 'src/common/enums/offer_type';
 
 @Injectable()
 export class OrderService {
@@ -60,276 +61,251 @@ export class OrderService {
   async placeOrder(user: Customer, dto: createOrderDto, lang = Language.en) {
         const transaction = await this.sequelize.transaction();
         try {
-            const {
-                storeId,
-                couponCode,
-                scheduledAt,
-                pickupType,
-                pickupByCustomer,
-                pickupPersonName,
-                pickupPersonNumber,
-                carId,
-                pointsUsed,
-                paymentMethod,
-                gatewayType,
-            } = dto;
+        const {storeId,couponCode,scheduledAt,pickupType,pickupByCustomer,pickupPersonName,pickupPersonNumber,carId,pointsUsed,paymentMethod,gatewayType,} = dto;
 
-      const pointsUsedSafe = pointsUsed ?? 0;
-      const store = await this.storeService.storeById(storeId);
-      if (!store || store.status !== StoreStatus.APPROVED || !store.isOnline) {
-        throw new BadRequestException(
-          this.i18n.translate('translation.orders.store_unavailable', { lang }),
-        );
-      }
-      if (pickupType === PickupType.DRIVE_THRU && !store.driveThru) {
-        throw new BadRequestException(
-            this.i18n.translate('translation.orders.store_no_drive_thru', { lang }),
-        );
-    }
-
-      if (pickupType === PickupType.IN_STORE && !store.inStore) {
+        const pointsUsedSafe = pointsUsed ?? 0;
+        const store = await this.storeService.storeById(storeId);
+        if (!store || store.status !== StoreStatus.APPROVED || !store.isOnline) {
           throw new BadRequestException(
-              this.i18n.translate('translation.orders.store_no_in_store', { lang }),
-          );
-      }
-
-      if (pointsUsedSafe > 0 && user.points < MIN_POINTS_TO_USE) {
-        throw new BadRequestException(
-          this.i18n.translate('translation.orders.min_points_required', {
-            lang,
-          }),
-        );
-      }
-
-      if (pointsUsedSafe > 0 && pointsUsedSafe > user.points) {
-        throw new BadRequestException(
-          this.i18n.translate('translation.orders.points_exceed_balance', {
-            lang,
-          }),
-        );
-      }
-
-      if (scheduledAt && new Date(scheduledAt) <= new Date()) {
-        throw new BadRequestException(
-          this.i18n.translate('translation.orders.scheduled_in_past', { lang }),
-        );
-      }
-
-      if (pickupByCustomer === undefined || pickupByCustomer === null) {
-        throw new BadRequestException(
-          this.i18n.translate('translation.orders.pickup_required', { lang }),
-        );
-      }
-
-      if (
-        pickupByCustomer === true &&
-        (pickupPersonName || pickupPersonNumber)
-      ) {
-        throw new BadRequestException(
-          this.i18n.translate('translation.orders.pickup_self_no_other', {
-            lang,
-          }),
-        );
-      } else if (
-        !pickupByCustomer &&
-        (!pickupPersonName || !pickupPersonNumber)
-      ) {
-        throw new BadRequestException(
-          this.i18n.translate('translation.orders.pickup_person_required', {
-            lang,
-          }),
-        );
-      }
-
-      let finalCarId: number | null = null;
-      if (pickupType === PickupType.DRIVE_THRU) {
-        finalCarId = carId ?? null;
-        if (!finalCarId && dto.newCar) {
-          const car = await this.carService.create(
-            user.id,
-            dto.newCar,
-            lang,
-            transaction,
-          );
-          finalCarId = car.carId;
-        } else if (finalCarId) {
-          await this.carService.getCustomerCar(user.id, finalCarId, lang);
-        }
-        if (!finalCarId) {
-          throw new BadRequestException(
-            this.i18n.translate('translation.orders.car_required', { lang }),
+            this.i18n.translate('translation.orders.store_unavailable', { lang }),
           );
         }
-      }
-
-      const cartItems = (await this.cartService.getCartItemsWithOffers(storeId,user.id,lang)).items;
-
-      const estimatedTime = Math.max(
-        ...cartItems.map((item) => item.product.preparationTime || 0),
-      );
-
-      if (scheduledAt) {
-        const storeIsOpen = await this.storeUtilsService.isStoreOpenAt(
-          storeId,
-          scheduledAt,
-        );
-        if (!storeIsOpen) {
+        if (pickupType === PickupType.DRIVE_THRU && !store.driveThru) {
           throw new BadRequestException(
-            this.i18n.translate('translation.orders.store_closed_scheduled', {
-              lang,
-            }),
+              this.i18n.translate('translation.orders.store_no_drive_thru', { lang }),
           );
-        }
-      } else {
-        const now = new Date();
-        const storeIsOpenNow = await this.storeUtilsService.isStoreOpenAt(
-          storeId,
-          now,
-        );
-        if (!storeIsOpenNow) {
-          throw new BadRequestException(
-            this.i18n.translate('translation.orders.store_closed_now', {
-              lang,
-            }),
-          );
-        }
       }
 
-      const subtotalBeforeDiscount = round2(cartItems.reduce((sum, item) => sum + item.finalPrice * item.quantity, 0),);
-
-      let coupon: Coupon | null = null;
-      if (couponCode) {
-        coupon = await this.couponService.validateCoupon(
-          couponCode,
-          lang,
-        );
-      }
-
-      const loyaltySetting = await this.loyaltySettingService.getSettings();
-      const discountCouponAmount = coupon? round2(subtotalBeforeDiscount * (coupon.discountPercentage / 100)): 0;
-      const finalPriceToPay = round2(subtotalBeforeDiscount - discountCouponAmount);
-      // change to use from loyalty setting table
-      const pointsAmountUsed = round2(pointsUsedSafe * loyaltySetting.dollarPerPoint);
-
-      if (pointsAmountUsed > finalPriceToPay) {
-        throw new BadRequestException(
-          this.i18n.translate('translation.orders.points_greater_than_total', {
-            lang,
-          }),
-        );
-      }
-
-      let remainingAmount = round2(finalPriceToPay - pointsAmountUsed);
-      if (isNaN(remainingAmount) || remainingAmount < 0) {
-        remainingAmount = 0;
-      }
-
-      // change to use from loyalty setting table
-      const pointsEarned = Math.floor(remainingAmount * loyaltySetting.pointsPerDollar);
-
-      let walletAmountUsed = 0;
-      let gatewayAmountUsed = 0;
-
-      if (remainingAmount > 0) {
-        if (paymentMethod === PaymentMethod.WALLET) {
-          if (remainingAmount > user.walletBalance) {
+        if (pickupType === PickupType.IN_STORE && !store.inStore) {
             throw new BadRequestException(
-              this.i18n.translate('translation.orders.wallet_insufficient', {
+                this.i18n.translate('translation.orders.store_no_in_store', { lang }),
+            );
+        }
+
+        if (pointsUsedSafe > 0 && user.points < MIN_POINTS_TO_USE) {
+          throw new BadRequestException(
+            this.i18n.translate('translation.orders.min_points_required', {
+              lang,
+            }),
+          );
+        }
+
+        if (pointsUsedSafe > 0 && pointsUsedSafe > user.points) {
+          throw new BadRequestException(
+            this.i18n.translate('translation.orders.points_exceed_balance', {
+              lang,
+            }),
+          );
+        }
+
+        if (scheduledAt && new Date(scheduledAt) <= new Date()) {
+          throw new BadRequestException(
+            this.i18n.translate('translation.orders.scheduled_in_past', { lang }),
+          );
+        }
+
+        if (pickupByCustomer === undefined || pickupByCustomer === null) {
+          throw new BadRequestException(
+            this.i18n.translate('translation.orders.pickup_required', { lang }),
+          );
+        }
+
+        if (
+          pickupByCustomer === true &&
+          (pickupPersonName || pickupPersonNumber)
+        ) {
+          throw new BadRequestException(
+            this.i18n.translate('translation.orders.pickup_self_no_other', {
+              lang,
+            }),
+          );
+        } else if (
+          !pickupByCustomer &&
+          (!pickupPersonName || !pickupPersonNumber)
+        ) {
+          throw new BadRequestException(
+            this.i18n.translate('translation.orders.pickup_person_required', {
+              lang,
+            }),
+          );
+        }
+
+        let finalCarId: number | null = null;
+        if (pickupType === PickupType.DRIVE_THRU) {
+          finalCarId = carId ?? null;
+          if (!finalCarId && dto.newCar) {
+            const car = await this.carService.create(
+              user.id,
+              dto.newCar,
+              lang,
+              transaction,
+            );
+            finalCarId = car.carId;
+          } else if (finalCarId) {
+            await this.carService.getCustomerCar(user.id, finalCarId, lang);
+          }
+          if (!finalCarId) {
+            throw new BadRequestException(
+              this.i18n.translate('translation.orders.car_required', { lang }),
+            );
+          }
+        }
+
+        const cart = await this.cartService.getCartItemsWithOffers(storeId,user.id,lang,couponCode);
+        const {items,estimatedTime} = cart
+
+        if (scheduledAt) {
+          const storeIsOpen = await this.storeUtilsService.isStoreOpenAt(
+            storeId,
+            scheduledAt,
+          );
+          if (!storeIsOpen) {
+            throw new BadRequestException(
+              this.i18n.translate('translation.orders.store_closed_scheduled', {
                 lang,
               }),
             );
           }
-          walletAmountUsed = round2(remainingAmount);
-        } else if (paymentMethod === PaymentMethod.GATEWAY) {
-          gatewayAmountUsed = round2(remainingAmount);
         } else {
+          const now = new Date();
+          const storeIsOpenNow = await this.storeUtilsService.isStoreOpenAt(
+            storeId,
+            now,
+          );
+          if (!storeIsOpenNow) {
+            throw new BadRequestException(
+              this.i18n.translate('translation.orders.store_closed_now', {
+                lang,
+              }),
+            );
+          }
+        }
+
+        const loyaltySetting = await this.loyaltySettingService.getSettings();
+        // change to use from loyalty setting table
+        const pointsAmountUsed = round2(pointsUsedSafe * loyaltySetting.dollarPerPoint);
+
+        if (pointsAmountUsed > cart.totalFinalPrice) {
           throw new BadRequestException(
-            this.i18n.translate('translation.orders.invalid_payment_method', {
+            this.i18n.translate('translation.orders.points_greater_than_total', {
               lang,
             }),
           );
         }
-      }
 
-      const order = await this.orderRepo.create(
-        {
-          customerId: user.id,
-          storeId:storeId,
-          subtotalBeforeDiscount,
-          estimatedTime,
-          discountCouponAmount,
-          finalPriceToPay,
-          couponId: coupon ? coupon.id : null,
-          status: OrderStatus.PENDING_PAYMENT,
-          isPaid: false,
-          pickupType,
-          scheduledAt: scheduledAt || null,
-          isScheduled: !!scheduledAt,
-          pickupByCustomer: pickupByCustomer,
-          pickupPersonName:
-            pickupByCustomer === false ? pickupPersonName : null,
-          pickupPersonNumber:
-            pickupByCustomer === false ? pickupPersonNumber : null,
-          walletAmountUsed,
-          gatewayAmountUsed,
-          paymentGateway: gatewayType || null,
-          paymentMethod,
-          pointsAmountUsed: pointsAmountUsed || 0,
-          pointsRedeemed: pointsUsedSafe || 0,
-          pointsEarned: pointsEarned || 0,
-          carId: pickupType === PickupType.DRIVE_THRU ? finalCarId : null,
-        },
-        { transaction },
-      );
-
-      for (const item of cartItems) {
-        const productName = item.product.languages?.find(l => l.languageCode === lang)?.name ?? item.product.languages?.[0]?.name ?? '';
-        const extrasForDb = item.extras.map(e => ({...e,name: e.languages?.find(l => l.languageCode === lang)?.name ?? e.languages?.[0]?.name ?? '',}));
-        const instructionsForDb = item.instructions.map(i => ({...i,name: i.languages?.find(l => l.languageCode === lang)?.name ?? i.languages?.[0]?.name ?? ''}));
-        const variantsForDb = item.variants.map(v => ({
-          ...v,
-          name: v.languages?.find(l => l.languageCode === lang)?.name
-                ?? v.languages?.[0]?.name ?? '',
-          category: v.variantCategory?.languages?.find(l => l.languageCode === lang)?.name
-                  ?? v.variantCategory?.languages?.[0]?.name ?? '',
-        }));
-        const orderItem = await this.orderItemService.createOrderItem(
-          {
-            orderId: order.id,
-            productId: item.product.id,
-            productName: productName,
-            productImageUrl: item.product.images[0],
-            unitBasePrice: item.product.basePrice,
-            unitDiscountedPrice:item.product.discountedPrice,
-            unitFinalPrice:item.finalPrice,
-            finalSubtotal:round2(item.finalPrice * item.quantity),
-            quantity: item.quantity,
-            offerId: item.product.offer?.id ?? null,
-            freeQty: 0,
-            note:item.note,
-          },
-          transaction,
-        );
-        await Promise.all([
-          this.orderItemExtraService.createExtras(orderItem.id, extrasForDb, transaction),
-          this.orderItemVariantService.createVariants(orderItem.id, variantsForDb, transaction),
-          this.orderItemInstructionService.createInstructions(orderItem.id,instructionsForDb,transaction),
-          ]);
+        let remainingAmount = round2(cart.totalFinalPrice - pointsAmountUsed);
+        if (isNaN(remainingAmount) || remainingAmount < 0) {
+          remainingAmount = 0;
         }
 
-      await this.cartService.deleteCart(storeId, user.id, transaction);
+        let walletAmountUsed = 0;
+        let gatewayAmountUsed = 0;
 
-      await transaction.commit();
-      return {
-        orderId: order.id,
-        totalPrice: round2(finalPriceToPay),
-        message: this.i18n.translate('translation.orders.order_placed_successfully', { lang }),
-      };
-    } catch (error) {
-      await transaction.rollback();
-      throw error;
+        if (remainingAmount > 0) {
+          if (paymentMethod === PaymentMethod.WALLET) {
+            if (remainingAmount > user.walletBalance) {
+              throw new BadRequestException(
+                this.i18n.translate('translation.orders.wallet_insufficient', {
+                  lang,
+                }),
+              );
+            }
+            walletAmountUsed = round2(remainingAmount);
+          } else if (paymentMethod === PaymentMethod.GATEWAY) {
+            gatewayAmountUsed = round2(remainingAmount);
+          } else {
+            throw new BadRequestException(
+              this.i18n.translate('translation.orders.invalid_payment_method', {
+                lang,
+              }),
+            );
+          }
+        }
+
+        const order = await this.orderRepo.create(
+          {
+            customerId: user.id,
+            storeId:storeId,
+            subtotalBeforeDiscount:cart.totalFinalPrice-cart.couponDiscountAmount,
+            estimatedTime,
+            discountCouponAmount:cart.couponDiscountAmount,
+            finalPriceToPay:cart.totalFinalPrice,
+            couponId: cart.couponId,
+            status: OrderStatus.PENDING_PAYMENT,
+            isPaid: false,
+            pickupType,
+            scheduledAt: scheduledAt || null,
+            isScheduled: !!scheduledAt,
+            pickupByCustomer: pickupByCustomer,
+            pickupPersonName:
+              pickupByCustomer === false ? pickupPersonName : null,
+            pickupPersonNumber:
+              pickupByCustomer === false ? pickupPersonNumber : null,
+            walletAmountUsed,
+            gatewayAmountUsed,
+            paymentGateway: gatewayType || null,
+            paymentMethod,
+            pointsAmountUsed: pointsAmountUsed || 0,
+            pointsRedeemed: pointsUsedSafe || 0,
+            pointsEarned: cart.pointsEarned || 0,
+            carId: pickupType === PickupType.DRIVE_THRU ? finalCarId : null,
+          },
+          { transaction },
+        );
+
+        for (const item of items) {
+          const productName = item.product.languages?.find(l => l.languageCode === lang)?.name ?? item.product.languages?.[0]?.name ?? '';
+          const extrasForDb = item.extras.map(e => ({...e,name: e.languages?.find(l => l.languageCode === lang)?.name ?? e.languages?.[0]?.name ?? '',}));
+          const instructionsForDb = item.instructions.map(i => ({...i,name: i.languages?.find(l => l.languageCode === lang)?.name ?? i.languages?.[0]?.name ?? ''}));
+          const variantsForDb = item.variants.map(v => ({
+            ...v,
+            name: v.languages?.find(l => l.languageCode === lang)?.name
+                  ?? v.languages?.[0]?.name ?? '',
+            category: v.variantCategory?.languages?.find(l => l.languageCode === lang)?.name
+                    ?? v.variantCategory?.languages?.[0]?.name ?? '',
+          }));
+          let freeQty = 0 ;
+          if(item.product.offer && item.product.offer.type===OfferType.INCENTIVE)
+          {
+            freeQty = Math.floor(item.quantity*(item.product.offer.getFreeQty/item.product.offer.buyQty))
+          }
+          const orderItem = await this.orderItemService.createOrderItem(
+            {
+              orderId: order.id,
+              productId: item.product.id,
+              productName: productName,
+              productImageUrl: item.product.images[0],
+              unitBasePrice: item.product.basePrice,
+              unitDiscountedPrice:item.product.discountedPrice,
+              unitFinalPrice:item.finalPrice,
+              finalSubtotal:round2(item.finalPrice * item.quantity),
+              quantity: item.quantity,
+              offerId: item.product.offer?.id ?? null,
+              freeQty,
+              note:item.note,
+            },
+            transaction,
+          );
+          await Promise.all([
+            this.orderItemExtraService.createExtras(orderItem.id, extrasForDb, transaction),
+            this.orderItemVariantService.createVariants(orderItem.id, variantsForDb, transaction),
+            this.orderItemInstructionService.createInstructions(orderItem.id,instructionsForDb,transaction),
+            ]);
+          }
+
+        await this.cartService.deleteCart(storeId, user.id, transaction);
+
+        await transaction.commit();
+        return {
+          orderId: order.id,
+          totalPrice: round2(cart.totalFinalPrice),
+          message: this.i18n.translate('translation.orders.order_placed_successfully', { lang }),
+        };
+      } catch (error) {
+        await transaction.rollback();
+        throw error;
+      }
     }
-  }
 
   async getOrdersByStore(
     storeId: number,
