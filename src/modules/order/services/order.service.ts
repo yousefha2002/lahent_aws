@@ -18,7 +18,7 @@ import { PaymentMethod } from 'src/common/enums/payment_method';
 import {MIN_POINTS_TO_USE} from 'src/common/constants';
 import { Customer } from '../../customer/entities/customer.entity';
 import { round2 } from 'src/common/utils/round2';
-import { Sequelize } from 'sequelize';
+import { literal, Sequelize } from 'sequelize';
 import { Coupon } from '../../coupon/entities/coupon.entity';
 import { StoreStatus } from 'src/common/enums/store_status';
 import { Op } from 'sequelize';
@@ -316,9 +316,11 @@ export class OrderService {
     const offset = (page - 1) * limit;
     const statusMap: Record<string, OrderStatus[]> = {
       incoming: [
-        OrderStatus.SCHEDULED,
         OrderStatus.PENDING_CONFIRMATION,
         OrderStatus.CUSTOMER_DECISION,
+      ],
+      scheduled:[
+        OrderStatus.SCHEDULED
       ],
       preparing: [OrderStatus.PREPARING, OrderStatus.HALF_PREPARATION],
       ready: [OrderStatus.READY],
@@ -515,5 +517,51 @@ export class OrderService {
       where: { id: orderId, customerId, storeId, status: OrderStatus.RECEIVED },
     });
     return count;
+  }
+
+  async getStoreOrderStats(storeId: number) 
+  {
+    const result = await Order.findOne({
+      attributes: [
+        [literal(`
+          SUM(
+            CASE
+              WHEN status = 'received' THEN 1
+              ELSE 0
+            END
+          )
+        `), 'completedCount'],
+
+        [literal(`
+          SUM(
+            CASE
+              WHEN status IN ('rejected','cancelled','expired_confirmation') THEN 1
+              ELSE 0
+            END
+          )
+        `), 'cancelledCount'],
+
+        [literal(`
+          SUM(
+            CASE
+              WHEN status IN ('preparing','half_preparation') THEN 1
+              ELSE 0
+            END
+          )
+        `), 'preparingCount'],
+      ],
+      where: { storeId },
+      raw: true,
+    })as unknown as {
+      completedCount: string | number;
+      cancelledCount: string | number;
+      preparingCount: string | number;
+    };
+
+    return {
+      completedCount: Number(result?.completedCount) || 0,
+      cancelledCount: Number(result?.cancelledCount) || 0,
+      preparingCount: Number(result?.preparingCount) || 0,
+    };
   }
 }

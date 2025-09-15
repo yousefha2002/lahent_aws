@@ -1,1 +1,1 @@
-export type filterStatusByStore =  'incoming' | 'preparing' | 'ready' | 'arrived' | 'completed' | 'canceled'
+export type filterStatusByStore =  'incoming' | 'preparing' | 'ready' | 'arrived' | 'completed' | 'canceled'|'scheduled'

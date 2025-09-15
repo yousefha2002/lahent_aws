@@ -45,7 +45,7 @@ export class StoreTransactionController {
     @ApiOperation({ summary: 'Get store financials with filter' })
     @ApiSecurity('access-token')
     @ApiResponse({ status: 200, description: 'Store financials', type: StoreFinancialsResponseDto })
-    @Get('financials')
+    @Get('financials/byStore')
     async getStoreFinancials(
         @CurrentUser() store: Store,
         @Query() query: StoreFinancialsFilterDto

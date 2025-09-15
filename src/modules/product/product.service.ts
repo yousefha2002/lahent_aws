@@ -498,4 +498,17 @@ export class ProductService {
   {
     return this.productRepo.restore({where: { storeId},transaction})
   }
+
+  async getTopProductsBySales(storeId:number,lang:Language)
+  {
+      return Product.findAll({
+        where: { storeId }, 
+        order: [['sales', 'DESC']], 
+        limit: 4,
+        include: [
+          { model: ProductImage},
+          { model: ProductLanguage, where:{languageCode:lang} }
+        ]
+      });
+  }
 }

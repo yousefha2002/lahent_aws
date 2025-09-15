@@ -35,6 +35,7 @@ import { ApprovedStoreGuard } from 'src/common/guards/approvedStore.guard';
 import { ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
+import { TopProductResponseDto } from './dto/top-product-response.dto';
 
 @Controller('product')
 export class ProductController {
@@ -271,5 +272,19 @@ export class ProductController {
       store.id,
       lang,
     );
+  }
+
+  @UseGuards(StoreOrOwnerGuard)
+  @Serilaize(TopProductResponseDto)
+  @Get('top-sales/:storeId')
+  @ApiOperation({ summary: 'Get top 4 selling products for a store' })
+  @ApiResponse({ status: 200, type: [TopProductResponseDto] })
+  @ApiSecurity('access-token')
+  async getTopSellingProducts(
+    @CurrentUser() store:Store,
+    @I18n() i18n: I18nContext
+  ) {
+    const lang = getLang(i18n);
+    return this.productService.getTopProductsBySales(store.id, lang);
   }
 }

@@ -23,6 +23,7 @@ import { OrderActionResponseDto } from './dto/order-action-response.dto';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
 import { AcceptOrderDto } from './dto/accept-order.dto';
+import { StoreOrderStatsResponseDto } from './dto/order-stats-response.dto';
 
 @Controller('order')
 export class OrderController {
@@ -194,6 +195,20 @@ export class OrderController {
   getOrdersByCustomer(@CurrentUser() customer:Customer,@Query('page',) page=1,@Query('limit') limit=10,@Query('storeId') storeId?: number)
   {
     return this.orderService.getOrdersForCustomer(customer.id,+page,+limit,undefined,storeId)
+  }
+
+  @Serilaize(StoreOrderStatsResponseDto)
+  @UseGuards(StoreOrOwnerGuard, ApprovedStoreGuard)
+  @Get('stats/byStore')
+  @ApiOperation({ summary: 'Get order statistics for a store' })
+  @ApiSecurity('access-token')
+  @ApiResponse({
+    status: 200,
+    description: 'Order statistics grouped by status',
+    type:StoreOrderStatsResponseDto
+  })
+  async getStoreOrderStats(@CurrentUser() store: Store) {
+    return this.orderService.getStoreOrderStats(store.id);
   }
 
   @Serilaize(OrderDto)
