@@ -137,7 +137,8 @@ export class GiftCategoryService {
           model: GiftTemplate,
           attributes: ['id', 'imageUrl'],
           order: [['createdAt', 'DESC']],
-          // required: true,
+          limit: 3,
+          separate: true,
         },
         {
           model: GiftCategoryLanguage,

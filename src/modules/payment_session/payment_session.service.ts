@@ -1,6 +1,4 @@
-import { OrderPaymentService } from './../order/services/order-payment.service';
-import { TransactionService } from './../transaction/transaction.service';
-import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
 import { PaymentSession } from './entities/payment_session.entity';
 import { PaymentGatewayFactory } from './payment_gateway.factory';

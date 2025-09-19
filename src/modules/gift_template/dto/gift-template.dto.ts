@@ -1,8 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose, Type } from 'class-transformer';
-import { GiftCategoryDto } from 'src/modules/gift_category/dto/gift-category.dto';
 
-export class GiftTemplateDto {
+export class BasicGiftTemplateDto {
   @ApiProperty({ example: 1 })
   @Expose()
   id: string;
@@ -10,11 +9,6 @@ export class GiftTemplateDto {
   @ApiProperty({ example: 'https:/cloudinary/image.com' })
   @Expose()
   imageUrl: string;
-
-  @ApiProperty({ type: () => GiftCategoryDto })
-  @Expose()
-  @Type(() => GiftCategoryDto)
-  category: GiftCategoryDto;
 }
 
 export class PaginatedGiftTemplateDto {
@@ -26,8 +20,8 @@ export class PaginatedGiftTemplateDto {
   @Expose()
   totalPages: number;
 
-  @ApiProperty({ type: GiftTemplateDto })
+  @ApiProperty({ type: [BasicGiftTemplateDto] })
   @Expose()
-  @Type(() => GiftTemplateDto)
-  data: GiftTemplateDto;
+  @Type(() => BasicGiftTemplateDto)
+  data: BasicGiftTemplateDto[];
 }

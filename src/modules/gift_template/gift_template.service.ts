@@ -80,7 +80,7 @@ export class GiftTemplateService {
     const msg = this.i18n.translate('translation.gift_template.updated', {
       lang,
     });
-    return { message: msg, giftTemplate };
+    return { message: msg };
   }
 
   async findByCategoryWithPagination(categoryId: number, page = 1, limit = 10) {

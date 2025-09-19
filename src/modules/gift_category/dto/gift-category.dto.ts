@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose, Type } from 'class-transformer';
-import { GiftTemplateDto } from 'src/modules/gift_template/dto/gift-template.dto';
+import { BasicGiftTemplateDto } from 'src/modules/gift_template/dto/gift-template.dto';
 
 export class GiftCategoryTypeLanguageDto {
   @ApiProperty({ example: 'أعياد' })
@@ -22,10 +22,10 @@ export class GiftCategoryDto {
   @Type(() => GiftCategoryTypeLanguageDto)
   languages: GiftCategoryTypeLanguageDto[];
 
-  @ApiProperty({ type: () => GiftTemplateDto, isArray: true })
+  @ApiProperty({ type: () => BasicGiftTemplateDto, isArray: true })
   @Expose()
-  @Type(() => GiftTemplateDto)
-  templates: GiftTemplateDto;
+  @Type(() => BasicGiftTemplateDto)
+  templates: BasicGiftTemplateDto;
 }
 
 export class GiftCategoryDtoWithMessage {

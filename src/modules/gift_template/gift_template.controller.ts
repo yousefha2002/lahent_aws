@@ -4,7 +4,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { AdminGuard } from 'src/common/guards/admin.guard';
 import { CreateGiftTemplateDto } from './dto/create-gift-template.dto';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
-import { GiftTemplateDto, PaginatedGiftTemplateDto } from './dto/gift-template.dto';
+import { PaginatedGiftTemplateDto } from './dto/gift-template.dto';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { getLang } from 'src/common/utils/get-lang.util';
@@ -16,7 +16,16 @@ export class GiftTemplateController {
   @ApiOperation({ summary: 'Create a Gift Template (admin only)' })
   @ApiConsumes('multipart/form-data')
   @ApiSecurity('access-token')
-  @ApiBody({ type: CreateGiftTemplateDto })
+  @ApiBody({
+      schema: {
+        type: 'object',
+        properties: {
+          categoryId: { type: 'string', example: '1', nullable: true },
+          image: { type: 'string', format: 'binary' },
+        },
+        required: ['categoryId', 'image'],
+      },
+    })
   @ApiResponse({ status: 201, description: 'Gift template created successfully', schema: { example: { message: 'Created successfully' } } })
   @UseGuards(AdminGuard)
   @Post()
@@ -35,7 +44,6 @@ export class GiftTemplateController {
   @ApiSecurity('access-token')
   @ApiBody({ type: CreateGiftTemplateDto })
   @ApiResponse({ status: 201, description: 'Gift template updated successfully', schema: { example: { message: 'Updated successfully' } } })
-  @Serilaize(GiftTemplateDto)
   @UseGuards(AdminGuard)
   @Put(':id')
   @UseInterceptors(FileInterceptor('image'))

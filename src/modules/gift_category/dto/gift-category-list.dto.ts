@@ -1,5 +1,5 @@
 import { Expose, Type } from "class-transformer";
-import { GiftTemplateDto } from "src/modules/gift_template/dto/gift-template.dto";
+import { BasicGiftTemplateDto } from "src/modules/gift_template/dto/gift-template.dto";
 
 export class GiftCategoryListDto {
     @Expose()
@@ -9,6 +9,6 @@ export class GiftCategoryListDto {
     name:string
     
     @Expose()
-    @Type(() => GiftTemplateDto)
-    templates: GiftTemplateDto;
+    @Type(() => BasicGiftTemplateDto)
+    templates: BasicGiftTemplateDto;
 }
