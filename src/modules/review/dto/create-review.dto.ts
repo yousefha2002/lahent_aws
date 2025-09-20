@@ -10,11 +10,6 @@ import {
 } from 'class-validator';
 
 export class CreateReviewDto {
-  @ApiProperty({ description: 'ID of the store being reviewed', example: 1 })
-  @IsInt()
-  @IsNotEmpty()
-  storeId: number;
-
   @ApiProperty({ description: 'ID of the order associated with this review', example: 123 })
   @IsInt()
   @IsNotEmpty()

@@ -6,7 +6,6 @@ import { OrderItemVariantService } from '../../order_item_variant/order_item_var
 import { OrderItemInstructionService } from '../../order_item_instruction/order_item_instruction.service';
 import { OrderItemExtraService } from '../../order_item_extra/order_item_extra.service';
 import { OrderItemService } from '../../order_item/order_item.service';
-import { CouponService } from '../../coupon/coupon.service';
 import { CartService } from '../../cart/cart.service';
 import {BadRequestException,Inject,Injectable,NotFoundException} from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
@@ -45,7 +44,6 @@ export class OrderService {
   constructor(
     @Inject(repositories.order_repository) private orderRepo: typeof Order,
     private readonly cartService: CartService,
-    private readonly couponService: CouponService,
     private readonly orderItemExtraService: OrderItemExtraService,
     private readonly orderItemInstructionService: OrderItemInstructionService,
     private readonly orderItemVariantService: OrderItemVariantService,
@@ -508,17 +506,6 @@ export class OrderService {
     return +maxOrderNumber + 1;
   }
 
-  async countRecivedOrderForCustomer(
-    orderId: number,
-    customerId: number,
-    storeId: number,
-  ) {
-    const count = await this.orderRepo.count({
-      where: { id: orderId, customerId, storeId, status: OrderStatus.RECEIVED },
-    });
-    return count;
-  }
-
   async getStoreOrderStats(storeId: number) 
   {
     const result = await Order.findOne({
@@ -563,5 +550,15 @@ export class OrderService {
       cancelledCount: Number(result?.cancelledCount) || 0,
       preparingCount: Number(result?.preparingCount) || 0,
     };
+  }
+
+  async findOrder(orderId:number,customerId:number)
+  {
+    const order = await this.orderRepo.findOne({where:{orderId,customerId}})
+    if(!order)
+    {
+      throw new NotFoundException('order is not found')
+    }
+    return order
   }
 }

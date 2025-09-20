@@ -5,6 +5,7 @@ import { StoreService } from '../store/services/store.service';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { Customer } from '../customer/entities/customer.entity';
 import { OrderService } from '../order/services/order.service';
+import { OrderStatus } from 'src/common/enums/order_status';
 
 @Injectable()
 export class ReviewService {
@@ -16,27 +17,28 @@ export class ReviewService {
   ) {}
 
   async createReview(customerId: number, dto: CreateReviewDto) {
-    const [store, count] = await Promise.all([
-      this.storeService.storeById(dto.storeId),
-      this.orderService.countRecivedOrderForCustomer(
-        dto.orderId,
-        customerId,
-        dto.storeId,
-      ),
-    ]);
+    const order = await this.orderService.findOrder(dto.orderId,customerId);
+    if (order.status !== OrderStatus.RECEIVED) {
+      throw new BadRequestException('Order not received yet');
+    }
+    const store = await this.storeService.storeById(order.storeId)
 
     if (!store) {
       throw new BadRequestException('Invalid store');
     }
 
-    if (count === 0) {
-      throw new BadRequestException('No order recived to review store');
+    const existingReview = await this.reviewRepo.findOne({
+      where: { customerId, orderId: dto.orderId },
+    });
+
+    if (existingReview) {
+      throw new BadRequestException('You already reviewed this order');
     }
 
     // 1. Create review
     await this.reviewRepo.create({
       customerId,
-      storeId: dto.storeId,
+      storeId: order.storeId,
       comment: dto.comment,
       rating: dto.rating,
       isAnonymous: dto.isAnonymous ?? false,
