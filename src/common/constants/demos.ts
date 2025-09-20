@@ -1,0 +1,3 @@
+export const DEMO_CUSTOMER_PHONE = '966500000000';
+export const DEMO_OWNER_PHONE = '966511111111';
+export const DEMO_OTP_CODE = '1234';
