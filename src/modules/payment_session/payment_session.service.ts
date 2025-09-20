@@ -25,7 +25,7 @@ export class PaymentSessionService {
         });
 
         // 2. بناء callbackUrl بعد معرفة sessionId
-        const callbackUrl = `https://myapp.com/api/payment/callback/${session.id}`;
+        const callbackUrl = `https://lahent.sa/api`;
 
         // 3. إنشاء الدفع مع البوابة
         const gateway = PaymentGatewayFactory.getProvider(provider);
