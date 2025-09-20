@@ -3,7 +3,7 @@ import { Expose, Type } from 'class-transformer';
 import { StoreTransactionType } from 'src/common/enums/transaction_type';
 import { SimpleCustomerDto } from 'src/modules/customer/dto/simple-customer.dto';
 
-export class OrderDto {
+export class TransactionOrderDto {
     @Expose()
     @ApiProperty({ description: 'Order ID' })
     id: number;
@@ -48,9 +48,9 @@ export class StoreTransactionDto {
     status: StoreTransactionType;
 
     @Expose()
-    @Type(() => OrderDto)
-    @ApiProperty({ description: 'Associated order', type: OrderDto })
-    order: OrderDto;
+    @Type(() => TransactionOrderDto)
+    @ApiProperty({ description: 'Associated order', type: TransactionOrderDto })
+    order: TransactionOrderDto;
 }
 
 export class PaginatedStoreTransactionDto {
