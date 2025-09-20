@@ -15,6 +15,7 @@ import { Store } from '../store/entities/store.entity';
 import { Customer } from '../customer/entities/customer.entity';
 import { Avatar } from '../avatar/entities/avatar.entity';
 import { PaymentSession } from '../payment_session/entities/payment_session.entity';
+import { Op } from 'sequelize';
 
 @Injectable()
 export class TransactionService {
@@ -67,22 +68,20 @@ export class TransactionService {
     );
   }
 
-  async getTransactions(customerId: number,typeFilter: filterTypeTransaction = "all",page = 1,limit = 10)
-  {
+  async getTransactions(customerId: number,typeFilter: 'all' | 'deposit' | 'purchase' | 'refund' | 'gift' = 'all',page = 1,limit = 10,) {
     const offset = (page - 1) * limit;
 
     const where: any = { customerId };
 
+    // فلترة حسب النوع
     if (typeFilter === 'deposit') {
-      where.type = [TransactionType.TOP_UP];
+      where.type = TransactionType.TOP_UP;
     } else if (typeFilter === 'purchase') {
-      where.type = [TransactionType.PURCHASE_GATEWAY, TransactionType.PURCHASE_WALLET];
+      where.type = { [Op.in]: [TransactionType.PURCHASE_GATEWAY, TransactionType.PURCHASE_WALLET] };
     } else if (typeFilter === 'refund') {
-      where.type = [TransactionType.REFUND_WALLET];
-    }
-    else if(typeFilter==='gift')
-    {
-      where.type = [TransactionType.GIFT_SENT,TransactionType.GIFT_RECEIVED];
+      where.type = TransactionType.REFUND_WALLET;
+    } else if (typeFilter === 'gift') {
+      where.type = { [Op.in]: [TransactionType.GIFT_SENT, TransactionType.GIFT_RECEIVED] };
     }
 
     const { rows, count } = await this.transactionRepo.findAndCountAll({
@@ -93,35 +92,37 @@ export class TransactionService {
       distinct: true,
       include: [
         { model: Order, include: [Store] },
-        { model: Gift, include: [{ model: Customer, as: 'sender',include:[Avatar] }, { model: Customer, as: 'receiver',include:[Avatar] }] },
+        {
+          model: Gift,
+          include: [
+            { model: Customer, as: 'sender', include: [Avatar] },
+            { model: Customer, as: 'receiver', include: [Avatar] },
+          ],
+        },
         { model: LoyaltyOffer },
       ],
     });
 
-    const dataWithOtherParty = rows.map(tx => {
-    const plainTx = tx.toJSON();
+    // تجهيز الداتا
+    const dataWithOtherParty = rows.map((tx) => {
+      const plainTx = tx.toJSON();
 
-    if (plainTx.type === TransactionType.GIFT_SENT && plainTx.gift?.receiver) {
-      plainTx.gift.otherParty = {
-        id: plainTx.gift.receiver.id,
-        name: plainTx.gift.receiver.name,
-        phone: plainTx.gift.receiver.phone,
-        imageUrl: plainTx.gift.receiver.imageUrl,
-        avatar: plainTx.gift.receiver.avatar
-          ? { id: plainTx.gift.receiver.avatar.id, url: plainTx.gift.receiver.avatar.url }
-          : null,
-      };
-    } else if (plainTx.type === TransactionType.GIFT_RECEIVED && plainTx.gift?.sender) {
-      plainTx.gift.otherParty = {
-        id: plainTx.gift.sender.id,
-        name: plainTx.gift.sender.name,
-        phone: plainTx.gift.sender.phone,
-        imageUrl: plainTx.gift.sender.imageUrl,
-        avatar: plainTx.gift.sender.avatar
-          ? { id: plainTx.gift.sender.avatar.id, url: plainTx.gift.sender.avatar.url }
-          : null,
-      };
-    }
+      if (plainTx.gift) {
+        const isSent = plainTx.type === TransactionType.GIFT_SENT;
+        const relatedCustomer = isSent ? plainTx.gift.receiver : plainTx.gift.sender;
+        const fallbackName = isSent ? plainTx.gift.receiverName : plainTx.gift.senderName;
+        const fallbackPhone = isSent ? plainTx.gift.receiverPhone : plainTx.gift.senderPhone;
+
+        plainTx.gift.otherParty = {
+          id: relatedCustomer?.id || null,
+          name: relatedCustomer?.name || fallbackName || 'Unknown',
+          phone: relatedCustomer?.phone || fallbackPhone || 'N/A',
+          imageUrl: relatedCustomer?.imageUrl || null,
+          avatar: relatedCustomer?.avatar
+            ? { id: relatedCustomer.avatar.id, url: relatedCustomer.avatar.url }
+            : null,
+        };
+      }
 
       return plainTx;
     });

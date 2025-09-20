@@ -27,12 +27,6 @@ export class RelatedGiftDto {
     id: number;
 
     @Expose()
-    receiverName: string;
-
-    @Expose()
-    receiverPhone: string;
-
-    @Expose()
     @Type(() => SimpleCustomerDto)
     otherParty?: SimpleCustomerDto;
 }
