@@ -554,7 +554,7 @@ export class OrderService {
 
   async findOrder(orderId:number,customerId:number)
   {
-    const order = await this.orderRepo.findOne({where:{orderId,customerId}})
+    const order = await this.orderRepo.findOne({where:{id:orderId,customerId}})
     if(!order)
     {
       throw new NotFoundException('order is not found')
