@@ -8,6 +8,7 @@ import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { PaginatedStoreTransactionDto } from './dto/store_transaction.dto';
 import { StoreFinancialsFilterDto } from '../store/dto/store-financials-filter.dto';
 import { StoreFinancialsResponseDto } from './dto/store-financials-response.dto';
+import { StoreTransactionType } from 'src/common/enums/transaction_type';
 
 @Controller('store-transaction')
 export class StoreTransactionController {
@@ -19,15 +20,16 @@ export class StoreTransactionController {
     @ApiSecurity('access-token')
     @ApiQuery({ name: 'page', required: false, example: 1 })
     @ApiQuery({ name: 'limit', required: false, example: 10 })
-    @ApiQuery({ name: 'storeId', required: false, example: '1' })
+    @ApiQuery({ name: 'status', required: false, example: StoreTransactionType.CANCELED })
     @ApiResponse({ status: 200, description: 'List of transactions',type:PaginatedStoreTransactionDto })
     @Get('current-store')
     async getAll(
         @CurrentUser() store:Store,
         @Query('page',new ParseIntPipe({ optional: true })) page = 1,
-        @Query('limit',new ParseIntPipe({ optional: true })) limit = 10
+        @Query('limit',new ParseIntPipe({ optional: true })) limit = 10,
+        @Query('status') status?: StoreTransactionType,
     ) {
-        return this.storeTransactionService.getAllByStore(store.id, page,limit);
+        return this.storeTransactionService.getAllByStore(store.id, page,limit,status);
     }
 
     @UseGuards(StoreOrOwnerGuard)

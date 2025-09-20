@@ -10,6 +10,7 @@ import { literal } from 'sequelize';
 import { round2 } from 'src/common/utils/round2';
 import { getDateRange } from 'src/common/utils/getDateRange';
 import { Op } from 'sequelize';
+import { StoreTransactionType } from 'src/common/enums/transaction_type';
 
 @Injectable()
 export class StoreTransactionService {
@@ -36,11 +37,15 @@ export class StoreTransactionService {
         },{transaction});
     }
 
-    async getAllByStore(storeId: number, page = 1, limit = 10) {
+    async getAllByStore(storeId: number, page = 1, limit = 10,status?: StoreTransactionType) {
         const offset = (page - 1) * limit;
+        const where: any = { storeId };
+        if (status) {
+            where.status = status;
+        }
 
         const { rows, count } = await this.storeTransactionRepo.findAndCountAll({
-            where: { storeId },
+            where,
             offset,
             limit,
             order: [['createdAt', 'DESC']],
