@@ -81,7 +81,7 @@ export class OwnerService {
 
   async findByPhone(phone:string)
   {
-    return this.ownerRepo.findOne({ where: { phone} });
+    return this.ownerRepo.findOne({ where: { phone} ,paranoid: false});
   }
   
   //deletion

@@ -163,7 +163,7 @@ export class CustomerService {
   }
 
   async findByPhone(phone: string) {
-    const customer = await this.customerRepo.findOne({ where: { phone },include:[Avatar] });
+    const customer = await this.customerRepo.findOne({ where: { phone },paranoid: false,include:[Avatar] });
     return customer;
   }
 
