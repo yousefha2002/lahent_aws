@@ -6,6 +6,7 @@ import { CreateReviewDto } from './dto/create-review.dto';
 import { Customer } from '../customer/entities/customer.entity';
 import { OrderService } from '../order/services/order.service';
 import { OrderStatus } from 'src/common/enums/order_status';
+import { Avatar } from '../avatar/entities/avatar.entity';
 
 @Injectable()
 export class ReviewService {
@@ -109,7 +110,7 @@ export class ReviewService {
 
     const { rows, count } = await this.reviewRepo.findAndCountAll({
       where,
-      include: [Customer],
+      include: [{model:Customer,include:[Avatar]}],
       order: [['createdAt', 'DESC']],
       limit,
       offset,
