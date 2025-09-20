@@ -62,4 +62,9 @@ export class UserTokenService {
     {
         return this.userTokenRepo.destroy({where:{storeId},transaction})
     }
+
+    deleteByOnwer(ownerId:number,transaction?:any)
+    {
+        return this.userTokenRepo.destroy({where:{ownerId},transaction})
+    }
 }

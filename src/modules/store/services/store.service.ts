@@ -443,4 +443,20 @@ export class StoreService {
           transaction,
       });
   }
+
+  findAllStoresByOwnerForDeletion(ownerId:number)
+  {
+    return this.storeRepo.findAll({where:{ownerId}})
+  }
+
+  async findDeletedStoresByOwner(ownerId: number, transaction?: any) {
+  return this.storeRepo.findAll({
+    where: {
+      ownerId,
+      deletedAt: { [Op.not]: null },
+    },
+    paranoid: false,
+    transaction,
+  });
+}
 }

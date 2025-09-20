@@ -19,7 +19,7 @@ import { DeletionCronService } from './deletion-cron.service';
   controllers: [DeletionController],
   providers: [DeletionService,DeletionCronService],
   imports:[CustomerModule,DatabaseModule,AdminModule,UserTokenModule,StoreModule,OwnerModule,ProductModule,CartModule,
-    FaviroteModule,CategoryModule,ReviewModule,StoreCommissionModule
+    FaviroteModule,CategoryModule,ReviewModule,StoreCommissionModule,OwnerModule
   ]
 })
 export class DeletionModule {}

@@ -11,6 +11,8 @@ import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { Sequelize } from 'sequelize';
 import { Customer } from 'src/modules/customer/entities/customer.entity';
 import { Store } from '../store/entities/store.entity';
+import { Owner } from '../owner/entities/owner.entity';
+import { OwnerService } from '../owner/owner.service';
 
 @Injectable()
 export class DeletionService {
@@ -24,9 +26,11 @@ export class DeletionService {
         private readonly categoryService:CategoryService,
         private readonly reviewService:ReviewService,
         private readonly storeCommissionService:StoreCommissionService,
-        private readonly storeService:StoreService
+        private readonly storeService:StoreService,
+        private readonly ownerService:OwnerService
     ){}
 
+    // Customer
     async softDeleteCustomer(customer:Customer)
     {
         const transaction = await this.sequelize.transaction();
@@ -72,6 +76,7 @@ export class DeletionService {
         }
     }
 
+    // Store
     async softDeleteStore(store:Store)
     {
         const transaction = await this.sequelize.transaction();
@@ -124,4 +129,68 @@ export class DeletionService {
             throw error;
         }
     }
+
+    // Owner
+    async softDeleteOwner(owner: Owner) {
+        const transaction = await this.sequelize.transaction();
+        try {
+        const stores = await this.storeService.findAllStoresByOwnerForDeletion(owner.id);
+        for (const store of stores) {
+            await this.softDeleteStore(store);
+        }
+        await owner.destroy({ transaction });
+        await this.userTokenService.deleteByOnwer(owner.id, transaction);
+
+        await transaction.commit();
+        return { status: 'success', message: 'Owner soft deleted with all related stores' };
+        } catch (error) {
+        await transaction.rollback();
+        throw error;
+        }
+    }
+
+    async restoreOwner(ownerId: number) 
+    {
+        const transaction = await this.sequelize.transaction();
+        try {
+        const owner = await this.ownerService.findDeletedOwner(ownerId, transaction);
+
+        await owner.restore({ transaction });
+
+        const stores = await this.storeService.findDeletedStoresByOwner(owner.id, transaction);
+        for (const store of stores) {
+            await this.restoreStore(store.id);
+        }
+
+        await transaction.commit();
+        return { status: 'success', message: 'Owner restored with all related stores' };
+        } catch (error) {
+        await transaction.rollback();
+        throw error;
+        }
+    }
+
+    async hardDeleteOwnersOlderThan(days: number) 
+    {
+        const transaction = await this.sequelize.transaction();
+        try {
+            const owners = await this.ownerService.findDeletedOwnersOlderThan(days, transaction);
+
+            for (const owner of owners) {
+            const stores = await this.storeService.findDeletedStoresByOwner(owner.id, transaction);
+
+            for (const store of stores) {
+                await this.userTokenService.deleteByStore(store.id, transaction);
+                await store.destroy({ force: true, transaction });
+            }
+            await owner.destroy({ force: true, transaction });
+            }
+
+            await transaction.commit();
+            return { status: 'success', deletedCount: owners.length };
+        } catch (error) {
+            await transaction.rollback();
+            throw error;
+        }
+        }
 }

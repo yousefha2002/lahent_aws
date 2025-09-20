@@ -8,6 +8,7 @@ import { Language } from 'src/common/enums/language';
 import { generateAccessToken, generateRefreshToken } from 'src/common/utils/generateToken';
 import { JwtService } from '@nestjs/jwt';
 import { REFRESH_TOKEN_EXPIRES_MS } from 'src/common/constants';
+import { Op } from 'sequelize';
 
 @Injectable()
 export class OwnerService {
@@ -81,5 +82,27 @@ export class OwnerService {
   async findByPhone(phone:string)
   {
     return this.ownerRepo.findOne({ where: { phone} });
+  }
+  
+  //deletion
+  async findDeletedOwner(ownerId:number,transaction?:any)
+  {
+    const owner = await this.ownerRepo.findByPk(ownerId, { paranoid: false,transaction});
+    if (!owner) throw new NotFoundException('Store not found');
+    return owner
+  }
+
+  async findDeletedOwnersOlderThan(days: number, transaction?: any) 
+  {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - days);
+
+    return this.ownerRepo.findAll({
+      where: {
+        deletedAt: { [Op.lt]: cutoffDate },
+      },
+      paranoid: false,
+      transaction,
+    });
   }
 }

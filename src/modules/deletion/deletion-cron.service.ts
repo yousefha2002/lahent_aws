@@ -36,4 +36,18 @@ export class DeletionCronService {
             this.logger.error('Error deleting old soft-deleted customers', error);
         }
     }
+
+    @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+    async deleteOldSoftDeletedOwners() {
+        try {
+            const result = await this.deletionService.hardDeleteOwnersOlderThan(30);
+            if (result.deletedCount) {
+            this.logger.log(`Hard deleted ${result.deletedCount} old soft-deleted owners`);
+            } else {
+            this.logger.log(`No old soft-deleted owners found`);
+            }
+        } catch (error) {
+            this.logger.error('Error deleting old soft-deleted owners', error);
+        }
+    }
 }
