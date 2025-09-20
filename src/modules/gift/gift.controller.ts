@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { GiftService } from './gift.service';
 import { CreateGiftDto } from './dto/create-gift.dto';
 import { CustomerGuard } from 'src/common/guards/customer.guard';
@@ -7,7 +7,9 @@ import { Customer } from '../customer/entities/customer.entity';
 import { CompletedProfileGuard } from 'src/common/guards/completed-profile.guard';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
-import { ApiBody, ApiOperation, ApiResponse, ApiSecurity } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
+import { PaginatedGiftDto } from './dto/gift.dto';
+import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 
 @Controller('gift')
 export class GiftController {
@@ -43,5 +45,21 @@ export class GiftController {
   ) {
     const lang = getLang(i18n);
     return this.giftService.createGift(sender.id, body, lang);
+  }
+
+  @Serilaize(PaginatedGiftDto)
+  @ApiOperation({ summary: 'Get gifts for current customer' })
+  @ApiSecurity('access-token')
+  @ApiQuery({ name: 'page', required: false, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, example: 10 })
+  @ApiResponse({ status: 200, type: PaginatedGiftDto })
+  @Get('my-gifts')
+  @UseGuards(CustomerGuard)
+  async getMyGifts(
+    @CurrentUser() customer: Customer,
+    @Query('page') page = 1,
+    @Query('limit') limit = 10,
+  ) {
+    return this.giftService.getGiftsByCustomer(customer.id, Number(page), Number(limit));
   }
 }

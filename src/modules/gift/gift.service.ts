@@ -15,6 +15,10 @@ import { TransactionService } from '../transaction/transaction.service';
 import { TransactionType } from 'src/common/enums/transaction_type';
 import { I18nService } from 'nestjs-i18n';
 import { Language } from 'src/common/enums/language';
+import { Op } from 'sequelize';
+import { Customer } from '../customer/entities/customer.entity';
+import { Avatar } from '../avatar/entities/avatar.entity';
+import { GiftTemplate } from '../gift_template/entities/gift_template.entity';
 
 @Injectable()
 export class GiftService {
@@ -153,5 +157,53 @@ export class GiftService {
     }
 
     return totalAmount;
+  }
+
+  async getGiftsByCustomer(customerId: number, page = 1, limit = 10){
+    const offset = (page - 1) * limit;
+
+    const { rows, count } = await this.giftRepo.findAndCountAll({
+      where: {
+        [Op.or]: [{ senderId: customerId }, { receiverId: customerId }],
+      },
+      include: [
+        { model: Customer, as: 'sender', include: [Avatar] },
+        { model: Customer, as: 'receiver', include: [Avatar] },
+        { model: GiftTemplate },
+      ],
+      order: [['createdAt', 'DESC']],
+      limit,
+      offset,
+      distinct: true,
+    });
+
+    const data = rows.map((gift) => {
+      const plainGift = gift.toJSON();
+
+      const isSender = plainGift.senderId === customerId;
+      const otherParty = isSender ? plainGift.receiver : plainGift.sender;
+
+      const giftDto = {
+        id: plainGift.id,
+        amount: plainGift.amount,
+        giftTemplate: plainGift.giftTemplate,
+        otherParty: otherParty
+          ? { name: otherParty.name, phone: otherParty.phone }
+          : {
+              name: isSender ? plainGift.receiverName : plainGift.senderName,
+              phone: isSender ? plainGift.receiverPhone : plainGift.senderPhone,
+            },
+        createdAt: plainGift.createdAt,
+        direction: isSender ? 'SENT' : 'RECEIVED', // هاد الحقل يوضح إذا أرسل أو استلم
+      };
+
+      return giftDto;
+    });
+
+    return {
+      data,
+      totalItems: count,
+      totalPages: Math.ceil(count / limit),
+    };
   }
 }
