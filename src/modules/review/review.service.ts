@@ -38,6 +38,7 @@ export class ReviewService {
     // 1. Create review
     await this.reviewRepo.create({
       customerId,
+      orderId:order.id,
       storeId: order.storeId,
       comment: dto.comment,
       rating: dto.rating,
