@@ -23,6 +23,7 @@ import { REFRESH_TOKEN_EXPIRES_MS } from 'src/common/constants';
 import { Sequelize } from 'sequelize';
 import { InitialCreateStoreDto } from '../dto/initial-create-store.dto';
 import { validateRequiredLanguages } from 'src/common/utils/validateLanguages';
+import { UpdatePasswordDto } from '../dto/update-password.dto';
 
 @Injectable()
 export class StoreAuthService {
@@ -265,5 +266,18 @@ export class StoreAuthService {
         });
         }
         return { accessToken ,refreshToken,store};
+    }
+
+    async updatePassword(store:Store,dto:UpdatePasswordDto)
+    {
+        const {oldPassword,newPassword} = dto
+        const isMatch = await comparePassword(oldPassword, store.password);
+        if (!isMatch) {
+            throw new BadRequestException('Old password is incorrect');
+        }
+        const hashedPassword = await hashPassword(newPassword);
+        store.password = hashedPassword;
+        await store.save();
+        return { message: 'Password updated successfully' };
     }
 }

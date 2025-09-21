@@ -30,6 +30,7 @@ import { CurrentStoreDTO } from './dto/current-store.dto';
 import { InitialCreateStoreDto } from './dto/initial-create-store.dto';
 import { OwnerStoresResponseDto } from './dto/owner-store-response.dto';
 import { IncompleteStoreResponseDto } from './dto/in-completed-store-response.dto';
+import { UpdatePasswordDto } from './dto/update-password.dto';
 
 @Controller('store')
 export class StoreController {
@@ -450,5 +451,22 @@ export class StoreController {
     @Param('id') storeId: number,
   ) {
     return this.storeService.getStoreServiceOptions(storeId);
+  }
+
+  @Put('update-password')
+  @UseGuards(StoreOrOwnerGuard)
+  @ApiOperation({ summary: 'Update store password (Store or Owner only)' })
+  @ApiSecurity('access-token')
+  @ApiBody({ type: UpdatePasswordDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Password updated successfully',
+    schema: { example: { message: 'Password updated successfully' } },
+  })
+  async updatePassword(
+    @CurrentUser() store: Store,
+    @Body() dto: UpdatePasswordDto,
+  ) {
+    return this.storeAuthService.updatePassword(store, dto);
   }
 }
