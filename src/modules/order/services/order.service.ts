@@ -18,7 +18,6 @@ import {MIN_POINTS_TO_USE} from 'src/common/constants';
 import { Customer } from '../../customer/entities/customer.entity';
 import { round2 } from 'src/common/utils/round2';
 import { literal, QueryTypes, Sequelize } from 'sequelize';
-import { Coupon } from '../../coupon/entities/coupon.entity';
 import { StoreStatus } from 'src/common/enums/store_status';
 import { Op } from 'sequelize';
 import { filterStatusByStore } from 'src/common/types/filter-status';
@@ -38,6 +37,7 @@ import { StoreLanguage } from 'src/modules/store/entities/store_language.entity'
 import { CarBrand } from 'src/modules/car_brand/entities/car_brand.entity';
 import { CarBrandLanguage } from 'src/modules/car_brand/entities/car_brand.languae.entity';
 import { OfferType } from 'src/common/enums/offer_type';
+import { getDateRange } from 'src/common/utils/getDateRange';
 
 @Injectable()
 export class OrderService {
@@ -506,40 +506,35 @@ export class OrderService {
     return +maxOrderNumber + 1;
   }
 
-  async getStoreOrderStats(storeId: number) 
+  async getStoreOrderStats(storeId: number, filter?: string, specificDate?: string) 
   {
+    const { start, end } = getDateRange(filter || 'all', specificDate);
     const result = await Order.findOne({
       attributes: [
         [literal(`
           SUM(
-            CASE
-              WHEN status = 'received' THEN 1
-              ELSE 0
-            END
+            CASE WHEN status = 'received' THEN 1 ELSE 0 END
           )
         `), 'completedCount'],
 
         [literal(`
           SUM(
-            CASE
-              WHEN status IN ('rejected','cancelled','expired_confirmation') THEN 1
-              ELSE 0
-            END
+            CASE WHEN status IN ('rejected','cancelled','expired_confirmation') THEN 1 ELSE 0 END
           )
         `), 'cancelledCount'],
 
         [literal(`
           SUM(
-            CASE
-              WHEN status IN ('preparing','half_preparation') THEN 1
-              ELSE 0
-            END
+            CASE WHEN status IN ('preparing','half_preparation') THEN 1 ELSE 0 END
           )
         `), 'preparingCount'],
       ],
-      where: { storeId },
+      where: {
+        storeId,
+        createdAt: { [Op.between]: [start, end] }, // <-- إضافة شرط التاريخ
+      },
       raw: true,
-    })as unknown as {
+    }) as unknown as {
       completedCount: string | number;
       cancelledCount: string | number;
       preparingCount: string | number;
@@ -562,40 +557,51 @@ export class OrderService {
     return order
   }
 
-  async getOrderAvgAnalyticsByStore(storeId: number) 
-  {
-  // 1. Average preparation time
-    const avgPrepResult = await this.orderRepo.findOne({
-      attributes: [
-        [this.sequelize.fn('AVG', this.sequelize.col('estimatedTime')), 'averagePrepTime'],
-      ],
-      where: { storeId },
-      raw: true,
-    }) as unknown as { averagePrepTime: string };
+  async getOrderAvgAnalyticsByStore(
+  storeId: number,
+  filter?: string,
+  specificDate?: string,
+) {
+  // 1. احصل على نطاق التاريخ من الدالة getDateRange
+  const { start, end } = getDateRange(filter ?? 'all', specificDate);
 
-    const averagePrepTime = Number(avgPrepResult?.averagePrepTime ?? 0);
+  // 2. متوسط وقت التحضير
+  const avgPrepResult = await this.orderRepo.findOne({
+    attributes: [
+      [this.sequelize.fn('AVG', this.sequelize.col('estimatedTime')), 'averagePrepTime'],
+    ],
+    where: {
+      storeId,
+      createdAt: { [Op.between]: [start, end] },
+    },
+    raw: true,
+  }) as unknown as { averagePrepTime: string };
 
-    // 2. Customer repeat rate (MySQL-compatible)
-    const repeatResult: any = await this.sequelize.query(
-      `
-      SELECT 
-        COUNT(DISTINCT CASE WHEN order_count > 1 THEN customerId END) * 1.0 
-        / NULLIF(COUNT(DISTINCT customerId), 0) AS repeat_rate
-      FROM (
-        SELECT customerId, COUNT(*) AS order_count
-        FROM orders
-        WHERE customerId IS NOT NULL AND storeId = :storeId
-        GROUP BY customerId
-      ) sub
-      `,
-      {
-        type: QueryTypes.SELECT,
-        replacements: { storeId },
-      },
-    );
+  const averagePrepTime = Number(avgPrepResult?.averagePrepTime ?? 0);
 
-    const customerRepeatRate = Number(repeatResult[0]?.repeat_rate ?? 0) * 100;
+  // 3. نسبة العملاء العائدين
+  const repeatResult: any = await this.sequelize.query(
+    `
+    SELECT 
+      COUNT(DISTINCT CASE WHEN order_count > 1 THEN customerId END) * 1.0 
+      / NULLIF(COUNT(DISTINCT customerId), 0) AS repeat_rate
+    FROM (
+      SELECT customerId, COUNT(*) AS order_count
+      FROM orders
+      WHERE customerId IS NOT NULL 
+        AND storeId = :storeId
+        AND createdAt BETWEEN :start AND :end
+      GROUP BY customerId
+    ) sub
+    `,
+    {
+      type: QueryTypes.SELECT,
+      replacements: { storeId, start, end }, // 👈 تمرير القيم ضروري
+    }
+  );
 
-    return { averagePrepTime, customerRepeatRate };
+  const customerRepeatRate = Number(repeatResult[0]?.repeat_rate ?? 0) * 100;
+
+  return { averagePrepTime, customerRepeatRate };
   }
 }

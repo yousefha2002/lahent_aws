@@ -25,6 +25,7 @@ import { getLang } from 'src/common/utils/get-lang.util';
 import { AcceptOrderDto } from './dto/accept-order.dto';
 import { StoreOrderStatsResponseDto } from './dto/order-stats-response.dto';
 import { OrderAnalyticsResponseDto } from './dto/orde-analytics.dto';
+import { StoreFinancialsFilterDto } from '../store/dto/store-financials-filter.dto';
 
 @Controller('order')
 export class OrderController {
@@ -70,8 +71,12 @@ export class OrderController {
     description: 'Store analytics',
     type: OrderAnalyticsResponseDto,
   })
-  async getOrderAvgAnalyticsByStore(@CurrentUser() store: Store) {
-    return this.orderService.getOrderAvgAnalyticsByStore(store.id);
+  async getOrderAvgAnalyticsByStore(
+    @CurrentUser() store: Store,
+    @Query() query: StoreFinancialsFilterDto
+  ) {
+    const { filter, specificDate } = query;
+    return this.orderService.getOrderAvgAnalyticsByStore(store.id, filter, specificDate);
   }
 
   @Serilaize(OrderActionResponseDto)
@@ -222,8 +227,9 @@ export class OrderController {
     description: 'Order statistics grouped by status',
     type:StoreOrderStatsResponseDto
   })
-  async getStoreOrderStats(@CurrentUser() store: Store) {
-    return this.orderService.getStoreOrderStats(store.id);
+  async getStoreOrderStats(@CurrentUser() store: Store, @Query() query: StoreFinancialsFilterDto) {
+    const { filter, specificDate } = query;
+    return this.orderService.getStoreOrderStats(store.id,filter,specificDate);
   }
 
   @Serilaize(OrderDto)
