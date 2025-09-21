@@ -17,7 +17,7 @@ import { PaymentMethod } from 'src/common/enums/payment_method';
 import {MIN_POINTS_TO_USE} from 'src/common/constants';
 import { Customer } from '../../customer/entities/customer.entity';
 import { round2 } from 'src/common/utils/round2';
-import { literal, Sequelize } from 'sequelize';
+import { literal, QueryTypes, Sequelize } from 'sequelize';
 import { Coupon } from '../../coupon/entities/coupon.entity';
 import { StoreStatus } from 'src/common/enums/store_status';
 import { Op } from 'sequelize';
@@ -560,5 +560,42 @@ export class OrderService {
       throw new NotFoundException('order is not found')
     }
     return order
+  }
+
+  async getOrderAvgAnalyticsByStore(storeId: number) 
+  {
+  // 1. Average preparation time
+    const avgPrepResult = await this.orderRepo.findOne({
+      attributes: [
+        [this.sequelize.fn('AVG', this.sequelize.col('estimatedTime')), 'averagePrepTime'],
+      ],
+      where: { storeId },
+      raw: true,
+    }) as unknown as { averagePrepTime: string };
+
+    const averagePrepTime = Number(avgPrepResult?.averagePrepTime ?? 0);
+
+    // 2. Customer repeat rate (MySQL-compatible)
+    const repeatResult: any = await this.sequelize.query(
+      `
+      SELECT 
+        COUNT(DISTINCT CASE WHEN order_count > 1 THEN customerId END) * 1.0 
+        / NULLIF(COUNT(DISTINCT customerId), 0) AS repeat_rate
+      FROM (
+        SELECT customerId, COUNT(*) AS order_count
+        FROM orders
+        WHERE customerId IS NOT NULL AND storeId = :storeId
+        GROUP BY customerId
+      ) sub
+      `,
+      {
+        type: QueryTypes.SELECT,
+        replacements: { storeId },
+      },
+    );
+
+    const customerRepeatRate = Number(repeatResult[0]?.repeat_rate ?? 0) * 100;
+
+    return { averagePrepTime, customerRepeatRate };
   }
 }

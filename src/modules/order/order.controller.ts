@@ -24,6 +24,7 @@ import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
 import { AcceptOrderDto } from './dto/accept-order.dto';
 import { StoreOrderStatsResponseDto } from './dto/order-stats-response.dto';
+import { OrderAnalyticsResponseDto } from './dto/orde-analytics.dto';
 
 @Controller('order')
 export class OrderController {
@@ -57,6 +58,20 @@ export class OrderController {
   {
     const lang = getLang(i18n);
     return this.orderPaymentService.payOrder(orderId,user,lang)
+  }
+
+  @Serilaize(OrderAnalyticsResponseDto)
+  @UseGuards(StoreOrOwnerGuard, ApprovedStoreGuard)
+  @Get('analytics/byStore')
+  @ApiOperation({ summary: 'Get analytics (avg prep time + repeat rate) for a store' })
+  @ApiSecurity('access-token')
+  @ApiResponse({
+    status: 200,
+    description: 'Store analytics',
+    type: OrderAnalyticsResponseDto,
+  })
+  async getOrderAvgAnalyticsByStore(@CurrentUser() store: Store) {
+    return this.orderService.getOrderAvgAnalyticsByStore(store.id);
   }
 
   @Serilaize(OrderActionResponseDto)
