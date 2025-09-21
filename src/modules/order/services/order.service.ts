@@ -525,25 +525,25 @@ export class OrderService {
 
         [literal(`
           SUM(
-            CASE WHEN status IN ('preparing','half_preparation') THEN 1 ELSE 0 END
+            CASE WHEN status = 'scheduled' THEN 1 ELSE 0 END
           )
-        `), 'preparingCount'],
+        `), 'scheduledCount'],
       ],
       where: {
         storeId,
-        createdAt: { [Op.between]: [start, end] }, // <-- إضافة شرط التاريخ
+        createdAt: { [Op.between]: [start, end] }
       },
       raw: true,
     }) as unknown as {
       completedCount: string | number;
       cancelledCount: string | number;
-      preparingCount: string | number;
+      scheduledCount: string | number;
     };
 
     return {
       completedCount: Number(result?.completedCount) || 0,
       cancelledCount: Number(result?.cancelledCount) || 0,
-      preparingCount: Number(result?.preparingCount) || 0,
+      scheduledCount: Number(result?.scheduledCount) || 0,
     };
   }
 

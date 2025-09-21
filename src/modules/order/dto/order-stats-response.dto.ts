@@ -11,6 +11,6 @@ export class StoreOrderStatsResponseDto {
     cancelledCount: number;
 
     @Expose()
-    @ApiProperty({ description: 'Number of orders currently in preparation', example: 5 })
-    preparingCount: number;
+    @ApiProperty({ description: 'Number of scheduled orders', example: 5 })
+    scheduledCount: number;
 }

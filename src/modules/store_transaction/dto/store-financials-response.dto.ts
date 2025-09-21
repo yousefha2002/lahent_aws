@@ -13,4 +13,8 @@ export class StoreFinancialsResponseDto {
     @Expose()
     @ApiProperty({ description: 'Total amount of refunded transactions', example: 100.25 })
     totalRefunded: number;
+
+    @Expose()
+    @ApiProperty({ description: 'Total earnings from completed transactions', example: 1800.0 })
+    totalEarning: number;  //
 }
