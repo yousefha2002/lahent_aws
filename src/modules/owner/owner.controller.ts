@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { OwnerService } from './owner.service';
 import { UpdateOwnerDto } from './dto/updateOwner.dto';
 import { OwnerGuard } from 'src/common/guards/owner.guard';
@@ -57,8 +57,9 @@ export class OwnerController {
     },
   })
   @Post('refresh-token')
-  async refreshToken(@Body('refreshToken') refreshToken: string) {
-    return this.ownerService.refreshToken(refreshToken);
+  async refreshToken(@Body('refreshToken') refreshToken: string,@Req() req: Request) {
+    const device = req.headers['user-agent'] || 'unknown';
+    return this.ownerService.refreshToken(refreshToken,device);
   }
 
   @ApiOperation({ summary: 'Get current owner profile' })

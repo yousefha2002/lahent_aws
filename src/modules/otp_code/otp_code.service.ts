@@ -71,7 +71,6 @@ export class OtpCodeService {
       device?: string,
       ip?: string,
     ) {
-      // 🚀 DEMO ACCOUNTS
       if (
         ((type === 'owner' && phone === DEMO_OWNER_PHONE) ||
           (type === 'customer' && phone === DEMO_CUSTOMER_PHONE)) &&
@@ -158,5 +157,5 @@ export class OtpCodeService {
         });
 
         return { status, customer, phone, accessToken, refreshToken };
-      }}
+  }}
 }

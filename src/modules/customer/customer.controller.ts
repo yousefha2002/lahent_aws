@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Put, UploadedFile, UseFilters, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Post, Put, Req, UploadedFile, UseFilters, UseGuards, UseInterceptors } from '@nestjs/common';
 import { CustomerService } from './customer.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { multerOptions } from 'src/multer/multer.options';
@@ -71,10 +71,11 @@ export class CustomerController {
   @ApiResponse({
     status: 200,
     description: 'New access token returned successfully',
-    schema: { example: { accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' } },
+    schema: { example: { accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',refreshToken:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." } },
   })
   @Post('refresh-token')
-  async refreshToken(@Body('refreshToken') refreshToken: string) {
-    return this.customerService.refreshToken(refreshToken);
+  async refreshToken(@Body('refreshToken') refreshToken: string,@Req() req: Request) {
+    const device = req.headers['user-agent'] || 'unknown';
+    return this.customerService.refreshToken(refreshToken,device);
   }
 }

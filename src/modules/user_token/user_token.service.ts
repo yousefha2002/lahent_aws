@@ -22,9 +22,10 @@ export class UserTokenService {
         });
     }
 
-    async findToken(refreshToken: string) {
+    async findToken(refreshToken: string,device:string) {
         return this.userTokenRepo.findOne({ where: { 
             refreshToken,
+            device,
             expiresAt: {[Op.gt]: new Date()}}});
     }
 

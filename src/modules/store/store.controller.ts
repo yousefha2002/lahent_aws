@@ -426,8 +426,9 @@ export class StoreController {
       },
     },
   })
-  async refreshToken(@Body('refreshToken') refreshToken: string) {
-    return this.storeAuthService.refreshToken(refreshToken)
+  async refreshToken(@Body('refreshToken') refreshToken: string,@Req() req: Request) {
+    const device = req.headers['user-agent'] || 'unknown';
+    return this.storeAuthService.refreshToken(refreshToken,device)
   }
 
   @Post(':storeId/select/byOwner')

@@ -6,10 +6,9 @@ import {
     AllowNull,
     PrimaryKey,
     AutoIncrement,
-    Default,
-    ForeignKey,
     CreatedAt,
     UpdatedAt,
+    Default,
 } from 'sequelize-typescript';
 import { RoleStatus } from 'src/common/enums/role_status';
 
@@ -42,6 +41,10 @@ export class UserToken extends Model {
 
     @Column(DataType.STRING)
     ip?: string; // IP الجهاز
+
+    @Default(false)
+    @Column(DataType.BOOLEAN)
+    isRevoked: boolean;
 
     @AllowNull(false)
     @Column(DataType.DATE)

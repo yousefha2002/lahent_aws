@@ -211,11 +211,11 @@ export class StoreAuthService {
         };
     }
 
-    async refreshToken(refreshToken:string)
+    async refreshToken(refreshToken:string,device:string)
     {
         try {
             const decoded = await this.jwtService.verifyAsync(refreshToken, {secret: 'refresh_token',});
-            const tokenRecord = await this.userTokenService.findToken(refreshToken);
+            const tokenRecord = await this.userTokenService.findToken(refreshToken,device);
             if (!tokenRecord) {
                 throw new BadRequestException('Invalid or expired refresh token');
             }
