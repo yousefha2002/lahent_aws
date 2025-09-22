@@ -107,15 +107,15 @@ export class OrderPaymentService {
 
             if (order.paymentMethod === PaymentMethod.GATEWAY) {
                 await transaction.rollback();
-                const { checkoutUrl } = await this.paymentSessionService.startPayment({
-                    customer,
-                    amount: amountLeftToPay,
-                    provider: order.paymentGateway,
-                    purpose: GatewaySource.order,
-                    sourceId: order.id,
-                });
+                // const { redirectUrl } = await this.paymentSessionService.startPayment({
+                //     customer,
+                //     amount: amountLeftToPay,
+                //     provider: order.paymentGateway,
+                //     purpose: GatewaySource.order,
+                //     sourceId: order.id,
+                // });
 
-                return { checkoutUrl };
+                // return { redirectUrl };
             }
         } catch (error) {
             await transaction.rollback();

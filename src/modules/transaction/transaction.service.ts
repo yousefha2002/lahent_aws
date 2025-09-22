@@ -1,3 +1,4 @@
+import { PaymentCardService } from './../payment_card/payment_card.service';
 import { CustomerService } from './../customer/customer.service';
 import { PaymentSessionService } from './../payment_session/payment_session.service';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
@@ -29,14 +30,30 @@ export class TransactionService {
 
     @Inject(forwardRef(() => CustomerService))
     private customerService: CustomerService,
+
+    private readonly paymentCardService:PaymentCardService
   ) {}
 
   async chargeWallet(loyaltyOfferId: number,customer: Customer,dto: ChargeWalletDTO,) 
   {
-    const { gateway } = dto;
+    const { gateway,paymentCardId ,cvc} = dto;
     const offer = await this.loyaltyOfferService.findByIdIfActive(loyaltyOfferId);
-    const { checkoutUrl} =await this.paymentSessionService.startPayment({customer,amount: offer.amountRequired,provider: gateway,purpose: GatewaySource.wallet,sourceId: loyaltyOfferId});
-    return { checkoutUrl};
+    const card = await this.paymentCardService.getOne(paymentCardId, customer.id)
+    const { redirectUrl } =await this.paymentSessionService.startPayment({
+      customer,
+      amount: offer.amountRequired,
+      provider: gateway,
+      purpose: GatewaySource.wallet,
+      card: {
+        cardNumber: card.cardNumber,
+        cardHolderName: card.cardHolderName,
+        expiryMonth: card.expiryDate.getUTCMonth() + 1,
+        expiryYear: card.expiryDate.getUTCFullYear(),
+        cvc
+      },
+      sourceId: loyaltyOfferId,
+    });
+    return { redirectUrl };
   }
 
   async confirmChargeWallet(session: PaymentSession) {

@@ -11,7 +11,7 @@ export class PaymentSessionService {
         @Inject(repositories.payment_session_repository) private paymentSessionRepo: typeof PaymentSession,
     ){}
 
-    async startPayment({ customer, amount, provider, purpose,sourceId}: { customer: Customer; amount: number; provider: string; purpose: GatewaySource;sourceId?:number }) 
+    async startPayment({ customer, amount, provider, purpose,card,sourceId}: { customer: Customer; amount: number; provider: string; purpose: GatewaySource;card: { cardNumber: string; expiryMonth: number; expiryYear: number; cardHolderName: string; cvc: string };sourceId?:number }) 
     {
     // 1. إنشاء جلسة في DB
         const session = await this.paymentSessionRepo.create({
@@ -29,14 +29,14 @@ export class PaymentSessionService {
 
         // 3. إنشاء الدفع مع البوابة
         const gateway = PaymentGatewayFactory.getProvider(provider);
-        const { checkoutUrl,paymentOrderId ,description,currency,hash} = await gateway.createPayment(amount, 'SAR', callbackUrl,customer);
+        const { redirectUrl,paymentOrderId ,description,currency,hash} = await gateway.createPayment(amount, 'SAR', callbackUrl,customer,card);
         session.paymentOrderId = paymentOrderId;
         session.description = description
         session.hash = hash
         session.currency = currency
         
         await session.save()
-        return { checkoutUrl};
+        return { redirectUrl};
     }
 
     async getByPaymentOrderId(paymentOrderId: string) {

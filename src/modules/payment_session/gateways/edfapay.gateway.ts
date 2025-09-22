@@ -1,6 +1,6 @@
 import { PaymentGateway } from "../interfaces/payment_session.interface";
 import axios from "axios";
-import { generateHash } from "src/common/utils/generateHash";
+import { generateCardHash } from "src/common/utils/generateHash";
 import { Customer } from "src/modules/customer/entities/customer.entity";
 import * as NodeFormData from 'form-data';
 import { v4 as uuidv4 } from 'uuid';
@@ -21,20 +21,22 @@ export class EdFapayGateway implements PaymentGateway {
         this.statusUrl = process.env.EDFA_STATUS_URL;
     }
     
-    async createPayment(amount: number, currency: string, callbackUrl: string,customer:Customer,description?:string) 
+    async createPayment(
+        amount: number, currency: string, callbackUrl: string,customer:Customer,
+        card: { cardNumber: string, expiryMonth: number, expiryYear: number, cardHolderName: string, cvc: string },
+        description?:string) 
     {
         const paymentOrderId = uuidv4();
         description = description || `Payment for order ${paymentOrderId}`;
 
         const formData = new NodeFormData()
-        const hash = generateHash(paymentOrderId,amount.toString(),currency,description,this.secretKey);
+        const hash = generateCardHash(customer.email,this.secretKey,card.cardNumber);
         formData.append('action', 'SALE');
-        formData.append('edfa_merchant_id', this.merchantId);
+        formData.append('client_key', this.merchantId);
         formData.append('order_id', paymentOrderId);
         formData.append('order_amount', amount.toString());
         formData.append('order_currency', currency);
         formData.append('order_description', description);
-        formData.append('req_token', 'N');
         formData.append('payer_first_name', customer.name);
         formData.append('payer_last_name', customer.name);
         formData.append('payer_address', 'N/A');
@@ -45,15 +47,17 @@ export class EdFapayGateway implements PaymentGateway {
         formData.append('payer_phone', customer.phone);
         formData.append('payer_ip', '176.44.76.222');
         formData.append('term_url_3ds', callbackUrl);
-        formData.append('auth', 'N');
-        formData.append('recurring_init', 'N');
         formData.append('hash', hash);
+        formData.append('card_number', card.cardNumber);
+        formData.append('card_exp_month', card.expiryMonth.toString().padStart(2, '0'));
+        formData.append('card_exp_year', card.expiryYear.toString());
+        formData.append('card_cvv2', card.cvc);
         
         const response = await axios.post(this.apiUrl, formData, {
             headers: formData.getHeaders()
         });
 
-        const checkoutUrl = response.data.redirect_url;
+        const checkoutUrl = response.data.redirect_params.body;
 
         return { checkoutUrl,paymentOrderId,description,currency,hash};
     }

@@ -7,7 +7,7 @@ import { UpdatePaymentCardDto } from './dto/update-payment-card.dto';
 @Injectable()
 export class PaymentCardService {
     constructor(
-            @Inject(repositories.payment_card_repository) private paymentCardRepo: typeof PaymentCard
+        @Inject(repositories.payment_card_repository) private paymentCardRepo: typeof PaymentCard
     ){}
 
     async create(dto: CreatePaymentCardDto,customerId: number) {

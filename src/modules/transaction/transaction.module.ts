@@ -6,6 +6,7 @@ import { TransactionProvider } from './proivders/transaction.provider';
 import { LoyaltyOfferModule } from '../loyalty_offer/loyalty_offer.module';
 import { CustomerModule } from '../customer/customer.module';
 import { GiftModule } from '../gift/gift.module';
+import { PaymentCardModule } from '../payment_card/payment_card.module';
 
 @Module({
   controllers: [TransactionController],
@@ -15,6 +16,7 @@ import { GiftModule } from '../gift/gift.module';
     forwardRef(() => CustomerModule),
     PaymentSessionModule,
     forwardRef(() => GiftModule),
+    PaymentCardModule
   ],
   exports: [TransactionService],
 })
