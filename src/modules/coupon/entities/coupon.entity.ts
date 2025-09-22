@@ -6,11 +6,8 @@ import {
   PrimaryKey,
   AutoIncrement,
   Default,
-  HasMany,
-  BelongsTo,
-  ForeignKey,
+  AllowNull,
 } from 'sequelize-typescript';
-import { Store } from 'src/modules/store/entities/store.entity';
 
 @Table({ tableName: 'coupons' })
 export class Coupon extends Model {
@@ -39,6 +36,11 @@ export class Coupon extends Model {
   @Column(DataType.INTEGER)
   usedCount: number;
 
+  @AllowNull(true)
+  @Column(DataType.DATE)
+  startDate: Date;
+
+  @AllowNull(true)
   @Column(DataType.DATE)
   expiryDate: Date;
 

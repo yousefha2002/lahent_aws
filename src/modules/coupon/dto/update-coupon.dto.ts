@@ -21,11 +21,17 @@ export class UpdateCouponDto {
   @Min(1)
   maxUsage?: number;
 
+  @ApiPropertyOptional({ example: '2025-09-01T00:00:00.000Z', description: 'Coupon start date' })
+  @IsOptional()
+  @Type(() => Date)
+  @IsDate()
+  startDate?: Date | null;
+
   @ApiPropertyOptional({ example: '2025-09-30T00:00:00.000Z', description: 'Expiry date of the coupon' })
   @IsOptional()
   @Type(() => Date)
   @IsDate()
-  expiryDate?: Date;
+  expiryDate?: Date | null;
 
   @ApiPropertyOptional({ example: true, description: 'Whether the coupon is active' })
   @IsOptional()

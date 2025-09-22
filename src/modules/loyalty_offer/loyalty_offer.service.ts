@@ -14,24 +14,29 @@ export class LoyaltyOfferService {
         private readonly i18n: I18nService
     ){}
 
-    async create(dto: CreateLoyaltyOfferDto, lang = Language.en) {
+    async create(dto: CreateLoyaltyOfferDto, lang = Language.ar) 
+    {
         const now = new Date();
+        const startDate = dto.startDate ?? now;
+        const endDate = dto.endDate ?? null;
 
-        if (dto.startDate <= now) {
-            const msg = this.i18n.translate('translation.loyalty_offer.start_date_future', { lang });
-            throw new BadRequestException(msg);
+        if (startDate < now) {
+            throw new BadRequestException('Start date cannot be in the past');
+        }
+        if (endDate && endDate < now) {
+            throw new BadRequestException('End date cannot be in the past');
+        }
+        if (endDate && startDate >= endDate) {
+            throw new BadRequestException('End date cannot be before start date');
         }
 
-        if (dto.endDate <= now) {
-            const msg = this.i18n.translate('translation.loyalty_offer.end_date_past', { lang });
-            throw new BadRequestException(msg);
-        }
-        if (dto.startDate >= dto.endDate) {
-            const msg = this.i18n.translate('translation.loyalty_offer.invalid_dates', { lang });
-            throw new BadRequestException(msg);
-        }
-        const offer = await this.loyaltyOfferModel.create({ ...dto });
-        return offer
+        const offer = await this.loyaltyOfferModel.create({
+            ...dto,
+            startDate,
+            endDate,
+        });
+
+        return offer;
     }
 
     async findAllForAdmin() {
@@ -47,7 +52,8 @@ export class LoyaltyOfferService {
         });
     }
 
-    async update(id: number, dto: UpdateLoyaltyOfferDto, lang = Language.en) {
+    async update(id: number, dto: UpdateLoyaltyOfferDto, lang = Language.ar) 
+    {
         const offer = await this.loyaltyOfferModel.findByPk(id);
         if (!offer) {
             const msg = this.i18n.translate('translation.loyalty_offer.not_found', { lang });
@@ -56,24 +62,32 @@ export class LoyaltyOfferService {
 
         const now = new Date();
 
-        if (dto.startDate && dto.startDate <= now) {
-            const msg = this.i18n.translate('translation.loyalty_offer.start_date_future', { lang });
-            throw new BadRequestException(msg);
+        let startDate = offer.startDate;
+        if ('startDate' in dto) {
+            startDate = dto.startDate ?? new Date();
+            if (startDate < now) {
+            throw new BadRequestException(
+                this.i18n.translate('translation.loyalty_offer.start_date_future', { lang }),
+            );
+            }
         }
 
-        if (dto.endDate && dto.endDate <= now) {
-            const msg = this.i18n.translate('translation.loyalty_offer.end_date_past', { lang });
-            throw new BadRequestException(msg);
+        let endDate = offer.endDate; 
+        if ('endDate' in dto) {
+            endDate = dto.endDate ?? null; 
+            if (endDate && endDate < now) {
+            throw new BadRequestException(
+                this.i18n.translate('translation.loyalty_offer.end_date_past', { lang }),
+            );
+            }
         }
-
-        if (dto.startDate && dto.endDate && dto.startDate >= dto.endDate) {
-            const msg = this.i18n.translate('translation.loyalty_offer.invalid_dates', { lang });
-            throw new BadRequestException(msg);
+        if (endDate && startDate >= endDate) {
+            throw new BadRequestException(
+            this.i18n.translate('translation.loyalty_offer.invalid_dates', { lang }),
+            );
         }
-
-
-        await offer.update(dto);
-        return offer
+        await offer.update({ ...dto, startDate, endDate });
+        return offer;
     }
 
     async toggleStatus(id: number, lang = Language.en) {
@@ -108,12 +122,16 @@ export class LoyaltyOfferService {
         return offer;
     }
 
-    private getActiveOfferCondition() {
+    private getActiveOfferCondition() 
+    {
         const now = new Date();
         return {
             isActive: true,
             startDate: { [Op.lte]: now },
-            endDate: { [Op.gte]: now },
+            [Op.or]: [
+                { endDate: null },         
+                { endDate: { [Op.gte]: now } }, 
+            ],
         };
     }
 }

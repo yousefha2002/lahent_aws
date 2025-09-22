@@ -30,11 +30,17 @@ export class CreateCouponDto {
     @Min(1)
     maxUsage: number;
 
-    @ApiProperty({ example: '2025-09-30T00:00:00.000Z', description: 'Coupon expiry date' })
-    @IsNotEmpty()
+    @ApiPropertyOptional({ example: '2025-09-01T00:00:00.000Z', description: 'Coupon start date' })
+    @IsOptional()
     @Type(() => Date)
     @IsDate()
-    expiryDate: Date;
+    startDate?: Date | null;
+
+    @ApiPropertyOptional({ example: '2025-09-30T00:00:00.000Z', description: 'Coupon expiry date' })
+    @IsOptional()
+    @Type(() => Date)
+    @IsDate()
+    expiryDate?: Date | null;
 
     @ApiPropertyOptional({ example: true, description: 'Whether the coupon is active' })
     @IsBoolean()

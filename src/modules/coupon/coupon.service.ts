@@ -18,22 +18,32 @@ export class CouponService {
     private readonly i18n: I18nService,
   ) {}
 
-  async createCoupon(dto: CreateCouponDto,lang = Language.en,) {
+  async createCoupon(dto: CreateCouponDto, lang:Language) 
+  {
     const existing = await this.couponRepo.findOne({ where: { code: dto.code } });
     if (existing) {
       const message = this.i18n.translate('translation.coupon.code_used', { lang });
       throw new BadRequestException(message);
     }
-    return this.couponRepo.create({ ...dto,});
+
+    const now = new Date();
+    const startDate = dto.startDate ?? now;
+    const expiryDate = dto.expiryDate ?? null;
+
+    return this.couponRepo.create({
+      ...dto,
+      startDate,
+      expiryDate,
+    });
   }
 
-  async updateCoupon(id: number, dto: UpdateCouponDto,lang: Language = Language.en ) {
+  async updateCoupon(id: number, dto: UpdateCouponDto, lang: Language) 
+  {
     const coupon = await this.couponRepo.findByPk(id);
     if (!coupon) {
       const message = this.i18n.translate('translation.coupon.not_found', { lang });
       throw new NotFoundException(message);
     }
-
 
     if (dto.code && dto.code !== coupon.code) {
       const exists = await this.couponRepo.findOne({ where: { code: dto.code } });
@@ -43,11 +53,18 @@ export class CouponService {
       }
     }
 
+    const now = new Date();
+
+    if (dto.startDate === undefined) dto.startDate = coupon.startDate ?? now;
+    if (dto.startDate === null) dto.startDate = now;
+
+    if (dto.expiryDate === undefined) dto.expiryDate = coupon.expiryDate ?? null;
+
     await coupon.update(dto);
     return coupon;
   }
 
-  async validateCoupon(code: string,lang: Language = Language.en ) {
+  async validateCoupon(code: string,lang: Language ) {
     const coupon = await this.couponRepo.findOne({ where: { code } });
     if (!coupon) {
       const message = this.i18n.translate('translation.coupon.not_found', { lang });
@@ -56,6 +73,12 @@ export class CouponService {
 
     if (!coupon.isActive) {
       const message = this.i18n.translate('translation.coupon.inactive', { lang });
+      throw new BadRequestException(message);
+    }
+
+    const now = new Date();
+    if (coupon.startDate && coupon.startDate > now) {
+      const message = this.i18n.translate('translation.coupon.not_started', { lang });
       throw new BadRequestException(message);
     }
 

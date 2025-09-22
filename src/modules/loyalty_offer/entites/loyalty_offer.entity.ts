@@ -28,9 +28,9 @@ export class LoyaltyOffer extends Model {
     @Column({type: DataType.DATE,defaultValue: DataType.NOW})
     startDate: Date;
 
-    @AllowNull(false)
-    @Column({type: DataType.DATE,defaultValue: DataType.NOW})
-    endDate: Date;
+    @AllowNull(true)
+    @Column({ type: DataType.DATE, defaultValue: null })
+    endDate: Date | null;
 
     @Default(true)
     @Column(DataType.BOOLEAN)
