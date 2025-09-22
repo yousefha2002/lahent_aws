@@ -19,6 +19,7 @@ import { Cart } from 'src/modules/cart/entities/cart.entity';
 import { Favorite } from 'src/modules/favirote/entities/favirote.entity';
 import { Gift } from 'src/modules/gift/entities/gift.entity';
 import { Order } from 'src/modules/order/entities/order.entity';
+import { PaymentCard } from 'src/modules/payment_card/entities/payment_card.entity';
 import { Review } from 'src/modules/review/entities/review.entity';
 import { Store } from 'src/modules/store/entities/store.entity';
 
@@ -92,4 +93,7 @@ export class Customer extends Model {
 
   @HasMany(() => Review)
   reviews: Review[];
+
+  @HasMany(() => PaymentCard)
+  cards: PaymentCard[];
 }

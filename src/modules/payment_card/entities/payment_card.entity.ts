@@ -1,4 +1,5 @@
-import {Table,Column,Model,DataType,PrimaryKey,AutoIncrement,Default,AllowNull} from 'sequelize-typescript';
+import {Table,Column,Model,DataType,PrimaryKey,AutoIncrement,Default,AllowNull, BelongsTo, ForeignKey} from 'sequelize-typescript';
+import { Customer } from 'src/modules/customer/entities/customer.entity';
 
 @Table({ tableName: 'payment_cards' })
 export class PaymentCard extends Model {
@@ -26,4 +27,12 @@ export class PaymentCard extends Model {
     @Default(false)
     @Column(DataType.BOOLEAN)
     isDefault: boolean;
+
+    @ForeignKey(() => Customer,)
+    @AllowNull(false)
+    @Column(DataType.INTEGER)
+    customerId: number;
+
+    @BelongsTo(() => Customer,{onDelete: 'CASCADE'})
+    customer: Customer;
 }
