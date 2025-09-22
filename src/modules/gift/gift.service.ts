@@ -36,7 +36,7 @@ export class GiftService {
   async createGift(
     senderId: number,
     dto: CreateGiftDto,
-    lang: Language = Language.en,
+    lang: Language = Language.ar,
   ) {
     const { receiverPhone, receiverName, giftTemplateId, amount } = dto;
 
