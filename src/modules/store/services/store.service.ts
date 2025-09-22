@@ -1,3 +1,4 @@
+import { StoreCommissionService } from './../../store_commission/store_commission.service';
 import { SectorService } from './../../sector/sector.service';
 import { FaviroteService } from './../../favirote/favirote.service';
 import { StoreUtilsService } from './storeUtils.service';
@@ -35,7 +36,8 @@ export class StoreService {
     private subTypeService: SubtypeService,
     @Inject(forwardRef(() => FaviroteService)) private faviroteService: FaviroteService,
     private sectorService:SectorService,
-    @Inject('SEQUELIZE') private readonly sequelize: Sequelize
+    @Inject('SEQUELIZE') private readonly sequelize: Sequelize,
+    private readonly storeCommissionService:StoreCommissionService
   ) {}
 
   async findAllStores(
@@ -201,6 +203,10 @@ export class StoreService {
     const store = await this.storeById(storeId);
     if (!store) {
       throw new BadRequestException(this.i18n.t('translation.store.not_found',{lang}));
+    }
+    if (status === StoreStatus.APPROVED)
+    {
+      await this.storeCommissionService.getCommission(storeId)
     }
     store.status = status;
     await store.save();

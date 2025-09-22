@@ -17,6 +17,7 @@ import { StoreLanguageProvider } from './providers/storeLangauge.provider';
 import { UserTokenModule } from '../user_token/user_token.module';
 import { SectorModule } from '../sector/sector.module';
 import { DatabaseModule } from 'src/database/database.module';
+import { StoreCommissionModule } from '../store_commission/store_commission.module';
 
 @Module({
   controllers: [StoreController],
@@ -32,7 +33,8 @@ import { DatabaseModule } from 'src/database/database.module';
     UserTokenModule,
     forwardRef(()=>FaviroteModule),
     SectorModule,
-    DatabaseModule
+    DatabaseModule,
+    StoreCommissionModule
   ],
   exports: [StoreService,StoreUtilsService],
 })
