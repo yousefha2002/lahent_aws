@@ -29,14 +29,14 @@ export class PaymentSessionService {
 
         // 3. إنشاء الدفع مع البوابة
         const gateway = PaymentGatewayFactory.getProvider(provider);
-        const { redirectUrl,paymentOrderId ,description,currency,hash} = await gateway.createPayment(amount, 'SAR', callbackUrl,customer,card);
+        const { redirect_params,paymentOrderId ,description,currency,hash} = await gateway.createPayment(amount, 'SAR', callbackUrl,customer,card);
         session.paymentOrderId = paymentOrderId;
         session.description = description
         session.hash = hash
         session.currency = currency
         
         await session.save()
-        return { redirectUrl};
+        return { redirect_params};
     }
 
     async getByPaymentOrderId(paymentOrderId: string) {

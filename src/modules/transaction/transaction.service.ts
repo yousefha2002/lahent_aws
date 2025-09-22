@@ -39,7 +39,7 @@ export class TransactionService {
     const { gateway,paymentCardId ,cvc} = dto;
     const offer = await this.loyaltyOfferService.findByIdIfActive(loyaltyOfferId);
     const card = await this.paymentCardService.getOne(paymentCardId, customer.id)
-    const { redirectUrl } =await this.paymentSessionService.startPayment({
+    const { redirect_params } =await this.paymentSessionService.startPayment({
       customer,
       amount: offer.amountRequired,
       provider: gateway,
@@ -53,7 +53,7 @@ export class TransactionService {
       },
       sourceId: loyaltyOfferId,
     });
-    return { redirectUrl };
+    return { redirect_params };
   }
 
   async confirmChargeWallet(session: PaymentSession) {

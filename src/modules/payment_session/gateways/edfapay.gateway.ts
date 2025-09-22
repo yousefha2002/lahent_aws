@@ -48,18 +48,18 @@ export class EdFapayGateway implements PaymentGateway {
         formData.append('payer_ip', '176.44.76.222');
         formData.append('term_url_3ds', callbackUrl);
         formData.append('hash', hash);
-        formData.append('card_number', card.cardNumber);
-        formData.append('card_exp_month', card.expiryMonth.toString().padStart(2, '0'));
-        formData.append('card_exp_year', card.expiryYear.toString());
-        formData.append('card_cvv2', card.cvc);
+        formData.append('card_number', "4111111111111111");
+        formData.append('card_exp_month', "01");
+        formData.append('card_exp_year', "2026");
+        formData.append('card_cvv2', "100");
         
         const response = await axios.post(this.apiUrl, formData, {
             headers: formData.getHeaders()
         });
 
-        const checkoutUrl = response.data.redirect_params.body;
+        const redirect_params = response.data.redirect_params.body;
 
-        return { checkoutUrl,paymentOrderId,description,currency,hash};
+        return { redirect_params,paymentOrderId,description,currency,hash};
     }
 
     async confirmPayment(orderId: string, gwayPaymentId: string,hash:string) {    
