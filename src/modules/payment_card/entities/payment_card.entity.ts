@@ -13,10 +13,6 @@ export class PaymentCard extends Model {
     cardNumber: string;
 
     @AllowNull(false)
-    @Column({ type: DataType.STRING(4) })
-    ccv: string;
-
-    @AllowNull(false)
     @Column(DataType.DATE)
     expiryDate: Date;
 

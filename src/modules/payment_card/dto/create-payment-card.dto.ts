@@ -8,11 +8,6 @@ export class CreatePaymentCardDto {
     @Length(14, 14)
     cardNumber: string;
 
-    @ApiProperty({ example: '1234', description: 'CCV code, 4 digits' })
-    @IsString()
-    @Length(4, 4)
-    ccv: string;
-
     @ApiProperty({ example: '2026-09-01T00:00:00.000Z', description: 'Expiry date' })
     @Type(() => Date)
     @IsDate()

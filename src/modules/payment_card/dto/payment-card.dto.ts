@@ -11,10 +11,6 @@ export class PaymentCardDto {
     cardNumber: string;
 
     @Expose()
-    @ApiProperty({ example: '123', description: 'CCV code' })
-    ccv: string;
-
-    @Expose()
     @ApiProperty({ example: '2025-12-31T00:00:00.000Z', description: 'Expiry date' })
     expiryDate: Date;
 
