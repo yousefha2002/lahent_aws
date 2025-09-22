@@ -34,6 +34,8 @@ async function bootstrap() {
     swaggerOptions: {
       docExpansion: 'none',
       persistAuthorization: true,
+      tagsSorter: 'alpha', 
+      operationsSorter: 'alpha',
     }
   });
   app.use(bodyParser.urlencoded({ extended: true }));
