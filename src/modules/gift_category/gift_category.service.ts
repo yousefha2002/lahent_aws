@@ -131,14 +131,23 @@ export class GiftCategoryService {
 
   // ---------- FIND ALL WITH TEMPLATES ----------
   async findAllWithTemplates(lang = Language.en) {
+    const now = new Date();
+
     return this.giftCategoryModel.findAll({
       include: [
         {
           model: GiftTemplate,
-          attributes: ['id', 'imageUrl'],
-          order: [['createdAt', 'DESC']],
-          limit: 3,
+          attributes: ['id', 'imageUrl', 'startDate', 'endDate'],
           separate: true,
+          limit: 3,
+          order: [['createdAt', 'DESC']],
+          where: {
+            startDate: { [Op.lte]: now },
+            [Op.or]: [
+              { endDate: null },
+              { endDate: { [Op.gte]: now } },
+            ],
+          },
         },
         {
           model: GiftCategoryLanguage,

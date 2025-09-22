@@ -1,16 +1,13 @@
 import { GiftCategoryService } from './../gift_category/gift_category.service';
 import { CloudinaryService } from './../../cloudinary/cloudinary.service';
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import {BadRequestException,Inject,Injectable,NotFoundException} from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
 import { GiftTemplate } from './entities/gift_template.entity';
 import { CreateGiftTemplateDto } from './dto/create-gift-template.dto';
 import { I18nService } from 'nestjs-i18n';
 import { Language } from 'src/common/enums/language';
+import { UpdateGiftTemplateDto } from './dto/update-gift-template.dto';
+import { Op } from 'sequelize';
 
 @Injectable()
 export class GiftTemplateService {
@@ -22,48 +19,70 @@ export class GiftTemplateService {
     private readonly i18n: I18nService,
   ) {}
 
-  async create(
-    body: CreateGiftTemplateDto,
-    file: Express.Multer.File,
-    lang = Language.en,
-  ) {
-    const { categoryId } = body;
+  async create(body: CreateGiftTemplateDto,file: Express.Multer.File,lang = Language.ar)
+  {
+    const { categoryId, startDate, endDate } = body;
+
     if (!file) {
       const msg = this.i18n.translate('translation.file_required', { lang });
       throw new BadRequestException(msg);
     }
 
-    const uploadResult = await this.cloudinaryService.uploadImage(file);
     await this.giftCategoryService.checkIfCategoryFound(+categoryId, lang);
+
+    // التحقق من startDate
+    let start: Date = startDate ? new Date(startDate) : new Date();
+    if (startDate) {
+      start = new Date(startDate);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (start < today) {
+        throw new BadRequestException('Start date cannot be in the past');
+      }
+    }
+
+    // التحقق من endDate
+    let end: Date | null = null;
+    if (endDate) {
+      end = new Date(endDate);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (end < today) {
+        throw new BadRequestException('End date cannot be in the past');
+      }
+      if (start && end < start) {
+        throw new BadRequestException('End date cannot be before start date');
+      }
+    }
+
+    const uploadResult = await this.cloudinaryService.uploadImage(file);
 
     const giftTemplate = await this.giftTemplateRepo.create({
       imageUrl: uploadResult.secure_url,
       imagePublicId: uploadResult.public_id,
-      categoryId,
+      categoryId: +categoryId,
+      startDate: start,
+      endDate: end,
     });
 
-    const msg = this.i18n.translate('translation.gift_template.created', {
-      lang,
-    });
+    const msg = this.i18n.translate('translation.gift_template.created', { lang });
     return { message: msg };
   }
 
-  async update(
-    body: CreateGiftTemplateDto,
-    templateId: number,
-    lang = Language.en,
-    file: Express.Multer.File,
-  ) {
+  async update(body: UpdateGiftTemplateDto,templateId: number,lang = Language.ar,file?: Express.Multer.File) 
+  {
     const giftTemplate = await this.giftTemplateRepo.findByPk(templateId);
     if (!giftTemplate) {
-      const msg = this.i18n.translate('translation.gift_template.not_found', {
-        lang,
-      });
+      const msg = this.i18n.translate('translation.gift_template.not_found', { lang });
       throw new BadRequestException(msg);
     }
 
-    const { categoryId } = body;
-    await this.giftCategoryService.checkIfCategoryFound(+categoryId, lang);
+    const { categoryId, startDate, endDate } = body;
+
+    if (categoryId !== undefined) {
+      await this.giftCategoryService.checkIfCategoryFound(+categoryId, lang);
+      giftTemplate.categoryId = +categoryId;
+    }
 
     if (file) {
       if (giftTemplate.imagePublicId) {
@@ -74,23 +93,69 @@ export class GiftTemplateService {
       giftTemplate.imagePublicId = uploadResult.public_id;
     }
 
-    giftTemplate.categoryId = +categoryId;
+    if (startDate !== undefined) {
+      if (startDate === null || startDate === 'null' || startDate === '') {
+        giftTemplate.startDate = new Date(); // null أو 'null' أو فارغ → اعتبر الآن
+      } else {
+        const start = new Date(startDate);
+        if (isNaN(start.getTime())) {
+          throw new BadRequestException('Start date must be a valid date');
+        }
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        if (start < today) {
+          throw new BadRequestException('Start date cannot be in the past');
+        }
+        giftTemplate.startDate = start;
+      }
+    }
+
+    if (endDate !== undefined) {
+      if (endDate === null || endDate === 'null' || endDate === '') {
+        giftTemplate.endDate = null;
+      } else {
+        const end = new Date(endDate);
+        if (isNaN(end.getTime())) {
+          throw new BadRequestException('End date must be a valid date');
+        }
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        if (end < today) {
+          throw new BadRequestException('End date cannot be in the past');
+        }
+        if (giftTemplate.startDate && end < giftTemplate.startDate) {
+          throw new BadRequestException('End date cannot be before start date');
+        }
+        giftTemplate.endDate = end;
+      }
+    }
+
     await giftTemplate.save();
 
-    const msg = this.i18n.translate('translation.gift_template.updated', {
-      lang,
-    });
+    const msg = this.i18n.translate('translation.gift_template.updated', { lang });
     return { message: msg };
   }
 
-  async findByCategoryWithPagination(categoryId: number, page = 1, limit = 10) {
+  async findByCategoryWithPagination(categoryId: number,page = 1,limit = 10,onlyActive = true) 
+  {
     const offset = (page - 1) * limit;
+    const where: any = { categoryId };
+    if (onlyActive) {
+      const today = new Date();
+      where.startDate = { [Op.lte]: today };
+      where[Op.or] = [
+        { endDate: null },
+        { endDate: { [Op.gte]: today } },
+      ];
+    }
+
     const { rows, count } = await this.giftTemplateRepo.findAndCountAll({
-      where: { categoryId },
+      where,
       limit,
       offset,
       order: [['createdAt', 'DESC']],
     });
+
     return {
       data: rows,
       total: count,
@@ -98,14 +163,26 @@ export class GiftTemplateService {
     };
   }
 
-  async findById(id: number, lang = Language.en) {
-    const giftTemplate = await this.giftTemplateRepo.findByPk(id);
+  async findById(id: number, lang = Language.en) 
+  {
+    const giftTemplate = await this.giftTemplateRepo.findOne({
+      where: {
+        id,
+        startDate: { [Op.lte]: new Date() },
+        [Op.or]: [
+          { endDate: null },               
+          { endDate: { [Op.gte]: new Date() } },
+        ],
+      },
+    });
+
     if (!giftTemplate) {
       const msg = this.i18n.translate('translation.gift_template.invalid', {
         lang,
       });
       throw new NotFoundException(msg);
     }
+
     return giftTemplate;
   }
 }

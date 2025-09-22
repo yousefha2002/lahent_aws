@@ -8,6 +8,7 @@ import { PaginatedGiftTemplateDto } from './dto/gift-template.dto';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { getLang } from 'src/common/utils/get-lang.util';
+import { UpdateGiftTemplateDto } from './dto/update-gift-template.dto';
 
 @Controller('gift-template')
 export class GiftTemplateController {
@@ -42,14 +43,14 @@ export class GiftTemplateController {
   @ApiParam({ name: 'id', description: 'ID of the gift template', example: 1 })
   @ApiConsumes('multipart/form-data')
   @ApiSecurity('access-token')
-  @ApiBody({ type: CreateGiftTemplateDto })
+  @ApiBody({ type: UpdateGiftTemplateDto })
   @ApiResponse({ status: 201, description: 'Gift template updated successfully', schema: { example: { message: 'Updated successfully' } } })
   @UseGuards(AdminGuard)
   @Put(':id')
   @UseInterceptors(FileInterceptor('image'))
   async update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() body: CreateGiftTemplateDto,
+    @Body() body: UpdateGiftTemplateDto,
     @UploadedFile() file: Express.Multer.File,
     @I18n() i18n: I18nContext,
   ) {
@@ -72,6 +73,7 @@ export class GiftTemplateController {
       +categoryId,
       +page,
       +limit,
+      true
     );
   }
 }

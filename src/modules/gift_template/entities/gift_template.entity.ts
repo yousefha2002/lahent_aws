@@ -33,4 +33,12 @@ export class GiftTemplate extends Model {
 
     @BelongsTo(() => GiftCategory)
     category: GiftCategory;
+
+    @AllowNull(true)
+    @Column(DataType.DATE)
+    startDate: Date | null;
+
+    @AllowNull(true)
+    @Column(DataType.DATE)
+    endDate: Date | null;
 }
