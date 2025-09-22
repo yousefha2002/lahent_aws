@@ -1,9 +1,8 @@
-import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { CouponService } from './coupon.service';
 import { AdminGuard } from 'src/common/guards/admin.guard';
 import { CreateCouponDto } from './dto/create-coupon.dto';
 import { UpdateCouponDto } from './dto/update-coupon.dto';
-import { ValidateCouponDTO } from './dto/validate-coupon';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { CouponDto } from './dto/coupon.dto';
 import { CouponValidateDto } from './dto/coupon-validate.dto';
@@ -32,9 +31,9 @@ export class CouponController {
   @ApiOperation({ summary: 'Validate a coupon code' })
   @ApiQuery({ name: 'code', required: true, description: 'Coupon code to validate', example: 'SUMMER2025' })
   @ApiResponse({ status: 200, description: 'Coupon validation result', type: CouponValidateDto })
-  validateCoupon(@Body() dto: ValidateCouponDTO, @I18n() i18n: I18nContext) {
+  validateCoupon(@Query('code') code: string, @I18n() i18n: I18nContext) {
     const lang = getLang(i18n);
-    return this.couponService.validateCoupon(dto.code, lang);
+    return this.couponService.validateCoupon(code, lang);
   }
 
   @UseGuards(AdminGuard)
