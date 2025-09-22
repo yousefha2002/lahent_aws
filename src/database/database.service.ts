@@ -61,6 +61,7 @@ import { StoreCommission } from 'src/modules/store_commission/entities/store_com
 import { StoreTransaction } from 'src/modules/store_transaction/entities/store_transaction.entity';
 import { Page } from 'src/modules/page/entities/page.entity';
 import { PageLanguage } from 'src/modules/page/entities/page_language.entity';
+import { PaymentCard } from 'src/modules/payment_card/entities/payment_card.entity';
 
 export const databaseProviders = [
   {
@@ -147,7 +148,8 @@ export const databaseProviders = [
         StoreCommission,
         StoreTransaction,
         Page,
-        PageLanguage
+        PageLanguage,
+        PaymentCard
       ]); 
       await sequelize.sync({ alter: false});
       return sequelize;

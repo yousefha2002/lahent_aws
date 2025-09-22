@@ -61,6 +61,7 @@ import { StoreTransactionModule } from './modules/store_transaction/store_transa
 import { DeletionModule } from './modules/deletion/deletion.module';
 import { PageModule } from './modules/page/page.module';
 import { CityModule } from './modules/city/city.module';
+import { PaymentCardModule } from './modules/payment_card/payment_card.module';
 
 @Module({
   imports: [
@@ -137,6 +138,7 @@ import { CityModule } from './modules/city/city.module';
     DeletionModule,
     PageModule,
     CityModule,
+    PaymentCardModule,
   ],
   providers: [MulterConfigService],
 })

@@ -62,5 +62,6 @@ export enum repositories {
   store_commission_repository = 'store_commission_repository',
   loyalty_setting_repository = 'loyalty_setting_repository',
   page_repository = 'page_repository',
-  pageLanguage_repository = 'pageLanguage_repository'
+  pageLanguage_repository = 'pageLanguage_repository',
+  payment_card_repository='payment_card_repository'
 }
