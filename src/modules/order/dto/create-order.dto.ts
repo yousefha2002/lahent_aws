@@ -22,7 +22,7 @@ export class createOrderDto {
     @IsNotEmpty()
     pickupType: PickupType;
 
-    @ApiPropertyOptional({ description: 'Scheduled date for pickup',example:"2020-3-2 01:20", type: String, format: 'date-time' })
+    @ApiPropertyOptional({ description: 'Scheduled date for pickup',example:"2020-03-01T22:20:00.000Z", type: String, format: 'date-time' })
     @IsOptional()
     @Type(() => Date)
     @IsDate()
