@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { IsInt, IsOptional, IsString, IsNotEmpty } from "class-validator";
+import { CreatePaymentCardWithSaveDto } from "src/modules/payment_card/dto/create-payment-card.dto";
 
 export class PayOrderDTO {
     @ApiPropertyOptional({ description: 'Existing payment card ID for gateway payment' })
@@ -12,4 +13,8 @@ export class PayOrderDTO {
     @IsNotEmpty()
     @IsOptional()
     cvc?: string;
+
+    @ApiPropertyOptional({ description: 'New card details if adding a new card', type: CreatePaymentCardWithSaveDto })
+    @IsOptional()
+    newCard?: CreatePaymentCardWithSaveDto;
 }

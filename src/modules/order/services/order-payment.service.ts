@@ -25,6 +25,7 @@ import { Language } from 'src/common/enums/language';
 import { PaymentSession } from 'src/modules/payment_session/entities/payment_session.entity';
 import { PayOrderDTO } from '../dto/pay-order-dto';
 import { formatCardForApi } from 'src/common/utils/formatCardForApi';
+import { PaymentCard } from 'src/modules/payment_card/entities/payment_card.entity';
 
 @Injectable()
 export class OrderPaymentService {
@@ -110,12 +111,29 @@ export class OrderPaymentService {
             }
 
             if (order.paymentMethod === PaymentMethod.GATEWAY) {
-                const {cvc,paymentCardId} = dto
-                if(!paymentCardId || !cvc)
+                const {cvc,paymentCardId,newCard} = dto
+                if(!cvc)
                 {
-                    throw new BadRequestException('You should select payment card and cvc')
+                    throw new BadRequestException('You should send cvc of your card')
                 }
-                const card = await this.paymentCardService.getOne(paymentCardId,customer.id)
+                let card:PaymentCard;
+                if (paymentCardId) {
+                    card = await this.paymentCardService.getOne(paymentCardId, customer.id);
+                } else if (newCard) {
+                    if (newCard.isSave) {
+                        card = await this.paymentCardService.create({ ...newCard, isDefault: false }, customer.id);
+                    } else {
+                        card = {
+                            cardNumber: newCard.cardNumber,
+                            expiryDate: newCard.expiryDate,
+                            cardHolderName: newCard.cardHolderName,
+                            cardName: newCard.cardName,
+                            customerId: customer.id,
+                        } as any; 
+                    }
+                    } else {
+                        throw new BadRequestException('Either paymentCardId or newCard must be provided');
+                    }
                 const apiCard = formatCardForApi(card);
                 await transaction.rollback();
                 const { redirectUrl ,redirectMethod,redirectParams} = await this.paymentSessionService.startPayment({
