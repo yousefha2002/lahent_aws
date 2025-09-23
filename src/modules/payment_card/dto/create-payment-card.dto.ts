@@ -8,7 +8,7 @@ export class CreatePaymentCardDto {
     @Length(14, 14)
     cardNumber: string;
 
-    @ApiProperty({ example: '2026-09-01T00:00:00.000Z', description: 'Expiry date' })
+    @ApiProperty({ example: '2026-09-01', description: 'Expiry date' })
     @Type(() => Date)
     @IsDate()
     expiryDate: Date;

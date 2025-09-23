@@ -12,10 +12,10 @@ export class EdFapayGateway implements PaymentGateway {
     private secretKey: string;
     private statusUrl: string;
     constructor() {
-        if (!process.env.EDFA_API_URL || !process.env.EDFA_MERCHANT_ID || !process.env.EDFA_SECRET_KEY || !process.env.EDFA_STATUS_URL) {
+        if (!process.env.EDFA_API_PAYMENT_URL || !process.env.EDFA_MERCHANT_ID || !process.env.EDFA_SECRET_KEY || !process.env.EDFA_STATUS_URL) {
             throw new Error('EDFAPAY environment variables are missing');
         }
-        this.apiUrl = process.env.EDFA_API_URL;
+        this.apiUrl = process.env.EDFA_API_PAYMENT_URL;
         this.merchantId = process.env.EDFA_MERCHANT_ID;
         this.secretKey = process.env.EDFA_SECRET_KEY;
         this.statusUrl = process.env.EDFA_STATUS_URL;
