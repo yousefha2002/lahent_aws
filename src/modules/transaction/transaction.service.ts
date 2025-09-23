@@ -1,7 +1,7 @@
 import { PaymentCardService } from './../payment_card/payment_card.service';
 import { CustomerService } from './../customer/customer.service';
 import { PaymentSessionService } from './../payment_session/payment_session.service';
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, forwardRef, Inject, Injectable } from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
 import { Transaction } from './entities/transaction.entity';
 import { LoyaltyOfferService } from '../loyalty_offer/loyalty_offer.service';
@@ -18,6 +18,7 @@ import { Avatar } from '../avatar/entities/avatar.entity';
 import { PaymentSession } from '../payment_session/entities/payment_session.entity';
 import { Op } from 'sequelize';
 import { formatCardForApi } from 'src/common/utils/formatCardForApi';
+import { PaymentCard } from '../payment_card/entities/payment_card.entity';
 
 @Injectable()
 export class TransactionService {
@@ -37,9 +38,32 @@ export class TransactionService {
 
   async chargeWallet(loyaltyOfferId: number,customer: Customer,dto: ChargeWalletDTO,) 
   {
-    const { gateway,paymentCardId ,cvc} = dto;
+    const { gateway,paymentCardId ,cvc,newCard} = dto;
     const offer = await this.loyaltyOfferService.findByIdIfActive(loyaltyOfferId);
-    const card = await this.paymentCardService.getOne(paymentCardId, customer.id)
+    let card: PaymentCard;
+    if(paymentCardId)
+    {
+      card = await this.paymentCardService.getOne(paymentCardId, customer.id)
+    }
+    else if(newCard)
+    {
+      if (newCard.isSave)
+      {
+        card = await this.paymentCardService.create({...newCard,isDefault:false},customer.id)
+      }
+      else{
+        card = {
+          cardNumber: newCard.cardNumber,
+          expiryDate: newCard.expiryDate,
+          cardHolderName: newCard.cardHolderName,
+          cardName: newCard.cardName,
+          customerId: customer.id,
+        } as PaymentCard;
+      }
+    }
+    else {
+      throw new BadRequestException('Either paymentCardId or newCard must be provided');
+    }
     const apiCard = formatCardForApi(card);
     const { redirectParams,redirectUrl ,redirectMethod} =await this.paymentSessionService.startPayment({
       customer,

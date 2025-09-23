@@ -1,5 +1,4 @@
-import { IsNotEmpty, IsString, Length, IsDate, IsBoolean, IsOptional, Matches } from 'class-validator';
-import { Type } from 'class-transformer';
+import { IsNotEmpty, IsString, Length, IsBoolean, IsOptional, Matches } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreatePaymentCardDto {
@@ -26,4 +25,10 @@ export class CreatePaymentCardDto {
     @IsBoolean()
     @IsOptional()
     isDefault?: boolean;
+}
+
+export class CreatePaymentCardWithSaveDto extends CreatePaymentCardDto {
+    @ApiProperty({ example: true, description: 'Save this Cart' })
+    @IsBoolean()
+    isSave: boolean;
 }
