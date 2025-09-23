@@ -1,3 +1,4 @@
+import { PaymentCardService } from './../../payment_card/payment_card.service';
 import { OrderNotificationService } from './orde_notification.service';
 import { OrderService } from './order.service';
 import { UserPointHistoryService } from '../../user_point_history/user_point_history.service';
@@ -22,6 +23,8 @@ import { OrderPointsService } from './order_points.service';
 import { I18nService } from 'nestjs-i18n';
 import { Language } from 'src/common/enums/language';
 import { PaymentSession } from 'src/modules/payment_session/entities/payment_session.entity';
+import { PayOrderDTO } from '../dto/pay-order-dto';
+import { formatCardForApi } from 'src/common/utils/formatCardForApi';
 
 @Injectable()
 export class OrderPaymentService {
@@ -41,10 +44,11 @@ export class OrderPaymentService {
         private orderPointsService: OrderPointsService,
         private orderService: OrderService,
         private readonly i18n: I18nService,
-        private readonly orderNotificationService:OrderNotificationService
+        private readonly orderNotificationService:OrderNotificationService,
+        private readonly paymentCardService:PaymentCardService
     ) {}
 
-    async payOrder(orderId: number, customer: Customer, lang: Language = Language.en) {
+    async payOrder(orderId: number, customer: Customer, dto:PayOrderDTO,lang: Language) {
         const transaction = await this.sequelize.transaction();
         try {
             const order = await this.orderRepo.findOne({ where: { id: orderId, customerId: customer.id }, transaction });
@@ -106,16 +110,27 @@ export class OrderPaymentService {
             }
 
             if (order.paymentMethod === PaymentMethod.GATEWAY) {
+                const {cvc,paymentCardId} = dto
+                if(!paymentCardId || !cvc)
+                {
+                    throw new BadRequestException('You should select payment card and cvc')
+                }
+                const card = await this.paymentCardService.getOne(paymentCardId,customer.id)
+                const apiCard = formatCardForApi(card);
                 await transaction.rollback();
-                // const { redirectUrl } = await this.paymentSessionService.startPayment({
-                //     customer,
-                //     amount: amountLeftToPay,
-                //     provider: order.paymentGateway,
-                //     purpose: GatewaySource.order,
-                //     sourceId: order.id,
-                // });
+                const { redirectUrl ,redirectMethod,redirectParams} = await this.paymentSessionService.startPayment({
+                    customer,
+                    amount: amountLeftToPay,
+                    provider: order.paymentGateway,
+                    purpose: GatewaySource.order,
+                    card: {
+                        ...apiCard,
+                        cvc
+                    },
+                    sourceId: order.id,
+                });
 
-                // return { redirectUrl };
+                return { redirectUrl,redirectMethod,redirectParams };
             }
         } catch (error) {
             await transaction.rollback();

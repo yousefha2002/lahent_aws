@@ -9,16 +9,20 @@ export class PaymentCard extends Model {
     id: number;
 
     @AllowNull(false)
-    @Column({ type: DataType.STRING(14), unique: true })
+    @Column({ type: DataType.STRING(16)})
     cardNumber: string;
 
     @AllowNull(false)
-    @Column(DataType.DATE)
-    expiryDate: Date;
+    @Column({ type: DataType.STRING(7) })
+    expiryDate: string;
 
     @AllowNull(false)
     @Column(DataType.STRING)
     cardHolderName: string;
+
+    @AllowNull(false)
+    @Column(DataType.STRING)
+    cardName: string;
 
     @Default(false)
     @Column(DataType.BOOLEAN)

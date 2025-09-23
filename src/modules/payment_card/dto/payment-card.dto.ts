@@ -11,12 +11,17 @@ export class PaymentCardDto {
     cardNumber: string;
 
     @Expose()
-    @ApiProperty({ example: '2025-12-31', description: 'Expiry date' })
-    expiryDate: Date;
+    @ApiProperty({ example: '2026-09', description: 'Expiry date' })
+    expiryDate: string;
 
     @Expose()
     @ApiProperty({ example: 'John Doe', description: 'Card holder name' })
     cardHolderName: string;
+
+    @Expose()
+    @ApiProperty({ example: 'Card Name', description: 'Card name' })
+    cardName: string;
+
 
     @Expose()
     @ApiProperty({ example: true, description: 'Is default card?' })

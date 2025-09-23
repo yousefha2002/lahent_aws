@@ -1,3 +1,4 @@
+import { CardForApi } from "src/common/types/cardForApi";
 import { Customer } from "src/modules/customer/entities/customer.entity";
 
 export interface PaymentGateway {
@@ -6,13 +7,7 @@ export interface PaymentGateway {
         currency: string, 
         callbackUrl: string,
         customer:Customer,
-        card: {
-            cardNumber: string;
-            expiryMonth: number;
-            expiryYear: number;
-            cardHolderName: string;
-            cvc: string;
-            },
+        card: CardForApi,
         description?:string);
 
     confirmPayment(orderId: string, gwayPaymentId: string, hash: string): Promise<boolean>;

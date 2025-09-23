@@ -26,6 +26,7 @@ import { OrderNotificationService } from './services/orde_notification.service';
 import { RealtimeModule } from '../realtime/realtime.module';
 import { StoreTransactionModule } from '../store_transaction/store_transaction.module';
 import { LoyaltySettingModule } from '../loyalty_setting/loyalty_setting.module';
+import { PaymentCardModule } from '../payment_card/payment_card.module';
 
 @Module({
   controllers: [OrderController],
@@ -57,7 +58,8 @@ import { LoyaltySettingModule } from '../loyalty_setting/loyalty_setting.module'
     forwardRef(()=>PaymentSessionModule),
     RealtimeModule,
     StoreTransactionModule,
-    LoyaltySettingModule
+    LoyaltySettingModule,
+    PaymentCardModule
   ],
   exports: [OrderService,OrderPaymentService],
 })

@@ -26,6 +26,7 @@ import { AcceptOrderDto } from './dto/accept-order.dto';
 import { StoreOrderStatsResponseDto } from './dto/order-stats-response.dto';
 import { OrderAnalyticsResponseDto } from './dto/orde-analytics.dto';
 import { StoreFinancialsFilterDto } from '../store/dto/store-financials-filter.dto';
+import { PayOrderDTO } from './dto/pay-order-dto';
 
 @Controller('order')
 export class OrderController {
@@ -55,10 +56,10 @@ export class OrderController {
   @ApiSecurity('access-token')
   @ApiParam({ name: 'orderId', description: 'ID of the order to pay', example: 1 })
   @ApiResponse({ status: 200, description: 'Payment result', type: PaymentResponseDto })
-  payOrder(@CurrentUser() user:Customer,@Param('orderId',ParseIntPipe) orderId:number,@I18n() i18n: I18nContext)
+  payOrder(@CurrentUser() user:Customer,@Param('orderId',ParseIntPipe) orderId:number,@I18n() i18n: I18nContext,@Body() dto: PayOrderDTO)
   {
     const lang = getLang(i18n);
-    return this.orderPaymentService.payOrder(orderId,user,lang)
+    return this.orderPaymentService.payOrder(orderId,user,dto,lang)
   }
 
   @Serilaize(OrderAnalyticsResponseDto)

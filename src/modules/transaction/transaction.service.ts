@@ -17,6 +17,7 @@ import { Customer } from '../customer/entities/customer.entity';
 import { Avatar } from '../avatar/entities/avatar.entity';
 import { PaymentSession } from '../payment_session/entities/payment_session.entity';
 import { Op } from 'sequelize';
+import { formatCardForApi } from 'src/common/utils/formatCardForApi';
 
 @Injectable()
 export class TransactionService {
@@ -39,21 +40,19 @@ export class TransactionService {
     const { gateway,paymentCardId ,cvc} = dto;
     const offer = await this.loyaltyOfferService.findByIdIfActive(loyaltyOfferId);
     const card = await this.paymentCardService.getOne(paymentCardId, customer.id)
-    const { redirect_params } =await this.paymentSessionService.startPayment({
+    const apiCard = formatCardForApi(card);
+    const { redirectParams,redirectUrl ,redirectMethod} =await this.paymentSessionService.startPayment({
       customer,
       amount: offer.amountRequired,
       provider: gateway,
       purpose: GatewaySource.wallet,
       card: {
-        cardNumber: card.cardNumber,
-        cardHolderName: card.cardHolderName,
-        expiryMonth: card.expiryDate.getUTCMonth() + 1,
-        expiryYear: card.expiryDate.getUTCFullYear(),
+        ...apiCard,
         cvc
       },
       sourceId: loyaltyOfferId,
     });
-    return { redirect_params };
+    return { redirectParams,redirectUrl,redirectMethod };
   }
 
   async confirmChargeWallet(session: PaymentSession) {

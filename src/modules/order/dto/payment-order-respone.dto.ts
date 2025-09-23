@@ -11,6 +11,14 @@ export class PaymentResponseDto {
     message?: string;
 
     @Expose()
-    @ApiPropertyOptional({ description: 'Checkout URL if payment via gateway is required', example: 'https://payment-provider.com/checkout/abc123' })
-    checkoutUrl?: string;
+    @ApiPropertyOptional({ description: 'Redirect URL for gateway payment', example: 'https://pgapi.edfapay.com/s2s/collector/136519623092025110210' })
+    redirectUrl?: string;
+
+    @Expose()
+    @ApiPropertyOptional({ description: 'Redirect parameters (encoded) for gateway payment', example: 'eyJhY3Rpb24iOiJTQUxFIiwiY2xpZW50X2tleSI6Ij...' })
+    redirectParams?: string;
+
+    @Expose()
+    @ApiPropertyOptional({ description: 'HTTP method to use for redirect (POST/GET)', example: 'POST' })
+    redirectMethod?: string;
 }
