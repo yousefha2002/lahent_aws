@@ -7,7 +7,6 @@ import {
   Param,
   Post,
   Put,
-  Req,
   UploadedFile,
   UseFilters,
   UseGuards,
@@ -129,6 +128,16 @@ export class TypeController {
   getAllTypes(@I18n() i18n: I18nContext) {
     const lang = getLang(i18n);
     return this.typeService.getAllTypes(lang);
+  }
+
+  @ApiOperation({ summary: 'Get all types without language filter (admin only)' })
+  @ApiSecurity('access-token')
+  @ApiResponse({ status: 200, description: 'List of all types', type: [TypeDto] })
+  @Get('all/byAdmin')
+  @UseGuards(AdminGuard)
+  @Serilaize(TypeDto)
+  getAllTypesAdmin() {
+    return this.typeService.getAllTypes();
   }
 
   @ApiOperation({ summary: 'Get a single type by ID with its languages' })

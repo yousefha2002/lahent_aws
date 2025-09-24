@@ -157,14 +157,16 @@ export class TypeService {
     return { message };
   }
 
-  async getAllTypes(language: Language) {
+  async getAllTypes(language?: Language) {
+    const includeOptions: any = {
+      model: this.typeLangRepo,
+    };
+
+    if (language) {
+      includeOptions.where = { languageCode: language };
+    }
     const types = await this.typeRepo.findAll({
-      include: [
-        {
-          model: this.typeLangRepo,
-          where: { languageCode: language },
-        },
-      ],
+      include: [includeOptions],
     });
 
     return types;
