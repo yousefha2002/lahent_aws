@@ -172,23 +172,6 @@ export class TypeService {
     return types;
   }
 
-  async getOneType(typeId: number, language: Language) {
-    const type = await this.typeRepo.findOne({
-      where: { id: typeId },
-      include: [
-        {
-          model: this.typeLangRepo,
-          where: { languageCode: language },
-        },
-      ],
-    });
-
-    if (!type) {
-      throw new BadRequestException('Invalid type');
-    }
-    return type;
-  }
-
   async findById(id: string | number) {
     const type = await this.typeRepo.findByPk(id);
     if (!type) {

@@ -1,25 +1,11 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Post,
-  Put,
-  UseGuards,
-} from '@nestjs/common';
+import {Body,Controller,Get,Param,Post,Put,UseGuards} from '@nestjs/common';
 import { CarBrandService } from './car_brand.service';
 import { CreateCarBrandDto } from './dto/create_car_brand.dto';
 import { UpdateCarBrandDto } from './dto/update_car_brand.dto';
 import { AdminGuard } from 'src/common/guards/admin.guard';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { CarBrandDto } from './dto/car-brand.dto';
-import {
-  ApiBody,
-  ApiOperation,
-  ApiParam,
-  ApiResponse,
-  ApiSecurity,
-} from '@nestjs/swagger';
+import {ApiBody,ApiOperation,ApiParam,ApiResponse,ApiSecurity} from '@nestjs/swagger';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
 
@@ -87,17 +73,10 @@ export class CarBrandController {
     return this.carBrandService.getAll(lang);
   }
 
-  @ApiOperation({ summary: 'Get a car brand by ID with its languages' })
-  @ApiParam({ name: 'id', description: 'ID of the car brand', example: 1 })
-  @ApiResponse({
-    status: 200,
-    description: 'Car brand details',
-    type: CarBrandDto,
-  })
-  @Get(':id')
+  @Get('admin')
+  @UseGuards(AdminGuard)
   @Serilaize(CarBrandDto)
-  getOne(@Param('id') id: number, @I18n() i18n: I18nContext) {
-    const lang = getLang(i18n);
-    return this.carBrandService.getOneOrFail(id, lang);
+  getAllAdmin() {
+    return this.carBrandService.getAll();
   }
 }

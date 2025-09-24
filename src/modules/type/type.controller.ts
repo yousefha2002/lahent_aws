@@ -139,17 +139,4 @@ export class TypeController {
   getAllTypesAdmin() {
     return this.typeService.getAllTypes();
   }
-
-  @ApiOperation({ summary: 'Get a single type by ID with its languages' })
-  @ApiParam({ name: 'typeId', description: 'ID of the type', example: 1 })
-  @ApiResponse({ status: 200, description: 'Type details', type: TypeDto })
-  @Get(':typeId')
-  @Serilaize(TypeDto)
-  getOne(
-    @Param('typeId') typeId: string,
-    @I18n() i18n: I18nContext
-  ) {
-    const lang = getLang(i18n);
-    return this.typeService.getOneType(+typeId, lang);
-  }
 }

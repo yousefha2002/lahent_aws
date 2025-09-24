@@ -92,9 +92,14 @@ export class CarBrandService {
     return { message };
   }
 
-  async getAll(lang = Language.ar) {
+  async getAll(lang?: Language) 
+  {
+    const includeOptions: any = { model: CarBrandLanguage };
+    if (lang) {
+      includeOptions.where = { languageCode: lang };
+    }
     return this.carBrandRep.findAll({
-      include: [{ model: CarBrandLanguage, where: { languageCode: lang } }],
+      include: [includeOptions],
     });
   }
 
