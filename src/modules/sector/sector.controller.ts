@@ -56,4 +56,13 @@ export class SectorController {
     const lang = getLang(i18n);
     return this.sectorService.update(id, body, lang);
   }
+
+  @Get('admin')
+  @UseGuards(AdminGuard)
+  @Serilaize(SectorDto)
+  @ApiOperation({ summary: 'Get all sectors (admin, without language filter)' })
+  @ApiResponse({ status: 200, type: [SectorDto] })
+  getAllSectorsAdmin() {
+    return this.sectorService.getAll();
+  }
 }

@@ -74,15 +74,14 @@ export class SectorService {
         return true;
     }
 
-    async getAll(lang: Language ) 
+    async getAll(lang?: Language) 
     {
+        const includeOptions: any = { model: SectorLanguage };
+        if (lang) {
+            includeOptions.where = { languageCode: lang };
+        }
         const sectors = await this.sectorRepo.findAll({
-        include: [
-            {
-            model: SectorLanguage,
-            where: { languageCode: lang },
-            },
-        ],
+            include: [includeOptions],
         });
         return sectors;
     }
