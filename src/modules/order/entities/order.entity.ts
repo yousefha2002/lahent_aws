@@ -181,4 +181,7 @@ export class Order extends Model {
 
   @HasMany(() => Review)
   reviews: Review[];
+
+  @Column({ type: DataType.BOOLEAN, defaultValue: false })
+  hasExtended: boolean;
 }

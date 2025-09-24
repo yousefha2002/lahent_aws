@@ -72,6 +72,14 @@ export class OrderDto {
     @ApiProperty({ example: '2025-08-29T10:00:00.000Z', description: 'وقت إنشاء الطلب بواسطة العميل' })
     @Expose()
     createdAt: Date;
+
+    @ApiProperty({ example: '2025-08-29T10:00:00.000Z', description: 'وقت انتهاء انتظار الرد من قبل المتجر' })
+    @Expose()
+    confirmationTimeoutAt: Date | null;
+
+    @ApiProperty({example:true,description:"هل تم تمديد الطلب من قبل العميل"})
+    @Expose()
+    hasExtended:boolean
     
     @ApiPropertyOptional({ type: () => SimpleCustomerDto }) @Expose() @Type(() => SimpleCustomerDto) customer?: SimpleCustomerDto;
     @ApiPropertyOptional({ type: () => SimpleStoreDto }) @Expose() @Type(() => SimpleStoreDto) store?: SimpleStoreDto;

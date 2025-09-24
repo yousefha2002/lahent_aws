@@ -144,4 +144,7 @@ export class Store extends Model {
   @Default(false)
   @Column(DataType.BOOLEAN)
   isCompletedProfile: boolean;
+
+  @Column({type: DataType.STRING,allowNull: false,defaultValue: 'Asia/Riyadh'})
+  timezone: string;
 }

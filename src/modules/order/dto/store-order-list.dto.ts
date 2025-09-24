@@ -67,6 +67,11 @@ export class OrderListDto {
     @Expose()
     receivedAt: Date | null;
 
+    @ApiProperty({ example: '2025-08-29T10:00:00.000Z', description: 'وقت انتهاء انتظار الرد من قبل المتجر' })
+    @Expose()
+    confirmationTimeoutAt: Date | null;
+
+
     @ApiProperty({ example: '2025-08-29T10:00:00.000Z', description: 'وقت إنشاء الطلب بواسطة العميل' })
     @Expose()
     createdAt: Date;

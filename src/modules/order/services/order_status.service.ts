@@ -61,7 +61,7 @@ export class OrderStatusService {
         }
     }
 
-    async rejectOrderByStore(orderId: number, storeId: number, lang: Language = Language.en) {
+    async rejectOrderByStore(orderId: number, storeId: number, lang: Language = Language.ar) {
         const transaction = await this.sequelize.transaction();
         try {
             const order = await this.orderRepo.findOne({ where: { id: orderId, storeId }, transaction });
@@ -216,6 +216,10 @@ export class OrderStatusService {
             throw new BadRequestException(this.i18n.translate('translation.orders.invalid_status_for_extend', { lang }));
         }
 
+        if (order.hasExtended) {
+            throw new BadRequestException(this.i18n.translate('translation.orders.already_extended', { lang }));
+        }
+
         const maxExtensionMinutes = 60;
         const currentTimeout = order.confirmationTimeoutAt.getTime();
         const now = Date.now();
@@ -225,6 +229,7 @@ export class OrderStatusService {
         }
 
         order.confirmationTimeoutAt = new Date(currentTimeout + extraMinutes * 60 * 1000);
+        order.hasExtended = true;
         await order.save();
 
         return { success: true, message: this.i18n.translate('translation.orders.extended_success', { lang }) };
