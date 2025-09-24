@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
 import { UserToken } from './entities/user_token.entity';
 import { CreateTokenDto } from './dtos/createToken.dto';
@@ -62,23 +62,18 @@ export class UserTokenService {
         });
     }
 
-    async logout(role: RoleStatus, userId: number, device?: string) 
+    async logout(role: RoleStatus, userId: number, device: string) 
     {
-        const whereClause: any = { role };
-        if (role === RoleStatus.STORE) whereClause.storeId = userId;
-        else if (role === RoleStatus.OWNER) whereClause.ownerId = userId;
-        else if (role === RoleStatus.CUSTOMER) whereClause.customerId = userId;
-
-        if (device) whereClause.device = device;
-
-        const token = await this.userTokenRepo.findOne({ where: whereClause });
+        const token = await this.findExistingToken(role, userId, device);
         if (token) {
             token.lastLogoutAt = new Date(); 
             token.isRevoked = true
             await token.save();
             return true;
         }
-        return false;
+        else{
+            throw new UnauthorizedException('You can not logout')
+        }   
     }
 
     deleteByCustomer(customerId:number,transaction?:any)

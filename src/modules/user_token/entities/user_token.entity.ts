@@ -1,4 +1,4 @@
-import {Table,Column,Model,DataType,AllowNull,PrimaryKey,AutoIncrement,Default} from 'sequelize-typescript';
+import {Table,Column,Model,DataType,AllowNull,PrimaryKey,AutoIncrement,Default, CreatedAt, UpdatedAt} from 'sequelize-typescript';
 import { RoleStatus } from 'src/common/enums/role_status';
 
 @Table({ tableName: 'user_tokens' })
