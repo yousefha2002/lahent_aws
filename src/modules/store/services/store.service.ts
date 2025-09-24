@@ -464,5 +464,5 @@ export class StoreService {
     paranoid: false,
     transaction,
   });
-}
+  }
 }
