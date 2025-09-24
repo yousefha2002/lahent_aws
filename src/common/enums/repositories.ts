@@ -63,5 +63,6 @@ export enum repositories {
   loyalty_setting_repository = 'loyalty_setting_repository',
   page_repository = 'page_repository',
   pageLanguage_repository = 'pageLanguage_repository',
-  payment_card_repository='payment_card_repository'
+  payment_card_repository='payment_card_repository',
+  fcm_token_repository='fcm_token_repository'
 }

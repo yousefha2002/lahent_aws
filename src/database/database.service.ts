@@ -62,6 +62,7 @@ import { StoreTransaction } from 'src/modules/store_transaction/entities/store_t
 import { Page } from 'src/modules/page/entities/page.entity';
 import { PageLanguage } from 'src/modules/page/entities/page_language.entity';
 import { PaymentCard } from 'src/modules/payment_card/entities/payment_card.entity';
+import { FcmToken } from 'src/modules/fcm_token/entities/fcm_token.entity';
 
 export const databaseProviders = [
   {
@@ -149,7 +150,8 @@ export const databaseProviders = [
         StoreTransaction,
         Page,
         PageLanguage,
-        PaymentCard
+        PaymentCard,
+        FcmToken
       ]); 
       await sequelize.sync({ alter: false});
       return sequelize;

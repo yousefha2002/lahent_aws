@@ -62,6 +62,7 @@ import { DeletionModule } from './modules/deletion/deletion.module';
 import { PageModule } from './modules/page/page.module';
 import { CityModule } from './modules/city/city.module';
 import { PaymentCardModule } from './modules/payment_card/payment_card.module';
+import { FcmTokenModule } from './modules/fcm_token/fcm_token.module';
 
 @Module({
   imports: [
@@ -139,6 +140,7 @@ import { PaymentCardModule } from './modules/payment_card/payment_card.module';
     PageModule,
     CityModule,
     PaymentCardModule,
+    FcmTokenModule,
   ],
   providers: [MulterConfigService],
 })
