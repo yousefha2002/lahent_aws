@@ -112,15 +112,16 @@ export class SubtypeService {
     return { message };
   }
 
-  async getAllSubTypesByTypeId(typeId: number, language: Language) {
+  async getAllSubTypesByTypeId(typeId: number, language?: Language) {
+    const includeOptions: any = { model: this.subTypelangRepo };
+
+    if (language) {
+      includeOptions.where = { languageCode: language };
+    }
+
     const subTypes = await this.subTypeRepo.findAll({
       where: { typeId },
-      include: [
-        {
-          model: this.subTypelangRepo,
-          where: { languageCode: language },
-        },
-      ],
+      include: [includeOptions],
     });
 
     return subTypes;

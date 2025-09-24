@@ -133,7 +133,7 @@ export class TypeController {
   @ApiOperation({ summary: 'Get all types without language filter (admin only)' })
   @ApiSecurity('access-token')
   @ApiResponse({ status: 200, description: 'List of all types', type: [TypeDto] })
-  @Get('all/byAdmin')
+  @Get('admin/all')
   @UseGuards(AdminGuard)
   @Serilaize(TypeDto)
   getAllTypesAdmin() {

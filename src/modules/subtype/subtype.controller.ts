@@ -1,28 +1,11 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Post,
-  Put,
-  Query,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
+import {Body,Controller,Delete,Get,Param,Post,Put,UseGuards} from '@nestjs/common';
 import { SubtypeService } from './subtype.service';
 import { CreateSubTypeDto } from './dto/create-subType.dto';
 import { AdminGuard } from 'src/common/guards/admin.guard';
 import { UpdateSubTypeDto } from './dto/update-subType.dto';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { SubTypeDto } from './dto/subType.dto';
-import {
-  ApiBody,
-  ApiOperation,
-  ApiParam,
-  ApiResponse,
-  ApiSecurity,
-} from '@nestjs/swagger';
+import {ApiBody,ApiOperation,ApiParam,ApiResponse,ApiSecurity} from '@nestjs/swagger';
 import { getLang } from 'src/common/utils/get-lang.util';
 import { I18n, I18nContext } from 'nestjs-i18n';
 
@@ -127,5 +110,12 @@ export class SubtypeController {
   ) {
     const lang = getLang(i18n);
     return this.subtypeService.getAllSubTypesByTypeId(+typeId, lang);
+  }
+
+  @Get('admin/byType/:typeId')
+  @UseGuards(AdminGuard)
+  @Serilaize(SubTypeDto)
+  fetchAllByTypeIdAdmin(@Param('typeId') typeId: string) {
+    return this.subtypeService.getAllSubTypesByTypeId(+typeId);
   }
 }
