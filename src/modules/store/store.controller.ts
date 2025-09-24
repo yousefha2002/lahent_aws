@@ -1,3 +1,4 @@
+import { UserTokenService } from './../user_token/user_token.service';
 import { StoreGeolocationService } from './services/storeGeolocation.service';
 import { StoreAuthService } from './services/storeAuth.service';
 import {Controller,Post,Body,UseGuards,UseInterceptors,UploadedFiles,BadRequestException,Get,Query,Put,Param,ParseIntPipe,Req,Ip,} from '@nestjs/common';
@@ -19,7 +20,7 @@ import { Store } from './entities/store.entity';
 import { UpdateStoreDto } from './dto/update-store.dto';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { Owner } from '../owner/entities/owner.entity';
-import { OwnerStoreDto, PaginatedStoreDto, StoreDto, storeForAction } from './dto/Store.dto';
+import { PaginatedStoreDto, StoreDto, storeForAction } from './dto/Store.dto';
 import { StoreWithTokenDto } from './dto/simple-store.dto';
 import { FullDetailsStoreDto } from './dto/full-details-store.dto';
 import { ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
@@ -31,6 +32,7 @@ import { InitialCreateStoreDto } from './dto/initial-create-store.dto';
 import { OwnerStoresResponseDto } from './dto/owner-store-response.dto';
 import { IncompleteStoreResponseDto } from './dto/in-completed-store-response.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
+import { RoleStatus } from 'src/common/enums/role_status';
 
 @Controller('store')
 export class StoreController {
@@ -38,6 +40,7 @@ export class StoreController {
     private readonly storeService: StoreService,
     private readonly storeAuthService: StoreAuthService,
     private readonly storeGeolocationService: StoreGeolocationService,
+    private readonly userTokenService:UserTokenService
   ) {}
 
   @Post('initial-create')
@@ -469,5 +472,20 @@ export class StoreController {
     @Body() dto: UpdatePasswordDto,
   ) {
     return this.storeAuthService.updatePassword(store, dto);
+  }
+
+  @UseGuards(StoreOrOwnerGuard)
+  @Post('logout')
+  @ApiOperation({ summary: 'Logout store and invalidate refresh token' })
+  @ApiSecurity('access-token')
+  @ApiResponse({
+    status: 200,
+    description: 'Store logged out successfully',
+    schema: { example: { message: 'Logged out successfully' } },
+  })
+  async logoutStore(@CurrentUser() store: Store, @Req() req: Request) {
+    const device = req.headers['user-agent'] || 'unknown';
+    await this.userTokenService.logout(RoleStatus.STORE,store.id, device);
+    return { message: 'Logged out successfully' };
   }
 }

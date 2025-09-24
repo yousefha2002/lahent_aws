@@ -1,15 +1,4 @@
-import {
-    Table,
-    Column,
-    Model,
-    DataType,
-    AllowNull,
-    PrimaryKey,
-    AutoIncrement,
-    CreatedAt,
-    UpdatedAt,
-    Default,
-} from 'sequelize-typescript';
+import {Table,Column,Model,DataType,AllowNull,PrimaryKey,AutoIncrement,Default} from 'sequelize-typescript';
 import { RoleStatus } from 'src/common/enums/role_status';
 
 @Table({ tableName: 'user_tokens' })
@@ -50,11 +39,9 @@ export class UserToken extends Model {
     @Column(DataType.DATE)
     expiresAt: Date;
 
-    @CreatedAt
-    @Column({ field: 'created_at' })
-    createdAt: Date;
+    @Column({ type: DataType.DATE, allowNull: true })
+    lastLoginAt?: Date;
 
-    @UpdatedAt
-    @Column({ field: 'updated_at' })
-    updatedAt: Date;
+    @Column({ type: DataType.DATE, allowNull: true })
+    lastLogoutAt?: Date;
 }

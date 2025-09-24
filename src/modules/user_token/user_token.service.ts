@@ -3,6 +3,7 @@ import { repositories } from 'src/common/enums/repositories';
 import { UserToken } from './entities/user_token.entity';
 import { CreateTokenDto } from './dtos/createToken.dto';
 import { Op } from 'sequelize';
+import { RoleStatus } from 'src/common/enums/role_status';
 @Injectable()
 export class UserTokenService {
     constructor(
@@ -19,18 +20,25 @@ export class UserTokenService {
         expiresAt: dto.expiresAt,
         device: dto.device,
         ip: dto.ip,
+        lastLoginAt: new Date(),
         });
     }
 
     async findToken(refreshToken: string,device:string) {
-        return this.userTokenRepo.findOne({ where: { 
-            refreshToken,
-            device,
-            expiresAt: {[Op.gt]: new Date()}}});
-    }
+        return this.userTokenRepo.findOne({ where: {  refreshToken, device,isRevoked:false,expiresAt: {[Op.gt]: new Date()}}});}
 
     async deleteToken(refreshToken: string) {
         return this.userTokenRepo.destroy({ where: { refreshToken } });
+    }
+
+    async findExistingToken(role: RoleStatus, userId: number, device: string) 
+    {
+        const whereClause: any = {role,isRevoked:false,expiresAt: { [Op.gt]: new Date() }};
+        if (role === 'store') whereClause.storeId = userId;
+        else if (role === 'owner') whereClause.ownerId = userId;
+        else if (role === 'customer') whereClause.customerId = userId;
+        if (device) whereClause.device = device;
+        return this.userTokenRepo.findOne({ where: whereClause });
     }
 
     async rotateToken(token: UserToken,newRefreshToken: string,expiresAt: Date,) 
@@ -41,17 +49,36 @@ export class UserTokenService {
         return token;
     }
 
-    async findTokenByStoreAndOwner(storeId: number, ownerId: number, device?: string, ip?: string) 
+    async findTokenByStoreAndOwner(storeId: number, ownerId: number, device?: string,) 
     {
         return this.userTokenRepo.findOne({
             where: {
             storeId,
+            isRevoked:false,
             ownerId,
             ...(device ? { device } : {}),
-            ...(ip ? { ip } : {}),
             expiresAt: { [Op.gt]: new Date() }
             },
         });
+    }
+
+    async logout(role: RoleStatus, userId: number, device?: string) 
+    {
+        const whereClause: any = { role };
+        if (role === RoleStatus.STORE) whereClause.storeId = userId;
+        else if (role === RoleStatus.OWNER) whereClause.ownerId = userId;
+        else if (role === RoleStatus.CUSTOMER) whereClause.customerId = userId;
+
+        if (device) whereClause.device = device;
+
+        const token = await this.userTokenRepo.findOne({ where: whereClause });
+        if (token) {
+            token.lastLogoutAt = new Date(); 
+            token.isRevoked = true
+            await token.save();
+            return true;
+        }
+        return false;
     }
 
     deleteByCustomer(customerId:number,transaction?:any)

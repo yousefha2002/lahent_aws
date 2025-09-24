@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import * as admin from 'firebase-admin';
-const serviceAccount = require('./lahentnotification-firebase-adminsdk-fbsvc-eaea030a60.json');
+import { join } from 'path';
+const serviceAccount = require(join(__dirname, 'lahentnotification-firebase-adminsdk-fbsvc-eaea030a60.json'));
 
 @Injectable()
 export class FirebaseService {

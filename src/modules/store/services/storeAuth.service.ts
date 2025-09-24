@@ -177,38 +177,43 @@ export class StoreAuthService {
         return false;
     }
 
-    async login(dto: LoginStoreDto,lang:Language,device?: string, ip?: string) {
+    async login(dto: LoginStoreDto,lang:Language,device: string, ip?: string) {
         const storeByPass = await this.storeRepo.findOne({
             where: { phoneLogin: dto.phone },
             include:[{model:StoreLanguage,where:{languageCode:lang}}]
-            });
-            if (!storeByPass) {
-        throw new NotFoundException(this.i18n.t('translation.auth.invalidPhone',{lang})); // ✅ مترجمة
+        });
+        if (!storeByPass) {
+            throw new NotFoundException(this.i18n.t('translation.auth.invalidPhone',{lang}));
         }
 
         const isMatch = await comparePassword(dto.password, storeByPass.password);
         if (!isMatch) {
-        throw new BadRequestException(this.i18n.t('translation.auth.invalidPassword',{lang})); // ✅ مترجمة
+        throw new BadRequestException(this.i18n.t('translation.auth.invalidPassword',{lang}));
         }
 
         const payload = { id: storeByPass.id, role: RoleStatus.STORE };
         const accessToken = generateAccessToken(payload);
         const refreshToken = generateRefreshToken(payload)
-        await this.userTokenService.createToken({
-            storeId: storeByPass.id,
-            role: RoleStatus.STORE,
-            refreshToken,
-            expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS),
-            device,
-            ip,
-        });
+        const existingToken = await this.userTokenService.findExistingToken(RoleStatus.STORE,storeByPass.id,device);
+        if(existingToken)
+        {
+            await this.userTokenService.rotateToken(existingToken,refreshToken,new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS))
+            existingToken.lastLoginAt = new Date();
+            await existingToken.save();
+        }
+        else{
+            await this.userTokenService.createToken({
+                storeId: storeByPass.id,
+                role: RoleStatus.STORE,
+                refreshToken,
+                expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS),
+                device,
+                ip,
+            });
+        }
         await storeByPass.save()
 
-        return {
-        store: storeByPass,
-        accessToken,
-        refreshToken
-        };
+        return {store: storeByPass,accessToken,refreshToken};
     }
 
     async refreshToken(refreshToken:string,device:string)
@@ -246,7 +251,7 @@ export class StoreAuthService {
         const payload = { id: store.id, role: RoleStatus.STORE };
         const accessToken = generateAccessToken(payload);
         const refreshToken = generateRefreshToken(payload);
-        const existingToken = await this.userTokenService.findTokenByStoreAndOwner(storeId, ownerId, device, ip);
+        const existingToken = await this.userTokenService.findTokenByStoreAndOwner(storeId, ownerId, device);
 
         if (existingToken) {
             await this.userTokenService.rotateToken(
