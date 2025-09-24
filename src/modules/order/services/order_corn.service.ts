@@ -3,7 +3,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { repositories } from 'src/common/enums/repositories';
 import { Order } from '../entities/order.entity';
 import { OrderStatus } from 'src/common/enums/order_status';
-import { literal, Op, Sequelize } from 'sequelize';
+import { Op, Sequelize } from 'sequelize';
 import { CONFIRMATION_EXTENSION_MINUTES, UNPAID_EXPIRATION_MINUTES } from 'src/common/constants';
 import { OrderStatusService } from './order_status.service';
 import { OrderNotificationService } from './orde_notification.service';

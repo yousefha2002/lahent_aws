@@ -22,10 +22,4 @@ export class RealtimeService {
         if (!this._server) return this.logger.warn('Socket server not bound yet');
         this._server.to(room).emit(RealtimeEvents.OrderUpdated, payload);
     }
-
-    // إرسال حدث "تم إنشاء الطلب" (اختياري)
-    emitOrderPlacedToRoom(room: string, payload: OrderUpdatePayload) {
-        if (!this._server) return this.logger.warn('Socket server not bound yet');
-        this._server.to(room).emit(RealtimeEvents.OrderPlaced, payload);
-    }
 }

@@ -243,7 +243,7 @@ export class OrderStatusService {
         if (![OrderStatus.PREPARING, OrderStatus.READY].includes(order.status)) {
             throw new BadRequestException(this.i18n.translate('translation.orders.invalid_status_for_on_the_way', { lang }));
         }
-        this.orderNotificationService.notifyStore({orderId: order.id,status: 'CUSTOMER_ON_THE_WAY',storeId: order.storeId});
+        this.orderNotificationService.notifyStore({orderId: order.id,status: 'customer_on_the_way',storeId: order.storeId});
 
         return { success: true, message: this.i18n.translate('translation.orders.customer_on_the_way', { lang }) };
     }
