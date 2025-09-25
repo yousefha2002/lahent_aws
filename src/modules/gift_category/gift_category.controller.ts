@@ -42,4 +42,14 @@ export class GiftCategoryController {
   async findAllWithTemplates(@I18n() i18n: I18nContext) {
     return this.giftCategoryService.findAllWithTemplates(getLang(i18n));
   }
+
+  @ApiOperation({ summary: 'Get all Gift categories with all languages (admin only)' })
+  @ApiSecurity('access-token')
+  @ApiResponse({ status: 200, description: 'All gift categories', type: GiftCategoryDto, isArray: true })
+  @Serilaize(GiftCategoryDto)
+  @UseGuards(AdminGuard)
+  @Get('admin/all')
+  async findAllForAdmin() {
+    return this.giftCategoryService.findAllForAdmin();
+  }
 }

@@ -1,16 +1,8 @@
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import {BadRequestException,Inject,Injectable,NotFoundException,} from '@nestjs/common';
 import { GiftCategory } from './entites/gift_category.entity';
 import { repositories } from 'src/common/enums/repositories';
 import { Op } from 'sequelize';
-import {
-  CreateGiftCategoryDto,
-  GiftCategoryLanguage as GiftCategoryLanguageDto,
-} from './dto/action-gift-category.dto';
+import {CreateGiftCategoryDto} from './dto/action-gift-category.dto';
 import { GiftTemplate } from '../gift_template/entities/gift_template.entity';
 import { I18nService } from 'nestjs-i18n';
 import { Language } from 'src/common/enums/language';
@@ -155,6 +147,17 @@ export class GiftCategoryService {
           where: { languageCode: lang },
         },
       ],
+    });
+  }
+
+  async findAllForAdmin() {
+    return this.giftCategoryModel.findAll({
+      include: [
+        {
+          model: GiftCategoryLanguage,
+        }
+      ],
+      order: [['createdAt', 'DESC']]
     });
   }
 }

@@ -4,7 +4,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { AdminGuard } from 'src/common/guards/admin.guard';
 import { CreateGiftTemplateDto } from './dto/create-gift-template.dto';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
-import { PaginatedGiftTemplateDto } from './dto/gift-template.dto';
+import { PaginatedAdminGiftTemplateDto, PaginatedGiftTemplateDto } from './dto/gift-template.dto';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { getLang } from 'src/common/utils/get-lang.util';
@@ -74,6 +74,28 @@ export class GiftTemplateController {
       +page,
       +limit,
       true
+    );
+  }
+
+  @ApiOperation({ summary: 'Get all gift templates by gift categoryId (admin only)' })
+  @ApiParam({ name: 'categoryId', description: 'ID of the gift category', example: 1 })
+  @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
+  @ApiResponse({ status: 200, description: 'All gift templates by gift category (including inactive)', type: PaginatedAdminGiftTemplateDto })
+  @ApiSecurity('access-token')
+  @UseGuards(AdminGuard)
+  @Serilaize(PaginatedAdminGiftTemplateDto)
+  @Get('admin/by-category/:categoryId')
+  async findByCategoryForAdmin(
+    @Param('categoryId', ParseIntPipe) categoryId: number,
+    @Query('page') page = '1',
+    @Query('limit') limit = '10',
+  ) {
+    return this.giftTemplateService.findByCategoryWithPagination(
+      +categoryId,
+      +page,
+      +limit,
+      false,
     );
   }
 }

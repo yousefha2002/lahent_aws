@@ -11,6 +11,16 @@ export class BasicGiftTemplateDto {
   imageUrl: string;
 }
 
+export class AdminGiftTemplateDto extends BasicGiftTemplateDto {
+  @ApiProperty({ example: '2025-09-24T12:00:00Z' })
+  @Expose()
+  startDate: Date;
+
+  @ApiProperty({ example: '2025-12-31T12:00:00Z' })
+  @Expose()
+  endDate: Date | null;
+}
+
 export class PaginatedGiftTemplateDto {
   @ApiProperty({ example: 30 })
   @Expose()
@@ -24,4 +34,12 @@ export class PaginatedGiftTemplateDto {
   @Expose()
   @Type(() => BasicGiftTemplateDto)
   data: BasicGiftTemplateDto[];
+}
+
+
+export class PaginatedAdminGiftTemplateDto extends PaginatedGiftTemplateDto {
+  @ApiProperty({ type: [AdminGiftTemplateDto] })
+  @Expose()
+  @Type(() => AdminGiftTemplateDto)
+  data: AdminGiftTemplateDto[];
 }
