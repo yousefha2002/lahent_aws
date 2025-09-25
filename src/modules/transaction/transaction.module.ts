@@ -16,7 +16,7 @@ import { PaymentCardModule } from '../payment_card/payment_card.module';
     forwardRef(() => CustomerModule),
     PaymentSessionModule,
     forwardRef(() => GiftModule),
-    PaymentCardModule
+    forwardRef(()=>PaymentCardModule)
   ],
   exports: [TransactionService],
 })

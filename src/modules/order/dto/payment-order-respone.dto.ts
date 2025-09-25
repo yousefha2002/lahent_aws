@@ -21,4 +21,8 @@ export class PaymentResponseDto {
     @Expose()
     @ApiPropertyOptional({ description: 'HTTP method to use for redirect (POST/GET)', example: 'POST' })
     redirectMethod?: string;
+
+    @Expose()
+    @ApiPropertyOptional({ description: 'Payment Id for checking if payment is success', example: 'd76bc9b1-c977-41f8-a459-9d743a96bb99' })
+    paymentId?: string;
 }

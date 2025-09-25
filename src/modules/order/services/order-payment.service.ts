@@ -136,7 +136,7 @@ export class OrderPaymentService {
                     }
                 const apiCard = formatCardForApi(card);
                 await transaction.rollback();
-                const { redirectUrl ,redirectMethod,redirectParams} = await this.paymentSessionService.startPayment({
+                const { redirectUrl ,redirectMethod,redirectParams,paymentId} = await this.paymentSessionService.startPayment({
                     customer,
                     amount: amountLeftToPay,
                     provider: order.paymentGateway,
@@ -148,7 +148,7 @@ export class OrderPaymentService {
                     sourceId: order.id,
                 });
 
-                return { redirectUrl,redirectMethod,redirectParams };
+                return { redirectUrl,redirectMethod,redirectParams,paymentId };
             }
         } catch (error) {
             await transaction.rollback();

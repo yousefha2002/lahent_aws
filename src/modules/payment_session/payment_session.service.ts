@@ -37,7 +37,7 @@ export class PaymentSessionService {
         session.currency = currency
         
         await session.save()
-        return { redirectParams,redirectMethod,redirectUrl};
+        return { redirectParams,redirectMethod,redirectUrl,paymentId:session.id};
     }
 
     async getByPaymentOrderId(paymentOrderId: string) {
@@ -46,8 +46,15 @@ export class PaymentSessionService {
         return session;
     }
 
-    findAll()
-    {
-        return this.paymentSessionRepo.findAll()
+    async checkPaymentStatus(paymentId: number) {
+        const session = await this.paymentSessionRepo.findByPk(paymentId);
+        if (!session) throw new NotFoundException('Payment session not found');
+
+        return {
+            id: session.id,
+            status: session.status,
+            amount: session.amount,
+            currency: session.currency,
+        };
     }
 }

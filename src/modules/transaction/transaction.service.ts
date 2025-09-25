@@ -65,7 +65,7 @@ export class TransactionService {
       throw new BadRequestException('Either paymentCardId or newCard must be provided');
     }
     const apiCard = formatCardForApi(card);
-    const { redirectParams,redirectUrl ,redirectMethod} =await this.paymentSessionService.startPayment({
+    const { redirectParams,redirectUrl ,redirectMethod,paymentId} =await this.paymentSessionService.startPayment({
       customer,
       amount: offer.amountRequired,
       provider: gateway,
@@ -76,7 +76,7 @@ export class TransactionService {
       },
       sourceId: loyaltyOfferId,
     });
-    return { redirectParams,redirectUrl,redirectMethod };
+    return { redirectParams,redirectUrl,redirectMethod,paymentId };
   }
 
   async confirmChargeWallet(session: PaymentSession) {
