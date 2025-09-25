@@ -467,18 +467,15 @@ export class StoreController {
     return this.storeAuthService.updatePassword(store, dto);
   }
 
-  @UseGuards(StoreOrOwnerGuard)
   @Post('logout')
   @ApiOperation({ summary: 'Logout store and invalidate refresh token' })
-  @ApiSecurity('access-token')
+  @ApiBody({type:RefreshTokenDto})
   @ApiResponse({
     status: 200,
     description: 'Store logged out successfully',
     schema: { example: { message: 'Logged out successfully' } },
   })
-  async logoutStore(@CurrentUser() store: Store, @Req() req: Request) {
-    const device = req.headers['user-agent'] || 'unknown';
-    await this.userTokenService.logout(RoleStatus.STORE,store.id, device);
-    return { message: 'Logged out successfully' };
+  async logoutStore(@CurrentUser() store: Store,@Body() body:RefreshTokenDto) {
+    return this.userTokenService.logout(body);
   }
 }

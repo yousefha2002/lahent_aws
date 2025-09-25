@@ -1,9 +1,10 @@
-import { BadRequestException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import {Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
 import { UserToken } from './entities/user_token.entity';
 import { CreateTokenDto } from './dtos/createToken.dto';
 import { Op } from 'sequelize';
 import { RoleStatus } from 'src/common/enums/role_status';
+import { RefreshTokenDto } from './dtos/refreshToken.dto';
 @Injectable()
 export class UserTokenService {
     constructor(
@@ -50,18 +51,18 @@ export class UserTokenService {
         return token;
     }
 
-    async logout(role: RoleStatus, userId: number, deviceId: string) 
+    async logout(body:RefreshTokenDto) 
     {
-        const token = await this.findExistingToken(role, userId, deviceId);
-        if (token) {
-            token.lastLogoutAt = new Date(); 
-            token.isRevoked = true
-            await token.save();
-            return true;
+        const token = await this.findTokenForRefreshing(body.refreshToken,body.deviceId);
+        if (!token) {
+            throw new UnauthorizedException('Invalid or already revoked token');
         }
-        else{
-            throw new UnauthorizedException('You can not logout')
-        }   
+
+        token.isRevoked = true;
+        token.lastLogoutAt = new Date();
+        await token.save();
+
+        return { message: 'Logged out successfully' };
     }
 
     deleteByCustomer(customerId:number,transaction?:any)
