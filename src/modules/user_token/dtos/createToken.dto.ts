@@ -7,4 +7,5 @@ export interface CreateTokenDto {
     expiresAt: Date;
     device?: string;
     ip?: string;
+    deviceId:string
 }

@@ -33,6 +33,8 @@ import { OwnerStoresResponseDto } from './dto/owner-store-response.dto';
 import { IncompleteStoreResponseDto } from './dto/in-completed-store-response.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { RoleStatus } from 'src/common/enums/role_status';
+import { SelectOwnerForStoreDto } from './dto/selectStoreForOwner.dto';
+import { RefreshTokenDto } from '../user_token/dtos/refreshToken.dto';
 
 @Controller('store')
 export class StoreController {
@@ -410,16 +412,7 @@ export class StoreController {
 
   @Post('refresh-token')
   @ApiOperation({ summary: 'Refresh access token using refresh token' })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        refreshToken: { type: 'string', example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' },
-        accessToken: { type: 'string', example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' },
-      },
-      required: ['refreshToken'],
-    },
-  })
+  @ApiBody({type:RefreshTokenDto})
   @ApiResponse({
     status: 200,
     description: 'Returns new access & refresh tokens',
@@ -429,9 +422,8 @@ export class StoreController {
       },
     },
   })
-  async refreshToken(@Body('refreshToken') refreshToken: string,@Req() req: Request) {
-    const device = req.headers['user-agent'] || 'unknown';
-    return this.storeAuthService.refreshToken(refreshToken,device)
+  async refreshToken(@Body() dto: RefreshTokenDto) {
+    return this.storeAuthService.refreshToken(dto)
   }
 
   @Post(':storeId/select/byOwner')
@@ -439,12 +431,13 @@ export class StoreController {
   @ApiOperation({ summary: 'Select a store for the current owner' })
   @ApiParam({ name: 'storeId', description: 'ID of the store to select', type: Number })
   @ApiResponse({ status: 200, description: 'Store selected successfully', type: StoreWithTokenDto })
+  @ApiBody({ type: SelectOwnerForStoreDto })
   @UseGuards(OwnerGuard)
-  selectStoreForOwner(@CurrentUser() owner:Owner,@Param('storeId') storeId:number,@I18n() i18n: I18nContext,@Req() req: Request,@Ip() ip:string)
+  selectStoreForOwner(@CurrentUser() owner:Owner,@Param('storeId') storeId:number,@Body() dto:SelectOwnerForStoreDto,@I18n() i18n: I18nContext,@Req() req: Request,@Ip() ip:string)
   {
     const lang = getLang(i18n)
     const device = req.headers['user-agent'] || 'unknown';
-    return this.storeAuthService.selectStoreForOnwer(storeId,owner.id,lang,device,ip)
+    return this.storeAuthService.selectStoreForOnwer(storeId,owner.id,dto,lang,device,ip)
   }
 
   @Serilaize(StoreOptionsDto)

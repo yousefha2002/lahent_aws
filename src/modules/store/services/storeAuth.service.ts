@@ -24,6 +24,8 @@ import { Sequelize } from 'sequelize';
 import { InitialCreateStoreDto } from '../dto/initial-create-store.dto';
 import { validateRequiredLanguages } from 'src/common/utils/validateLanguages';
 import { UpdatePasswordDto } from '../dto/update-password.dto';
+import { SelectOwnerForStoreDto } from '../dto/selectStoreForOwner.dto';
+import { RefreshTokenDto } from 'src/modules/user_token/dtos/refreshToken.dto';
 
 @Injectable()
 export class StoreAuthService {
@@ -194,7 +196,7 @@ export class StoreAuthService {
         const payload = { id: storeByPass.id, role: RoleStatus.STORE };
         const accessToken = generateAccessToken(payload);
         const refreshToken = generateRefreshToken(payload)
-        const existingToken = await this.userTokenService.findExistingToken(RoleStatus.STORE,storeByPass.id,device);
+        const existingToken = await this.userTokenService.findExistingToken(RoleStatus.STORE,storeByPass.id,dto.deviceId);
         if(existingToken)
         {
             await this.userTokenService.rotateToken(existingToken,refreshToken,new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS))
@@ -209,6 +211,7 @@ export class StoreAuthService {
                 expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS),
                 device,
                 ip,
+                deviceId:dto.deviceId
             });
         }
         await storeByPass.save()
@@ -216,11 +219,12 @@ export class StoreAuthService {
         return {store: storeByPass,accessToken,refreshToken};
     }
 
-    async refreshToken(refreshToken:string,device:string)
+    async refreshToken(dto:RefreshTokenDto)
     {
+        const {refreshToken,deviceId} = dto
         try {
             const decoded = await this.jwtService.verifyAsync(refreshToken, {secret: 'refresh_token',});
-            const tokenRecord = await this.userTokenService.findToken(refreshToken,device);
+            const tokenRecord = await this.userTokenService.findTokenForRefreshing(refreshToken,deviceId);
             if (!tokenRecord) {
                 throw new BadRequestException('Invalid or expired refresh token');
             }
@@ -238,12 +242,10 @@ export class StoreAuthService {
         }
     }
 
-    async selectStoreForOnwer(storeId:number,ownerId:number,lang:Language,device?:string,ip?:string)
+    async selectStoreForOnwer(storeId:number,ownerId:number,dto:SelectOwnerForStoreDto,lang:Language,device?:string,ip?:string)
     {
-        const store = await this.storeRepo.findOne({
-            where:{id:storeId,ownerId},
-            include:[{model:StoreLanguage,where:{languageCode:lang}}]
-        })
+        const {deviceId} = dto
+        const store = await this.storeRepo.findOne({where:{id:storeId,ownerId},include:[{model:StoreLanguage,where:{languageCode:lang}}]})
         if(!store)
         {
             throw new ForbiddenException('You are not the owner of the store')
@@ -251,7 +253,7 @@ export class StoreAuthService {
         const payload = { id: store.id, role: RoleStatus.STORE };
         const accessToken = generateAccessToken(payload);
         const refreshToken = generateRefreshToken(payload);
-        const existingToken = await this.userTokenService.findTokenByStoreAndOwner(storeId, ownerId, device);
+        const existingToken = await this.userTokenService.findExistingToken(RoleStatus.STORE,storeId,deviceId);
 
         if (existingToken) {
             await this.userTokenService.rotateToken(
@@ -268,6 +270,7 @@ export class StoreAuthService {
             expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS),
             device,
             ip,
+            deviceId
         });
         }
         return { accessToken ,refreshToken,store};

@@ -9,6 +9,7 @@ import { OwnerDto } from './dto/owner.dto';
 import { ApiBody, ApiOperation, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
+import { RefreshTokenDto } from '../user_token/dtos/refreshToken.dto';
 
 @Controller('owner')
 export class OwnerController {
@@ -35,18 +36,7 @@ export class OwnerController {
   }
 
   @ApiOperation({ summary: 'Refresh access token using refresh token' })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        refreshToken: {
-          type: 'string',
-          example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
-        },
-      },
-      required: ['refreshToken'],
-    },
-  })
+  @ApiBody({type:RefreshTokenDto})
   @ApiResponse({
     status: 200,
     description: 'New access token returned successfully',
@@ -57,9 +47,9 @@ export class OwnerController {
     },
   })
   @Post('refresh-token')
-  async refreshToken(@Body('refreshToken') refreshToken: string,@Req() req: Request) {
+  async refreshToken(@Body() dto:RefreshTokenDto,@Req() req: Request) {
     const device = req.headers['user-agent'] || 'unknown';
-    return this.ownerService.refreshToken(refreshToken,device);
+    return this.ownerService.refreshToken(dto,device);
   }
 
   @ApiOperation({ summary: 'Get current owner profile' })

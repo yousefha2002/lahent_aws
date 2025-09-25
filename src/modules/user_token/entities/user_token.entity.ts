@@ -44,4 +44,8 @@ export class UserToken extends Model {
 
     @Column({ type: DataType.DATE, allowNull: true })
     lastLogoutAt?: Date;
+
+    @AllowNull(false)
+    @Column(DataType.STRING)
+    deviceId: string;
 }

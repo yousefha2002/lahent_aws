@@ -8,6 +8,7 @@ import { ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { OwnerOtpSendToken, OwnerOtpVerifyToken } from './dto/owner-otp.dto';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
+import { RoleStatus } from 'src/common/enums/role_status';
 
 @Controller('otp-code')
 export class OtpCodeController {
@@ -29,7 +30,7 @@ export class OtpCodeController {
   ) {
     const lang = getLang(i18n);
     const device = req.headers['user-agent'] || 'unknown';
-    return this.otpCodeService.verifyOtp(body.phone, 'owner', body.code, lang,device,ip);
+    return this.otpCodeService.verifyOtp(body, RoleStatus.OWNER, lang,device,ip);
   }
 
   @ApiOperation({ summary: 'Verify OTP for customer' })
@@ -48,7 +49,7 @@ export class OtpCodeController {
   ) {
     const lang = getLang(i18n);
     const device = req.headers['user-agent'] || 'unknown';
-    return this.otpCodeService.verifyOtp(body.phone, 'customer', body.code, lang,device,ip);
+    return this.otpCodeService.verifyOtp(body, RoleStatus.CUSTOMER, lang,device,ip);
   }
 
   @ApiOperation({ summary: 'Send OTP to owner' })

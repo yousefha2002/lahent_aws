@@ -20,6 +20,7 @@ import { JwtService } from '@nestjs/jwt';
 import { REFRESH_TOKEN_EXPIRES_MS } from 'src/common/constants';
 import { Sequelize } from 'sequelize';
 import { Op } from 'sequelize';
+import { RefreshTokenDto } from '../user_token/dtos/refreshToken.dto';
 
 @Injectable()
 export class CustomerService {
@@ -67,11 +68,13 @@ export class CustomerService {
     return customer;
   }
 
-  async refreshToken(refreshToken:string,device:string)
+  async refreshToken(dto:RefreshTokenDto)
   {
+    const {refreshToken,deviceId} = dto
     try {
       const decoded = await this.jwtService.verifyAsync(refreshToken, {secret: 'refresh_token'});
-      const tokenRecord = await this.userTokenService.findToken(refreshToken,device)
+      const tokenRecord = await this.userTokenService.findTokenForRefreshing(refreshToken,deviceId)
+      console.log(decoded)
       if (!tokenRecord) {
         throw new BadRequestException('Invalid or expired refresh token');
       }
@@ -81,7 +84,7 @@ export class CustomerService {
       await this.userTokenService.rotateToken(tokenRecord,newRefreshToken,new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS));
       return { accessToken, refreshToken: newRefreshToken };
     } catch (err) {
-      throw new BadRequestException('Invalid or expired acess token');
+      throw new BadRequestException(err.message || 'Invalid or expired refresh token');
     }
   }
 

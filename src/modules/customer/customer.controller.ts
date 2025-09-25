@@ -12,6 +12,7 @@ import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
 import { ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiSecurity } from '@nestjs/swagger';
+import { RefreshTokenDto } from '../user_token/dtos/refreshToken.dto';
 
 @Controller('customer')
 export class CustomerController {
@@ -59,23 +60,14 @@ export class CustomerController {
   }
 
   @ApiOperation({ summary: 'Refresh access token using refresh token' })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        refreshToken: { type: 'string', example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' },
-      },
-      required: ['refreshToken'],
-    },
-  })
+  @ApiBody({type:RefreshTokenDto})
   @ApiResponse({
     status: 200,
     description: 'New access token returned successfully',
     schema: { example: { accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',refreshToken:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." } },
   })
   @Post('refresh-token')
-  async refreshToken(@Body('refreshToken') refreshToken: string,@Req() req: Request) {
-    const device = req.headers['user-agent'] || 'unknown';
-    return this.customerService.refreshToken(refreshToken,device);
+  async refreshToken(@Body() dto: RefreshTokenDto) {
+    return this.customerService.refreshToken(dto);
   }
 }

@@ -21,23 +21,24 @@ export class UserTokenService {
         device: dto.device,
         ip: dto.ip,
         lastLoginAt: new Date(),
+        deviceId:dto.deviceId
         });
     }
 
-    async findToken(refreshToken: string,device:string) {
-        return this.userTokenRepo.findOne({ where: {  refreshToken, device,isRevoked:false,expiresAt: {[Op.gt]: new Date()}}});}
+    async findTokenForRefreshing(refreshToken: string,deviceId:string) {
+        return this.userTokenRepo.findOne({ where: {  refreshToken, deviceId,isRevoked:false,expiresAt: {[Op.gt]: new Date()}}});
+    }
 
     async deleteToken(refreshToken: string) {
         return this.userTokenRepo.destroy({ where: { refreshToken } });
     }
 
-    async findExistingToken(role: RoleStatus, userId: number, device: string) 
+    async findExistingToken(role: RoleStatus, userId: number, deviceId: string) 
     {
-        const whereClause: any = {role,isRevoked:false,expiresAt: { [Op.gt]: new Date() }};
+        const whereClause: any = {role,isRevoked:false,deviceId,expiresAt: { [Op.gt]: new Date() }};
         if (role === 'store') whereClause.storeId = userId;
         else if (role === 'owner') whereClause.ownerId = userId;
         else if (role === 'customer') whereClause.customerId = userId;
-        if (device) whereClause.device = device;
         return this.userTokenRepo.findOne({ where: whereClause });
     }
 
@@ -49,22 +50,9 @@ export class UserTokenService {
         return token;
     }
 
-    async findTokenByStoreAndOwner(storeId: number, ownerId: number, device?: string,) 
+    async logout(role: RoleStatus, userId: number, deviceId: string) 
     {
-        return this.userTokenRepo.findOne({
-            where: {
-            storeId,
-            isRevoked:false,
-            ownerId,
-            ...(device ? { device } : {}),
-            expiresAt: { [Op.gt]: new Date() }
-            },
-        });
-    }
-
-    async logout(role: RoleStatus, userId: number, device: string) 
-    {
-        const token = await this.findExistingToken(role, userId, device);
+        const token = await this.findExistingToken(role, userId, deviceId);
         if (token) {
             token.lastLogoutAt = new Date(); 
             token.isRevoked = true
