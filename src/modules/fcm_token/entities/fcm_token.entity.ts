@@ -1,6 +1,6 @@
 import { Table, Column, Model, DataType, AutoIncrement, PrimaryKey, AllowNull } from 'sequelize-typescript';
+import { RoleStatus } from 'src/common/enums/role_status';
 
-export type UserRole = 'customer' | 'owner' | 'store';
 
 @Table({ tableName: 'fcm_tokens' })
 export class FcmToken extends Model {
@@ -14,8 +14,8 @@ export class FcmToken extends Model {
     userId: number;
 
     @AllowNull(false)
-    @Column(DataType.ENUM('customer', 'owner', 'store'))
-    role: UserRole;
+    @Column(DataType.ENUM(...Object.values(RoleStatus)))
+    role:RoleStatus;
 
     @AllowNull(false)
     @Column(DataType.STRING)
@@ -23,7 +23,4 @@ export class FcmToken extends Model {
 
     @Column(DataType.STRING)
     deviceName: string;
-
-    @Column({ type: DataType.DATE, defaultValue: DataType.NOW })
-    createdAt: Date;
 }

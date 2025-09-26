@@ -1,7 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { FcmToken, UserRole } from './entities/fcm_token.entity';
+import { FcmToken } from './entities/fcm_token.entity';
 import { repositories } from 'src/common/enums/repositories';
 import { FirebaseService } from './common/firebase/firebase.service';
+import { RoleStatus } from 'src/common/enums/role_status';
 
 @Injectable()
 export class FcmTokenService {
@@ -11,7 +12,7 @@ export class FcmTokenService {
     ) {}
 
     /** تسجيل أو تحديث token لجهاز */
-    async registerToken(userId: number, role: UserRole, token: string, deviceName?: string) {
+    async registerToken(userId: number, role: RoleStatus, token: string, deviceName?: string) {
         const existing = await this.fcmTokenRepo.findOne({ where: { userId, token,role } });
         if (!existing) {
             await this.fcmTokenRepo.create({ userId, role, token, deviceName });
@@ -29,7 +30,7 @@ export class FcmTokenService {
     /** إرسال إشعار لمستخدم واحد لجميع أجهزته */
     async notifyUser(
         userId: number,
-        role: UserRole,
+        role: RoleStatus,
         title: string,
         body: string,
         data?: Record<string, string>,
@@ -49,7 +50,7 @@ export class FcmTokenService {
 
     /** إرسال إشعار لمجموعة من المستخدمين */
     async notifyUsers(
-        users: { userId: number; role: UserRole }[],
+        users: { userId: number; role: RoleStatus }[],
         title: string,
         body: string,
         data?: Record<string, string>,
