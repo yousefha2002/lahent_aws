@@ -1,14 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { FcmToken } from './entities/fcm_token.entity';
 import { repositories } from 'src/common/enums/repositories';
-import { FirebaseService } from './common/firebase/firebase.service';
 import { RoleStatus } from 'src/common/enums/role_status';
 
 @Injectable()
 export class FcmTokenService {
     constructor(
         @Inject(repositories.fcm_token_repository) private fcmTokenRepo: typeof FcmToken,
-        private readonly firebaseService: FirebaseService,
+        // private readonly firebaseService: FirebaseService,
     ) {}
 
     /** تسجيل أو تحديث token لجهاز */
@@ -43,7 +42,7 @@ export class FcmTokenService {
         if (tokens.length === 0) return { success: false, message: 'No devices found' };
 
         const tokenList = tokens.map(t => t.token);
-        await this.firebaseService.sendNotificationToMultiple(tokenList, title, body, data);
+        // await this.firebaseService.sendNotificationToMultiple(tokenList, title, body, data);
 
         return { success: true, notifiedDevices: tokenList.length };
     }
@@ -65,7 +64,7 @@ export class FcmTokenService {
         }
 
         if (tokens.length === 0) return { success: false, message: 'No devices found' };
-        await this.firebaseService.sendNotificationToMultiple(tokens, title, body, data);
+        // await this.firebaseService.sendNotificationToMultiple(tokens, title, body, data);
 
         return { success: true, notifiedDevices: tokens.length };
     }
