@@ -46,7 +46,7 @@ export class OrderPaymentService {
         private orderService: OrderService,
         private readonly i18n: I18nService,
         private readonly orderNotificationService:OrderNotificationService,
-        private readonly paymentCardService:PaymentCardService
+        private readonly paymentCardService:PaymentCardService,
     ) {}
 
     async payOrder(orderId: number, customer: Customer, dto:PayOrderDTO,lang: Language) {
@@ -84,6 +84,7 @@ export class OrderPaymentService {
                 await this.orderPointsService.handlePointsAfterPayment(customer.id, order.pointsRedeemed, order.id, transaction);
                 await transaction.commit();
                 this.orderNotificationService.notifyStore({orderId: order.id,status: order.status,storeId: order.storeId});
+                await this.orderNotificationService.sendOrderNotificationToStore(order.id,order.status,order.storeId,customer.name,lang);
                 return { success: true, message: this.i18n.translate('translation.orders.paid_with_points', { lang }) };
             }
 
@@ -106,6 +107,7 @@ export class OrderPaymentService {
                     orderId: order.id,
                 }, transaction);
                 this.orderNotificationService.notifyStore({orderId: order.id,status: order.status,storeId: order.storeId});
+                await this.orderNotificationService.sendOrderNotificationToStore(order.id,order.status,order.storeId,customer.name,lang);
                 await transaction.commit();
                 return { success: true, message: this.i18n.translate('translation.orders.paid_with_points_and_wallet', { lang }) };
             }
@@ -178,8 +180,10 @@ export class OrderPaymentService {
                 orderId: order.id,
             }, transaction);
 
-            await transaction.commit();
+            const customer = await this.customerService.findById(order.customerId);
             this.orderNotificationService.notifyStore({orderId: order.id,status: order.status,storeId: order.storeId});
+            await this.orderNotificationService.sendOrderNotificationToStore(order.id,order.status,order.storeId,customer.name,lang);
+            await transaction.commit();
         } catch (error) {
             await transaction.rollback();
             throw error;

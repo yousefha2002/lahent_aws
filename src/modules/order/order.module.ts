@@ -27,6 +27,7 @@ import { RealtimeModule } from '../realtime/realtime.module';
 import { StoreTransactionModule } from '../store_transaction/store_transaction.module';
 import { LoyaltySettingModule } from '../loyalty_setting/loyalty_setting.module';
 import { PaymentCardModule } from '../payment_card/payment_card.module';
+import { FcmTokenModule } from '../fcm_token/fcm_token.module';
 
 @Module({
   controllers: [OrderController],
@@ -59,7 +60,8 @@ import { PaymentCardModule } from '../payment_card/payment_card.module';
     RealtimeModule,
     StoreTransactionModule,
     LoyaltySettingModule,
-    PaymentCardModule
+    PaymentCardModule,
+    FcmTokenModule
   ],
   exports: [OrderService,OrderPaymentService],
 })
