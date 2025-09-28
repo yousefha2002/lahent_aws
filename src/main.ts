@@ -4,10 +4,7 @@ import * as bodyParser from 'body-parser';
 import * as dotenv from 'dotenv';
 dotenv.config();
 
-import {
-  ExpressAdapter,
-  NestExpressApplication,
-} from '@nestjs/platform-express';
+import {ExpressAdapter,NestExpressApplication} from '@nestjs/platform-express';
 import * as express from 'express';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';

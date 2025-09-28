@@ -30,10 +30,6 @@ export class UserTokenService {
         return this.userTokenRepo.findOne({ where: {  refreshToken, deviceId,isRevoked:false,expiresAt: {[Op.gt]: new Date()}}});
     }
 
-    async deleteToken(refreshToken: string) {
-        return this.userTokenRepo.destroy({ where: { refreshToken } });
-    }
-
     async findExistingToken(role: RoleStatus, userId: number, deviceId: string) 
     {
         const whereClause: any = {role,isRevoked:false,deviceId,expiresAt: { [Op.gt]: new Date() }};

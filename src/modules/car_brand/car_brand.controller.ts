@@ -60,6 +60,7 @@ export class CarBrandController {
   }
 
   @ApiOperation({ summary: 'Get all car brands and their languages' })
+  @ApiSecurity('access-token')
   @ApiResponse({
     status: 200,
     description: 'List of car brands',
@@ -73,6 +74,8 @@ export class CarBrandController {
     return this.carBrandService.getAll(lang);
   }
 
+  @ApiOperation({ summary: 'Get all car brands for admin' })
+  @ApiResponse({type:[CarBrandDto]})
   @Get('admin')
   @UseGuards(AdminGuard)
   @Serilaize(CarBrandDto)

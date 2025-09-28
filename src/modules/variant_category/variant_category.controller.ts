@@ -31,15 +31,21 @@ export class VariantCategoryController {
   @Serilaize(VariantCategoryDto)
   @Get()
   @ApiOperation({ summary: 'Get all variant categories' })
-  @ApiQuery({ name: 'lang', enum: Language, required: false, example: 'ar' })
-  @ApiResponse({
-    status: 200,
-    description: 'List of all variant categories',
-    type: [VariantCategoryDto],
-  })
+  @ApiResponse({type: [VariantCategoryDto]})
   getAll(@I18n() i18n: I18nContext)
   {
     const lang = getLang(i18n);
     return this.variantCategoryService.getAll(lang)
+  }
+
+  @UseGuards(AdminGuard)
+  @Serilaize(VariantCategoryDto)
+  @Get('admin')
+  @ApiOperation({ summary: 'Get all variant categories for admin' })
+  @ApiSecurity('access-token')
+  @ApiResponse({type: [VariantCategoryDto]})
+  getAllForAdmin()
+  {
+    return this.variantCategoryService.getAll()
   }
 }

@@ -60,9 +60,13 @@ export class VariantCategoryService {
         }
     }
 
-    getAll(lang:Language)
+    getAll(lang?:Language)
     {
-        return this.variantCategoryRepo.findAll({include:[{model:VariantCategoryLanguage,where:{languageCode:lang},required:false}]})
+        const includeOptions: any = { model: VariantCategoryLanguage };
+        if (lang) {
+            includeOptions.where = { languageCode: lang };
+        }
+        return this.variantCategoryRepo.findAll({include:[includeOptions]})
     }
 
     async findOne(categoryId:number)

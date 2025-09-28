@@ -21,6 +21,10 @@ export class FcmToken extends Model {
     @Column(DataType.STRING)
     token: string;
 
+    @AllowNull(false)
+    @Column(DataType.STRING)
+    deviceId: string;
+
     @Column(DataType.STRING)
     deviceName: string;
 }
