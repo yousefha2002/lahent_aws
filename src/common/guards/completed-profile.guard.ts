@@ -4,12 +4,11 @@ import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@
 export class CompletedProfileGuard implements CanActivate {
     canActivate(context: ExecutionContext): boolean {
         const request = context.switchToHttp().getRequest();
-        const customer = request.currentUser;
+        const user = request.currentUser;
 
-        if (!customer || !customer.isCompletedProfile) {
+        if (!user || !user.isCompletedProfile) {
             throw new ForbiddenException('Please complete your profile first');
         }
-
         return true;
     }
 }

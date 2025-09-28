@@ -35,6 +35,7 @@ import { UpdatePasswordDto } from './dto/update-password.dto';
 import { SelectOwnerForStoreDto } from './dto/selectStoreForOwner.dto';
 import { RefreshTokenDto } from '../user_token/dtos/refreshToken.dto';
 import { StoreGuard } from 'src/common/guards/store.guard';
+import { CompletedProfileGuard } from 'src/common/guards/completed-profile.guard';
 
 @Controller('store')
 export class StoreController {
@@ -50,7 +51,7 @@ export class StoreController {
   @ApiSecurity('access-token')
   @ApiBody({ type: InitialCreateStoreDto })
   @ApiResponse({status: 200,schema: {example: {message: 'Store created successfully'}}})
-  @UseGuards(OwnerGuard)
+  @UseGuards(OwnerGuard,CompletedProfileGuard)
   async initialCreate(@Body() dto: InitialCreateStoreDto,@CurrentUser() owner: Owner,@I18n() i18n: I18nContext,) 
   {
     const lang = getLang(i18n);
