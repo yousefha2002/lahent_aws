@@ -11,7 +11,6 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ProuductVariantService } from './prouduct_variant.service';
-import { StoreOrOwnerGuard } from 'src/common/guards/StoreOrOwner.guard';
 import { ApprovedStoreGuard } from 'src/common/guards/approvedStore.guard';
 import { AnyFilesInterceptor, FileInterceptor } from '@nestjs/platform-express';
 import { multerOptions } from 'src/multer/multer.options';
@@ -21,6 +20,7 @@ import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { Store } from '../store/entities/store.entity';
 import { UpdateProductVariantDto } from './dto/update-variant.dto';
 import { ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
+import { StoreGuard } from 'src/common/guards/store.guard';
 
 @Controller('product-variant')
 export class ProuductVariantController {
@@ -28,7 +28,7 @@ export class ProuductVariantController {
     private readonly prouductVariantService: ProuductVariantService,
   ) {}
 
-  @UseGuards(StoreOrOwnerGuard, ApprovedStoreGuard)
+  @UseGuards(StoreGuard, ApprovedStoreGuard)
   @UseInterceptors(FileInterceptor('image', multerOptions))
   @UseFilters(MulterExceptionFilter)
   @Put(':variantId')
@@ -58,7 +58,6 @@ export class ProuductVariantController {
       required: ['additional_price'],
     },
   })
-  @ApiQuery({ name: 'storeId', required: false, example: '1' })
   @ApiResponse({
     status: 200,
     description: 'Variant updated successfully',
@@ -78,12 +77,11 @@ export class ProuductVariantController {
     ); 
   }
 
-  @UseGuards(StoreOrOwnerGuard, ApprovedStoreGuard)
+  @UseGuards(StoreGuard, ApprovedStoreGuard)
   @Put('/active/:variantId')
   @ApiOperation({ summary: 'Toggle active status of a product variant' })
   @ApiSecurity('access-token')
   @ApiParam({ name: 'variantId', type: Number, description: 'ID of the variant', example: 5 })
-  @ApiQuery({ name: 'storeId', required: false, example: '1' })
   @ApiResponse({
     status: 200,
     description: 'Active status updated successfully',
@@ -93,14 +91,13 @@ export class ProuductVariantController {
     return this.prouductVariantService.updateIsActive(+variantId, store.id);
   }
 
-  @UseGuards(StoreOrOwnerGuard, ApprovedStoreGuard)
+  @UseGuards(StoreGuard, ApprovedStoreGuard)
   @UseInterceptors(AnyFilesInterceptor(multerOptions))
   @UseFilters(MulterExceptionFilter)
   @Post()
   @ApiOperation({ summary: 'Create multiple product variants with images' })
   @ApiSecurity('access-token')
   @ApiConsumes('multipart/form-data')
-  @ApiQuery({ name: 'storeId', required: false, example: '1' })
   @ApiBody({
     schema: {
       type: 'object',

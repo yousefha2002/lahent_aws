@@ -1,7 +1,6 @@
 import { Controller, Get, Query, UseGuards, ParseIntPipe } from '@nestjs/common';
 import { StoreTransactionService } from './store_transaction.service';
 import { ApiOperation, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
-import { StoreOrOwnerGuard } from 'src/common/guards/StoreOrOwner.guard';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { Store } from '../store/entities/store.entity';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
@@ -9,13 +8,14 @@ import { PaginatedStoreTransactionDto } from './dto/store_transaction.dto';
 import { StoreFinancialsFilterDto } from '../store/dto/store-financials-filter.dto';
 import { StoreFinancialsResponseDto } from './dto/store-financials-response.dto';
 import { StoreTransactionType } from 'src/common/enums/transaction_type';
+import { StoreGuard } from 'src/common/guards/store.guard';
 
 @Controller('store-transaction')
 export class StoreTransactionController {
     constructor(private readonly storeTransactionService: StoreTransactionService) {}
 
     @Serilaize(PaginatedStoreTransactionDto)
-    @UseGuards(StoreOrOwnerGuard)
+    @UseGuards(StoreGuard)
     @ApiOperation({ summary: 'Get all transactions for a store with pagination' })
     @ApiSecurity('access-token')
     @ApiQuery({ name: 'page', required: false, example: 1 })
@@ -32,7 +32,7 @@ export class StoreTransactionController {
         return this.storeTransactionService.getAllByStore(store.id, page,limit,status);
     }
 
-    @UseGuards(StoreOrOwnerGuard)
+    @UseGuards(StoreGuard)
     @ApiOperation({ summary: 'Get available balance for current store' })
     @ApiSecurity('access-token')
     @ApiResponse({ status: 200, description: 'Available balance of the store', type: Number})
@@ -43,7 +43,7 @@ export class StoreTransactionController {
     }
 
     @Serilaize(StoreFinancialsResponseDto)
-    @UseGuards(StoreOrOwnerGuard)
+    @UseGuards(StoreGuard)
     @ApiOperation({ summary: 'Get store financials with filter' })
     @ApiSecurity('access-token')
     @ApiResponse({ status: 200, description: 'Store financials', type: StoreFinancialsResponseDto })

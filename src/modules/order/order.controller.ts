@@ -5,7 +5,6 @@ import { CustomerGuard } from 'src/common/guards/customer.guard';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { Customer } from '../customer/entities/customer.entity';
 import { createOrderDto } from './dto/create-order.dto';
-import { StoreOrOwnerGuard } from 'src/common/guards/StoreOrOwner.guard';
 import { Store } from '../store/entities/store.entity';
 import { ExtendOrderTimeDto } from './dto/extend-order-time.dto';
 import { ApprovedStoreGuard } from 'src/common/guards/approvedStore.guard';
@@ -27,6 +26,7 @@ import { StoreOrderStatsResponseDto } from './dto/order-stats-response.dto';
 import { OrderAnalyticsResponseDto } from './dto/orde-analytics.dto';
 import { StoreFinancialsFilterDto } from '../store/dto/store-financials-filter.dto';
 import { PayOrderDTO } from './dto/pay-order-dto';
+import { StoreGuard } from 'src/common/guards/store.guard';
 
 @Controller('order')
 export class OrderController {
@@ -63,7 +63,7 @@ export class OrderController {
   }
 
   @Serilaize(OrderAnalyticsResponseDto)
-  @UseGuards(StoreOrOwnerGuard, ApprovedStoreGuard)
+  @UseGuards(StoreGuard, ApprovedStoreGuard)
   @Get('analytics/byStore')
   @ApiOperation({ summary: 'Get analytics (avg prep time + repeat rate) for a store' })
   @ApiSecurity('access-token')
@@ -81,7 +81,7 @@ export class OrderController {
   }
 
   @Serilaize(OrderActionResponseDto)
-  @UseGuards(StoreOrOwnerGuard,ApprovedStoreGuard)
+  @UseGuards(StoreGuard,ApprovedStoreGuard)
   @Put('reject/:orderId')
   @ApiOperation({ summary: 'Reject an order by store' })
   @ApiSecurity('access-token')
@@ -94,7 +94,7 @@ export class OrderController {
   }
 
   @Serilaize(OrderActionResponseDto)
-  @UseGuards(StoreOrOwnerGuard,ApprovedStoreGuard)
+  @UseGuards(StoreGuard,ApprovedStoreGuard)
   @Put('accept/:orderId')
   @ApiOperation({ summary: 'Accept an order by store' })
   @ApiSecurity('access-token')
@@ -175,7 +175,7 @@ export class OrderController {
   }
 
   @Serilaize(OrderActionResponseDto)
-  @UseGuards(StoreOrOwnerGuard, ApprovedStoreGuard)
+  @UseGuards(StoreGuard, ApprovedStoreGuard)
   @ApiOperation({ summary: 'Mark order as ready by store' })
   @ApiSecurity('access-token')
   @ApiParam({ name: 'orderId', description: 'ID of the order to mark as ready', example: 123 })
@@ -191,7 +191,7 @@ export class OrderController {
   }
 
   @Serilaize(PaginatedOrderListDto)
-  @UseGuards(StoreOrOwnerGuard, ApprovedStoreGuard)
+  @UseGuards(StoreGuard, ApprovedStoreGuard)
   @Get('byStore')
   @ApiOperation({ summary: 'Get paginated orders for a store' })
   @ApiSecurity('access-token')
@@ -219,7 +219,7 @@ export class OrderController {
   }
 
   @Serilaize(StoreOrderStatsResponseDto)
-  @UseGuards(StoreOrOwnerGuard, ApprovedStoreGuard)
+  @UseGuards(StoreGuard, ApprovedStoreGuard)
   @Get('stats/byStore')
   @ApiOperation({ summary: 'Get order statistics for a store' })
   @ApiSecurity('access-token')
@@ -234,7 +234,7 @@ export class OrderController {
   }
 
   @Serilaize(OrderDto)
-  @UseGuards(StoreOrOwnerGuard, ApprovedStoreGuard)
+  @UseGuards(StoreGuard, ApprovedStoreGuard)
   @Get(':orderId/byStore')
   @ApiOperation({ summary: 'Get order details by store' })
   @ApiSecurity('access-token')

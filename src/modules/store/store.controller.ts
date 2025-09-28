@@ -32,9 +32,9 @@ import { InitialCreateStoreDto } from './dto/initial-create-store.dto';
 import { OwnerStoresResponseDto } from './dto/owner-store-response.dto';
 import { IncompleteStoreResponseDto } from './dto/in-completed-store-response.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
-import { RoleStatus } from 'src/common/enums/role_status';
 import { SelectOwnerForStoreDto } from './dto/selectStoreForOwner.dto';
 import { RefreshTokenDto } from '../user_token/dtos/refreshToken.dto';
+import { StoreGuard } from 'src/common/guards/store.guard';
 
 @Controller('store')
 export class StoreController {
@@ -153,9 +153,8 @@ export class StoreController {
   }
 
   @Serilaize(CurrentStoreDTO)
-  @UseGuards(StoreOrOwnerGuard)
+  @UseGuards(StoreGuard)
   @Get('current')
-  @ApiQuery({ name: 'storeId', required: false, example: '1' })
   @ApiOperation({ summary: 'Get Current Store With Basic details (owner or store only)' })
   @ApiSecurity('access-token')
   @ApiResponse({status: 200,type: CurrentStoreDTO})

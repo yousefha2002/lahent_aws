@@ -9,7 +9,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { OfferService } from './offer.service';
-import { StoreOrOwnerGuard } from 'src/common/guards/StoreOrOwner.guard';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { Store } from '../store/entities/store.entity';
 import { CreateOfferDto } from './dto/create-offer.dto';
@@ -22,12 +21,13 @@ import { AdminGuard } from 'src/common/guards/admin.guard';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
 import { OfferType } from 'src/common/enums/offer_type';
+import { StoreGuard } from 'src/common/guards/store.guard';
 
 @Controller('offer')
 export class OfferController {
   constructor(private readonly offerService: OfferService) {}
 
-  @UseGuards(StoreOrOwnerGuard, ApprovedStoreGuard)
+  @UseGuards(StoreGuard, ApprovedStoreGuard)
   @Post()
   @ApiResponse({
     status: 201,
@@ -39,7 +39,6 @@ export class OfferController {
   })
   @ApiOperation({ summary: 'Create a new offer for the store' })
   @ApiSecurity('access-token')
-  @ApiQuery({ name: 'storeId', required: false, example: '1' })
   @ApiBody({ type: CreateOfferDto })
   async createOffer(
     @CurrentUser() store: Store,
@@ -79,7 +78,7 @@ export class OfferController {
   }
 
   @Serilaize(PaginatedOfferResponseDto)
-  @UseGuards(StoreOrOwnerGuard, ApprovedStoreGuard)
+  @UseGuards(StoreGuard, ApprovedStoreGuard)
   @Get('byStore/all')
   @ApiOperation({ summary: 'Get all offers for the current store' })
   @ApiSecurity('access-token')
@@ -87,7 +86,6 @@ export class OfferController {
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
   @ApiQuery({ name: 'type', required: false, enum: OfferType,example: OfferType.FIXED 
 })
-  @ApiQuery({ name: 'storeId', required: false, type: Number, example: 5 })
   @ApiResponse({ status: 200, description: 'Paginated list of offers for the store', type: PaginatedOfferResponseDto })
   getAllOffersForStore(
     @CurrentUser() store: Store,

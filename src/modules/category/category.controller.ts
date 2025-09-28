@@ -11,6 +11,7 @@ import { CategoryDto } from './dto/category.dto';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
+import { StoreGuard } from 'src/common/guards/store.guard';
 
 @Controller('category')
 export class CategoryController {
@@ -20,9 +21,8 @@ export class CategoryController {
   @ApiOperation({ summary: 'Create a new category (store or owner only)' })
   @ApiSecurity('access-token')
   @ApiBody({ type: CreateCategoryDto })
-  @ApiQuery({ name: 'storeId', required: false, example: '1' })
   @ApiResponse({status: 201, description: 'category created successfully', schema: {example: {message: 'Created successfully'}}})
-  @UseGuards(StoreOrOwnerGuard, ApprovedStoreGuard)
+  @UseGuards(StoreGuard, ApprovedStoreGuard)
   createCategory(
     @CurrentUser() store: Store,
     @Body() body: CreateCategoryDto,
@@ -36,10 +36,9 @@ export class CategoryController {
   @ApiOperation({ summary: 'Update a category (store or owner only)' })
   @ApiSecurity('access-token')
   @ApiParam({ name: 'categoryId', example: 1 })
-  @ApiQuery({ name: 'storeId', required: false, example: '1' })
   @ApiBody({ type: UpdateCategoryDto })
   @ApiResponse({status: 201, description: 'category updated successfully', schema: {example: {message: 'Updated successfully'}}})
-  @UseGuards(StoreOrOwnerGuard, ApprovedStoreGuard)
+  @UseGuards(StoreGuard, ApprovedStoreGuard)
   updateCategory(
     @Body() body: UpdateCategoryDto,
     @Param('categoryId') categoryId: string,
@@ -64,11 +63,10 @@ export class CategoryController {
   }
 
   @Delete('/:categoryId')
-  @UseGuards(StoreOrOwnerGuard, ApprovedStoreGuard)
+  @UseGuards(StoreGuard, ApprovedStoreGuard)
   @ApiOperation({ summary: 'Delete a category (store or owner only)' })
   @ApiSecurity('access-token')
   @ApiParam({ name: 'categoryId', example: 1 })
-  @ApiQuery({ name: 'storeId', required: false, example: '1' })
   @ApiResponse({status: 200, description: 'Category deleted successfully', schema: { example: { message: 'Deleted successfully' }}})
   deleteOne(
     @Param('categoryId') categoryId: string,
