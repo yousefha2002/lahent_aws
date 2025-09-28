@@ -1,4 +1,4 @@
-interface OrderNotificationInput {
+interface OrderSocketInput {
     orderId: number;
     customerId?: number;
     storeId?: number;

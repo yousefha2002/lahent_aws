@@ -15,7 +15,7 @@ export class OrderNotificationService {
     ) {}
 
     // real time socket
-    notifyCustomer(data: OrderNotificationInput) {
+    notifyCustomer(data: OrderSocketInput) {
         if (!data.customerId) {
             throw new Error('customerId is required for notifyCustomer');
         }
@@ -23,7 +23,7 @@ export class OrderNotificationService {
         this.rt.emitOrderUpdateToRoom(this.rt.customerRoom(data.customerId), payload);
     }
 
-    notifyStore(data: OrderNotificationInput) {
+    notifyStore(data: OrderSocketInput) {
         if (!data.storeId) {
             throw new Error('storeId is required for notifyStore');
         }
@@ -32,7 +32,7 @@ export class OrderNotificationService {
         this.rt.emitOrderUpdateToRoom(this.rt.storeRoom(data.storeId), payload);
     }
 
-    notifyBoth(data: OrderNotificationInput) {
+    notifyBoth(data: OrderSocketInput) {
         if (!data.customerId || !data.storeId) {
             throw new Error('Both customerId and storeId are required for notifyBoth');
         }
