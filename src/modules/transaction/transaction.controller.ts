@@ -11,6 +11,7 @@ import { PaginatedTransactionDto } from './dto/transaction.dto';
 @Controller('transaction')
 export class TransactionController {
   constructor(private readonly transactionService: TransactionService) {}
+  
   @UseGuards(CustomerGuard)
   @Post('charge-wallet/:loyaltyOfferId')
   chargeWallet(@CurrentUser() user:Customer,@Param('loyaltyOfferId') loyaltyOfferId:number,@Body() dto:ChargeWalletDTO)

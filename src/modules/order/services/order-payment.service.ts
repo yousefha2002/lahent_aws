@@ -163,7 +163,7 @@ export class OrderPaymentService {
                     sourceId: order.id,
                 });
 
-                return { redirectUrl,redirectMethod,redirectParams,paymentId };
+                return { redirect:{redirectUrl,redirectMethod,redirectParams,paymentId} };
             }
         } catch (error) {
             await transaction.rollback();
