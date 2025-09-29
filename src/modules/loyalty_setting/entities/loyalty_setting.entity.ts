@@ -7,12 +7,12 @@ export class LoyaltySetting extends Model {
         defaultValue: 0.02, // كل ريال يعطي 0.02 نقطة
         comment: 'عدد النقاط المكتسبة لكل ريال'
     })
-    pointsPerDollar: number;
+    pointsPerCurrency: number;
 
     @Column({
         type: DataType.FLOAT,
         defaultValue: 0.05, // كل نقطة تساوي 0.05 ريال عند الدفع بالنقاط
         comment: 'قيمة النقطة عند الاستعمال للخصم'
     })
-    dollarPerPoint: number;
+    currencyPerPoint: number;
 }

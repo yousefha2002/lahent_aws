@@ -4,9 +4,9 @@ import { Expose } from 'class-transformer';
 export class LoyaltySettingDto {
     @Expose()
     @ApiProperty({ description: 'عدد النقاط المكتسبة لكل ريال' })
-    pointsPerDollar: number;
+    pointsPerCurrency: number;
 
     @Expose()
     @ApiProperty({ description: 'قيمة النقطة عند الاستعمال للخصم' })
-    dollarPerPoint: number;
+    currencyPerPoint: number;
 }

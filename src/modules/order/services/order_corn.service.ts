@@ -6,7 +6,7 @@ import { OrderStatus } from 'src/common/enums/order_status';
 import { Op, Sequelize } from 'sequelize';
 import { CONFIRMATION_EXTENSION_MINUTES, UNPAID_EXPIRATION_MINUTES } from 'src/common/constants';
 import { OrderStatusService } from './order_status.service';
-import { OrderNotificationService } from './orde_notification.service';
+import { OrderNotificationService } from './order_notification.service';
 import { Language } from 'src/common/enums/language';
 
 @Injectable()

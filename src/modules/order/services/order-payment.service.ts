@@ -1,5 +1,5 @@
 import { PaymentCardService } from './../../payment_card/payment_card.service';
-import { OrderNotificationService } from './orde_notification.service';
+import { OrderNotificationService } from './order_notification.service';
 import { OrderService } from './order.service';
 import { UserPointHistoryService } from '../../user_point_history/user_point_history.service';
 import { PaymentSessionService } from '../../payment_session/payment_session.service';

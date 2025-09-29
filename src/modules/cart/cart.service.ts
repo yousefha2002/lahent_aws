@@ -257,7 +257,7 @@ export class CartService {
       couponId = coupon.id;
     }
     totalFinalPrice = round2(totalFinalPrice - couponDiscountAmount);
-    const pointsEarned = Math.floor(totalFinalPrice * loyaltySetting.pointsPerDollar);
+    const pointsEarned = Math.floor(totalFinalPrice * loyaltySetting.pointsPerCurrency);
     return {
       items,
       totalOriginalPrice:round2(totalOriginalPrice),

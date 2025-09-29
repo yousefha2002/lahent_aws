@@ -22,7 +22,7 @@ import { OrderStatusService } from './services/order_status.service';
 import { OfferModule } from '../offer/offer.module';
 import { ProductModule } from '../product/product.module';
 import { OrderCronService } from './services/order_corn.service';
-import { OrderNotificationService } from './services/orde_notification.service';
+import { OrderNotificationService } from './services/order_notification.service';
 import { RealtimeModule } from '../realtime/realtime.module';
 import { StoreTransactionModule } from '../store_transaction/store_transaction.module';
 import { LoyaltySettingModule } from '../loyalty_setting/loyalty_setting.module';

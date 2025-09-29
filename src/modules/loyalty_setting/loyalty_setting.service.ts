@@ -8,15 +8,15 @@ export class LoyaltySettingService {
         @Inject(repositories.loyalty_setting_repository) private loyaltySettingRepo: typeof LoyaltySetting
     ){}
 
-    async createOrUpdate(pointsPerDollar: number, dollarPerPoint: number) {
+    async createOrUpdate(pointsPerCurrency: number, currencyPerPoint: number) {
         const existing = await this.loyaltySettingRepo.findOne();
         if (existing) {
-            existing.pointsPerDollar = pointsPerDollar;
-            existing.dollarPerPoint = dollarPerPoint;
+            existing.pointsPerCurrency = pointsPerCurrency;
+            existing.currencyPerPoint = currencyPerPoint;
             await existing.save();
             return existing;
         }
-        const newSetting = await this.loyaltySettingRepo.create({ pointsPerDollar, dollarPerPoint });
+        const newSetting = await this.loyaltySettingRepo.create({ pointsPerCurrency, currencyPerPoint });
         return newSetting;
     }
 

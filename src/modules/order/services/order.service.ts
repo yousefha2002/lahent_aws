@@ -181,7 +181,7 @@ export class OrderService {
 
         const loyaltySetting = await this.loyaltySettingService.getSettings();
         // change to use from loyalty setting table
-        const pointsAmountUsed = round2(pointsUsedSafe * loyaltySetting.dollarPerPoint);
+        const pointsAmountUsed = round2(pointsUsedSafe * loyaltySetting.currencyPerPoint);
 
         if (pointsAmountUsed > cart.totalFinalPrice) {
           throw new BadRequestException(

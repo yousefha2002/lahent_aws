@@ -1,5 +1,5 @@
 import { StoreTransactionService } from './../../store_transaction/store_transaction.service';
-import { OrderNotificationService } from './orde_notification.service';
+import { OrderNotificationService } from './order_notification.service';
 import { ProductService } from './../../product/product.service';
 import { CouponService } from './../../coupon/coupon.service';
 import { OfferService } from './../../offer/offer.service';

@@ -1,5 +1,5 @@
-import { FcmTokenService } from './../../fcm_token/fcm_token.service';
-import { OrderStatus } from './../../../common/enums/order_status';
+import { FcmTokenService } from '../../fcm_token/fcm_token.service';
+import { OrderStatus } from '../../../common/enums/order_status';
 import { Injectable } from '@nestjs/common';
 import { Language } from 'src/common/enums/language';
 import { RoleStatus } from 'src/common/enums/role_status';
