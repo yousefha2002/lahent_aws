@@ -1,3 +1,4 @@
+import { SmsService } from './../sms/sms.service';
 import { FcmTokenService } from 'src/modules/fcm_token/fcm_token.service';
 import {BadRequestException,forwardRef,Inject,Injectable} from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
@@ -11,7 +12,7 @@ import { TransactionService } from '../transaction/transaction.service';
 import { TransactionType } from 'src/common/enums/transaction_type';
 import { I18nService } from 'nestjs-i18n';
 import { Language } from 'src/common/enums/language';
-import { Op } from 'sequelize';
+import { Op, Sequelize } from 'sequelize';
 import { Customer } from '../customer/entities/customer.entity';
 import { Avatar } from '../avatar/entities/avatar.entity';
 import { GiftTemplate } from '../gift_template/entities/gift_template.entity';
@@ -29,103 +30,115 @@ export class GiftService {
     @Inject(forwardRef(() => TransactionService))
     private transactionService: TransactionService,
     private readonly i18n: I18nService,
-    private fcmTokenService:FcmTokenService
+    private readonly fcmTokenService:FcmTokenService,
+    private readonly smsService:SmsService,
+    @Inject('SEQUELIZE') private readonly sequelize: Sequelize,
   ) {}
 
-  async createGift(senderId: number,dto: CreateGiftDto,lang: Language = Language.ar) {
-    const { receiverPhone, receiverName, giftTemplateId, amount } = dto;
+  async createGift(senderId: number, dto: CreateGiftDto, lang: Language = Language.ar) {
+    const transaction = await this.sequelize.transaction();
+    try {
+      const { receiverPhone, receiverName, giftTemplateId, amount } = dto;
 
-    const [giftTemplate, sender] = await Promise.all([
-      this.giftTemplateService.findById(giftTemplateId),
-      this.customerService.findById(senderId),
-    ]);
+      const [giftTemplate, sender] = await Promise.all([
+        this.giftTemplateService.findById(giftTemplateId),
+        this.customerService.findById(senderId),
+      ]);
 
-    if (sender.walletBalance < amount) {
-      const message = this.i18n.translate('translation.not_enough_balance', {
-        lang,
-      });
-      throw new BadRequestException(message);
-    }
-
-    let finalReceiverId: number | null = null;
-    let finalReceiverName: string;
-    let finalReceiverPhone: string;
-    let finalStatus: GiftStatus;
-
-    // Find receiver by phone
-    const receiver = await this.customerService.findByPhone(
-      formatPhoneNumber(receiverPhone),
-    );
-
-    if (receiver) {
-      // Receiver exists in system
-      receiver.walletBalance += amount;
-      await this.fcmTokenService.notifyUser(
-        receiver.id,
-        RoleStatus.CUSTOMER,
-        GiftNotifications.GIFT_RECEIVED.title[lang],
-        GiftNotifications.GIFT_RECEIVED.body[lang](amount),
-      );
-      await receiver.save();
-
-      finalReceiverId = receiver.id;
-      finalReceiverName = receiver.name;
-      finalReceiverPhone = receiver.phone;
-      finalStatus = GiftStatus.RECEVIED;
-    } else {
-      // Receiver not in system → pending gift
-      if (!receiverName) {
-        const message = this.i18n.translate('translation.receiver_required', {
-          lang,
-        });
+      if (sender.walletBalance < amount) {
+        const message = this.i18n.translate('translation.not_enough_balance', { lang });
         throw new BadRequestException(message);
       }
 
-      finalReceiverId = null;
-      finalReceiverName = receiverName;
-      finalReceiverPhone = formatPhoneNumber(receiverPhone);
-      finalStatus = GiftStatus.PENDING;
-    }
+      let finalReceiverId: number | null = null;
+      let finalReceiverName: string;
+      let finalReceiverPhone: string;
+      let finalStatus: GiftStatus;
 
-    // Create the gift
-    const gift = await this.giftRepo.create({
-      senderId: sender.id,
-      receiverId: finalReceiverId,
-      receiverName: finalReceiverName,
-      receiverPhone: finalReceiverPhone,
-      giftTemplateId: giftTemplate.id,
-      amount,
-      status: finalStatus,
-    });
+      // Find receiver by phone
+      const receiver = await this.customerService.findByPhone(
+        formatPhoneNumber(receiverPhone),
+      );
 
-    // Deduct from sender wallet
-    sender.walletBalance -= amount;
-    await sender.save();
+      if (receiver) {
+        receiver.walletBalance += amount;
+        await receiver.save({ transaction });
 
-    // Create transaction for sender
-    await this.transactionService.createTransaction({
-      customerId: senderId,
-      amount,
-      direction: 'OUT',
-      type: TransactionType.GIFT_SENT,
-      giftId: gift.id,
-    });
+        finalReceiverId = receiver.id;
+        finalReceiverName = receiver.name;
+        finalReceiverPhone = receiver.phone;
+        finalStatus = GiftStatus.RECEVIED;
+      } else {
+        if (!receiverName) {
+          const message = this.i18n.translate('translation.receiver_required', { lang });
+          throw new BadRequestException(message);
+        }
 
-    // If receiver exists, create transaction for receiver
-    if (receiver) {
-      await this.transactionService.createTransaction({
-        customerId: receiver.id,
+        finalReceiverId = null;
+        finalReceiverName = receiverName;
+        finalReceiverPhone = formatPhoneNumber(receiverPhone);
+        finalStatus = GiftStatus.PENDING;
+      }
+
+      // Create the gift
+      const gift = await this.giftRepo.create({
+        senderId: sender.id,
+        receiverId: finalReceiverId,
+        receiverName: finalReceiverName,
+        receiverPhone: finalReceiverPhone,
+        giftTemplateId: giftTemplate.id,
         amount,
-        direction: 'IN',
-        type: TransactionType.GIFT_RECEIVED,
-        giftId: gift.id,
-      });
-    }
+        status: finalStatus,
+      }, { transaction });
 
-    const successMessage = this.i18n.translate('translation.gift_sent', {
-      lang,
-    });
-    return { message: successMessage };
+      // Deduct from sender wallet
+      sender.walletBalance -= amount;
+      await sender.save({ transaction });
+
+      // Create transaction for sender
+      await this.transactionService.createTransaction({
+        customerId: senderId,
+        amount,
+        direction: 'OUT',
+        type: TransactionType.GIFT_SENT,
+        giftId: gift.id,
+      }, transaction);
+
+      // If receiver exists, create transaction for receiver
+      if (receiver) {
+        await this.transactionService.createTransaction({
+          customerId: receiver.id,
+          amount,
+          direction: 'IN',
+          type: TransactionType.GIFT_RECEIVED,
+          giftId: gift.id,
+        }, transaction);
+      }
+
+      await transaction.commit();
+
+      // إرسال SMS و FCM بعد commit لضمان أن كل شيء تم حفظه
+      const smsMessage = this.i18n.translate('translation.gift_received_sms', {
+        lang,
+        args: { amount },
+      });
+      await this.smsService.sendSms(finalReceiverPhone, smsMessage);
+
+      if (receiver) {
+        await this.fcmTokenService.notifyUser(
+          receiver.id,
+          RoleStatus.CUSTOMER,
+          GiftNotifications.GIFT_RECEIVED.title[lang],
+          GiftNotifications.GIFT_RECEIVED.body[lang](amount),
+        );
+      }
+
+      const successMessage = this.i18n.translate('translation.gift_sent', { lang });
+      return { message: successMessage };
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
   }
 
   async updateGiftsForNewCustomer(

@@ -35,9 +35,10 @@ export class OtpCodeService {
     ) {
       return { phone, code: DEMO_OTP_CODE, status: 'login' };
     }
+    const code = generateOtpCode();
+    await this.smsService.sendSms(phone, `Your OTP code is: ${code}`);
     if (type === 'owner') {
         const owner = await this.ownerService.findByPhone(dto.phone)
-        const code = generateOtpCode();
         const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
         await this.otpCodeRepo.create({ phone, code,isVerified: false, type: 'owner',expiresAt });
         if (owner) {
@@ -50,7 +51,6 @@ export class OtpCodeService {
 
       if (type === 'customer') {
         const customer = await this.customerService.findByPhone(phone)
-        const code = generateOtpCode();
         const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
         await this.otpCodeRepo.create({phone,code,type: 'customer',isVerified: false,expiresAt});
         if (customer) {
