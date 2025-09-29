@@ -40,7 +40,7 @@ export class OrderStatusService {
         private readonly fcmTokenService:FcmTokenService
     ){}
 
-    async refundOrder(orderId: number, customer: Customer,lang: Language = Language.ar,status:OrderStatus=OrderStatus.CANCELLED) {
+    async refundOrder(orderId: number, customer: Customer,lang:Language,status:OrderStatus=OrderStatus.CANCELLED) {
         const transaction = await this.sequelize.transaction();
         try {
             const order = await this.orderRepo.findOne({ where: { id: orderId, customerId: customer.id }, transaction });
@@ -57,6 +57,15 @@ export class OrderStatusService {
 
             await transaction.commit();
             this.orderNotificationService.notifyBothSocket({orderId: order.id,status,customerId: order.customerId,storeId: order.storeId});
+            await this.fcmTokenService.notifyUsers(
+                [
+                    { userId: order.customerId, role: RoleStatus.CUSTOMER },
+                    { userId: order.storeId, role: RoleStatus.STORE }
+                ],
+                OrderNotifications.ORDER_CANCELLED.title[lang],
+                OrderNotifications.ORDER_CANCELLED.body[lang],
+                { orderId: order.id.toString(), status }
+            );
             return { success: true, message: this.i18n.translate('translation.orders.refund_success', { lang }) };
 
         } catch (error) {
@@ -282,6 +291,13 @@ export class OrderStatusService {
             throw new BadRequestException(this.i18n.translate('translation.orders.invalid_status_for_on_the_way', { lang }));
         }
         this.orderNotificationService.notifyStoreSocket({orderId: order.id,status: 'customer_on_the_way',storeId: order.storeId});
+        await this.fcmTokenService.notifyUser(
+            order.storeId,
+            RoleStatus.STORE,
+            OrderNotifications.CUSTOMER_ON_THE_WAY.title[lang],
+            OrderNotifications.CUSTOMER_ON_THE_WAY.body[lang](order.id),
+            { orderId: order.id.toString(), status: 'customer_on_the_way' }
+        );
 
         return { success: true, message: this.i18n.translate('translation.orders.customer_on_the_way', { lang }) };
     }
