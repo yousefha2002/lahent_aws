@@ -79,6 +79,13 @@ export class OrderStatusService {
             await this.storeTransactionService.create({storeId,orderId:order.id,totalAmount:order.finalPriceToPay,status:StoreTransactionType.CANCELED},transaction);
 
             this.orderNotificationService.notifyCustomerSocket({orderId: order.id,status: OrderStatus.REJECTED,customerId: order.customerId});
+            await this.fcmTokenService.notifyUser(
+                order.customerId,
+                RoleStatus.CUSTOMER,
+                OrderNotifications.REJECTED_BY_STORE.title[lang],
+                OrderNotifications.REJECTED_BY_STORE.body[lang],
+                { orderId: order.id.toString(), status: OrderStatus.REJECTED }
+            );
             await transaction.commit();
             return { success: true, message: this.i18n.translate('translation.orders.reject_success', { lang }) };
 
@@ -166,6 +173,13 @@ export class OrderStatusService {
 
         await order.save();
         this.orderNotificationService.notifyCustomerSocket({orderId: order.id,status: order.status,customerId: order.customerId});
+        await this.fcmTokenService.notifyUser(
+            order.customerId,
+            RoleStatus.CUSTOMER,
+            OrderNotifications.ORDER_READY.title[lang],
+            OrderNotifications.ORDER_READY.body[lang],
+            { orderId: order.id.toString(), status: order.status }
+        );
 
         return { message: this.i18n.translate('translation.orders.ready_success', { lang }), order };
     }
@@ -187,6 +201,13 @@ export class OrderStatusService {
             await transaction.commit();
 
             this.orderNotificationService.notifyStoreSocket({orderId: order.id,status: order.status,storeId: order.storeId});
+            await this.fcmTokenService.notifyUser(
+                order.storeId,
+                RoleStatus.STORE,
+                OrderNotifications.ORDER_ARRIVED.title[lang],
+                OrderNotifications.ORDER_ARRIVED.body[lang],
+                { orderId: order.id.toString(), status: order.status }
+            );
             return { success: true, message: this.i18n.translate('translation.orders.arrived_success', { lang }) };
         } catch (error) {
             await transaction.rollback();
@@ -210,6 +231,13 @@ export class OrderStatusService {
             await order.save({ transaction });
             await transaction.commit();
             this.orderNotificationService.notifyStoreSocket({orderId: order.id,status: order.status,storeId: order.storeId});
+            await this.fcmTokenService.notifyUser(
+                order.storeId,
+                RoleStatus.STORE,
+                OrderNotifications.ORDER_RECEIVED.title[lang],
+                OrderNotifications.ORDER_RECEIVED.body[lang],
+                { orderId: order.id.toString(), status: order.status }
+            );
 
             return { success: true, message: this.i18n.translate('translation.orders.received_success', { lang }) };
         } catch (error) {
