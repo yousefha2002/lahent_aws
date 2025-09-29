@@ -28,6 +28,7 @@ import { StoreTransactionModule } from '../store_transaction/store_transaction.m
 import { LoyaltySettingModule } from '../loyalty_setting/loyalty_setting.module';
 import { PaymentCardModule } from '../payment_card/payment_card.module';
 import { FcmTokenModule } from '../fcm_token/fcm_token.module';
+import { OrderPlacingService } from './services/order-placing.service';
 
 @Module({
   controllers: [OrderController],
@@ -38,7 +39,8 @@ import { FcmTokenModule } from '../fcm_token/fcm_token.module';
     OrderStatusService,
     OrderCronService,
     ...OrderProvider,
-    OrderNotificationService
+    OrderNotificationService,
+    OrderPlacingService
   ],
   imports: [
     CartModule,

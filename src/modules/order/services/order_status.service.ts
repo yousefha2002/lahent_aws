@@ -132,9 +132,8 @@ export class OrderStatusService {
 
             await order.save({ transaction });
             await this.storeTransactionService.create({storeId,orderId:order.id,totalAmount:order.finalPriceToPay,status:StoreTransactionType.COMPLETED},transaction);
-            await transaction.commit();
             this.orderNotificationService.notifyCustomer({orderId: order.id,status: order.status,customerId: order.customerId});
-
+            await transaction.commit();
             return { success: true, message: this.i18n.translate('translation.orders.accept_success', { lang }) };
 
         } catch (error) {

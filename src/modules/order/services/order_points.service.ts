@@ -56,7 +56,7 @@ export class OrderPointsService {
                     }, transaction);
                 }
                 throw new BadRequestException(
-                    await this.i18n.translate('translation.orders.points_insufficient', { lang })
+                    this.i18n.translate('translation.orders.points_insufficient', { lang })
                 );
             }
 
@@ -74,7 +74,7 @@ export class OrderPointsService {
                     }, transaction);
                 }
                 throw new BadRequestException(
-                    await this.i18n.translate('translation.orders.expired_order_refund', { lang })
+                    this.i18n.translate('translation.orders.expired_order_refund', { lang })
                 );
             }
 

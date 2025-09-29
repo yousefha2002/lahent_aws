@@ -1,3 +1,4 @@
+import { OrderPlacingService } from './services/order-placing.service';
 import { OrderStatusService } from './services/order_status.service';
 import { Body, Controller, Get, Param, ParseIntPipe, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { OrderService } from './services/order.service';
@@ -34,6 +35,7 @@ export class OrderController {
     private readonly orderService: OrderService,
     private readonly orderPaymentService:OrderPaymentService,
     private readonly orderStatusService:OrderStatusService,
+    private readonly orderPlacingService:OrderPlacingService
   ) {}
 
   @Serilaize(CreateOrderResponseDto)
@@ -46,7 +48,7 @@ export class OrderController {
   placeOrder(@CurrentUser() user:Customer,@Body() dto:createOrderDto,@I18n() i18n: I18nContext)
   {
     const lang = getLang(i18n);
-    return this.orderService.placeOrder(user,dto,lang)
+    return this.orderPlacingService.placeOrder(user,dto,lang)
   }
 
   @Serilaize(PaymentResponseDto)

@@ -70,7 +70,7 @@ export class OrderPaymentService {
             }
 
             if (order.scheduledAt && new Date(order.scheduledAt) <= new Date()) {
-                throw new BadRequestException(this.i18n.translate('translation.orders.scheduled_expired_payment', { lang }),);
+                throw new BadRequestException(this.i18n.translate('translation.orders.scheduled_in_past', { lang }),);
             }
 
             if (order.isPaid) throw new BadRequestException(this.i18n.translate('translation.orders.already_paid', { lang }));
