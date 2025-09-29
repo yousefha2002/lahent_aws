@@ -15,7 +15,7 @@ export class OrderNotificationService {
     ) {}
 
     // real time socket
-    notifyCustomer(data: OrderSocketInput) {
+    notifyCustomerSocket(data: OrderSocketInput) {
         if (!data.customerId) {
             throw new Error('customerId is required for notifyCustomer');
         }
@@ -23,7 +23,7 @@ export class OrderNotificationService {
         this.rt.emitOrderUpdateToRoom(this.rt.customerRoom(data.customerId), payload);
     }
 
-    notifyStore(data: OrderSocketInput) {
+    notifyStoreSocket(data: OrderSocketInput) {
         if (!data.storeId) {
             throw new Error('storeId is required for notifyStore');
         }
@@ -32,21 +32,21 @@ export class OrderNotificationService {
         this.rt.emitOrderUpdateToRoom(this.rt.storeRoom(data.storeId), payload);
     }
 
-    notifyBoth(data: OrderSocketInput) {
+    notifyBothSocket(data: OrderSocketInput) {
         if (!data.customerId || !data.storeId) {
             throw new Error('Both customerId and storeId are required for notifyBoth');
         }
-        this.notifyCustomer(data);
-        this.notifyStore(data);
+        this.notifyCustomerSocket(data);
+        this.notifyStoreSocket(data);
     }
 
     // fcm 
-    async sendNewOrderNotificationToStore(orderId:number,status:OrderStatus,storeId:number,customerName:string, lang: Language) {
+    async sendNewOrderNotificationToStore(orderId:number,status:OrderStatus,storeId:number, lang: Language) {
         return this.fcmTokenService.notifyUser(
             storeId,
             RoleStatus.STORE,
             OrderNotifications.NEW_ORDER.title[lang],
-            OrderNotifications.NEW_ORDER.body[lang](customerName),
+            OrderNotifications.NEW_ORDER.body[lang],
             { orderId: orderId.toString(), status: status }
         );
     }

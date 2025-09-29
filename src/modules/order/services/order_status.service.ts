@@ -19,6 +19,9 @@ import { I18nService } from 'nestjs-i18n';
 import { Language } from 'src/common/enums/language';
 import { StoreTransactionType } from 'src/common/enums/transaction_type';
 import { AcceptOrderDto } from '../dto/accept-order.dto';
+import { FcmTokenService } from 'src/modules/fcm_token/fcm_token.service';
+import { RoleStatus } from 'src/common/enums/role_status';
+import { OrderNotifications } from 'src/common/notification/order-notifications';
 
 @Injectable()
 export class OrderStatusService {
@@ -34,6 +37,7 @@ export class OrderStatusService {
         private readonly i18n: I18nService,
         private readonly orderNotificationService:OrderNotificationService,
         private readonly storeTransactionService:StoreTransactionService,
+        private readonly fcmTokenService:FcmTokenService
     ){}
 
     async refundOrder(orderId: number, customer: Customer,lang: Language = Language.ar,status:OrderStatus=OrderStatus.CANCELLED) {
@@ -52,7 +56,7 @@ export class OrderStatusService {
             await this.storeTransactionService.create({storeId:order.storeId,orderId:order.id,totalAmount:order.finalPriceToPay,status:StoreTransactionType.CANCELED},transaction);
 
             await transaction.commit();
-            this.orderNotificationService.notifyBoth({orderId: order.id,status,customerId: order.customerId,storeId: order.storeId});
+            this.orderNotificationService.notifyBothSocket({orderId: order.id,status,customerId: order.customerId,storeId: order.storeId});
             return { success: true, message: this.i18n.translate('translation.orders.refund_success', { lang }) };
 
         } catch (error) {
@@ -74,7 +78,7 @@ export class OrderStatusService {
             await this.orderPaymentService.processOrderRefund(order, OrderStatus.REJECTED, transaction);
             await this.storeTransactionService.create({storeId,orderId:order.id,totalAmount:order.finalPriceToPay,status:StoreTransactionType.CANCELED},transaction);
 
-            this.orderNotificationService.notifyCustomer({orderId: order.id,status: OrderStatus.REJECTED,customerId: order.customerId});
+            this.orderNotificationService.notifyCustomerSocket({orderId: order.id,status: OrderStatus.REJECTED,customerId: order.customerId});
             await transaction.commit();
             return { success: true, message: this.i18n.translate('translation.orders.reject_success', { lang }) };
 
@@ -132,7 +136,14 @@ export class OrderStatusService {
 
             await order.save({ transaction });
             await this.storeTransactionService.create({storeId,orderId:order.id,totalAmount:order.finalPriceToPay,status:StoreTransactionType.COMPLETED},transaction);
-            this.orderNotificationService.notifyCustomer({orderId: order.id,status: order.status,customerId: order.customerId});
+            this.orderNotificationService.notifyCustomerSocket({orderId: order.id,status: order.status,customerId: order.customerId});
+            this.fcmTokenService.notifyUser(
+                order.customerId,        
+                RoleStatus.CUSTOMER, 
+                OrderNotifications.ACCEPTED_BY_STORE.title[lang],
+                OrderNotifications.ACCEPTED_BY_STORE.body[lang],
+                { orderId: order.id.toString(), status: order.status }
+            );
             await transaction.commit();
             return { success: true, message: this.i18n.translate('translation.orders.accept_success', { lang }) };
 
@@ -154,7 +165,7 @@ export class OrderStatusService {
         order.status = OrderStatus.READY;
 
         await order.save();
-        this.orderNotificationService.notifyCustomer({orderId: order.id,status: order.status,customerId: order.customerId});
+        this.orderNotificationService.notifyCustomerSocket({orderId: order.id,status: order.status,customerId: order.customerId});
 
         return { message: this.i18n.translate('translation.orders.ready_success', { lang }), order };
     }
@@ -175,7 +186,7 @@ export class OrderStatusService {
             await order.save({ transaction });
             await transaction.commit();
 
-            this.orderNotificationService.notifyStore({orderId: order.id,status: order.status,storeId: order.storeId});
+            this.orderNotificationService.notifyStoreSocket({orderId: order.id,status: order.status,storeId: order.storeId});
             return { success: true, message: this.i18n.translate('translation.orders.arrived_success', { lang }) };
         } catch (error) {
             await transaction.rollback();
@@ -198,7 +209,7 @@ export class OrderStatusService {
 
             await order.save({ transaction });
             await transaction.commit();
-            this.orderNotificationService.notifyStore({orderId: order.id,status: order.status,storeId: order.storeId});
+            this.orderNotificationService.notifyStoreSocket({orderId: order.id,status: order.status,storeId: order.storeId});
 
             return { success: true, message: this.i18n.translate('translation.orders.received_success', { lang }) };
         } catch (error) {
@@ -242,7 +253,7 @@ export class OrderStatusService {
         if (![OrderStatus.PREPARING, OrderStatus.READY].includes(order.status)) {
             throw new BadRequestException(this.i18n.translate('translation.orders.invalid_status_for_on_the_way', { lang }));
         }
-        this.orderNotificationService.notifyStore({orderId: order.id,status: 'customer_on_the_way',storeId: order.storeId});
+        this.orderNotificationService.notifyStoreSocket({orderId: order.id,status: 'customer_on_the_way',storeId: order.storeId});
 
         return { success: true, message: this.i18n.translate('translation.orders.customer_on_the_way', { lang }) };
     }

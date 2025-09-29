@@ -35,7 +35,7 @@ export class OrderCronService{
             order.status = OrderStatus.EXPIRED_PAYMENT;
             order.canceledAt = new Date()
             await order.save();
-            this.orderNotificationService.notifyCustomer({orderId: order.id,status: order.status,customerId: order.customerId});
+            this.orderNotificationService.notifyCustomerSocket({orderId: order.id,status: order.status,customerId: order.customerId});
         }
         if (orders.length) {
             this.logger.warn(`Expired ${orders.length} unpaid orders`);
@@ -58,7 +58,7 @@ export class OrderCronService{
             order.status = OrderStatus.CUSTOMER_DECISION;
             order.confirmationTimeoutAt = new Date(order.confirmationTimeoutAt.getTime() + CONFIRMATION_EXTENSION_MINUTES * 60 * 1000); // زيادة 3 دقائق
             await order.save();
-            this.orderNotificationService.notifyCustomer({orderId: order.id,status: order.status,customerId: order.customerId});
+            this.orderNotificationService.notifyCustomerSocket({orderId: order.id,status: order.status,customerId: order.customerId});
         }
 
         if (orders.length) {
@@ -119,13 +119,13 @@ export class OrderCronService{
                 order.status = OrderStatus.READY;
                 order.readyAt = now;
                 await order.save();
-                this.orderNotificationService.notifyBoth({orderId: order.id,status: order.status,customerId: order.customerId,storeId: order.storeId});
+                this.orderNotificationService.notifyBothSocket({orderId: order.id,status: order.status,customerId: order.customerId,storeId: order.storeId});
                 this.logger.log(`Order ${order.id} status updated to READY`);
             } else if (elapsedMs >= estimatedMs / 2 && order.status !== OrderStatus.HALF_PREPARATION) {
                 // مضى نصف الوقت => نصف تحضير
                 order.status = OrderStatus.HALF_PREPARATION;
                 await order.save();
-                this.orderNotificationService.notifyBoth({orderId: order.id,status: order.status,customerId: order.customerId,storeId: order.storeId});
+                this.orderNotificationService.notifyBothSocket({orderId: order.id,status: order.status,customerId: order.customerId,storeId: order.storeId});
                 this.logger.log(`Order ${order.id} status updated to HALF_PREPARING`);
             }
         }
@@ -155,7 +155,7 @@ export class OrderCronService{
         );
         await Promise.all(
             orders.map(order =>
-            this.orderNotificationService.notifyBoth({
+            this.orderNotificationService.notifyBothSocket({
                 orderId: order.id,
                 status: OrderStatus.PREPARING,
                 customerId: order.customerId,
@@ -186,7 +186,7 @@ export class OrderCronService{
             order.canceledAt = now;
             await order.save();
 
-            this.orderNotificationService.notifyCustomer({orderId: order.id,status: order.status,customerId: order.customerId});
+            this.orderNotificationService.notifyCustomerSocket({orderId: order.id,status: order.status,customerId: order.customerId});
         }
     }
 }

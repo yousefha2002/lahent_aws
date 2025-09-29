@@ -5,8 +5,18 @@ export const OrderNotifications = {
             ar: 'تم استلام طلب جديد',
         },
         body: {
-            en: (customerName: string) => `A customer ${customerName} has placed a new order.`,
-            ar: (customerName: string) => `قام الزبون ${customerName} بعمل طلب جديد.`,
+            en: 'A new order has been placed.',
+            ar: 'تم عمل طلب جديد.',
         },
     },
+    ACCEPTED_BY_STORE: {
+        title: {
+            en: 'Your Order is Accepted',
+            ar: 'تم قبول طلبك',
+        },
+        body: {
+            en: 'Your order has been accepted.',
+            ar: 'تم قبول طلبك.',
+        },
+    }
 };
