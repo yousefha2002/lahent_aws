@@ -41,7 +41,7 @@ export class OrderNotificationService {
     }
 
     // fcm 
-    async sendOrderNotificationToStore(orderId:number,status:OrderStatus,storeId:number,customerName:string, lang: Language) {
+    async sendNewOrderNotificationToStore(orderId:number,status:OrderStatus,storeId:number,customerName:string, lang: Language) {
         return this.fcmTokenService.notifyUser(
             storeId,
             RoleStatus.STORE,

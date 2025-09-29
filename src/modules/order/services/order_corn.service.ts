@@ -166,4 +166,27 @@ export class OrderCronService{
 
         this.logger.log(`${orders.length} orders moved from SCHEDULED to PREPARING.`);
     }
+
+    /** الغاء الطلبات اذا عدى وقت scheduledAt وهي لسه في pending confirmation أو customer decision */
+    @Cron(CronExpression.EVERY_MINUTE)
+    async cancelExpiredScheduledConfirmations() 
+    {
+        const now = new Date();
+        const orders = await this.orderRepo.findAll({
+            where: {
+            status: {
+                [Op.in]: [OrderStatus.PENDING_CONFIRMATION, OrderStatus.CUSTOMER_DECISION],
+            },
+            scheduledAt: { [Op.lt]: now },
+            },
+        });
+
+        for (const order of orders) {
+            order.status = OrderStatus.EXPIRED_CONFIRMATION;
+            order.canceledAt = now;
+            await order.save();
+
+            this.orderNotificationService.notifyCustomer({orderId: order.id,status: order.status,customerId: order.customerId});
+        }
+    }
 }

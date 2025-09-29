@@ -26,6 +26,7 @@ import { PaymentSession } from 'src/modules/payment_session/entities/payment_ses
 import { PayOrderDTO } from '../dto/pay-order-dto';
 import { formatCardForApi } from 'src/common/utils/formatCardForApi';
 import { PaymentCard } from 'src/modules/payment_card/entities/payment_card.entity';
+import { StoreUtilsService } from 'src/modules/store/services/storeUtils.service';
 
 @Injectable()
 export class OrderPaymentService {
@@ -47,6 +48,7 @@ export class OrderPaymentService {
         private readonly i18n: I18nService,
         private readonly orderNotificationService:OrderNotificationService,
         private readonly paymentCardService:PaymentCardService,
+        private readonly  storeUtilsService : StoreUtilsService
     ) {}
 
     async payOrder(orderId: number, customer: Customer, dto:PayOrderDTO,lang: Language) {
@@ -58,6 +60,17 @@ export class OrderPaymentService {
             const store = await this.storeService.storeById(order.storeId);
             if (!store || store.status !== StoreStatus.APPROVED) {
                 throw new BadRequestException(this.i18n.translate('translation.orders.store_unavailable', { lang }));
+            }
+            if(!order.scheduledAt)
+            {
+                const storeIsOpenNow = await this.storeUtilsService.isStoreOpenAt(store.id,new Date());
+                if (!storeIsOpenNow) {
+                    throw new BadRequestException(this.i18n.translate('translation.orders.store_closed_now', {lang,}),)
+                }
+            }
+
+            if (order.scheduledAt && new Date(order.scheduledAt) <= new Date()) {
+                throw new BadRequestException(this.i18n.translate('translation.orders.scheduled_expired_payment', { lang }),);
             }
 
             if (order.isPaid) throw new BadRequestException(this.i18n.translate('translation.orders.already_paid', { lang }));
@@ -84,7 +97,7 @@ export class OrderPaymentService {
                 await this.orderPointsService.handlePointsAfterPayment(customer.id, order.pointsRedeemed, order.id, transaction);
                 await transaction.commit();
                 this.orderNotificationService.notifyStore({orderId: order.id,status: order.status,storeId: order.storeId});
-                await this.orderNotificationService.sendOrderNotificationToStore(order.id,order.status,order.storeId,customer.name,lang);
+                await this.orderNotificationService.sendNewOrderNotificationToStore(order.id,order.status,order.storeId,customer.name,lang);
                 return { success: true, message: this.i18n.translate('translation.orders.paid_with_points', { lang }) };
             }
 
@@ -107,7 +120,7 @@ export class OrderPaymentService {
                     orderId: order.id,
                 }, transaction);
                 this.orderNotificationService.notifyStore({orderId: order.id,status: order.status,storeId: order.storeId});
-                await this.orderNotificationService.sendOrderNotificationToStore(order.id,order.status,order.storeId,customer.name,lang);
+                await this.orderNotificationService.sendNewOrderNotificationToStore(order.id,order.status,order.storeId,customer.name,lang);
                 await transaction.commit();
                 return { success: true, message: this.i18n.translate('translation.orders.paid_with_points_and_wallet', { lang }) };
             }
@@ -182,7 +195,7 @@ export class OrderPaymentService {
 
             const customer = await this.customerService.findById(order.customerId);
             this.orderNotificationService.notifyStore({orderId: order.id,status: order.status,storeId: order.storeId});
-            await this.orderNotificationService.sendOrderNotificationToStore(order.id,order.status,order.storeId,customer.name,lang);
+            await this.orderNotificationService.sendNewOrderNotificationToStore(order.id,order.status,order.storeId,customer.name,lang);
             await transaction.commit();
         } catch (error) {
             await transaction.rollback();

@@ -103,6 +103,7 @@
       "min_points_required": "You must have at least 500 points to use points for payment",
       "points_exceed_balance": "Used points exceed your available balance",
       "scheduled_in_past": "Scheduled time must be in the future",
+      "scheduled_expired_payment": "Cannot proceed with payment, scheduled time has expired",
       "pickup_required": "Pickup by customer or another person must be specified",
       "pickup_self_no_other": "You cannot enter another person's info if pickup is by the customer",
       "pickup_person_required": "You must provide the name and number of the person who will pick up the order",

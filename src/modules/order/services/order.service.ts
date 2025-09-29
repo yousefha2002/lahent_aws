@@ -303,7 +303,7 @@ export class OrderService {
         await transaction.rollback();
         throw error;
       }
-    }
+  }
 
   async getOrdersByStore(
     storeId: number,
