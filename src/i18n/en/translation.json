@@ -100,6 +100,7 @@
       "invalid_offer_type": "Invalid offer type"
   },
   "orders": {
+      "order_placed_successfully": "Order placed successfully",
       "min_points_required": "You must have at least 500 points to use points for payment",
       "points_exceed_balance": "Used points exceed your available balance",
       "scheduled_in_past": "Scheduled time must be in the future",

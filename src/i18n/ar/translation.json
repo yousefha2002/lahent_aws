@@ -100,6 +100,7 @@
     "invalid_offer_type": "نوع العرض غير صالح"
   },
   "orders": {
+      "order_placed_successfully": "تم إنشاء الطلب بنجاح",
       "min_points_required": "يجب أن تمتلك على الأقل 500 نقطة لاستخدام النقاط في الدفع",
       "points_exceed_balance": "النقاط المستخدمة تتجاوز رصيدك المتاح",
       "scheduled_in_past": "وقت الجدولة يجب أن يكون في المستقبل",
