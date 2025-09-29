@@ -18,6 +18,7 @@ import { UserTokenModule } from '../user_token/user_token.module';
 import { SectorModule } from '../sector/sector.module';
 import { DatabaseModule } from 'src/database/database.module';
 import { StoreCommissionModule } from '../store_commission/store_commission.module';
+import { FcmTokenModule } from '../fcm_token/fcm_token.module';
 
 @Module({
   controllers: [StoreController],
@@ -34,7 +35,8 @@ import { StoreCommissionModule } from '../store_commission/store_commission.modu
     forwardRef(()=>FaviroteModule),
     SectorModule,
     DatabaseModule,
-    StoreCommissionModule
+    StoreCommissionModule,
+    FcmTokenModule
   ],
   exports: [StoreService,StoreUtilsService],
 })

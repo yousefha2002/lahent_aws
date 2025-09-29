@@ -1,3 +1,4 @@
+import { FcmTokenService } from 'src/modules/fcm_token/fcm_token.service';
 import { UserTokenService } from './../user_token/user_token.service';
 import { StoreGeolocationService } from './services/storeGeolocation.service';
 import { StoreAuthService } from './services/storeAuth.service';
@@ -36,6 +37,7 @@ import { SelectOwnerForStoreDto } from './dto/selectStoreForOwner.dto';
 import { RefreshTokenDto } from '../user_token/dtos/refreshToken.dto';
 import { StoreGuard } from 'src/common/guards/store.guard';
 import { CompletedProfileGuard } from 'src/common/guards/completed-profile.guard';
+import { RoleStatus } from 'src/common/enums/role_status';
 
 @Controller('store')
 export class StoreController {
@@ -43,7 +45,8 @@ export class StoreController {
     private readonly storeService: StoreService,
     private readonly storeAuthService: StoreAuthService,
     private readonly storeGeolocationService: StoreGeolocationService,
-    private readonly userTokenService:UserTokenService
+    private readonly userTokenService:UserTokenService,
+    private readonly fcmTokenService:FcmTokenService
   ) {}
 
   @Post('initial-create')
@@ -476,6 +479,7 @@ export class StoreController {
     schema: { example: { message: 'Logged out successfully' } },
   })
   async logoutStore(@CurrentUser() store: Store,@Body() body:RefreshTokenDto) {
-    return this.userTokenService.logout(body);
+    await this.userTokenService.logout(body);
+    await this.fcmTokenService.removeTokenByDevice(store.id,body.deviceId,RoleStatus.STORE);
   }
 }
