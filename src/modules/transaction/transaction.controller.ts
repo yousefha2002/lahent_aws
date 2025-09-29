@@ -8,7 +8,7 @@ import { ChargeWalletDTO } from './dto/charge-wallet.dto';
 import { filterTypeTransaction } from 'src/common/types/filter-type-transaction';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { PaginatedTransactionDto } from './dto/transaction.dto';
-import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 
 @Controller('transaction')
 export class TransactionController {
@@ -16,6 +16,7 @@ export class TransactionController {
   
   @Serilaize(PaymentRedirectDto)
   @ApiOperation({ summary: 'Charge wallet using loyalty offer' })
+  @ApiSecurity('access-token')
   @ApiParam({ name: 'loyaltyOfferId', description: 'Loyalty offer ID to charge wallet', type: Number })
   @ApiBody({ type: ChargeWalletDTO })
   @ApiResponse({status: 200,type: PaymentRedirectDto})
@@ -27,6 +28,18 @@ export class TransactionController {
   }
 
   @Serilaize(PaginatedTransactionDto)
+  @ApiSecurity('access-token')
+  @ApiOperation({ summary: 'Get paginated list of transactions for the current customer' })
+  @ApiQuery({ name: 'page', required: false, type: Number, example: 1, description: 'Page number' })
+  @ApiQuery({ name: 'limit', required: false, type: Number, example: 10, description: 'Number of items per page' })
+  @ApiQuery({ 
+    name: 'typeFilter', 
+    required: false, 
+    enum: ['all', 'deposit', 'purchase', 'refund', 'gift'],
+    example: 'all', 
+    description: 'Filter transactions by type' 
+  })
+  @ApiOkResponse({ type: PaginatedTransactionDto, description: 'Paginated transactions list' })
   @UseGuards(CustomerGuard)
   @Get()
   async getTransactions(
