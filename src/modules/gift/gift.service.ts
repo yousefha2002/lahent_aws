@@ -1,9 +1,5 @@
-import {
-  BadRequestException,
-  forwardRef,
-  Inject,
-  Injectable,
-} from '@nestjs/common';
+import { FcmTokenService } from 'src/modules/fcm_token/fcm_token.service';
+import {BadRequestException,forwardRef,Inject,Injectable} from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
 import { Gift } from './entities/gift.entity';
 import { GiftTemplateService } from '../gift_template/gift_template.service';
@@ -19,6 +15,8 @@ import { Op } from 'sequelize';
 import { Customer } from '../customer/entities/customer.entity';
 import { Avatar } from '../avatar/entities/avatar.entity';
 import { GiftTemplate } from '../gift_template/entities/gift_template.entity';
+import { GiftNotifications } from 'src/common/notification/gift-notification';
+import { RoleStatus } from 'src/common/enums/role_status';
 
 @Injectable()
 export class GiftService {
@@ -31,13 +29,10 @@ export class GiftService {
     @Inject(forwardRef(() => TransactionService))
     private transactionService: TransactionService,
     private readonly i18n: I18nService,
+    private fcmTokenService:FcmTokenService
   ) {}
 
-  async createGift(
-    senderId: number,
-    dto: CreateGiftDto,
-    lang: Language = Language.ar,
-  ) {
+  async createGift(senderId: number,dto: CreateGiftDto,lang: Language = Language.ar) {
     const { receiverPhone, receiverName, giftTemplateId, amount } = dto;
 
     const [giftTemplate, sender] = await Promise.all([
@@ -65,6 +60,12 @@ export class GiftService {
     if (receiver) {
       // Receiver exists in system
       receiver.walletBalance += amount;
+      await this.fcmTokenService.notifyUser(
+        receiver.id,
+        RoleStatus.CUSTOMER,
+        GiftNotifications.GIFT_RECEIVED.title[lang],
+        GiftNotifications.GIFT_RECEIVED.body[lang](amount),
+      );
       await receiver.save();
 
       finalReceiverId = receiver.id;
@@ -130,7 +131,6 @@ export class GiftService {
   async updateGiftsForNewCustomer(
     phone: string,
     customerId: number,
-    lang: Language = Language.en,
   ) {
     const gifts = await this.giftRepo.findAll({
       where: { receiverPhone: phone, status: GiftStatus.PENDING },
