@@ -21,13 +21,13 @@ export class LoyaltyOfferService {
         const endDate = dto.endDate ?? null;
 
         if (startDate < now) {
-            throw new BadRequestException('Start date cannot be in the past');
+            throw new BadRequestException(this.i18n.translate('translation.start_in_past', { lang }),);
         }
         if (endDate && endDate < now) {
-            throw new BadRequestException('End date cannot be in the past');
+            throw new BadRequestException(this.i18n.translate('translation.expired_date', { lang }),);
         }
         if (endDate && startDate >= endDate) {
-            throw new BadRequestException('End date cannot be before start date');
+            throw new BadRequestException(this.i18n.translate('translation.invalid_dates', { lang }),);
         }
 
         const offer = await this.loyaltyOfferModel.create({
@@ -76,7 +76,7 @@ export class LoyaltyOfferService {
             startDate = dto.startDate ?? new Date();
             if (startDate < now) {
             throw new BadRequestException(
-                this.i18n.translate('translation.loyalty_offer.start_date_future', { lang }),
+                this.i18n.translate('translation.start_in_past', { lang }),
             );
             }
         }
@@ -86,13 +86,13 @@ export class LoyaltyOfferService {
             endDate = dto.endDate ?? null; 
             if (endDate && endDate < now) {
             throw new BadRequestException(
-                this.i18n.translate('translation.loyalty_offer.end_date_past', { lang }),
+                this.i18n.translate('translation.expired_date', { lang }),
             );
             }
         }
         if (endDate && startDate >= endDate) {
             throw new BadRequestException(
-            this.i18n.translate('translation.loyalty_offer.invalid_dates', { lang }),
+            this.i18n.translate('translation.invalid_dates', { lang }),
             );
         }
         await offer.update({ ...dto, startDate, endDate });

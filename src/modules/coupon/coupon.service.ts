@@ -30,13 +30,18 @@ export class CouponService {
     const startDate = dto.startDate ?? now;
     const expiryDate = dto.expiryDate ?? null;
 
+    if (startDate < now) {
+        const message = this.i18n.translate('translation.start_in_past', { lang });
+        throw new BadRequestException(message);
+      }
+
     if (expiryDate && expiryDate < startDate) {
-      const message = this.i18n.translate('translation.coupon.invalid_dates', { lang });
+      const message = this.i18n.translate('translation.invalid_dates', { lang });
       throw new BadRequestException(message);
     }
 
     if (expiryDate && expiryDate < now) {
-      const message = this.i18n.translate('translation.coupon.expired_date', { lang });
+      const message = this.i18n.translate('translation.expired_date', { lang });
       throw new BadRequestException(message);
     }
 
@@ -70,25 +75,22 @@ export class CouponService {
         dto.startDate = now;
       } else {
       if (dto.startDate < now) {
-        const message = this.i18n.translate('translation.coupon.start_in_past', { lang });
+        const message = this.i18n.translate('translation.start_in_past', { lang });
         throw new BadRequestException(message);
       }
     }
 
-    // ✅ expiryDate
     if (dto.expiryDate === undefined) {
       dto.expiryDate = coupon.expiryDate ?? null;
     }
 
-    // ✅ تأكد أن expiry > start
     if (dto.expiryDate && dto.startDate && dto.expiryDate < dto.startDate) {
-      const message = this.i18n.translate('translation.coupon.invalid_dates', { lang });
+      const message = this.i18n.translate('translation.invalid_dates', { lang });
       throw new BadRequestException(message);
     }
 
-    // ✅ expiry ما يكون منتهي
     if (dto.expiryDate && dto.expiryDate < now) {
-      const message = this.i18n.translate('translation.coupon.expired_date', { lang });
+      const message = this.i18n.translate('translation.expired_date', { lang });
       throw new BadRequestException(message);
     }
 

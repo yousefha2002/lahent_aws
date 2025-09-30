@@ -59,7 +59,8 @@
     "expired": "Coupon has expired",
     "used_up": "Coupon has been fully used",
     "not_available_for_store": "Coupon is not available for this store",
-    "validate":"validate coupon success"
+    "validate":"validate coupon success",
+    "not_started": "Coupon has not started yet"
   },
   "favorite_not_found": "Favorite not found",
   "removed_from_favorites": "Removed from favorites",
@@ -82,9 +83,7 @@
     "not_found": "Loyalty offer not found",
     "not_active": "This loyalty offer is not active",
     "activated": "Loyalty offer has been activated",
-    "deactivated": "Loyalty offer has been deactivated",
-    "start_date_future": "Offer start date must be in the future",
-    "end_date_past": "Offer end date cannot be in the past"
+    "deactivated": "Loyalty offer has been deactivated"
   },
   "offer": {
       "start_date_future": "Offer start date must be in the future",
@@ -182,5 +181,8 @@
   "auth": {
     "invalidPhone": "Invalid Phone Number",
     "invalidPassword": "Invalid Password"
-  }
+  },
+  "invalid_dates": "Start or end date is invalid",
+  "expired_date": "End date must be in the future",
+  "start_in_past": "Start date cannot be in the past"
 }
