@@ -1,12 +1,12 @@
-import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { LoyaltyOfferService } from './loyalty_offer.service';
 import { AdminGuard } from 'src/common/guards/admin.guard';
 import { UpdateLoyaltyOfferDto } from './dto/update-loyalty-offer.dto';
 import { CreateLoyaltyOfferDto } from './dto/create-loyalty-offer.dto';
-import { BaseloyaltyOfferDto, ExtendedLoyaltyOfferDto } from './dto/loyalty-offer.dto';
+import { BaseloyaltyOfferDto, ExtendedLoyaltyOfferDto, PaginatedLoyaltyOfferDto } from './dto/loyalty-offer.dto';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { I18n, I18nContext } from 'nestjs-i18n';
-import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiSecurity } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { getLang } from 'src/common/utils/get-lang.util';
 
 @Controller('loyalty-offer')
@@ -24,14 +24,16 @@ export class LoyaltyOfferController {
     return this.loyaltyOfferService.create(dto, getLang(i18n));
   }
 
-  @Serilaize(ExtendedLoyaltyOfferDto)
+  @Serilaize(PaginatedLoyaltyOfferDto)
   @UseGuards(AdminGuard)
   @Get('admin')
   @ApiOperation({ summary: 'Get all loyalty offers for admin' })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiSecurity('access-token')
-  @ApiResponse({ status: 200, description: 'List of all loyalty offers', type: [ExtendedLoyaltyOfferDto] })
-  async getAllForAdmin() {
-    return this.loyaltyOfferService.findAllForAdmin();
+  @ApiResponse({ status: 200, type: [PaginatedLoyaltyOfferDto] })
+  async getAllForAdmin(@Query('page',new ParseIntPipe({ optional: true })) page = 1,@Query('limit',new ParseIntPipe({ optional: true })) limit = 10) {
+    return this.loyaltyOfferService.findAllForAdmin(page,limit);
   }
 
   @Serilaize(BaseloyaltyOfferDto)

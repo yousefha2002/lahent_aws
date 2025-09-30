@@ -1,4 +1,4 @@
-import { Expose, Transform } from 'class-transformer';
+import { Expose, Transform, Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class BaseloyaltyOfferDto {
@@ -29,4 +29,16 @@ export class ExtendedLoyaltyOfferDto extends BaseloyaltyOfferDto {
     @Transform(({ value }) => value ?? null)
     @Expose()
     startDate: Date;
+}
+
+export class PaginatedLoyaltyOfferDto {
+    @ApiProperty({ type: [ExtendedLoyaltyOfferDto] })
+    @Type(() => ExtendedLoyaltyOfferDto)
+    data: ExtendedLoyaltyOfferDto[];
+
+    @ApiProperty({ example: 25, description: 'Total number of offers' })
+    total: number;
+
+    @ApiProperty({ example: 3, description: 'Total number of pages' })
+    totalPages: number;
 }

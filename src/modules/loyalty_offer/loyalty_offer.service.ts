@@ -39,10 +39,19 @@ export class LoyaltyOfferService {
         return offer;
     }
 
-    async findAllForAdmin() {
-        return this.loyaltyOfferModel.findAll({
-            order: [['createdAt', 'DESC']],
-        });
+    async findAllForAdmin(page:number,limit:number) {
+        const offset = (page - 1) * limit;
+        const { rows, count } = await this.loyaltyOfferModel.findAndCountAll({
+        order: [['createdAt', 'DESC']],
+        limit,
+        offset,
+    });
+
+    return {
+        data: rows,
+        total: count,
+        totalPages: Math.ceil(count / limit),
+    };
     }
 
     async findActiveForCustomer() {
