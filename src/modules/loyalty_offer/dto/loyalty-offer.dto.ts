@@ -32,13 +32,16 @@ export class ExtendedLoyaltyOfferDto extends BaseloyaltyOfferDto {
 }
 
 export class PaginatedLoyaltyOfferDto {
+    @Expose()
     @ApiProperty({ type: [ExtendedLoyaltyOfferDto] })
     @Type(() => ExtendedLoyaltyOfferDto)
     data: ExtendedLoyaltyOfferDto[];
 
+    @Expose()
     @ApiProperty({ example: 25, description: 'Total number of offers' })
     total: number;
-
+    
+    @Expose()
     @ApiProperty({ example: 3, description: 'Total number of pages' })
     totalPages: number;
 }
