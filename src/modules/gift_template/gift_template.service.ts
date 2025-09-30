@@ -30,26 +30,25 @@ export class GiftTemplateService {
 
     await this.giftCategoryService.checkIfCategoryFound(+categoryId, lang);
 
-    let start: Date = startDate ? new Date(startDate) : new Date();
-    if (startDate) {
-      start = new Date(startDate);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      if (start < today) {
-        throw new BadRequestException(this.i18n.translate('translation.start_in_past', { lang }));
-      }
+    const now =new Date();
+    let start = startDate ? new Date(startDate) : now;
+    if (isNaN(start.getTime())) {
+      throw new BadRequestException(this.i18n.translate('translation.invalid_dates', { lang }));
+    }
+    if (start < now) {
+      throw new BadRequestException(this.i18n.translate('translation.start_in_past', { lang }));
     }
 
-    let end: Date | null = null;
-    if (endDate) {
-      end = new Date(endDate);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      if (end < today) {
-        throw new BadRequestException(this.i18n.translate('translation.expired_date', { lang }));
-      }
-      if (start && end < start) {
+    let end: Date | null = endDate ? new Date(endDate) : null;
+    if (end) {
+      if (isNaN(end.getTime())) {
         throw new BadRequestException(this.i18n.translate('translation.invalid_dates', { lang }));
+      }
+      if (end < start) {
+        throw new BadRequestException(this.i18n.translate('translation.invalid_dates', { lang }));
+      }
+      if (end < now) {
+        throw new BadRequestException(this.i18n.translate('translation.expired_date', { lang }));
       }
     }
 
@@ -67,12 +66,11 @@ export class GiftTemplateService {
     return { message: msg };
   }
 
-  async update(body: UpdateGiftTemplateDto,templateId: number,lang = Language.ar,file?: Express.Multer.File) 
+  async update(body: UpdateGiftTemplateDto, templateId: number, lang = Language.ar, file?: Express.Multer.File) 
   {
     const giftTemplate = await this.giftTemplateRepo.findByPk(templateId);
     if (!giftTemplate) {
-      const msg = this.i18n.translate('translation.gift_template.not_found', { lang });
-      throw new BadRequestException(msg);
+      throw new BadRequestException(this.i18n.translate('translation.gift_template.not_found', { lang }));
     }
 
     const { categoryId, startDate, endDate } = body;
@@ -91,38 +89,34 @@ export class GiftTemplateService {
       giftTemplate.imagePublicId = uploadResult.public_id;
     }
 
+    const now = new Date();
+
+    // تحديث startDate
     if (startDate !== undefined) {
-      if (startDate === null || startDate === 'null' || startDate === '') {
-        giftTemplate.startDate = new Date();
-      } else {
-        const start = new Date(startDate);
-        if (isNaN(start.getTime())) {
-          throw new BadRequestException(this.i18n.translate('translation.invalid_dates', { lang }));
-        }
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        if (start < today) {
-          throw new BadRequestException(this.i18n.translate('translation.start_in_past', { lang }));
-        }
-        giftTemplate.startDate = start;
+      let start = startDate ? new Date(startDate) : now;
+      if (isNaN(start.getTime())) {
+        throw new BadRequestException(this.i18n.translate('translation.invalid_dates', { lang }));
       }
+      if (start < now) {
+        throw new BadRequestException(this.i18n.translate('translation.start_in_past', { lang }));
+      }
+      giftTemplate.startDate = start;
     }
 
+    // تحديث endDate
     if (endDate !== undefined) {
-      if (endDate === null || endDate === 'null' || endDate === '') {
+      if (!endDate) {
         giftTemplate.endDate = null;
       } else {
         const end = new Date(endDate);
         if (isNaN(end.getTime())) {
           throw new BadRequestException(this.i18n.translate('translation.invalid_dates', { lang }));
         }
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        if (end < today) {
-          throw new BadRequestException(this.i18n.translate('translation.expired_date', { lang }));
-        }
-        if (giftTemplate.startDate && end < giftTemplate.startDate) {
+        if (end < giftTemplate.startDate!) {
           throw new BadRequestException(this.i18n.translate('translation.invalid_dates', { lang }));
+        }
+        if (end < now) {
+          throw new BadRequestException(this.i18n.translate('translation.expired_date', { lang }));
         }
         giftTemplate.endDate = end;
       }
@@ -130,8 +124,7 @@ export class GiftTemplateService {
 
     await giftTemplate.save();
 
-    const msg = this.i18n.translate('translation.gift_template.updated', { lang });
-    return { message: msg };
+    return { message: this.i18n.translate('translation.gift_template.updated', { lang }) };
   }
 
   async findByCategoryWithPagination(categoryId: number,page = 1,limit = 10,onlyActive = true) 
