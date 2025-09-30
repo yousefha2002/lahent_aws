@@ -12,7 +12,7 @@ export class FcmTokenController {
   @ApiOperation({ summary: 'Register FCM token for the current user' })
   @ApiResponse({ status: 201, description: 'FCM token registered successfully.' })
   @ApiSecurity('access-token')
-  @ApiBody({type:[RegisterFcmTokenDto]})
+  @ApiBody({type:RegisterFcmTokenDto})
   @UseGuards(AnyUserGuard)
   @Post('register')
   async registerToken(
