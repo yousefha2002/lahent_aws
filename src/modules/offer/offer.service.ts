@@ -3,12 +3,7 @@ import { ProductService } from './../product/product.service';
 import { OfferCategoryService } from './../offer_category/offer_category.service';
 import { OfferProductService } from './../offer_product/offer_product.service';
 import { StoreStatus } from 'src/common/enums/store_status';
-import {
-  BadRequestException,
-  forwardRef,
-  Inject,
-  Injectable,
-} from '@nestjs/common';
+import {BadRequestException,forwardRef,Inject,Injectable} from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
 import { Offer } from './entities/offer.entity';
 import { OfferType } from 'src/common/enums/offer_type';

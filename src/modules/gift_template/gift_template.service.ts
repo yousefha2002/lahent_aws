@@ -8,6 +8,7 @@ import { I18nService } from 'nestjs-i18n';
 import { Language } from 'src/common/enums/language';
 import { UpdateGiftTemplateDto } from './dto/update-gift-template.dto';
 import { Op } from 'sequelize';
+import { validateDates } from 'src/common/validation/date.validator';
 
 @Injectable()
 export class GiftTemplateService {
@@ -66,20 +67,20 @@ export class GiftTemplateService {
     return { message: msg };
   }
 
-  async update(body: UpdateGiftTemplateDto, templateId: number, lang = Language.ar, file?: Express.Multer.File) 
-  {
+  async update(body: UpdateGiftTemplateDto,templateId: number,lang:Language,file?: Express.Multer.File
+  ) {
     const giftTemplate = await this.giftTemplateRepo.findByPk(templateId);
     if (!giftTemplate) {
-      throw new BadRequestException(this.i18n.translate('translation.gift_template.not_found', { lang }));
+      throw new BadRequestException(
+        this.i18n.translate('translation.gift_template.not_found', { lang })
+      );
     }
 
-    const { categoryId, startDate, endDate } = body;
-
+    const { categoryId, startDate: newStart, endDate: newEnd } = body;
     if (categoryId !== undefined) {
       await this.giftCategoryService.checkIfCategoryFound(+categoryId, lang);
       giftTemplate.categoryId = +categoryId;
     }
-
     if (file) {
       if (giftTemplate.imagePublicId) {
         await this.cloudinaryService.deleteImage(giftTemplate.imagePublicId);
@@ -89,42 +90,20 @@ export class GiftTemplateService {
       giftTemplate.imagePublicId = uploadResult.public_id;
     }
 
-    const now = new Date();
+    const { startDate, endDate } = validateDates({
+      existingStart: giftTemplate.startDate,
+      existingEnd: giftTemplate.endDate,
+      newStart,
+      newEnd,
+      i18n: this.i18n,
+      lang,
+    });
 
-    // تحديث startDate
-    if (startDate !== undefined) {
-      let start = startDate ? new Date(startDate) : now;
-      if (isNaN(start.getTime())) {
-        throw new BadRequestException(this.i18n.translate('translation.invalid_dates', { lang }));
-      }
-      if (start < now) {
-        throw new BadRequestException(this.i18n.translate('translation.start_in_past', { lang }));
-      }
-      giftTemplate.startDate = start;
-    }
+    await giftTemplate.update({ ...body, startDate, endDate });
 
-    // تحديث endDate
-    if (endDate !== undefined) {
-      if (!endDate) {
-        giftTemplate.endDate = null;
-      } else {
-        const end = new Date(endDate);
-        if (isNaN(end.getTime())) {
-          throw new BadRequestException(this.i18n.translate('translation.invalid_dates', { lang }));
-        }
-        if (end < giftTemplate.startDate!) {
-          throw new BadRequestException(this.i18n.translate('translation.invalid_dates', { lang }));
-        }
-        if (end < now) {
-          throw new BadRequestException(this.i18n.translate('translation.expired_date', { lang }));
-        }
-        giftTemplate.endDate = end;
-      }
-    }
-
-    await giftTemplate.save();
-
-    return { message: this.i18n.translate('translation.gift_template.updated', { lang }) };
+    return {
+      message: this.i18n.translate('translation.gift_template.updated', { lang }),
+    };
   }
 
   async findByCategoryWithPagination(categoryId: number,page = 1,limit = 10,onlyActive = true) 

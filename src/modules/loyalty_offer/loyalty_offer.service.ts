@@ -6,6 +6,7 @@ import { UpdateLoyaltyOfferDto } from './dto/update-loyalty-offer.dto';
 import { CreateLoyaltyOfferDto } from './dto/create-loyalty-offer.dto';
 import { I18nService } from 'nestjs-i18n';
 import { Language } from 'src/common/enums/language';
+import { validateDates } from 'src/common/validation/date.validator';
 
 @Injectable()
 export class LoyaltyOfferService {
@@ -61,40 +62,24 @@ export class LoyaltyOfferService {
         });
     }
 
-    async update(id: number, dto: UpdateLoyaltyOfferDto, lang = Language.ar) 
+    async update(id: number, dto: UpdateLoyaltyOfferDto, lang:Language) 
     {
         const offer = await this.loyaltyOfferModel.findByPk(id);
         if (!offer) {
-            const msg = this.i18n.translate('translation.loyalty_offer.not_found', { lang });
-            throw new NotFoundException(msg);
-        }
-
-        const now = new Date();
-
-        let startDate = offer.startDate;
-        if ('startDate' in dto) {
-            startDate = dto.startDate ?? new Date();
-            if (startDate < now) {
-            throw new BadRequestException(
-                this.i18n.translate('translation.start_in_past', { lang }),
-            );
-            }
-        }
-
-        let endDate = offer.endDate; 
-        if ('endDate' in dto) {
-            endDate = dto.endDate ?? null; 
-            if (endDate && endDate < now) {
-            throw new BadRequestException(
-                this.i18n.translate('translation.expired_date', { lang }),
-            );
-            }
-        }
-        if (endDate && startDate >= endDate) {
-            throw new BadRequestException(
-            this.i18n.translate('translation.invalid_dates', { lang }),
+            throw new NotFoundException(
+            this.i18n.translate('translation.loyalty_offer.not_found', { lang })
             );
         }
+
+        const { startDate, endDate } = validateDates({
+            existingStart: offer.startDate,
+            existingEnd: offer.endDate,
+            newStart: dto.startDate,
+            newEnd: dto.endDate,
+            i18n: this.i18n,
+            lang,
+        });
+
         await offer.update({ ...dto, startDate, endDate });
         return offer;
     }

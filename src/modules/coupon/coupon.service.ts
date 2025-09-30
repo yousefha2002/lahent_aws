@@ -10,6 +10,7 @@ import { CreateCouponDto } from './dto/create-coupon.dto';
 import { UpdateCouponDto } from './dto/update-coupon.dto';
 import { I18nService } from 'nestjs-i18n';
 import { Language } from 'src/common/enums/language';
+import { validateDates } from 'src/common/validation/date.validator';
 
 @Injectable()
 export class CouponService {
@@ -52,49 +53,32 @@ export class CouponService {
     });
   }
 
-  async updateCoupon(id: number, dto: UpdateCouponDto, lang: Language) {
-      const coupon = await this.couponRepo.findByPk(id);
-      if (!coupon) {
-        const message = this.i18n.translate('translation.coupon.not_found', { lang });
-        throw new NotFoundException(message);
-      }
+  async updateCoupon(id: number, dto: UpdateCouponDto, lang: Language) 
+  {
+    const coupon = await this.couponRepo.findByPk(id);
+    if (!coupon) {
+      const message = this.i18n.translate('translation.coupon.not_found', { lang });
+      throw new NotFoundException(message);
+    }
 
-      if (dto.code && dto.code !== coupon.code) {
-        const exists = await this.couponRepo.findOne({ where: { code: dto.code } });
-        if (exists) {
-          const message = this.i18n.translate('translation.coupon.code_used_another', { lang });
-          throw new BadRequestException(message);
-        }
-      }
-
-      const now = new Date();
-
-      if (dto.startDate === undefined) {
-        dto.startDate = coupon.startDate ?? now;
-      } else if (dto.startDate === null) {
-        dto.startDate = now;
-      } else {
-      if (dto.startDate < now) {
-        const message = this.i18n.translate('translation.start_in_past', { lang });
+    if (dto.code && dto.code !== coupon.code) {
+      const exists = await this.couponRepo.findOne({ where: { code: dto.code } });
+      if (exists) {
+        const message = this.i18n.translate('translation.coupon.code_used_another', { lang });
         throw new BadRequestException(message);
       }
     }
 
-    if (dto.expiryDate === undefined) {
-      dto.expiryDate = coupon.expiryDate ?? null;
-    }
+    const { startDate, endDate } = validateDates({
+      existingStart: coupon.startDate,
+      existingEnd: coupon.expiryDate,
+      newStart: dto.startDate,
+      newEnd: dto.expiryDate,
+      i18n: this.i18n,
+      lang,
+    });
 
-    if (dto.expiryDate && dto.startDate && dto.expiryDate < dto.startDate) {
-      const message = this.i18n.translate('translation.invalid_dates', { lang });
-      throw new BadRequestException(message);
-    }
-
-    if (dto.expiryDate && dto.expiryDate < now) {
-      const message = this.i18n.translate('translation.expired_date', { lang });
-      throw new BadRequestException(message);
-    }
-
-    await coupon.update(dto);
+    await coupon.update({ ...dto, startDate, expiryDate: endDate });
     return coupon;
   }
 
