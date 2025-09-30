@@ -2,9 +2,9 @@ import { IsNotEmpty, IsString, Length, IsBoolean, IsOptional, Matches } from 'cl
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreatePaymentCardDto {
-    @ApiProperty({ example: '12345678123456', description: 'Card number, 14 digits' })
+    @ApiProperty({ example: '12345678123456', description: 'Card number, 14 to 16 digits' })
     @IsString()
-    @Length(14, 14)
+    @Length(14, 16)
     cardNumber: string;
 
     @ApiProperty({ example: '2026-09', description: 'Expiry date in YYYY-MM format' })
