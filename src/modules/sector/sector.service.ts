@@ -4,11 +4,11 @@ import { Sector } from './entities/sector.entity';
 import { SectorLanguage } from './entities/sectore_langauge.entity';
 import { I18nService } from 'nestjs-i18n';
 import { Sequelize } from 'sequelize';
-import { validateRequiredLanguages, validateUniqueLanguages } from 'src/common/utils/validateLanguages';
 import { Op } from 'sequelize';
 import { Language } from 'src/common/enums/language';
 import { CreateSectorDto } from './dto/create-sector.dto';
 import { UpdateSectorDto } from './dto/update-sector.dto';
+import { validateRequiredLanguages, validateUniqueLanguages } from 'src/common/validators/translation-validator.';
 
 @Injectable()
 export class SectorService {

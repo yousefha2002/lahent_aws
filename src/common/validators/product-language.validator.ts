@@ -1,6 +1,6 @@
 import { BadRequestException } from '@nestjs/common';
 import { Language } from '../enums/language';
-import { validateRequiredLanguages } from '../utils/validateLanguages';
+import { validateRequiredLanguages } from './translation-validator.';
 
 export interface ProductLanguageDto {
     languageCode: Language;

@@ -5,7 +5,7 @@ import { Sequelize } from 'sequelize';
 import { VariantCategoryLanguage } from './entities/variant_category_language.entity';
 import { CreateVariantCategoryDto } from './dto/create_variant_category.dto';
 import { Language } from 'src/common/enums/language';
-import { validateRequiredLanguages } from 'src/common/utils/validateLanguages';
+import { validateRequiredLanguages } from 'src/common/validators/translation-validator.';
 
 @Injectable()
 export class VariantCategoryService {

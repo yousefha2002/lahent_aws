@@ -12,7 +12,7 @@ import { UpdateProductInstructionDto } from './dto/update-product-instruction.st
 import { Product } from '../product/entities/product.entity';
 import { ProductInstructionLanguage } from './entities/product_instruction_language.dto';
 import { CreateProductInstructionDto } from './dto/create-product-instruction.dto';
-import { validateRequiredLanguages, validateUniqueLanguages } from 'src/common/utils/validateLanguages';
+import { validateRequiredLanguages, validateUniqueLanguages } from 'src/common/validators/translation-validator.';
 
 @Injectable()
 export class ProductInstructionService {

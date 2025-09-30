@@ -10,8 +10,8 @@ import { CreateCouponDto } from './dto/create-coupon.dto';
 import { UpdateCouponDto } from './dto/update-coupon.dto';
 import { I18nService } from 'nestjs-i18n';
 import { Language } from 'src/common/enums/language';
-import { validateDates } from 'src/common/validation/date.validator';
-import { validateCreateDates } from 'src/common/validation/create-date.validator';
+import { validateDates } from 'src/common/validators/date.validator';
+import { validateCreateDates } from 'src/common/validators/create-date.validator';
 
 @Injectable()
 export class CouponService {

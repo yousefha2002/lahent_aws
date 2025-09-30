@@ -1,7 +1,7 @@
 import { IsNotEmpty, Validate } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { Language } from 'src/common/enums/language';
-import { ValidLanguageKeysAndValues } from 'src/common/validation/valid-language-keys.validator';
+import { ValidLanguageKeysAndValues } from 'src/common/validators/valid-language-keys.validator';
 
 export class UpdateCarBrandDto {
   @IsNotEmpty({ message: 'Names object cannot be empty' })

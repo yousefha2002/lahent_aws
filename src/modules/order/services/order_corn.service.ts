@@ -10,7 +10,7 @@ import { OrderStatusService } from './order_status.service';
 import { OrderNotificationService } from './order_notification.service';
 import { Language } from 'src/common/enums/language';
 import { RoleStatus } from 'src/common/enums/role_status';
-import { OrderNotifications } from 'src/common/notification/order-notifications';
+import { OrderNotifications } from 'src/common/constants/notification/order-notifications';
 
 @Injectable()
 export class OrderCronService{

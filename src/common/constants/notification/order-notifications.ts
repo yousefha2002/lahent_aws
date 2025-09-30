@@ -1,4 +1,4 @@
-import { OrderStatus } from "../enums/order_status";
+import { OrderStatus } from "../../enums/order_status";
 
 export const OrderNotifications = {
     NEW_ORDER: {

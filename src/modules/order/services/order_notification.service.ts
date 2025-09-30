@@ -3,7 +3,7 @@ import { OrderStatus } from '../../../common/enums/order_status';
 import { Injectable } from '@nestjs/common';
 import { Language } from 'src/common/enums/language';
 import { RoleStatus } from 'src/common/enums/role_status';
-import { OrderNotifications } from 'src/common/notification/order-notifications';
+import { OrderNotifications } from 'src/common/constants/notification/order-notifications';
 import { RealtimeService } from 'src/modules/realtime/realtime.service';
 
 

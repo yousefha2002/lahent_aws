@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
 import { OpeningHour } from './entites/opening_hour.entity';
-import { OpeningHourEnum } from 'src/common/validation/validateAndParseOpeningHours';
+import { OpeningHourEnum } from 'src/common/validators/validateAndParseOpeningHours';
 import { DayOfWeek } from 'src/common/enums/day_of_week';
 import { ActionOpeningHourDto } from './dto/action-open-hour.dto';
 

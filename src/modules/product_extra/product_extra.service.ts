@@ -13,7 +13,7 @@ import { Product } from '../product/entities/product.entity';
 import { CreateProductExtraDto } from './dto/create-product-extra.dto';
 import { Sequelize } from 'sequelize';
 import { ProductExtraLanguage } from './entities/product_extra_language.entity';
-import { validateRequiredLanguages, validateUniqueLanguages } from 'src/common/utils/validateLanguages';
+import { validateRequiredLanguages, validateUniqueLanguages } from 'src/common/validators/translation-validator.';
 
 @Injectable()
 export class ProductExtraService {

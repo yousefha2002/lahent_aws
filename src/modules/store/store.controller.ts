@@ -9,7 +9,7 @@ import { StoreService } from './services/store.service';
 import { OwnerGuard } from 'src/common/guards/owner.guard';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { multerOptions } from 'src/multer/multer.options';
-import {OpeningHourEnum,validateAndParseOpeningHours,} from 'src/common/validation/validateAndParseOpeningHours';
+import {OpeningHourEnum,validateAndParseOpeningHours,} from 'src/common/validators/validateAndParseOpeningHours';
 import { LoginStoreDto } from './dto/store-login.dto';
 import { GetNearbyStoresDto } from './dto/get-nearby-store.dto';
 import { CustomerGuard } from 'src/common/guards/customer.guard';

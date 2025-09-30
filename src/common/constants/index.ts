@@ -1,6 +1,6 @@
 export const RADIS_KM = 3
 
-export const MIN_POINTS_TO_USE = 500;  // الحد الأدنى للنقاط لاستخدام النقاط في الدفع
+export const MIN_POINTS_TO_USE = 500; 
 
 export const CONFIRMATION_EXTENSION_MINUTES = 3;
 export const UNPAID_EXPIRATION_MINUTES = 30;

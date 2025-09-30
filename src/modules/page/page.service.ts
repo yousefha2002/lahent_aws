@@ -3,9 +3,9 @@ import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
 import { Page } from './entities/page.entity';
 import { CreatePageDto } from './dto/create-page.dto';
-import { validateRequiredLanguages } from 'src/common/utils/validateLanguages';
 import { PageType } from 'src/common/enums/page_type';
 import { Language } from 'src/common/enums/language';
+import { validateRequiredLanguages } from 'src/common/validators/translation-validator.';
 
 @Injectable()
 export class PageService {

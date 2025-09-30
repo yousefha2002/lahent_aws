@@ -16,7 +16,7 @@ import { Op, Sequelize } from 'sequelize';
 import { Customer } from '../customer/entities/customer.entity';
 import { Avatar } from '../avatar/entities/avatar.entity';
 import { GiftTemplate } from '../gift_template/entities/gift_template.entity';
-import { GiftNotifications } from 'src/common/notification/gift-notification';
+import { GiftNotifications } from 'src/common/constants/notification/gift-notification';
 import { RoleStatus } from 'src/common/enums/role_status';
 
 @Injectable()

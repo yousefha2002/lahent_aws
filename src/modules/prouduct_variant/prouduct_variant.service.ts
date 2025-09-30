@@ -1,11 +1,6 @@
 import { VariantCategoryService } from './../variant_category/variant_category.service';
 import { ProductCategoryVariantService } from './../product_category_variant/product_category_variant.service';
-import {
-  BadRequestException,
-  forwardRef,
-  Inject,
-  Injectable,
-} from '@nestjs/common';
+import {BadRequestException,forwardRef,Inject,Injectable} from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
 import { ProductVariant } from './entities/prouduct_variant.entity';
 import { ProductService } from '../product/product.service';
@@ -16,8 +11,8 @@ import { Product } from '../product/entities/product.entity';
 import { UpdateProductVariantDto } from './dto/update-variant.dto';
 import { ProductVariantLanguage } from './entities/product_variant_language.entity';
 import { Sequelize } from 'sequelize';
-import { validateAndParseVariants } from 'src/common/validation/validate_variants';
-import { validateVariantLanguages } from 'src/common/validation/variant_language.validator';
+import { validateVariantLanguages } from 'src/common/validators/variant_language.validator';
+import { validateVariants } from 'src/common/validators/variants.validator';
 
 @Injectable()
 export class ProuductVariantService {
@@ -116,7 +111,7 @@ export class ProuductVariantService {
   async createMultipleVariants(body:CreateProductVariantsDto,files: Record<string, Express.Multer.File>,storeId: number) {
     const transaction = await this.sequelize.transaction();
     const {variants,productId} = body
-    const parsedVariants = validateAndParseVariants(variants);
+    const parsedVariants = validateVariants(variants);
     try {
       // جلب المنتج والتأكد من ملكية الـ store
       const product = await this.productService.productById(+productId);

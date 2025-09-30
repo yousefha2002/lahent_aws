@@ -8,7 +8,7 @@ import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { CreateStoreDto } from '../dto/create-store.dto';
 import { comparePassword, hashPassword } from 'src/common/utils/password';
 import { UploadApiResponse } from 'cloudinary';
-import { OpeningHourEnum } from 'src/common/validation/validateAndParseOpeningHours';
+import { OpeningHourEnum } from 'src/common/validators/validateAndParseOpeningHours';
 import { OpeningHourService } from '../../opening_hour/opening_hour.service';
 import { LoginStoreDto } from '../dto/store-login.dto';
 import { RoleStatus } from 'src/common/enums/role_status';
@@ -17,15 +17,15 @@ import { I18nService } from 'nestjs-i18n';
 import { Language } from 'src/common/enums/language';
 import { generateAccessToken, generateRefreshToken } from 'src/common/utils/generateToken';
 import { JwtService } from '@nestjs/jwt';
-import { validateAndParseStoreTranslations } from 'src/common/validation/translationDto/storeTranslation.dto';
+import { validateAndParseStoreTranslations } from 'src/common/validators/validate-store-translations.validator';
 import { StoreLanguage } from '../entities/store_language.entity';
 import { REFRESH_TOKEN_EXPIRES_MS } from 'src/common/constants';
 import { Sequelize } from 'sequelize';
 import { InitialCreateStoreDto } from '../dto/initial-create-store.dto';
-import { validateRequiredLanguages } from 'src/common/utils/validateLanguages';
 import { UpdatePasswordDto } from '../dto/update-password.dto';
 import { SelectOwnerForStoreDto } from '../dto/selectStoreForOwner.dto';
 import { RefreshTokenDto } from 'src/modules/user_token/dtos/refreshToken.dto';
+import { validateRequiredLanguages } from 'src/common/validators/translation-validator.';
 
 @Injectable()
 export class StoreAuthService {

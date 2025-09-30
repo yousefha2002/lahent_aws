@@ -1,5 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
-import { validateRequiredLanguages } from 'src/common/utils/validateLanguages';
+import { validateRequiredLanguages } from './translation-validator.';
 
 export interface StoreTranslationDto {
     languageCode: string;

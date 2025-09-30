@@ -14,7 +14,7 @@ import { I18nService } from 'nestjs-i18n';
 import { Language } from 'src/common/enums/language';
 import { CategoryLanguage } from './entities/category_language.entity';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-import { validateRequiredLanguages, validateUniqueLanguages } from 'src/common/utils/validateLanguages';
+import { validateRequiredLanguages, validateUniqueLanguages } from 'src/common/validators/translation-validator.';
 
 @Injectable()
 export class CategoryService {

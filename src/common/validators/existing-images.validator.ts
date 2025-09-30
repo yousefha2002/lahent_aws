@@ -2,7 +2,7 @@ export interface ExistingImage {
   imageUrl: string;
 }
 
-export function parseAndValidateExistingImages(raw: string): ExistingImage[] {
+export function validateExistingImages(raw: string): ExistingImage[] {
   try {
     const parsed = JSON.parse(raw);
 

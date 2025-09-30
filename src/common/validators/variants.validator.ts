@@ -1,5 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
-import { validateRequiredLanguages } from '../utils/validateLanguages';
+import { validateRequiredLanguages } from './translation-validator.';
 
 export interface VariantLanguageDto {
     languageCode: string;
@@ -12,7 +12,7 @@ export interface VariantDto {
     languages: VariantLanguageDto[];
 }
 
-export function validateAndParseVariants(raw: string): VariantDto[] {
+export function validateVariants(raw: string): VariantDto[] {
     let parsed: any[];
 
     try {

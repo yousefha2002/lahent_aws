@@ -6,7 +6,7 @@ import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { CreateProductDto } from './dto/create-product.dto';
 import { multerOptions } from 'src/multer/multer.options';
 import { UpdateProductWithImageDto } from './dto/update-product-withImage.dto';
-import {ExistingImage,parseAndValidateExistingImages} from 'src/common/validation/parseAndValidateExistingImages';
+import {ExistingImage,validateExistingImages} from 'src/common/validators/existing-images.validator';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { PaginatedProductWithOfferDto } from './dto/productwithoffer.dto';
 import { PaginatedSimpleProductDto } from './dto/product-for-store.dto';
@@ -131,7 +131,7 @@ export class ProductController {
   ) {
     let existingImages: ExistingImage[] = [];
     try {
-      existingImages = parseAndValidateExistingImages(body.existingImages);
+      existingImages = validateExistingImages(body.existingImages);
     } catch (error) {
       throw new BadRequestException(error.message);
     }
