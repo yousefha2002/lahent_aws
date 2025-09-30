@@ -36,8 +36,8 @@ export class Coupon extends Model {
   @Column(DataType.INTEGER)
   usedCount: number;
 
-  @AllowNull(true)
-  @Column(DataType.DATE)
+  @AllowNull(false)
+  @Column({type:DataType.DATE,defaultValue: DataType.NOW})
   startDate: Date;
 
   @AllowNull(true)

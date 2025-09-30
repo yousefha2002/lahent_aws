@@ -30,6 +30,16 @@ export class CouponService {
     const startDate = dto.startDate ?? now;
     const expiryDate = dto.expiryDate ?? null;
 
+    if (expiryDate && expiryDate < startDate) {
+      const message = this.i18n.translate('translation.coupon.invalid_dates', { lang });
+      throw new BadRequestException(message);
+    }
+
+    if (expiryDate && expiryDate < now) {
+      const message = this.i18n.translate('translation.coupon.expired_date', { lang });
+      throw new BadRequestException(message);
+    }
+
     return this.couponRepo.create({
       ...dto,
       startDate,
@@ -37,28 +47,50 @@ export class CouponService {
     });
   }
 
-  async updateCoupon(id: number, dto: UpdateCouponDto, lang: Language) 
-  {
-    const coupon = await this.couponRepo.findByPk(id);
-    if (!coupon) {
-      const message = this.i18n.translate('translation.coupon.not_found', { lang });
-      throw new NotFoundException(message);
-    }
+  async updateCoupon(id: number, dto: UpdateCouponDto, lang: Language) {
+      const coupon = await this.couponRepo.findByPk(id);
+      if (!coupon) {
+        const message = this.i18n.translate('translation.coupon.not_found', { lang });
+        throw new NotFoundException(message);
+      }
 
-    if (dto.code && dto.code !== coupon.code) {
-      const exists = await this.couponRepo.findOne({ where: { code: dto.code } });
-      if (exists) {
-        const message = this.i18n.translate('translation.coupon.code_used_another', { lang });
+      if (dto.code && dto.code !== coupon.code) {
+        const exists = await this.couponRepo.findOne({ where: { code: dto.code } });
+        if (exists) {
+          const message = this.i18n.translate('translation.coupon.code_used_another', { lang });
+          throw new BadRequestException(message);
+        }
+      }
+
+      const now = new Date();
+
+      if (dto.startDate === undefined) {
+        dto.startDate = coupon.startDate ?? now;
+      } else if (dto.startDate === null) {
+        dto.startDate = now;
+      } else {
+      if (dto.startDate < now) {
+        const message = this.i18n.translate('translation.coupon.start_in_past', { lang });
         throw new BadRequestException(message);
       }
     }
 
-    const now = new Date();
+    // ✅ expiryDate
+    if (dto.expiryDate === undefined) {
+      dto.expiryDate = coupon.expiryDate ?? null;
+    }
 
-    if (dto.startDate === undefined) dto.startDate = coupon.startDate ?? now;
-    if (dto.startDate === null) dto.startDate = now;
+    // ✅ تأكد أن expiry > start
+    if (dto.expiryDate && dto.startDate && dto.expiryDate < dto.startDate) {
+      const message = this.i18n.translate('translation.coupon.invalid_dates', { lang });
+      throw new BadRequestException(message);
+    }
 
-    if (dto.expiryDate === undefined) dto.expiryDate = coupon.expiryDate ?? null;
+    // ✅ expiry ما يكون منتهي
+    if (dto.expiryDate && dto.expiryDate < now) {
+      const message = this.i18n.translate('translation.coupon.expired_date', { lang });
+      throw new BadRequestException(message);
+    }
 
     await coupon.update(dto);
     return coupon;
