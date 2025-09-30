@@ -98,4 +98,21 @@ export class CouponService {
   increamntOCouponCount(id: number, transaction: any) {
     this.couponRepo.increment({ usedCount: 1 }, { where: { id }, transaction });
   }
+
+  async findAllForAdmin(page: number, limit: number) 
+  {
+    const offset = (page - 1) * limit;
+
+    const { rows, count } = await this.couponRepo.findAndCountAll({
+      order: [['createdAt', 'DESC']],
+      limit,
+      offset,
+    });
+
+    return {
+      data: rows,
+      total: count,
+      totalPages: Math.ceil(count / limit),
+    };
+  }
 }

@@ -26,6 +26,11 @@ export class CouponDto {
     @Expose()
     expiryDate: Date;
 
+    @ApiProperty({ example: '2025-09-30T00:00:00.000Z', description: 'Coupon start date' })
+    @Expose()
+    startDate: Date;
+
+
     @ApiProperty({ example: true, description: 'Whether the coupon is active' })
     @Expose()
     isActive: boolean;

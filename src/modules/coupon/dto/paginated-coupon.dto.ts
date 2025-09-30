@@ -6,6 +6,9 @@ export class PaginatedCouponDto {
     totalPages:number;
 
     @Expose()
+    total:number;
+
+    @Expose()
     @Type(() => CouponDto)
     data: CouponDto;
 }
