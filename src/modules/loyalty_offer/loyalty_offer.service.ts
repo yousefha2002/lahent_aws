@@ -7,6 +7,7 @@ import { CreateLoyaltyOfferDto } from './dto/create-loyalty-offer.dto';
 import { I18nService } from 'nestjs-i18n';
 import { Language } from 'src/common/enums/language';
 import { validateDates } from 'src/common/validation/date.validator';
+import { validateCreateDates } from 'src/common/validation/create-date.validator';
 
 @Injectable()
 export class LoyaltyOfferService {
@@ -15,22 +16,15 @@ export class LoyaltyOfferService {
         private readonly i18n: I18nService
     ){}
 
-    async create(dto: CreateLoyaltyOfferDto, lang = Language.ar) 
+    async create(dto: CreateLoyaltyOfferDto, lang : Language) 
     {
-        const now = new Date();
-        const startDate = dto.startDate ?? now;
-        const endDate = dto.endDate ?? null;
+        const { startDate, endDate } = validateCreateDates({
+            start: dto.startDate,
+            end: dto.endDate,
+            i18n: this.i18n,
+            lang,
+        });
 
-        if (startDate < now) {
-            throw new BadRequestException(this.i18n.translate('translation.start_in_past', { lang }),);
-        }
-        if (endDate && endDate < now) {
-            throw new BadRequestException(this.i18n.translate('translation.expired_date', { lang }),);
-        }
-        if (endDate && startDate >= endDate) {
-            throw new BadRequestException(this.i18n.translate('translation.invalid_dates', { lang }),);
-        }
-        
         const offer = await this.loyaltyOfferModel.create({
             ...dto,
             startDate,

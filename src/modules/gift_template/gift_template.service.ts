@@ -9,6 +9,7 @@ import { Language } from 'src/common/enums/language';
 import { UpdateGiftTemplateDto } from './dto/update-gift-template.dto';
 import { Op } from 'sequelize';
 import { validateDates } from 'src/common/validation/date.validator';
+import { validateCreateDates } from 'src/common/validation/create-date.validator';
 
 @Injectable()
 export class GiftTemplateService {
@@ -20,51 +21,34 @@ export class GiftTemplateService {
     private readonly i18n: I18nService,
   ) {}
 
-  async create(body: CreateGiftTemplateDto,file: Express.Multer.File,lang = Language.ar)
+  async create(body: CreateGiftTemplateDto, file: Express.Multer.File, lang : Language) 
   {
-    const { categoryId, startDate, endDate } = body;
+    const { categoryId, startDate: startInput, endDate: endInput } = body;
 
     if (!file) {
-      const msg = this.i18n.translate('translation.file_required', { lang });
-      throw new BadRequestException(msg);
+        throw new BadRequestException(this.i18n.translate('translation.file_required', { lang }));
     }
 
     await this.giftCategoryService.checkIfCategoryFound(+categoryId, lang);
 
-    const now =new Date();
-    let start = startDate ? new Date(startDate) : now;
-    if (isNaN(start.getTime())) {
-      throw new BadRequestException(this.i18n.translate('translation.invalid_dates', { lang }));
-    }
-    if (start < now) {
-      throw new BadRequestException(this.i18n.translate('translation.start_in_past', { lang }));
-    }
-
-    let end: Date | null = endDate ? new Date(endDate) : null;
-    if (end) {
-      if (isNaN(end.getTime())) {
-        throw new BadRequestException(this.i18n.translate('translation.invalid_dates', { lang }));
-      }
-      if (end < start) {
-        throw new BadRequestException(this.i18n.translate('translation.invalid_dates', { lang }));
-      }
-      if (end < now) {
-        throw new BadRequestException(this.i18n.translate('translation.expired_date', { lang }));
-      }
-    }
+    const { startDate, endDate } = validateCreateDates({
+        start: startInput,
+        end: endInput,
+        i18n: this.i18n,
+        lang,
+    });
 
     const uploadResult = await this.cloudinaryService.uploadImage(file);
 
-    const giftTemplate = await this.giftTemplateRepo.create({
-      imageUrl: uploadResult.secure_url,
-      imagePublicId: uploadResult.public_id,
-      categoryId: +categoryId,
-      startDate: start,
-      endDate: end,
+    await this.giftTemplateRepo.create({
+        imageUrl: uploadResult.secure_url,
+        imagePublicId: uploadResult.public_id,
+        categoryId: +categoryId,
+        startDate,
+        endDate,
     });
 
-    const msg = this.i18n.translate('translation.gift_template.created', { lang });
-    return { message: msg };
+    return { message: this.i18n.translate('translation.gift_template.created', { lang }) };
   }
 
   async update(body: UpdateGiftTemplateDto,templateId: number,lang:Language,file?: Express.Multer.File

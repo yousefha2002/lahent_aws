@@ -11,6 +11,7 @@ import { UpdateCouponDto } from './dto/update-coupon.dto';
 import { I18nService } from 'nestjs-i18n';
 import { Language } from 'src/common/enums/language';
 import { validateDates } from 'src/common/validation/date.validator';
+import { validateCreateDates } from 'src/common/validation/create-date.validator';
 
 @Injectable()
 export class CouponService {
@@ -19,7 +20,7 @@ export class CouponService {
     private readonly i18n: I18nService,
   ) {}
 
-  async createCoupon(dto: CreateCouponDto, lang:Language) 
+  async createCoupon(dto: CreateCouponDto, lang: Language) 
   {
     const existing = await this.couponRepo.findOne({ where: { code: dto.code } });
     if (existing) {
@@ -27,24 +28,12 @@ export class CouponService {
       throw new BadRequestException(message);
     }
 
-    const now = new Date();
-    const startDate = dto.startDate ?? now;
-    const expiryDate = dto.expiryDate ?? null;
-
-    if (startDate < now) {
-        const message = this.i18n.translate('translation.start_in_past', { lang });
-        throw new BadRequestException(message);
-      }
-
-    if (expiryDate && expiryDate < startDate) {
-      const message = this.i18n.translate('translation.invalid_dates', { lang });
-      throw new BadRequestException(message);
-    }
-
-    if (expiryDate && expiryDate < now) {
-      const message = this.i18n.translate('translation.expired_date', { lang });
-      throw new BadRequestException(message);
-    }
+    const { startDate, endDate: expiryDate } = validateCreateDates({
+      start: dto.startDate,
+      end: dto.expiryDate,
+      i18n: this.i18n,
+      lang,
+    });
 
     return this.couponRepo.create({
       ...dto,
