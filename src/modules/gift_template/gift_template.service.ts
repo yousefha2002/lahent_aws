@@ -30,28 +30,26 @@ export class GiftTemplateService {
 
     await this.giftCategoryService.checkIfCategoryFound(+categoryId, lang);
 
-    // التحقق من startDate
     let start: Date = startDate ? new Date(startDate) : new Date();
     if (startDate) {
       start = new Date(startDate);
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       if (start < today) {
-        throw new BadRequestException('Start date cannot be in the past');
+        throw new BadRequestException(this.i18n.translate('translation.start_in_past', { lang }));
       }
     }
 
-    // التحقق من endDate
     let end: Date | null = null;
     if (endDate) {
       end = new Date(endDate);
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       if (end < today) {
-        throw new BadRequestException('End date cannot be in the past');
+        throw new BadRequestException(this.i18n.translate('translation.expired_date', { lang }));
       }
       if (start && end < start) {
-        throw new BadRequestException('End date cannot be before start date');
+        throw new BadRequestException(this.i18n.translate('translation.invalid_dates', { lang }));
       }
     }
 
@@ -95,16 +93,16 @@ export class GiftTemplateService {
 
     if (startDate !== undefined) {
       if (startDate === null || startDate === 'null' || startDate === '') {
-        giftTemplate.startDate = new Date(); // null أو 'null' أو فارغ → اعتبر الآن
+        giftTemplate.startDate = new Date();
       } else {
         const start = new Date(startDate);
         if (isNaN(start.getTime())) {
-          throw new BadRequestException('Start date must be a valid date');
+          throw new BadRequestException(this.i18n.translate('translation.invalid_dates', { lang }));
         }
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         if (start < today) {
-          throw new BadRequestException('Start date cannot be in the past');
+          throw new BadRequestException(this.i18n.translate('translation.start_in_past', { lang }));
         }
         giftTemplate.startDate = start;
       }
@@ -116,15 +114,15 @@ export class GiftTemplateService {
       } else {
         const end = new Date(endDate);
         if (isNaN(end.getTime())) {
-          throw new BadRequestException('End date must be a valid date');
+          throw new BadRequestException(this.i18n.translate('translation.invalid_dates', { lang }));
         }
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         if (end < today) {
-          throw new BadRequestException('End date cannot be in the past');
+          throw new BadRequestException(this.i18n.translate('translation.expired_date', { lang }));
         }
         if (giftTemplate.startDate && end < giftTemplate.startDate) {
-          throw new BadRequestException('End date cannot be before start date');
+          throw new BadRequestException(this.i18n.translate('translation.invalid_dates', { lang }));
         }
         giftTemplate.endDate = end;
       }
@@ -163,7 +161,7 @@ export class GiftTemplateService {
     };
   }
 
-  async findById(id: number, lang = Language.en) 
+  async findById(id: number, lang = Language.ar) 
   {
     const giftTemplate = await this.giftTemplateRepo.findOne({
       where: {

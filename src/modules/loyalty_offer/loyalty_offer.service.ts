@@ -29,7 +29,7 @@ export class LoyaltyOfferService {
         if (endDate && startDate >= endDate) {
             throw new BadRequestException(this.i18n.translate('translation.invalid_dates', { lang }),);
         }
-
+        
         const offer = await this.loyaltyOfferModel.create({
             ...dto,
             startDate,
