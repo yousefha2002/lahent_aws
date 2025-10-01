@@ -60,7 +60,8 @@
     "used_up": "تم استخدام الكوبون بالكامل",
     "not_available_for_store": "الكوبون غير متاح لهذا المتجر",
     "validate":"نجاح عملية تأكيد الكوبون",
-    "not_started": "الكوبون لم يبدأ بعد"
+    "not_started": "الكوبون لم يبدأ بعد",
+    "already_used":"لقد استخدمت هذا الكوبون مسبقًا"
   },
   "favorite_not_found": "المفضل غير موجود",
   "removed_from_favorites": "تم الحذف من المفضلة",

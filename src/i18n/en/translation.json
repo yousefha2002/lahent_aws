@@ -60,7 +60,8 @@
     "used_up": "Coupon has been fully used",
     "not_available_for_store": "Coupon is not available for this store",
     "validate":"validate coupon success",
-    "not_started": "Coupon has not started yet"
+    "not_started": "Coupon has not started yet",
+    "already_used":"You have already used this coupon"
   },
   "favorite_not_found": "Favorite not found",
   "removed_from_favorites": "Removed from favorites",

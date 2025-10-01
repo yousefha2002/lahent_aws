@@ -329,4 +329,24 @@ export class OrderService {
 
   return { averagePrepTime, customerRepeatRate };
   }
+
+  async hasUsedCouponBefore(customerId: number, couponId: number): Promise<boolean> 
+  {
+    const existingOrder = await this.orderRepo.findOne({
+      where: {
+        customerId,
+        couponId,
+        status: {
+          [Op.notIn]: [
+            OrderStatus.CANCELLED,
+            OrderStatus.REJECTED,
+            OrderStatus.EXPIRED_PAYMENT,
+            OrderStatus.EXPIRED_CONFIRMATION,
+          ]
+        }
+      }
+    });
+
+    return !!existingOrder;
+  }
 }

@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  forwardRef,
   Inject,
   Injectable,
   NotFoundException,
@@ -12,13 +13,17 @@ import { I18nService } from 'nestjs-i18n';
 import { Language } from 'src/common/enums/language';
 import { validateDates } from 'src/common/validators/date.validator';
 import { validateCreateDates } from 'src/common/validators/create-date.validator';
+import { OrderService } from '../order/services/order.service';
 
 @Injectable()
 export class CouponService {
   constructor(
     @Inject(repositories.coupon_repository) private couponRepo: typeof Coupon,
     private readonly i18n: I18nService,
-  ) {}
+
+    @Inject(forwardRef(() => OrderService))
+    private orderService:OrderService
+    ) {}
 
   async createCoupon(dto: CreateCouponDto, lang: Language) 
   {
@@ -71,7 +76,7 @@ export class CouponService {
     return coupon;
   }
 
-  async validateCoupon(code: string,lang: Language ) {
+  async validateCoupon(code: string,customerId:number,lang: Language ) {
     const coupon = await this.couponRepo.findOne({ where: { code } });
     if (!coupon) {
       const message = this.i18n.translate('translation.coupon.not_found', { lang });
@@ -99,11 +104,23 @@ export class CouponService {
       throw new BadRequestException(message);
     }
 
+    const usedBefore = await this.orderService.hasUsedCouponBefore(customerId, coupon.id);
+    if (usedBefore) {
+      throw new BadRequestException(
+        this.i18n.translate('translation.coupon.already_used', { lang })
+      );
+    }
+
     return coupon;
   }
 
   increamntOCouponCount(id: number, transaction: any) {
     this.couponRepo.increment({ usedCount: 1 }, { where: { id }, transaction });
+  }
+
+  decremantCouponCount(id: number, transaction: any)
+  {
+    this.couponRepo.decrement({ usedCount: 1 }, { where: { id }, transaction });
   }
 
   async findAllForAdmin(page: number, limit: number) 

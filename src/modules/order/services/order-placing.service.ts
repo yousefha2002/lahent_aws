@@ -1,3 +1,4 @@
+import { CouponService } from './../../coupon/coupon.service';
 import { LoyaltySettingService } from './../../loyalty_setting/loyalty_setting.service';
 import { StoreUtilsService } from './../../store/services/storeUtils.service';
 import { StoreService } from 'src/modules/store/services/store.service';
@@ -7,7 +8,7 @@ import { OrderItemInstructionService } from '../../order_item_instruction/order_
 import { OrderItemExtraService } from '../../order_item_extra/order_item_extra.service';
 import { OrderItemService } from '../../order_item/order_item.service';
 import { CartService } from '../../cart/cart.service';
-import {BadRequestException,Inject,Injectable} from '@nestjs/common';
+import {BadRequestException,forwardRef,Inject,Injectable} from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
 import { Order } from '../entities/order.entity';
 import { createOrderDto } from '../dto/create-order.dto';
@@ -33,12 +34,17 @@ export class OrderPlacingService {
         private readonly orderItemInstructionService: OrderItemInstructionService,
         private readonly orderItemVariantService: OrderItemVariantService,
         private readonly orderItemService: OrderItemService,
+
+        @Inject(forwardRef(() => CarService))
         private readonly carService: CarService,
         private readonly storeService: StoreService,
         private readonly storeUtilsService: StoreUtilsService,
         @Inject('SEQUELIZE') private readonly sequelize: Sequelize,
         private readonly i18n: I18nService,
-        private loyaltySettingService:LoyaltySettingService
+        private loyaltySettingService:LoyaltySettingService,
+
+        @Inject(forwardRef(() => CouponService))
+        private couponService:CouponService
     ) {}
 
     async placeOrder(user: Customer, dto: createOrderDto, lang:Language) 
@@ -71,7 +77,6 @@ export class OrderPlacingService {
             const loyaltySetting = await this.loyaltySettingService.getSettings();
             const { pointsAmountUsed, walletAmountUsed, gatewayAmountUsed } = 
                 this.calculatePayment(cart.totalFinalPrice, pointsUsedSafe, user, dto.paymentMethod, loyaltySetting.currencyPerPoint);
-
             // إنشاء الطلب
             const order = await this.orderRepo.create({
                 customerId: user.id,
@@ -98,6 +103,10 @@ export class OrderPlacingService {
                 pointsEarned: cart.pointsEarned || 0,
                 carId: finalCarId
             }, { transaction });
+
+            if (cart.couponId) {
+                this.couponService.increamntOCouponCount(cart.couponId, transaction);
+            }
 
             // إنشاء عناصر الطلب (Products)
             for (const item of items) {

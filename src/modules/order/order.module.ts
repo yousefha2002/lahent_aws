@@ -43,9 +43,9 @@ import { OrderPlacingService } from './services/order-placing.service';
     OrderPlacingService
   ],
   imports: [
-    CartModule,
+    forwardRef(()=>CartModule),
+    forwardRef(()=>CouponModule),
     CustomerModule,
-    CouponModule,
     OrderItemExtraModule,
     OrderItemModule,
     OrderItemInstructionModule,

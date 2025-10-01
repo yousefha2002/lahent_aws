@@ -5,7 +5,6 @@ import { CreateCouponDto } from './dto/create-coupon.dto';
 import { UpdateCouponDto } from './dto/update-coupon.dto';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { CouponDto } from './dto/coupon.dto';
-import { CouponValidateDto } from './dto/coupon-validate.dto';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
@@ -25,16 +24,6 @@ export class CouponController {
   create(@Body() dto: CreateCouponDto, @I18n() i18n: I18nContext) {
     const lang = getLang(i18n);
     return this.couponService.createCoupon(dto, lang);
-  }
-
-  @Serilaize(CouponValidateDto)
-  @Get('validate')
-  @ApiOperation({ summary: 'Validate a coupon code' })
-  @ApiQuery({ name: 'code', required: true, description: 'Coupon code to validate', example: 'SUMMER2025' })
-  @ApiResponse({ status: 200, description: 'Coupon validation result', type: CouponValidateDto })
-  validateCoupon(@Query('code') code: string, @I18n() i18n: I18nContext) {
-    const lang = getLang(i18n);
-    return this.couponService.validateCoupon(code, lang);
   }
 
   @UseGuards(AdminGuard)

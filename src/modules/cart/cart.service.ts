@@ -252,7 +252,7 @@ export class CartService {
     let couponDiscountAmount = 0;
     let couponId: number | null = null;
     if (couponCode) {
-      const coupon = await this.couponService.validateCoupon(couponCode, lang);
+      const coupon = await this.couponService.validateCoupon(couponCode,customerId, lang);
       couponDiscountAmount = round2((totalFinalPrice * coupon.discountPercentage) / 100);
       couponId = coupon.id;
     }
@@ -308,6 +308,7 @@ export class CartService {
   ) {
     await this.cartRepo.destroy({
       where: { storeId, customerId },
+      force: true,
       transaction,
     });
     const message = this.i18n.translate('translation.cart_deleted', { lang });

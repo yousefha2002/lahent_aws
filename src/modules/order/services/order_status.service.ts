@@ -1,7 +1,6 @@
 import { StoreTransactionService } from './../../store_transaction/store_transaction.service';
 import { OrderNotificationService } from './order_notification.service';
 import { ProductService } from './../../product/product.service';
-import { CouponService } from './../../coupon/coupon.service';
 import { OfferService } from './../../offer/offer.service';
 import { OrderPaymentService } from './order-payment.service';
 import { UserPointHistoryService } from '../../user_point_history/user_point_history.service';
@@ -32,7 +31,6 @@ export class OrderStatusService {
         private readonly userPointHistoryService: UserPointHistoryService,
         private orderPaymentService: OrderPaymentService,
         private offerService: OfferService,
-        private couponService: CouponService,
         private productService: ProductService,
         private readonly i18n: I18nService,
         private readonly orderNotificationService:OrderNotificationService,
@@ -120,10 +118,6 @@ export class OrderStatusService {
                     this.offerService.increamntOfferCount(item.offerId, transaction);
                 }
                 await this.productService.incrementSales(item.productId, item.quantity, transaction);
-            }
-
-            if (order.couponId) {
-                this.couponService.increamntOCouponCount(order.couponId, transaction);
             }
 
             order.placedAt = new Date();
