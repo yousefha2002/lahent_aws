@@ -1,7 +1,6 @@
 import { PaymentCardService } from './../../payment_card/payment_card.service';
 import { OrderNotificationService } from './order_notification.service';
 import { OrderService } from './order.service';
-import { UserPointHistoryService } from '../../user_point_history/user_point_history.service';
 import { PaymentSessionService } from '../../payment_session/payment_session.service';
 import { TransactionService } from '../../transaction/transaction.service';
 import { CustomerService } from '../../customer/customer.service';
@@ -16,8 +15,6 @@ import { Customer } from '../../customer/entities/customer.entity';
 import { Sequelize } from 'sequelize';
 import { TransactionType } from 'src/common/enums/transaction_type';
 import { GatewaySource } from 'src/common/enums/gateway-source';
-import { PointActionType } from 'src/common/enums/points_action_type';
-import { PointActionSoucre } from 'src/common/enums/point_action_source';
 import { StoreStatus } from 'src/common/enums/store_status';
 import { OrderPointsService } from './order_points.service';
 import { I18nService } from 'nestjs-i18n';
@@ -41,8 +38,6 @@ export class OrderPaymentService {
         
         @Inject(forwardRef(() => PaymentSessionService))
         private readonly paymentSessionService: PaymentSessionService,
-
-        private readonly userPointHistoryService: UserPointHistoryService,
         private orderPointsService: OrderPointsService,
         private orderService: OrderService,
         private readonly i18n: I18nService,
@@ -54,116 +49,20 @@ export class OrderPaymentService {
     async payOrder(orderId: number, customer: Customer, dto:PayOrderDTO,lang: Language) {
         const transaction = await this.sequelize.transaction();
         try {
-            const order = await this.orderRepo.findOne({ where: { id: orderId, customerId: customer.id }, transaction });
-            if (!order) throw new NotFoundException(this.i18n.translate('translation.orders.not_found', { lang }));
-
-            const store = await this.storeService.storeById(order.storeId);
-            if (!store || store.status !== StoreStatus.APPROVED) {
-                throw new BadRequestException(this.i18n.translate('translation.orders.store_unavailable', { lang }));
-            }
-            if(!order.scheduledAt)
-            {
-                const storeIsOpenNow = await this.storeUtilsService.isStoreOpenAt(store.id,new Date());
-                if (!storeIsOpenNow) {
-                    throw new BadRequestException(this.i18n.translate('translation.orders.store_closed_now', {lang,}),)
-                }
-            }
-
-            if (order.scheduledAt && new Date(order.scheduledAt) <= new Date()) {
-                throw new BadRequestException(this.i18n.translate('translation.orders.scheduled_in_past', { lang }),);
-            }
-
-            if (order.isPaid) throw new BadRequestException(this.i18n.translate('translation.orders.already_paid', { lang }));
-            if (order.status !== OrderStatus.PENDING_PAYMENT) {
-                throw new BadRequestException(this.i18n.translate('translation.orders.invalid_status_for_payment', { lang }));
-            }
-
-            if (order.pointsRedeemed > 0 && customer.points < MIN_POINTS_TO_USE) {
-                throw new BadRequestException(this.i18n.translate('translation.orders.min_points_required', { lang }));
-            }
-
-            if (order.pointsRedeemed > customer.points && order.pointsRedeemed > 0) {
-                throw new BadRequestException(this.i18n.translate('translation.orders.points_exceed_balance', { lang }));
-            }
-
+            const order = await this.getValidOrder(orderId, customer, transaction, lang);
             const pointsValue = order.pointsAmountUsed;
             let amountLeftToPay = order.finalPriceToPay - pointsValue;
 
             if (amountLeftToPay <= 0) {
-                // الدفع بالكامل بالنقاط
-                order.orderNumber = await this.orderService.generateOrderNumber(order.storeId, transaction);
-                await order.save({ transaction });
-                await this.updateOrderPaymentInfo(order, transaction);
-                await this.orderPointsService.handlePointsAfterPayment(customer.id, order.pointsRedeemed, order.id, transaction);
-                await transaction.commit();
-                this.orderNotificationService.notifyStoreSocket({orderId: order.id,status: order.status,storeId: order.storeId});
-                await this.orderNotificationService.sendNewOrderNotificationToStore(order.id,order.status,order.storeId,lang);
-                return { success: true, message: this.i18n.translate('translation.orders.paid_with_points', { lang }) };
+                return await this.handlePointsOnlyPayment(order, customer, transaction, lang);
             }
-
-            if (order.paymentMethod === PaymentMethod.WALLET) {
-                if (customer.walletBalance < amountLeftToPay) {
-                    throw new BadRequestException(this.i18n.translate('translation.orders.wallet_insufficient', { lang }));
-                }
-
-                order.orderNumber = await this.orderService.generateOrderNumber(order.storeId, transaction);
-                await order.save({ transaction });
-                await this.customerService.detuctFromWallet(customer.id, amountLeftToPay, transaction);
-                await this.updateOrderPaymentInfo(order, transaction);
-                await this.orderPointsService.handlePointsAfterPayment(customer.id, order.pointsRedeemed, order.id, transaction);
-
-                await this.transactionService.createTransaction({
-                    customerId: customer.id,
-                    amount: amountLeftToPay,
-                    direction: 'OUT',
-                    type: TransactionType.PURCHASE_WALLET,
-                    orderId: order.id,
-                }, transaction);
-                this.orderNotificationService.notifyStoreSocket({orderId: order.id,status: order.status,storeId: order.storeId});
-                await this.orderNotificationService.sendNewOrderNotificationToStore(order.id,order.status,order.storeId,lang);
-                await transaction.commit();
-                return { success: true, message: this.i18n.translate('translation.orders.paid_with_points_and_wallet', { lang }) };
-            }
-
-            if (order.paymentMethod === PaymentMethod.GATEWAY) {
-                const {cvc,paymentCardId,newCard} = dto
-                if(!cvc)
-                {
-                    throw new BadRequestException('You should send cvc of your card')
-                }
-                let card:PaymentCard;
-                if (paymentCardId) {
-                    card = await this.paymentCardService.getOne(paymentCardId, customer.id);
-                } else if (newCard) {
-                    if (newCard.isSave) {
-                        card = await this.paymentCardService.create({ ...newCard, isDefault: false }, customer.id);
-                    } else {
-                        card = {
-                            cardNumber: newCard.cardNumber,
-                            expiryDate: newCard.expiryDate,
-                            cardHolderName: newCard.cardHolderName,
-                            cardName: newCard.cardName,
-                            customerId: customer.id,
-                        } as any; 
-                    }
-                    } else {
-                        throw new BadRequestException('Either paymentCardId or newCard must be provided');
-                    }
-                const apiCard = formatCardForApi(card);
-                await transaction.rollback();
-                const { redirectUrl ,redirectMethod,redirectParams,paymentId} = await this.paymentSessionService.startPayment({
-                    customer,
-                    amount: amountLeftToPay,
-                    provider: order.paymentGateway,
-                    purpose: GatewaySource.order,
-                    card: {
-                        ...apiCard,
-                        cvc
-                    },
-                    sourceId: order.id,
-                });
-
-                return { redirect:{redirectUrl,redirectMethod,redirectParams,paymentId} };
+            switch (order.paymentMethod) {
+                case PaymentMethod.WALLET:
+                    return await this.handleWalletPayment(order, customer, amountLeftToPay, transaction, lang);
+                case PaymentMethod.GATEWAY:
+                    return await this.handleGatewayPayment(order, customer, dto, amountLeftToPay, transaction);
+                default:
+                    throw new BadRequestException(this.i18n.translate('translation.orders.invalid_payment_method', { lang }));
             }
         } catch (error) {
             await transaction.rollback();
@@ -171,20 +70,155 @@ export class OrderPaymentService {
         }
     }
 
-    async confirmOrderPayment(session: PaymentSession, lang: Language = Language.ar) {
+    private async getValidOrder(orderId: number, customer: Customer, transaction: any, lang: Language) {
+        const order = await this.orderRepo.findOne({ where: { id: orderId, customerId:customer.id }, transaction });
+        if (!order) throw new NotFoundException(this.i18n.translate('translation.orders.not_found', { lang }));
+
+        const store = await this.storeService.storeById(order.storeId);
+        if (!store || store.status !== StoreStatus.APPROVED) {
+            throw new BadRequestException(this.i18n.translate('translation.orders.store_unavailable', { lang }));
+        }
+
+        if (!order.scheduledAt && !(await this.storeUtilsService.isStoreOpenAt(store.id, new Date()))) {
+            throw new BadRequestException(this.i18n.translate('translation.orders.store_closed_now', { lang }));
+        }
+
+        if (order.scheduledAt && new Date(order.scheduledAt) <= new Date()) {
+            throw new BadRequestException(this.i18n.translate('translation.orders.scheduled_in_past', { lang }));
+        }
+
+        if (order.isPaid) throw new BadRequestException(this.i18n.translate('translation.orders.already_paid', { lang }));
+        if (order.status !== OrderStatus.PENDING_PAYMENT) {
+            throw new BadRequestException(this.i18n.translate('translation.orders.invalid_status_for_payment', { lang }));
+        }
+
+        if (order.pointsRedeemed > 0) {
+            if (customer.points < MIN_POINTS_TO_USE) {
+                throw new BadRequestException(this.i18n.translate('translation.orders.min_points_required', { lang }));
+            }
+            if (order.pointsRedeemed > customer.points) {
+                throw new BadRequestException(this.i18n.translate('translation.orders.points_exceed_balance', { lang }));
+            }
+        }
+
+        return order;
+    }
+
+    private async handlePointsOnlyPayment(order: Order, customer: Customer, transaction: any, lang: Language) {
+        order.orderNumber = await this.orderService.generateOrderNumber(order.storeId, transaction);
+        await order.save({ transaction });
+
+        await this.updateOrderPaymentInfo(order, transaction);
+        await this.orderPointsService.deductPointsForOrder(customer.id, order.pointsRedeemed, order.id, transaction);
+
+        await transaction.commit();
+
+        this.orderNotificationService.notifyStoreSocket({ orderId: order.id, status: order.status, storeId: order.storeId });
+        await this.orderNotificationService.sendNewOrderNotificationToStore(order.id, order.status, order.storeId, lang);
+
+        return { success: true, message: this.i18n.translate('translation.orders.paid_with_points', { lang }) };
+    }
+
+    private async handleWalletPayment(order: Order, customer: Customer, amountLeft: number, transaction: any, lang: Language) {
+        if (customer.walletBalance < amountLeft) {
+            throw new BadRequestException(this.i18n.translate('translation.orders.wallet_insufficient', { lang }));
+        }
+
+        order.orderNumber = await this.orderService.generateOrderNumber(order.storeId, transaction);
+        await order.save({ transaction });
+
+        await this.customerService.detuctFromWallet(customer.id, amountLeft, transaction);
+        await this.updateOrderPaymentInfo(order, transaction);
+        await this.orderPointsService.deductPointsForOrder(customer.id, order.pointsRedeemed, order.id, transaction);
+
+        await this.transactionService.createTransaction({
+            customerId: customer.id,
+            amount: amountLeft,
+            direction: 'OUT',
+            type: TransactionType.PURCHASE_WALLET,
+            orderId: order.id,
+        }, transaction);
+
+        await transaction.commit();
+        this.orderNotificationService.notifyStoreSocket({ orderId: order.id, status: order.status, storeId: order.storeId });
+        await this.orderNotificationService.sendNewOrderNotificationToStore(order.id, order.status, order.storeId, lang);
+
+        return { success: true, message: this.i18n.translate('translation.orders.paid_with_points_and_wallet', { lang }) };
+    }
+
+    private async handleGatewayPayment(order: Order, customer: Customer, dto: PayOrderDTO, amountLeft: number, transaction: any) {
+        const { cvc, paymentCardId, newCard } = dto;
+
+        if (!cvc) throw new BadRequestException('You should send cvc of your card');
+
+        let card: PaymentCard;
+
+        if (paymentCardId) {
+            card = await this.paymentCardService.getOne(paymentCardId, customer.id);
+        } else if (newCard) {
+            if (newCard.isSave) {
+                card = await this.paymentCardService.create({ ...newCard, isDefault: false }, customer.id);
+            } else {
+                card = { ...newCard, customerId: customer.id } as any;
+            }
+        } else {
+            throw new BadRequestException('Either paymentCardId or newCard must be provided');
+        }
+
+        const apiCard = formatCardForApi(card);
+
+        await transaction.rollback();
+
+        const { redirectUrl, redirectMethod, redirectParams, paymentId } = await this.paymentSessionService.startPayment({
+            customer,
+            amount: amountLeft,
+            provider: order.paymentGateway,
+            purpose: GatewaySource.order,
+            card: { ...apiCard, cvc },
+            sourceId: order.id,
+        });
+
+        return { redirect: { redirectUrl, redirectMethod, redirectParams, paymentId } };
+    }
+
+    async confirmOrderPayment(session: PaymentSession, lang: Language = Language.ar) 
+    {
         const transaction = await this.sequelize.transaction();
         try {
+            // 1️⃣ جلب الطلب والتحقق من وجوده
             const order = await this.orderRepo.findOne({ where: { id: session.orderId }, transaction });
             if (!order) {
                 await transaction.rollback();
                 throw new NotFoundException(this.i18n.translate('translation.orders.not_found', { lang }));
             }
 
-            order.orderNumber = await this.orderService.generateOrderNumber(order.storeId, transaction);
-            await order.save({ transaction });
-            await this.updateOrderPaymentInfo(order, transaction);
-            await this.orderPointsService.validateAndRedeemPoints(order, transaction, lang);
+            const customer = await this.customerService.findById(order.customerId);
 
+            // 2️⃣ التحقق من صلاحية الطلب
+            if (order.status === OrderStatus.EXPIRED_PAYMENT) {
+                await this.refundWalletIfNeeded(order.customerId, order.walletAmountUsed, order.gatewayAmountUsed, order.id, transaction);
+                throw new BadRequestException(this.i18n.translate('translation.orders.expired_order_refund', { lang }));
+            }
+
+            // 3️⃣ التحقق من النقاط المستخدمة
+            if (order.pointsRedeemed > 0) {
+                if (customer.points < order.pointsRedeemed) {
+                    await this.refundWalletIfNeeded(order.customerId, order.walletAmountUsed, order.gatewayAmountUsed, order.id, transaction);
+                    throw new BadRequestException(this.i18n.translate('translation.orders.points_insufficient', { lang }));
+                }
+            }
+
+            // 4️⃣ تحديث رقم الطلب وحفظه
+            order.orderNumber = await this.orderService.generateOrderNumber(order.storeId, transaction);
+            await this.updateOrderPaymentInfo(order,transaction)
+            await order.save({ transaction });
+
+            // 5️⃣ خصم النقاط المستخدمة (إن وجدت)
+            if (order.pointsRedeemed > 0) {
+                await this.orderPointsService.deductPointsForOrder(customer.id, order.pointsRedeemed, order.id, transaction);
+            }
+
+            // 6️⃣ إنشاء المعاملة للبوابة
             await this.transactionService.createTransaction({
                 customerId: order.customerId,
                 amount: session.amount ?? 0,
@@ -193,10 +227,14 @@ export class OrderPaymentService {
                 orderId: order.id,
             }, transaction);
 
-            const customer = await this.customerService.findById(order.customerId);
+            // 7️⃣ إشعارات المتجر
             this.orderNotificationService.notifyStoreSocket({orderId: order.id,status: order.status,storeId: order.storeId});
-            await this.orderNotificationService.sendNewOrderNotificationToStore(order.id,order.status,order.storeId,lang);
+            await this.orderNotificationService.sendNewOrderNotificationToStore(order.id, order.status, order.storeId, lang);
+
+            // 8️⃣ تأكيد المعاملة
             await transaction.commit();
+
+            return { success: true, message: this.i18n.translate('translation.orders.payment_confirmed', { lang }) };
         } catch (error) {
             await transaction.rollback();
             throw error;
@@ -212,35 +250,25 @@ export class OrderPaymentService {
     }
 
     async processOrderRefund(order: Order, newStatus: OrderStatus, transaction: any) {
-        const totalRefundAmount = (order.walletAmountUsed || 0) + (order.gatewayAmountUsed || 0);
-
-        if (totalRefundAmount > 0) {
-            await this.customerService.addToWallet(order.customerId, totalRefundAmount, transaction);
-
-            await this.transactionService.createTransaction({
-                customerId: order.customerId,
-                amount: totalRefundAmount,
-                direction: 'IN',
-                type: TransactionType.REFUND_WALLET,
-                orderId: order.id,
-            }, transaction);
-        }
-
-        if (order.pointsRedeemed && order.pointsRedeemed > 0) {
-            await this.customerService.addPoints(order.customerId, order.pointsRedeemed, transaction);
-
-            await this.userPointHistoryService.create({
-                customerId: order.customerId,
-                type: PointActionType.REFUND,
-                source: PointActionSoucre.ORDER,
-                points: order.pointsRedeemed,
-                relatedOrderId: order.id,
-            }, transaction);
-        }
-
+        await this.refundWalletIfNeeded(order.customerId, order.walletAmountUsed, order.gatewayAmountUsed, order.id, transaction);
+        await this.orderPointsService.addPointsForRefund(order.customerId, order.pointsRedeemed, order.id, transaction);
         order.status = newStatus;
-        order.isPaid = false;
         order.canceledAt = new Date();
         await order.save({ transaction });
+    }
+
+    async refundWalletIfNeeded(customerId: number, walletAmountUsed: number, gatewayAmountUsed: number, orderId: number, transaction: any) 
+    {
+        const totalRefund = (walletAmountUsed || 0) + (gatewayAmountUsed || 0);
+        if (totalRefund > 0) {
+            await this.customerService.addToWallet(customerId, totalRefund, transaction);
+            await this.transactionService.createTransaction({
+                customerId,
+                amount: totalRefund,
+                direction: 'IN',
+                type: TransactionType.REFUND_WALLET,
+                orderId,
+            }, transaction);
+        }
     }
 }
