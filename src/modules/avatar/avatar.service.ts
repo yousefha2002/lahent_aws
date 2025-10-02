@@ -12,7 +12,7 @@ export class AvatarService {
         private cloudinaryService:CloudinaryService,
         private readonly i18n: I18nService,
     ){}
-    async findById(id: number,lang=Language.en) 
+    async findById(id: number,lang=Language.ar) 
     {
         const avatar = await this.avatarRepo.findByPk(id)
         if(!avatar)
@@ -28,7 +28,7 @@ export class AvatarService {
         return this.avatarRepo.findAll()
     }
 
-    async create(lang=Language.en,file?: Express.Multer.File)
+    async create(lang:Language,file?: Express.Multer.File)
     {
         if(!file)
         {
@@ -39,5 +39,24 @@ export class AvatarService {
         await this.avatarRepo.create({url: result.secure_url,publicId: result.public_id})
         const message = this.i18n.translate('translation.createdSuccefully', { lang });
         return {message}
+    }
+
+    async update(id: number, lang : Language, file?: Express.Multer.File) {
+        const avatar = await this.findById(id,lang);
+
+        if (!file) {
+            const message = this.i18n.translate('translation.file_required', { lang });
+            throw new BadRequestException(message);
+        }
+        if (avatar.publicId) {
+            await this.cloudinaryService.deleteImage(avatar.publicId);
+        }
+        const result = await this.cloudinaryService.uploadImage(file);
+        avatar.url = result.secure_url;
+        avatar.publicId = result.public_id;
+        await avatar.save();
+
+        const message = this.i18n.translate('translation.updatedSuccefully', { lang });
+        return { message };
     }
 }

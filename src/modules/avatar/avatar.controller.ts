@@ -1,13 +1,4 @@
-import { 
-  Controller, 
-  Get, 
-  Post, 
-  Req, 
-  UploadedFile, 
-  UseFilters, 
-  UseGuards, 
-  UseInterceptors 
-} from '@nestjs/common';
+import { Controller, Get, Param, Post, Put, UploadedFile, UseFilters, UseGuards, UseInterceptors } from '@nestjs/common';
 import { AvatarService } from './avatar.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { MulterExceptionFilter } from 'src/multer/multer.exception.filter';
@@ -67,5 +58,34 @@ export class AvatarController {
   ) {
     const lang = getLang(i18n);
     return this.avatarService.create(lang, file);
+  }
+
+  @ApiOperation({ summary: 'Update an existing avatar (admin only)' })
+  @ApiSecurity('access-token')
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        image: { type: 'string', format: 'binary' },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Avatar updated successfully',
+    schema: { example: { message: 'Updated successfully' } },
+  })
+  @UseGuards(AdminGuard)
+  @Put(':id')
+  @UseInterceptors(FileInterceptor('image', multerOptions))
+  @UseFilters(MulterExceptionFilter)
+  async updateAvatar(
+    @Param('id') id: string,
+    @I18n() i18n: I18nContext,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    const lang = getLang(i18n);
+    return this.avatarService.update(+id, lang, file);
   }
 }
