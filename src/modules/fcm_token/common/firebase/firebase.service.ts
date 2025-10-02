@@ -1,7 +1,7 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import * as admin from 'firebase-admin';
 
-const sa = JSON.parse(process.env.SA_LA_HENT!);
+const sa = JSON.parse(process.env.SA_LAHent!);
 
 if (sa.private_key) {
     sa.private_key = sa.private_key.replace(/\\n/g, '\n').trim();
