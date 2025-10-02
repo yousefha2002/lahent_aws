@@ -1,5 +1,5 @@
 import { FcmTokenService } from 'src/modules/fcm_token/fcm_token.service';
-import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { repositories } from 'src/common/enums/repositories';
 import { Order } from '../entities/order.entity';
@@ -11,6 +11,7 @@ import { OrderNotificationService } from './order_notification.service';
 import { Language } from 'src/common/enums/language';
 import { RoleStatus } from 'src/common/enums/role_status';
 import { OrderNotifications } from 'src/common/constants/notification/order-notifications';
+import { CouponService } from 'src/modules/coupon/coupon.service';
 
 @Injectable()
 export class OrderCronService{
@@ -20,7 +21,10 @@ export class OrderCronService{
         @Inject(repositories.order_repository) private orderRepo: typeof Order,
         private readonly orderStatusService:OrderStatusService,
         private readonly orderNotificationService: OrderNotificationService,
-        private readonly fcmTokenService:FcmTokenService
+        private readonly fcmTokenService:FcmTokenService,
+        @Inject(forwardRef(() => CouponService))
+        private couponService:CouponService,
+        @Inject('SEQUELIZE') private readonly sequelize: Sequelize
     ) {}
 
     /***  إلغاء الطلبات التي لم يتم دفعها خلال 30 دقيقة*/
@@ -36,17 +40,34 @@ export class OrderCronService{
             },
         });
         for (const order of orders) {
-            order.status = OrderStatus.EXPIRED_PAYMENT;
-            order.canceledAt = new Date()
-            await order.save();
-            this.orderNotificationService.notifyCustomerSocket({orderId: order.id,status: order.status,customerId: order.customerId});
-            await this.fcmTokenService.notifyUser(
-                order.customerId,
-                RoleStatus.CUSTOMER,
-                OrderNotifications.ORDER_EXPIRED_PAYMENT.title[Language.ar],
-                OrderNotifications.ORDER_EXPIRED_PAYMENT.body[Language.ar], 
-                { orderId: order.id.toString(), status: order.status }
-            );
+            const transaction = await this.sequelize.transaction();
+            try {
+                order.status = OrderStatus.EXPIRED_PAYMENT;
+                order.canceledAt = new Date();
+                await order.save({ transaction });
+
+                if (order.couponId) {
+                    this.couponService.decrementCouponCount(order.couponId, transaction);
+                }
+
+                await transaction.commit();
+
+                this.orderNotificationService.notifyCustomerSocket({
+                orderId: order.id,
+                status: order.status,
+                customerId: order.customerId
+                });
+                await this.fcmTokenService.notifyUser(
+                    order.customerId,
+                    RoleStatus.CUSTOMER,
+                    OrderNotifications.ORDER_EXPIRED_PAYMENT.title[Language.ar],
+                    OrderNotifications.ORDER_EXPIRED_PAYMENT.body[Language.ar],
+                    { orderId: order.id.toString(), status: order.status }
+                );
+            } catch (e) {
+                await transaction.rollback();
+                throw e;
+            }
         }
     }
 
@@ -203,7 +224,7 @@ export class OrderCronService{
         const orders = await this.orderRepo.findAll({
             where: {
             status: {
-                [Op.in]: [OrderStatus.PENDING_CONFIRMATION, OrderStatus.CUSTOMER_DECISION],
+                [Op.in]: [OrderStatus.CUSTOMER_DECISION],
             },
             scheduledAt: { [Op.lt]: now },
             },

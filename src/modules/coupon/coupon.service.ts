@@ -118,7 +118,7 @@ export class CouponService {
     this.couponRepo.increment({ usedCount: 1 }, { where: { id }, transaction });
   }
 
-  decremantCouponCount(id: number, transaction: any)
+  decrementCouponCount(id: number, transaction: any)
   {
     this.couponRepo.decrement({ usedCount: 1 }, { where: { id }, transaction });
   }

@@ -5,7 +5,7 @@ import { OfferService } from './../../offer/offer.service';
 import { OrderPaymentService } from './order-payment.service';
 import { UserPointHistoryService } from '../../user_point_history/user_point_history.service';
 import { CustomerService } from '../../customer/customer.service';
-import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
 import { Order } from '../entities/order.entity';
 import { OrderStatus } from 'src/common/enums/order_status';
@@ -21,6 +21,7 @@ import { AcceptOrderDto } from '../dto/accept-order.dto';
 import { FcmTokenService } from 'src/modules/fcm_token/fcm_token.service';
 import { RoleStatus } from 'src/common/enums/role_status';
 import { OrderNotifications } from 'src/common/constants/notification/order-notifications';
+import { CouponService } from 'src/modules/coupon/coupon.service';
 
 @Injectable()
 export class OrderStatusService {
@@ -35,7 +36,9 @@ export class OrderStatusService {
         private readonly i18n: I18nService,
         private readonly orderNotificationService:OrderNotificationService,
         private readonly storeTransactionService:StoreTransactionService,
-        private readonly fcmTokenService:FcmTokenService
+        private readonly fcmTokenService:FcmTokenService,
+        @Inject(forwardRef(() => CouponService))
+        private couponService:CouponService
     ){}
 
     async refundOrder(orderId: number, customer: Customer,lang:Language,status:OrderStatus=OrderStatus.CANCELLED) {
@@ -44,14 +47,11 @@ export class OrderStatusService {
             const order = await this.orderRepo.findOne({ where: { id: orderId, customerId: customer.id }, transaction });
             if (!order) throw new NotFoundException(this.i18n.translate('translation.orders.not_found', { lang }));
 
-            if (!order.isPaid) throw new BadRequestException(this.i18n.translate('translation.orders.not_paid', { lang }));
-
             if (![OrderStatus.CUSTOMER_DECISION].includes(order.status)) {
                 throw new BadRequestException(this.i18n.translate('translation.orders.invalid_status_for_refund', { lang }));
             }
 
-            await this.orderPaymentService.processOrderRefund(order,status, transaction);
-            await this.storeTransactionService.create({storeId:order.storeId,orderId:order.id,totalAmount:order.finalPriceToPay,status:StoreTransactionType.CANCELED},transaction);
+            await this.handleOrderRefundActions(order, status,StoreTransactionType.CANCELED, transaction);
 
             await transaction.commit();
             this.orderNotificationService.notifyBothSocket({orderId: order.id,status,customerId: order.customerId,storeId: order.storeId});
@@ -82,8 +82,7 @@ export class OrderStatusService {
                 throw new BadRequestException(this.i18n.translate('translation.orders.invalid_status_for_reject', { lang }));
             }
 
-            await this.orderPaymentService.processOrderRefund(order, OrderStatus.REJECTED, transaction);
-            await this.storeTransactionService.create({storeId,orderId:order.id,totalAmount:order.finalPriceToPay,status:StoreTransactionType.CANCELED},transaction);
+            await this.handleOrderRefundActions(order, OrderStatus.REJECTED,StoreTransactionType.CANCELED, transaction);
 
             this.orderNotificationService.notifyCustomerSocket({orderId: order.id,status: OrderStatus.REJECTED,customerId: order.customerId});
             await this.fcmTokenService.notifyUser(
@@ -99,6 +98,22 @@ export class OrderStatusService {
         } catch (error) {
             await transaction.rollback();
             throw error;
+        }
+    }
+
+    private async handleOrderRefundActions(order: Order, orderStatus: OrderStatus,storeTransactionStatus: StoreTransactionType,transaction: any) 
+    {
+        await this.orderPaymentService.processOrderRefund(order, orderStatus, transaction);
+        await this.storeTransactionService.create({
+            storeId: order.storeId,
+            orderId: order.id,
+            totalAmount: order.finalPriceToPay,
+            status:storeTransactionStatus,
+            },
+            transaction
+        );
+        if (order.couponId) {
+            this.couponService.decrementCouponCount(order.couponId, transaction);
         }
     }
 
