@@ -6,16 +6,19 @@ import { VariantCategoryLanguage } from './entities/variant_category_language.en
 import { CreateVariantCategoryDto } from './dto/create_variant_category.dto';
 import { Language } from 'src/common/enums/language';
 import { validateRequiredLanguages } from 'src/common/validators/translation-validator.';
+import { UpdateVariantCategoryDto } from './dto/update_variant_category.dto';
+import { I18nService } from 'nestjs-i18n';
 
 @Injectable()
 export class VariantCategoryService {
     constructor(
         @Inject(repositories.variant_category_repository) private variantCategoryRepo: typeof VariantCategory,
         @Inject(repositories.variant_category_language_repository) private variantCategoryLanguageRepo: typeof VariantCategoryLanguage,
-        @Inject('SEQUELIZE') private readonly sequelize: Sequelize
+        @Inject('SEQUELIZE') private readonly sequelize: Sequelize,
+        private readonly i18n: I18nService
     ){}
 
-    async create(createDto: CreateVariantCategoryDto) 
+    async create(createDto: CreateVariantCategoryDto,lang:Language) 
     {
         const { languages } = createDto;
         const codes = languages.map(l => l.languageCode);
@@ -49,11 +52,10 @@ export class VariantCategoryService {
             ),
             ),
         );
-
-        // commit transaction
         await t.commit();
 
-        return { ...category.toJSON(), languages: categoryLanguages };
+        const message = this.i18n.translate('translation.createdSuccefully', { lang });
+        return { message };
         } catch (error) {
         await t.rollback();
         throw error;
@@ -77,5 +79,51 @@ export class VariantCategoryService {
             throw new Error('category is not found')
         }
         return category
+    }
+
+    async update(id: number, dto: UpdateVariantCategoryDto, lang: Language) {
+    const transaction = await this.sequelize.transaction();
+    try {
+        const category = await this.variantCategoryRepo.findByPk(id);
+        if (!category) {
+        throw new BadRequestException(this.i18n.translate('translation.not_found', { lang }));
+        }
+
+        if (dto.languages) {
+        const codes = dto.languages.map(l => l.languageCode);
+        validateRequiredLanguages(codes, 'variant category languages');
+
+        for (const langObj of dto.languages) {
+            const existingLang = await this.variantCategoryLanguageRepo.findOne({
+            where: {
+                variantCategoryId: id,
+                languageCode: langObj.languageCode,
+            },
+            transaction,
+            });
+
+            if (existingLang) {
+            existingLang.name = langObj.name;
+            await existingLang.save({ transaction });
+            } else {
+            await this.variantCategoryLanguageRepo.create(
+                {
+                variantCategoryId: id,
+                languageCode: langObj.languageCode,
+                name: langObj.name,
+                },
+                { transaction },
+            );
+            }
+        }
+        }
+
+        await transaction.commit();
+        const message = this.i18n.translate('translation.updatedSuccefully', { lang });
+        return { message };
+    } catch (error) {
+        await transaction.rollback();
+        throw error;
+    }
     }
 }
