@@ -28,6 +28,7 @@ import { OrderAnalyticsResponseDto } from './dto/orde-analytics.dto';
 import { StoreFinancialsFilterDto } from '../store/dto/store-financials-filter.dto';
 import { PayOrderDTO } from './dto/pay-order-dto';
 import { StoreGuard } from 'src/common/guards/store.guard';
+import { ReorderResponseDto } from './dto/reorder-response.dto';
 
 @Controller('order')
 export class OrderController {
@@ -273,5 +274,26 @@ export class OrderController {
   ) {
     const lang = getLang(i18n);
     return this.orderStatusService.markCustomerOnTheWay(orderId, user.id, lang);
+  }
+
+  
+  @Serilaize(ReorderResponseDto)
+  @UseGuards(CustomerGuard)
+  @Post('reorder/:orderId')
+  @ApiOperation({ summary: 'Reorder a previous order' })
+  @ApiSecurity('access-token')
+  @ApiParam({ name: 'orderId', description: 'ID of the previous order', example: 123 })
+  @ApiResponse({
+    status: 200,
+    description: 'Products added to cart successfully',
+    type: ReorderResponseDto,
+  })
+  async reorder(
+    @CurrentUser() customer: Customer,
+    @Param('orderId', ParseIntPipe) orderId: number,
+    @I18n() i18n: I18nContext,
+  ) {
+    const lang = getLang(i18n);
+    return this.orderPlacingService.reorder(orderId, customer, lang);
   }
 }

@@ -304,7 +304,7 @@ export class CartService {
     storeId: number,
     customerId: number,
     transaction?: any,
-    lang = Language.en,
+    lang = Language.ar,
   ) {
     await this.cartRepo.destroy({
       where: { storeId, customerId },

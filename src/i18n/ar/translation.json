@@ -138,7 +138,8 @@
       "received_success": "تم تأكيد استلام الطلب",
       "invalid_status_for_extend": "الطلب ليس في حالة قرار العميل",
       "max_extension_exceeded": "تم تجاوز الحد الأقصى لتمديد الوقت",
-      "extended_success": "تم تمديد الوقت"
+      "extended_success": "تم تمديد الوقت",
+      "reorder_added_to_cart": "تمت إضافة منتجات الطلب السابق إلى سلة التسوق"
   },
   "otp": {
     "already_sent": "تم إرسال رمز التحقق مسبقًا. الرجاء استخدام الرمز الحالي أو الانتظار.",

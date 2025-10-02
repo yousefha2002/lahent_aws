@@ -24,6 +24,8 @@ import { I18nService } from 'nestjs-i18n';
 import { Language } from 'src/common/enums/language';
 import { OfferType } from 'src/common/enums/offer_type';
 import { Store } from 'src/modules/store/entities/store.entity';
+import { OrderItem } from 'src/modules/order_item/entities/order_item.entity';
+import { CreateCartProductDto } from 'src/modules/cart/dto/create-product-cart.dto';
 
 @Injectable()
 export class OrderPlacingService {
@@ -259,6 +261,48 @@ export class OrderPlacingService {
 
         if (!pickupByCustomer && (!pickupPersonName || !pickupPersonNumber)) {
             throw new BadRequestException(this.i18n.translate('translation.orders.pickup_person_required', { lang }));
+        }
+    }
+
+    async reorder(oldOrderId: number, customer: Customer, lang: Language) 
+    {
+        const transaction = await this.sequelize.transaction();
+
+        try {
+            const oldOrder = await this.orderRepo.findOne({
+            where: { id: oldOrderId, customerId: customer.id },
+            include: [
+                { model: OrderItem, include: ['extras', 'instructions', 'variants'] },
+            ],
+            transaction,
+            });
+
+            if (!oldOrder) {
+                throw new BadRequestException(this.i18n.translate('translation.orders.not_found', { lang }));
+            }
+
+            const oldItems = oldOrder.orderItems;
+
+            // أضف كل منتج للسلة
+            for (const item of oldItems) {
+                const dto: CreateCartProductDto = {
+                    productId: item.productId,
+                    quantity: item.quantity,
+                    note: item.note,
+                    variants: item.variants.map(v => v.variantId),
+                    extras: item.extras.map(e => e.extraId),
+                    instructions: item.instructions.map(i => i.instructionId),
+                };
+
+                await this.cartService.createProductCart(dto, customer.id, lang);
+            }
+
+            await transaction.commit();
+
+            return {message: this.i18n.translate('translation.orders.reorder_added_to_cart', { lang })};
+        } catch (error) {
+            await transaction.rollback();
+            throw error;
         }
     }
 }

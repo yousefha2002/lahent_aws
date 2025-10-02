@@ -138,7 +138,8 @@
       "received_success": "Order marked as RECEIVED",
       "invalid_status_for_extend": "Order is not in customer decision state",
       "max_extension_exceeded": "Maximum extension time exceeded",
-      "extended_success": "Extended by minutes"
+      "extended_success": "Extended by minutes",
+      "reorder_added_to_cart": "Previous order products added to cart successfully"
   },
   "otp": {
     "already_sent": "OTP already sent. Please use the existing one or wait.",
