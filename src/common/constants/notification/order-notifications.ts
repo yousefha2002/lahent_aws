@@ -30,9 +30,9 @@ export const OrderNotifications = {
         en: `Order #${orderNumber} has been cancelled and payment refunded.`,
         ar: `تم إلغاء الطلب رقم #${orderNumber} واسترداد المبلغ.`,
     }),
-    ORDER_EXPIRED_PAYMENT: (orderNumber: number) => ({
-        en: `Order #${orderNumber} expired due to non-payment.`,
-        ar: `انتهت صلاحية الطلب رقم #${orderNumber} لعدم الدفع.`,
+    ORDER_EXPIRED_PAYMENT: () => ({
+        en: `Your order has expired due to non-payment.`,
+        ar: `انتهت صلاحية طلبك لعدم الدفع.`,
     }),
     CUSTOMER_DECISION: (orderNumber: number) => ({
         en: `Order #${orderNumber} is pending your decision — the store has not confirmed yet.`,

@@ -61,7 +61,7 @@ export class OrderCronService{
                 await this.fcmTokenService.notifyUser(
                     order.customerId,
                     RoleStatus.CUSTOMER,
-                    OrderNotifications.ORDER_EXPIRED_PAYMENT(order.orderNumber)[Language.ar],
+                    OrderNotifications.ORDER_EXPIRED_PAYMENT()[Language.ar],
                     { orderId: order.id.toString(), status: order.status }
                 );
             } catch (e) {
