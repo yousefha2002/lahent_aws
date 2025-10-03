@@ -114,7 +114,7 @@ export class OrderPaymentService {
         await transaction.commit();
 
         this.orderNotificationService.notifyStoreSocket({ orderId: order.id, status: order.status, storeId: order.storeId });
-        await this.orderNotificationService.sendNewOrderNotificationToStore(order.id, order.status, order.storeId, lang);
+        await this.orderNotificationService.sendNewOrderNotificationToStore(order.id,order.orderNumber, order.status, order.storeId, lang);
 
         return { success: true, message: this.i18n.translate('translation.orders.paid_with_points', { lang }) };
     }
@@ -141,7 +141,7 @@ export class OrderPaymentService {
 
         await transaction.commit();
         this.orderNotificationService.notifyStoreSocket({ orderId: order.id, status: order.status, storeId: order.storeId });
-        await this.orderNotificationService.sendNewOrderNotificationToStore(order.id, order.status, order.storeId, lang);
+        await this.orderNotificationService.sendNewOrderNotificationToStore(order.id,order.orderNumber, order.status, order.storeId, lang);
 
         return { success: true, message: this.i18n.translate('translation.orders.paid_with_points_and_wallet', { lang }) };
     }
@@ -229,7 +229,7 @@ export class OrderPaymentService {
 
             // 7️⃣ إشعارات المتجر
             this.orderNotificationService.notifyStoreSocket({orderId: order.id,status: order.status,storeId: order.storeId});
-            await this.orderNotificationService.sendNewOrderNotificationToStore(order.id, order.status, order.storeId, lang);
+            await this.orderNotificationService.sendNewOrderNotificationToStore(order.id,order.orderNumber, order.status, order.storeId, lang);
 
             // 8️⃣ تأكيد المعاملة
             await transaction.commit();

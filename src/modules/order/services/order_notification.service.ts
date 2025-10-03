@@ -41,13 +41,13 @@ export class OrderNotificationService {
     }
 
     // fcm 
-    async sendNewOrderNotificationToStore(orderId:number,status:OrderStatus,storeId:number, lang: Language) {
-        return this.fcmTokenService.notifyUser(
-            storeId,
-            RoleStatus.STORE,
-            OrderNotifications.NEW_ORDER.title[lang],
-            OrderNotifications.NEW_ORDER.body[lang],
-            { orderId: orderId.toString(), status: status }
-        );
-    }
+    async sendNewOrderNotificationToStore(orderId:number,orderNumber:number,status:OrderStatus,storeId:number, lang: Language) {
+        const notification = OrderNotifications.NEW_ORDER(orderNumber);
+            return this.fcmTokenService.notifyUser(
+                storeId,
+                RoleStatus.STORE,
+                notification[lang],
+                { orderId: orderId.toString(), status: status }
+            );
+        }
 }

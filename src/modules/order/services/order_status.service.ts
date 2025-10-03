@@ -60,8 +60,7 @@ export class OrderStatusService {
                     { userId: order.customerId, role: RoleStatus.CUSTOMER },
                     { userId: order.storeId, role: RoleStatus.STORE }
                 ],
-                OrderNotifications.ORDER_CANCELLED.title[lang],
-                OrderNotifications.ORDER_CANCELLED.body[lang],
+                OrderNotifications.ORDER_CANCELLED(order.orderNumber)[lang],
                 { orderId: order.id.toString(), status }
             );
             return { success: true, message: this.i18n.translate('translation.orders.refund_success', { lang }) };
@@ -88,8 +87,7 @@ export class OrderStatusService {
             await this.fcmTokenService.notifyUser(
                 order.customerId,
                 RoleStatus.CUSTOMER,
-                OrderNotifications.REJECTED_BY_STORE.title[lang],
-                OrderNotifications.REJECTED_BY_STORE.body[lang],
+                OrderNotifications.REJECTED_BY_STORE(order.orderNumber)[lang], 
                 { orderId: order.id.toString(), status: OrderStatus.REJECTED }
             );
             await transaction.commit();
@@ -162,11 +160,10 @@ export class OrderStatusService {
             await order.save({ transaction });
             await this.storeTransactionService.create({storeId,orderId:order.id,totalAmount:order.finalPriceToPay,status:StoreTransactionType.COMPLETED},transaction);
             this.orderNotificationService.notifyCustomerSocket({orderId: order.id,status: order.status,customerId: order.customerId});
-            this.fcmTokenService.notifyUser(
-                order.customerId,        
-                RoleStatus.CUSTOMER, 
-                OrderNotifications.ACCEPTED_BY_STORE.title[lang],
-                OrderNotifications.ACCEPTED_BY_STORE.body[lang],
+            await this.fcmTokenService.notifyUser(
+                order.customerId,
+                RoleStatus.CUSTOMER,
+                OrderNotifications.ACCEPTED_BY_STORE(order.orderNumber)[lang],
                 { orderId: order.id.toString(), status: order.status }
             );
             await transaction.commit();
@@ -194,8 +191,7 @@ export class OrderStatusService {
         await this.fcmTokenService.notifyUser(
             order.customerId,
             RoleStatus.CUSTOMER,
-            OrderNotifications.ORDER_READY.title[lang],
-            OrderNotifications.ORDER_READY.body[lang],
+            OrderNotifications.ORDER_READY(order.orderNumber, order.pickupType)[lang],
             { orderId: order.id.toString(), status: order.status }
         );
 
@@ -222,8 +218,7 @@ export class OrderStatusService {
             await this.fcmTokenService.notifyUser(
                 order.storeId,
                 RoleStatus.STORE,
-                OrderNotifications.ORDER_ARRIVED.title[lang],
-                OrderNotifications.ORDER_ARRIVED.body[lang],
+                OrderNotifications.ORDER_ARRIVED(order.orderNumber)[lang],
                 { orderId: order.id.toString(), status: order.status }
             );
             return { success: true, message: this.i18n.translate('translation.orders.arrived_success', { lang }) };
@@ -252,11 +247,9 @@ export class OrderStatusService {
             await this.fcmTokenService.notifyUser(
                 order.storeId,
                 RoleStatus.STORE,
-                OrderNotifications.ORDER_RECEIVED.title[lang],
-                OrderNotifications.ORDER_RECEIVED.body[lang],
+                OrderNotifications.ORDER_RECEIVED(order.orderNumber)[lang],
                 { orderId: order.id.toString(), status: order.status }
             );
-
             return { success: true, message: this.i18n.translate('translation.orders.received_success', { lang }) };
         } catch (error) {
             await transaction.rollback();
@@ -303,8 +296,7 @@ export class OrderStatusService {
         await this.fcmTokenService.notifyUser(
             order.storeId,
             RoleStatus.STORE,
-            OrderNotifications.CUSTOMER_ON_THE_WAY.title[lang],
-            OrderNotifications.CUSTOMER_ON_THE_WAY.body[lang](order.id),
+            OrderNotifications.CUSTOMER_ON_THE_WAY(order.orderNumber)[lang],
             { orderId: order.id.toString(), status: 'customer_on_the_way' }
         );
 

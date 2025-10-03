@@ -42,7 +42,6 @@ export class FcmTokenService {
         userId: number,
         role: RoleStatus,
         title: string,
-        body: string,
         data?: Record<string, string>,
     ) {
         const tokens = await this.fcmTokenRepo.findAll({
@@ -53,7 +52,7 @@ export class FcmTokenService {
         if (tokens.length === 0) return { success: false, message: 'No devices found' };
 
         const tokenList = tokens.map(t => t.token);
-        await this.firebaseService.sendNotificationToMultiple(tokenList, title, body, data);
+        await this.firebaseService.sendNotificationToMultiple(tokenList, title, data);
 
         return { success: true, notifiedDevices: tokenList.length };
     }
@@ -62,7 +61,6 @@ export class FcmTokenService {
     async notifyUsers(
         users: { userId: number; role: RoleStatus }[],
         title: string,
-        body: string,
         data?: Record<string, string>,
     ) {
         const tokens: string[] = [];
@@ -75,7 +73,7 @@ export class FcmTokenService {
         }
 
         if (tokens.length === 0) return { success: false, message: 'No devices found' };
-        await this.firebaseService.sendNotificationToMultiple(tokens, title, body, data);
+        await this.firebaseService.sendNotificationToMultiple(tokens, title, data);
 
         return { success: true, notifiedDevices: tokens.length };
     }

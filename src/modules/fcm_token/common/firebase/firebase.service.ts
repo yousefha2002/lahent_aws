@@ -25,14 +25,13 @@ export class FirebaseService implements OnModuleInit {
     async sendNotificationToMultiple(
         tokens: string[],
         title: string,
-        body: string,
         data?: Record<string, string>,
     ) {
         if (!this.initialized) throw new Error('Firebase not initialized yet');
 
         const multicastMessage: admin.messaging.MulticastMessage = {
             tokens,
-            notification: { title, body },
+            notification: { title },
             data,
         };
 

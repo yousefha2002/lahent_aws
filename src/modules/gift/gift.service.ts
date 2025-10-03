@@ -129,7 +129,6 @@ export class GiftService {
           receiver.id,
           RoleStatus.CUSTOMER,
           GiftNotifications.GIFT_RECEIVED.title[lang],
-          GiftNotifications.GIFT_RECEIVED.body[lang](amount),
         );
       }
 

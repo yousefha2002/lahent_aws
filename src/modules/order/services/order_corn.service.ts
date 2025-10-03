@@ -12,6 +12,7 @@ import { Language } from 'src/common/enums/language';
 import { RoleStatus } from 'src/common/enums/role_status';
 import { OrderNotifications } from 'src/common/constants/notification/order-notifications';
 import { CouponService } from 'src/modules/coupon/coupon.service';
+import { PickupType } from 'src/common/enums/pickedup_type';
 
 @Injectable()
 export class OrderCronService{
@@ -60,8 +61,7 @@ export class OrderCronService{
                 await this.fcmTokenService.notifyUser(
                     order.customerId,
                     RoleStatus.CUSTOMER,
-                    OrderNotifications.ORDER_EXPIRED_PAYMENT.title[Language.ar],
-                    OrderNotifications.ORDER_EXPIRED_PAYMENT.body[Language.ar],
+                    OrderNotifications.ORDER_EXPIRED_PAYMENT(order.orderNumber)[Language.ar],
                     { orderId: order.id.toString(), status: order.status }
                 );
             } catch (e) {
@@ -91,8 +91,7 @@ export class OrderCronService{
             await this.fcmTokenService.notifyUser(
                 order.customerId,
                 RoleStatus.CUSTOMER,
-                OrderNotifications.ORDER_PENDING_CONFIRMATION.title[Language.ar],
-                OrderNotifications.ORDER_PENDING_CONFIRMATION.body[Language.ar],
+                OrderNotifications.CUSTOMER_DECISION(order.orderNumber)[Language.ar],
                 { orderId: order.id.toString(), status: order.status }
             );
         }
@@ -143,14 +142,17 @@ export class OrderCronService{
             const estimatedMs = order.estimatedTime * 60 * 1000;
 
             let newStatus: OrderStatus | null = null;
+            let notificationFn: ((orderNumber: number, pickupType?: PickupType) => any) | null = null;
 
             if (elapsedMs >= estimatedMs && order.status !== OrderStatus.READY) {
                 // مضى الوقت الكامل => جاهز
                 newStatus = OrderStatus.READY;
                 order.readyAt = now;
+                notificationFn = (orderNumber: number) => OrderNotifications.ORDER_READY(orderNumber, order.pickupType);
             } else if (elapsedMs >= estimatedMs / 2 && order.status !== OrderStatus.HALF_PREPARATION) {
                 // مضى نصف الوقت => نصف تحضير
                 newStatus = OrderStatus.HALF_PREPARATION;
+                notificationFn = (orderNumber: number) => OrderNotifications.HALF_PREPARING(orderNumber);
             }
 
             if (newStatus) {
@@ -165,15 +167,18 @@ export class OrderCronService{
                     storeId: order.storeId
                 });
 
-                await this.fcmTokenService.notifyUsers(
-                    [
-                        { userId: order.customerId, role: RoleStatus.CUSTOMER },
-                        { userId: order.storeId, role: RoleStatus.STORE }
-                    ],
-                    OrderNotifications.ORDER_STATUS_UPDATE.title[Language.ar],
-                    OrderNotifications.ORDER_STATUS_UPDATE.body[Language.ar](order.status),
-                    { orderId: order.id.toString(), status: order.status }
-                );
+                if(notificationFn)
+                {
+                    const notification = notificationFn(order.orderNumber);
+                    await this.fcmTokenService.notifyUsers(
+                        [
+                            { userId: order.customerId, role: RoleStatus.CUSTOMER },
+                            { userId: order.storeId, role: RoleStatus.STORE }
+                        ],
+                        notification[Language.ar], // عنوان الإشعار
+                        { orderId: order.id.toString(), status: order.status }
+                    );
+                }
             }
         }
     }
@@ -209,8 +214,7 @@ export class OrderCronService{
                     { userId: order.customerId, role: RoleStatus.CUSTOMER },
                     { userId: order.storeId, role: RoleStatus.STORE }
                 ],
-                OrderNotifications.ORDER_STATUS_UPDATE.title[Language.ar],
-                OrderNotifications.ORDER_STATUS_UPDATE.body[Language.ar](OrderStatus.PREPARING),
+                OrderNotifications.PREPARING(order.orderNumber)[Language.ar], // إشعار التحضير
                 { orderId: order.id.toString(), status: OrderStatus.PREPARING }
             );
         }
