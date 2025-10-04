@@ -77,7 +77,7 @@ export class OrderPlacingService {
 
             // حساب الدفع بالنقاط والمحفظة أو البوابة
             const loyaltySetting = await this.loyaltySettingService.getSettings();
-            const { pointsAmountUsed, walletAmountUsed, gatewayAmountUsed } = 
+            const {pointsRedeemed, pointsAmountUsed, walletAmountUsed, gatewayAmountUsed } = 
                 this.calculatePayment(cart.totalFinalPrice, pointsUsedSafe, user, dto.paymentMethod, loyaltySetting.currencyPerPoint);
             // إنشاء الطلب
             const order = await this.orderRepo.create({
@@ -101,7 +101,7 @@ export class OrderPlacingService {
                 paymentGateway: dto.gatewayType || null,
                 paymentMethod: dto.paymentMethod,
                 pointsAmountUsed: pointsAmountUsed || 0,
-                pointsRedeemed: pointsUsedSafe || 0,
+                pointsRedeemed: pointsRedeemed || 0,
                 pointsEarned: cart.pointsEarned || 0,
                 carId: finalCarId
             }, { transaction });
@@ -196,7 +196,9 @@ export class OrderPlacingService {
 
     private calculatePayment(cartTotal: number, pointsUsed: number, user: Customer, paymentMethod: PaymentMethod, currencyPerPoint:number) 
     {
-        const pointsAmountUsed = round2(pointsUsed * currencyPerPoint);
+        const neededPoints = Math.ceil(cartTotal / currencyPerPoint);
+        const pointsRedeemed = Math.min(pointsUsed, neededPoints);
+        const pointsAmountUsed = round2(pointsRedeemed * currencyPerPoint);
         let remainingAmount = round2(cartTotal - pointsAmountUsed);
         if (isNaN(remainingAmount) || remainingAmount < 0) remainingAmount = 0;
 
@@ -216,7 +218,7 @@ export class OrderPlacingService {
             }
         }
 
-        return { pointsAmountUsed, remainingAmount, walletAmountUsed, gatewayAmountUsed };
+        return { pointsRedeemed,pointsAmountUsed, remainingAmount, walletAmountUsed, gatewayAmountUsed };
     }
 
     private getNameByLang(item: any, lang: Language) {
