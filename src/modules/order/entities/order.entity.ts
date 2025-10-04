@@ -11,7 +11,7 @@ import {
   Default,
   HasMany,
 } from 'sequelize-typescript';
-import { GatewayType } from 'src/common/enums/gatewat_type';
+import { GatewayType } from 'src/common/enums/gateway_type';
 import { OrderStatus } from 'src/common/enums/order_status';
 import { PaymentMethod } from 'src/common/enums/payment_method';
 import { PickupType } from 'src/common/enums/pickedup_type';

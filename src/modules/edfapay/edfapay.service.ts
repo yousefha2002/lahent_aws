@@ -4,7 +4,7 @@ import { PaymentSessionService } from './../payment_session/payment_session.serv
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { GatewaySource } from 'src/common/enums/gateway-source';
 import { PaymentGatewayFactory } from '../payment_session/payment_gateway.factory';
-import { GatewayType } from 'src/common/enums/gatewat_type';
+import { GatewayType } from 'src/common/enums/gateway_type';
 
 @Injectable()
 export class EdfapayService {

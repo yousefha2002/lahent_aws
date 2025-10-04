@@ -1,4 +1,4 @@
-import { GatewayType } from "src/common/enums/gatewat_type";
+import { GatewayType } from "src/common/enums/gateway_type";
 import { PaymentGateway } from "./interfaces/payment_session.interface";
 import { EdFapayGateway } from "./gateways/edfapay.gateway";
 

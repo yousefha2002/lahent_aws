@@ -1,7 +1,7 @@
 import { Type } from 'class-transformer';
 import { IsNotEmpty, IsNumber, IsOptional, IsString, IsDate, IsBoolean, IsEnum, Min } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { GatewayType } from 'src/common/enums/gatewat_type';
+import { GatewayType } from 'src/common/enums/gateway_type';
 import { PaymentMethod } from 'src/common/enums/payment_method';
 import { PickupType } from 'src/common/enums/pickedup_type';
 import { CreateCarDto } from 'src/modules/car/dto/create_car.dto';

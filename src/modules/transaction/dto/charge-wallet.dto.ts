@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { IsEnum, IsNotEmpty,IsInt,IsString, IsOptional } from "class-validator";
-import { GatewayType } from "src/common/enums/gatewat_type";
+import { GatewayType } from "src/common/enums/gateway_type";
 import { CreatePaymentCardWithSaveDto } from "src/modules/payment_card/dto/create-payment-card.dto";
 
 export class ChargeWalletDTO {

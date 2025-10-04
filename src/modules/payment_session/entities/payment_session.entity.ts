@@ -3,7 +3,7 @@ import { Customer } from './../../customer/entities/customer.entity';
 import {Table,Column,Model,DataType,AutoIncrement,PrimaryKey,ForeignKey,AllowNull,BelongsTo,Default,} from 'sequelize-typescript';
 import { Order } from 'src/modules/order/entities/order.entity';
 import { GatewaySource } from 'src/common/enums/gateway-source';
-import { GatewayType } from 'src/common/enums/gatewat_type';
+import { GatewayType } from 'src/common/enums/gateway_type';
 @Table({ tableName: 'payment_sessions' })
 export class PaymentSession extends Model {
     @PrimaryKey

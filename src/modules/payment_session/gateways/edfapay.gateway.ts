@@ -24,12 +24,10 @@ export class EdFapayGateway implements PaymentGateway {
     }
     
     async createPayment(
-        amount: number, currency: string, callbackUrl: string,customer:Customer,
-        card:CardForApi,
-        description?:string) 
+        amount: number, currency: string, callbackUrl: string,customer:Customer,card:CardForApi) 
     {
         const paymentOrderId = uuidv4();
-        description = description || `Payment for order ${paymentOrderId}`;
+        const description = `Payment for order ${paymentOrderId}`;
         const holderParts = card.cardHolderName.trim().split(' ');
         const firstName = holderParts.shift() || '';
         const lastName = holderParts.join(' ') || '';
