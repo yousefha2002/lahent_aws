@@ -46,8 +46,8 @@ export class PaymentSessionService {
         return session;
     }
 
-    async checkPaymentStatus(paymentId: number) {
-        const session = await this.paymentSessionRepo.findByPk(paymentId);
+    async checkPaymentStatus(sessionId: number) {
+        const session = await this.paymentSessionRepo.findByPk(sessionId);
         if (!session) throw new NotFoundException('Payment session not found');
 
         return {

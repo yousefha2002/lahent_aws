@@ -1,19 +1,9 @@
 import { LoyaltyOffer } from 'src/modules/loyalty_offer/entites/loyalty_offer.entity';
 import { Customer } from './../../customer/entities/customer.entity';
-import {
-    Table,
-    Column,
-    Model,
-    DataType,
-    AutoIncrement,
-    PrimaryKey,
-    ForeignKey,
-    AllowNull,
-    BelongsTo,
-    Default,
-} from 'sequelize-typescript';
+import {Table,Column,Model,DataType,AutoIncrement,PrimaryKey,ForeignKey,AllowNull,BelongsTo,Default,} from 'sequelize-typescript';
 import { Order } from 'src/modules/order/entities/order.entity';
 import { GatewaySource } from 'src/common/enums/gateway-source';
+import { GatewayType } from 'src/common/enums/gatewat_type';
 @Table({ tableName: 'payment_sessions' })
 export class PaymentSession extends Model {
     @PrimaryKey
@@ -51,13 +41,11 @@ export class PaymentSession extends Model {
     amount: number;
 
     @Column(DataType.STRING)
-    description:string
-
-    @Column(DataType.STRING)
     currency:string
 
-    @Column(DataType.STRING)
-    provider: string; // مثلاً gateway: stripe, moyasar
+    @AllowNull(false)
+    @Column(DataType.ENUM(...Object.values(GatewayType)))
+    provider: GatewayType;
 
     @AllowNull(true)
     @Column(DataType.STRING)

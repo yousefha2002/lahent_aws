@@ -2,8 +2,9 @@ import { Expose, Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { CustomerCarListDto } from 'src/modules/car/dto/customer-car-list.dto';
 import { OrderItemDto } from 'src/modules/order_item/dtos/order-item.dto';
+import { SimpleOrderDto } from './simple-order.dto';
 
-export class OrderDto {
+export class OrderDto extends SimpleOrderDto {
     @ApiProperty({ example: 60 }) 
     @Expose() subtotalBeforeDiscount: number;
 

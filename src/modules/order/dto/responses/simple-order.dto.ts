@@ -5,7 +5,7 @@ import { OrderStatus } from 'src/common/enums/order_status';
 import { PickupType } from 'src/common/enums/pickedup_type';
 import { CustomerSummaryDto } from 'src/modules/customer/dto/customer.dto';
 
-export class BaseOrderDto {
+export class SimpleOrderDto {
     @ApiProperty({ example: 1, description: 'Order ID' })
     @Expose()
     id: number;
