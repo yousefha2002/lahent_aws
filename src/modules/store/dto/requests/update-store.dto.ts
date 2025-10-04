@@ -9,13 +9,12 @@ import {
   IsNotEmpty,
   IsNumber,
   IsInt,
-  Min,
 } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 import { ActionOpeningHourDto } from 'src/modules/opening_hour/dto/action-open-hour.dto';
 import { cities } from 'src/common/constants/cities';
-import { StoreLanguageActionDto } from './store-language-action.dto';
 import { ApiProperty } from '@nestjs/swagger';
+import { StoreLanguageActionDto } from './store-language-action.dto';
 
 export class UpdateStoreDto {
   @ApiProperty({ example: '0501234567', required: false })

@@ -5,7 +5,7 @@ import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { Store } from '../store/entities/store.entity';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { PaginatedStoreTransactionDto } from './dto/store_transaction.dto';
-import { StoreFinancialsFilterDto } from '../store/dto/store-financials-filter.dto';
+import { StoreFinancialsFilterDto } from '../store/dto/requests/store-financials-filter.dto';
 import { StoreFinancialsResponseDto } from './dto/store-financials-response.dto';
 import { StoreTransactionType } from 'src/common/enums/transaction_type';
 import { StoreGuard } from 'src/common/guards/store.guard';

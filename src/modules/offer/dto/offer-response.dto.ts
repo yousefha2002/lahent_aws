@@ -1,6 +1,6 @@
 import { Expose, Type } from 'class-transformer';
 import { SimpleOfferDto } from './simple-offer.dto';
-import { StoreLanguageDto } from 'src/modules/store/dto/store-language.dto';
+import { StoreLanguageDto } from 'src/modules/store/dto/responses/store-language.dto';
 import { SimpleCategoryDto } from 'src/modules/category/dto/category.dto';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { TargetType } from 'src/common/enums/target_type';

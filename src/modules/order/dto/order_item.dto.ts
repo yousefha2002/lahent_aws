@@ -4,7 +4,7 @@ import { ExtraDto } from 'src/modules/product_extra/dto/extra-dto';
 import { InstructionDto } from 'src/modules/product_instruction/dto/instruction-dto';
 import { VariantDto } from 'src/modules/prouduct_variant/dto/variant-dto';
 import { SimpleCustomerDto } from 'src/modules/customer/dto/simple-customer.dto';
-import { SimpleStoreDto } from 'src/modules/store/dto/simple-store.dto';
+import { SimpleStoreDto } from 'src/modules/store/dto/responses/simple-store.dto';
 import { CustomerCarListDto } from 'src/modules/car/dto/customer-car-list.dto';
 import { OrderStatus } from 'src/common/enums/order_status';
 import { PickupType } from 'src/common/enums/pickedup_type';

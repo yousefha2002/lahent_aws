@@ -16,7 +16,7 @@ import { ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse, Ap
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
 import { TopProductResponseDto } from './dto/top-product-response.dto';
-import { StoreFinancialsFilterDto } from '../store/dto/store-financials-filter.dto';
+import { StoreFinancialsFilterDto } from '../store/dto/requests/store-financials-filter.dto';
 import { StoreGuard } from 'src/common/guards/store.guard';
 
 @Controller('product')

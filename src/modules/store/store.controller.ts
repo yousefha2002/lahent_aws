@@ -2,42 +2,42 @@ import { FcmTokenService } from 'src/modules/fcm_token/fcm_token.service';
 import { UserTokenService } from './../user_token/user_token.service';
 import { StoreGeolocationService } from './services/storeGeolocation.service';
 import { StoreAuthService } from './services/storeAuth.service';
-import {Controller,Post,Body,UseGuards,UseInterceptors,UploadedFiles,BadRequestException,Get,Query,Put,Param,ParseIntPipe,Req,Ip,} from '@nestjs/common';
+import {Controller,Post,Body,UseGuards,UseInterceptors,UploadedFiles,Get,Query,Put,Param,ParseIntPipe,Req,Ip,} from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
-import { CreateStoreDto } from './dto/create-store.dto';
+import { CreateStoreDto } from './dto/requests/create-store.dto';
 import { StoreService } from './services/store.service';
 import { OwnerGuard } from 'src/common/guards/owner.guard';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { multerOptions } from 'src/multer/multer.options';
 import {OpeningHourEnum,validateAndParseOpeningHours,} from 'src/common/validators/validateAndParseOpeningHours';
-import { LoginStoreDto } from './dto/store-login.dto';
-import { GetNearbyStoresDto } from './dto/get-nearby-store.dto';
+import { LoginStoreDto } from './dto/requests/store-login.dto';
+import { GetNearbyStoresDto } from './dto/requests/get-nearby-store.dto';
 import { CustomerGuard } from 'src/common/guards/customer.guard';
 import { Customer } from '../customer/entities/customer.entity';
 import { StoreStatus } from 'src/common/enums/store_status';
 import { AdminGuard } from 'src/common/guards/admin.guard';
 import { StoreOrOwnerGuard } from 'src/common/guards/StoreOrOwner.guard';
 import { Store } from './entities/store.entity';
-import { UpdateStoreDto } from './dto/update-store.dto';
+import { UpdateStoreDto } from './dto/requests/update-store.dto';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { Owner } from '../owner/entities/owner.entity';
-import { PaginatedStoreDto, StoreDto, storeForAction } from './dto/Store.dto';
-import { StoreWithTokenDto } from './dto/simple-store.dto';
-import { FullDetailsStoreDto } from './dto/full-details-store.dto';
-import { ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
+import { storeForAction } from './dto/responses/store-for-action.dto';
+import { ApiBody, ApiConsumes, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
-import { StoreOptionsDto } from './dto/store-options.dto';
-import { CurrentStoreDTO } from './dto/current-store.dto';
-import { InitialCreateStoreDto } from './dto/initial-create-store.dto';
-import { OwnerStoresResponseDto } from './dto/owner-store-response.dto';
-import { IncompleteStoreResponseDto } from './dto/in-completed-store-response.dto';
-import { UpdatePasswordDto } from './dto/update-password.dto';
-import { SelectOwnerForStoreDto } from './dto/selectStoreForOwner.dto';
+import { StoreOptionsDto } from './dto/responses/store-options.dto';
+import { CurrentStoreDTO } from './dto/responses/current-store.dto';
+import { InitialCreateStoreDto } from './dto/requests/initial-create-store.dto';
+import { OwnerStoresResponseDto } from './dto/responses/owner-store-response.dto';
+import { IncompleteStoreResponseDto } from './dto/responses/in-completed-store-response.dto';
+import { UpdatePasswordDto } from './dto/requests/update-password.dto';
+import { SelectOwnerForStoreDto } from './dto/requests/selectStoreForOwner.dto';
 import { RefreshTokenDto } from '../user_token/dtos/refreshToken.dto';
 import { StoreGuard } from 'src/common/guards/store.guard';
 import { CompletedProfileGuard } from 'src/common/guards/completed-profile.guard';
 import { RoleStatus } from 'src/common/enums/role_status';
+import { FullDetailsCustomerStoreViewDto, PaginatedCustomerStoreViewDto, StoreCustomerViewDto } from './dto/responses/customer-store.dto';
+import { StoreWithTokenDto } from './dto/responses/store-with-token.dto';
 
 @Controller('store')
 export class StoreController {
@@ -192,13 +192,13 @@ export class StoreController {
   }
 
   @Post('nearby')
-  @Serilaize(PaginatedStoreDto)
+  @Serilaize(PaginatedCustomerStoreViewDto)
   @ApiOperation({ summary: 'Get nearby stores based on  location' })
   @ApiQuery({ name: 'type', type: Number, required: false, example: 1 })
   @ApiQuery({ name: 'subType', type: Number, required: false, example: 2 })
   @ApiQuery({ name: 'page', type: Number, required: false, example: 2 })
   @ApiQuery({ name: 'limit', type: Number, required: false, example: 2 })
-  @ApiResponse({status: 200,type: [PaginatedStoreDto]})
+  @ApiResponse({status: 200,type: [PaginatedCustomerStoreViewDto]})
   @ApiBody({ type: GetNearbyStoresDto })
   async getNearbyStores(
     @Body() dto: GetNearbyStoresDto,
@@ -228,8 +228,8 @@ export class StoreController {
   @ApiQuery({ name: 'name', required: false, type: String, description: 'Filter by store name' })
   @ApiQuery({ name: 'lat', required: false, type: Number, description: 'Latitude of user location' })
   @ApiQuery({ name: 'lng', required: false, type: Number, description: 'Longitude of user location' })
-  @ApiResponse({status: 200,description: 'Paginated list of stores',type: PaginatedStoreDto})
-  @Serilaize(PaginatedStoreDto)
+  @ApiResponse({status: 200,description: 'Paginated list of stores',type: PaginatedCustomerStoreViewDto})
+  @Serilaize(PaginatedCustomerStoreViewDto)
   getAllStores(
     @I18n() i18n: I18nContext,
     @Query('name') name: string,
@@ -254,12 +254,12 @@ export class StoreController {
   }
 
   @UseGuards(CustomerGuard)
-  @Serilaize(FullDetailsStoreDto)
+  @Serilaize(FullDetailsCustomerStoreViewDto)
   @Get(':id')
   @ApiOperation({ summary: 'Get full details of a store by ID (customer only)' })
   @ApiSecurity('access-token')
   @ApiParam({ name: 'id', description: 'ID of the store', example: 1 })
-  @ApiResponse({status: 200,description: 'full details of store',type: FullDetailsStoreDto})
+  @ApiResponse({status: 200,description: 'full details of store',type: FullDetailsCustomerStoreViewDto})
   async getFullDetailsStore(
     @Param('id') storeId: number,
     @I18n() i18n: I18nContext,
@@ -269,11 +269,11 @@ export class StoreController {
     return this.storeService.getFullDetailsStore(storeId, lang,customer.id);
   }
 
-  @Serilaize(StoreDto)
+  @Serilaize(StoreCustomerViewDto)
   @Get('guest/:id')
   @ApiOperation({ summary: 'Get full details of a store by ID (guest)' })
   @ApiParam({ name: 'id', description: 'ID of the store', example: 1 })
-  @ApiResponse({ status: 200, description: 'full details of store', type: StoreDto })
+  @ApiResponse({ status: 200, description: 'full details of store', type: StoreCustomerViewDto })
   async getFullDetailsStoreGuest(
     @Param('id') storeId: number,
     @I18n() i18n: I18nContext,
@@ -399,8 +399,8 @@ export class StoreController {
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
   @ApiQuery({ name: 'type', required: false, type: Number, description: 'Filter by store type ID' })
-  @ApiResponse({status: 200,description: 'List of favourite stores with pagination',type: PaginatedStoreDto})
-  @Serilaize(PaginatedStoreDto)
+  @ApiResponse({status: 200,description: 'List of favourite stores with pagination',type: PaginatedCustomerStoreViewDto})
+  @Serilaize(PaginatedCustomerStoreViewDto)
   @UseGuards(CustomerGuard)
   getFavouriteStoresByCustomer(
     @CurrentUser() user: Customer,
@@ -447,6 +447,7 @@ export class StoreController {
   @Get(':id/withOpeningHours')
   @ApiOperation({ summary: 'Get store with opening hours and picked methods' })
   @ApiParam({ name: 'id', description: 'Store ID', example: 1 })
+  @ApiOkResponse({ description: 'Store retrieved successfully', type: StoreOptionsDto })
   async getStoreWithOpeningHours(
     @Param('id') storeId: number,
   ) {

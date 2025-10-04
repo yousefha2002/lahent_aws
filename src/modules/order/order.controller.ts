@@ -25,7 +25,7 @@ import { getLang } from 'src/common/utils/get-lang.util';
 import { AcceptOrderDto } from './dto/accept-order.dto';
 import { StoreOrderStatsResponseDto } from './dto/order-stats-response.dto';
 import { OrderAnalyticsResponseDto } from './dto/orde-analytics.dto';
-import { StoreFinancialsFilterDto } from '../store/dto/store-financials-filter.dto';
+import { StoreFinancialsFilterDto } from '../store/dto/requests/store-financials-filter.dto';
 import { PayOrderDTO } from './dto/pay-order-dto';
 import { StoreGuard } from 'src/common/guards/store.guard';
 import { ReorderResponseDto } from './dto/reorder-response.dto';

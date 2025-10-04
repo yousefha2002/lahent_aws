@@ -12,7 +12,7 @@ import { OpeningHour } from '../../opening_hour/entites/opening_hour.entity';
 import { Type } from '../../type/entities/type.entity';
 import { TypeLanguage } from '../../type/entities/type_language.entity';
 import { Language } from 'src/common/enums/language';
-import { UpdateStoreDto } from '../dto/update-store.dto';
+import { UpdateStoreDto } from '../dto/requests/update-store.dto';
 import { SubType } from '../../subtype/entities/subtype.entity';
 import { SubTypeLanguage } from '../../subtype/entities/sybtype_language.entity';
 import { Op, Sequelize } from 'sequelize';

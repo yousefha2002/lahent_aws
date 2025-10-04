@@ -2,7 +2,7 @@ import { StoreUtilsService } from './storeUtils.service';
 import {Inject,Injectable,} from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
 import { Store } from '../entities/store.entity';
-import { GetNearbyStoresDto } from '../dto/get-nearby-store.dto';
+import { GetNearbyStoresDto } from '../dto/requests/get-nearby-store.dto';
 import { StoreStatus } from 'src/common/enums/store_status';
 import { literal, Op } from 'sequelize';
 import { OpeningHour } from '../../opening_hour/entites/opening_hour.entity';

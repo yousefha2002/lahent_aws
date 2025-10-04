@@ -2,7 +2,7 @@ import { Expose, Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { SectorDto } from 'src/modules/sector/dto/sector.dto';
 
-export class StoreLanguageInfoDto {
+class StoreLanguageInfoDto {
     @ApiProperty({ example: 'en' })
     @Expose()
     languageCode: string;
@@ -12,7 +12,7 @@ export class StoreLanguageInfoDto {
     brand: string;
 }
 
-export class IncompleteStoreDto {
+class IncompleteStoreDto {
     @ApiProperty({ example: 1 })
     @Expose()
     storeId: number;

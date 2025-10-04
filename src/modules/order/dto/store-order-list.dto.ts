@@ -3,7 +3,7 @@ import { Expose, Transform, Type } from "class-transformer";
 import { OrderStatus } from "src/common/enums/order_status";
 import { PickupType } from "src/common/enums/pickedup_type";
 import { SimpleCustomerDto } from "src/modules/customer/dto/simple-customer.dto";
-import { SimpleStoreDto } from "src/modules/store/dto/simple-store.dto";
+import { SimpleStoreDto } from "src/modules/store/dto/responses/simple-store.dto";
 
 export class OrderListDto {
     @ApiProperty({ example: 123, description: 'Order ID' })

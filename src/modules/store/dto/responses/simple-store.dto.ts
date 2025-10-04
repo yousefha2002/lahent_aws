@@ -56,19 +56,12 @@ export class SimpleStoreDto {
     @ApiProperty({ example: 10 })
     @Expose()
     numberOfRates: number;
-}
 
-export class StoreWithTokenDto {
-    @ApiProperty({ example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' })
+    @ApiProperty({example: true})
     @Expose()
-    accessToken: string;
-
-    @ApiProperty({ example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' })
+    inStore:boolean
+    
+    @ApiProperty({ example: true })
     @Expose()
-    refreshToken: string;
-
-    @ApiProperty({ type: SimpleStoreDto })
-    @Expose()
-    @Type(() => SimpleStoreDto)
-    store: SimpleStoreDto;
+    driveThru: boolean;
 }

@@ -5,12 +5,12 @@ import {BadRequestException,ForbiddenException,forwardRef,Inject,Injectable,NotF
 import { repositories } from 'src/common/enums/repositories';
 import { Store } from '../entities/store.entity';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
-import { CreateStoreDto } from '../dto/create-store.dto';
+import { CreateStoreDto } from '../dto/requests/create-store.dto';
 import { comparePassword, hashPassword } from 'src/common/utils/password';
 import { UploadApiResponse } from 'cloudinary';
 import { OpeningHourEnum } from 'src/common/validators/validateAndParseOpeningHours';
 import { OpeningHourService } from '../../opening_hour/opening_hour.service';
-import { LoginStoreDto } from '../dto/store-login.dto';
+import { LoginStoreDto } from '../dto/requests/store-login.dto';
 import { RoleStatus } from 'src/common/enums/role_status';
 import { SubtypeService } from '../../subtype/subtype.service';
 import { I18nService } from 'nestjs-i18n';
@@ -21,9 +21,9 @@ import { validateAndParseStoreTranslations } from 'src/common/validators/validat
 import { StoreLanguage } from '../entities/store_language.entity';
 import { REFRESH_TOKEN_EXPIRES_MS } from 'src/common/constants';
 import { Sequelize } from 'sequelize';
-import { InitialCreateStoreDto } from '../dto/initial-create-store.dto';
-import { UpdatePasswordDto } from '../dto/update-password.dto';
-import { SelectOwnerForStoreDto } from '../dto/selectStoreForOwner.dto';
+import { InitialCreateStoreDto } from '../dto/requests/initial-create-store.dto';
+import { UpdatePasswordDto } from '../dto/requests/update-password.dto';
+import { SelectOwnerForStoreDto } from '../dto/requests/selectStoreForOwner.dto';
 import { RefreshTokenDto } from 'src/modules/user_token/dtos/refreshToken.dto';
 import { validateRequiredLanguages } from 'src/common/validators/translation-validator.';
 
