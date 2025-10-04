@@ -3,19 +3,19 @@ import {AnyFilesInterceptor,FileFieldsInterceptor} from '@nestjs/platform-expres
 import { ProductService } from './product.service';
 import { Store } from '../store/entities/store.entity';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
-import { CreateProductDto } from './dto/create-product.dto';
+import { CreateProductDto } from './dto/requests/create-product.dto';
 import { multerOptions } from 'src/multer/multer.options';
-import { UpdateProductWithImageDto } from './dto/update-product-withImage.dto';
+import { UpdateProductWithImageDto } from './dto/requests/update-product-withImage.dto';
 import {ExistingImage,validateExistingImages} from 'src/common/validators/existing-images.validator';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
-import { PaginatedProductWithOfferDto } from './dto/productwithoffer.dto';
-import { PaginatedSimpleProductDto } from './dto/product-for-store.dto';
-import { FullProductDetailsDto, fullProductDetailsWihtPrivateDetails } from './dto/full-product-with-details.dto';
+import { PaginatedProductWithOfferDto } from './dto/responses/productwithoffer.dto';
+import { PaginatedSimpleProductDto } from './dto/responses/product-for-store.dto';
+import { FullProductDetailsDto, fullProductDetailsWihtPrivateDetails } from './dto/responses/full-product-with-details.dto';
 import { ApprovedStoreGuard } from 'src/common/guards/approvedStore.guard';
 import { ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
-import { TopProductResponseDto } from './dto/top-product-response.dto';
+import { TopProductResponseDto } from './dto/responses/top-product-response.dto';
 import { StoreFinancialsFilterDto } from '../store/dto/requests/store-financials-filter.dto';
 import { StoreGuard } from 'src/common/guards/store.guard';
 

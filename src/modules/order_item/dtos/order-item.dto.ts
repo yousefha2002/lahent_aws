@@ -1,8 +1,8 @@
+import { OrderItemInstructionDto } from './../../order_item_instruction/dtos/order-item-instruction.dto';
 import { ApiProperty } from "@nestjs/swagger";
 import { Expose, Transform, Type } from "class-transformer";
-import { ExtraDto } from "src/modules/product_extra/dto/extra-dto";
-import { InstructionDto } from "src/modules/product_instruction/dto/instruction-dto";
-import { VariantDto } from "src/modules/prouduct_variant/dto/variant-dto";
+import { OrderItemExtraDto } from "src/modules/order_item_extra/dtos/order-item-extra.dto";
+import { OrderItemVariantDto } from 'src/modules/order_item_variant/dtos/order-item-variant.dto';
 
 export class OrderItemDto {
     @ApiProperty({ example: 1 }) @Expose() id: number;
@@ -15,7 +15,7 @@ export class OrderItemDto {
     @ApiProperty({ example: 2 }) @Expose() quantity: number;
     @ApiProperty({ example: 0 }) @Expose() freeQty: number;
     @ApiProperty({ example: ['https://example.com/image.png'] }) @Expose() @Transform(({ obj }) => obj.product?.images?.map(img => img.imageUrl) || []) images: string[];
-    @ApiProperty({ type: () => [ExtraDto] }) @Expose() @Type(() => ExtraDto) extras: ExtraDto[];
-    @ApiProperty({ type: () => [VariantDto] }) @Expose() @Type(() => VariantDto) variants: VariantDto[];
-    @ApiProperty({ type: () => [InstructionDto] }) @Expose() @Type(() => InstructionDto) instructions: InstructionDto[];
+    @ApiProperty({ type: () => [OrderItemExtraDto] }) @Expose() @Type(() => OrderItemExtraDto) extras: OrderItemExtraDto[];
+    @ApiProperty({ type: () => [OrderItemVariantDto] }) @Expose() @Type(() => OrderItemVariantDto) variants: OrderItemVariantDto[];
+    @ApiProperty({ type: () => [OrderItemInstructionDto] }) @Expose() @Type(() => OrderItemInstructionDto) instructions: OrderItemInstructionDto[];
 }

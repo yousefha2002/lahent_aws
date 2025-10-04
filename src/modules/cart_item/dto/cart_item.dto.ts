@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose, Type } from 'class-transformer';
 import { SimpleOfferDto } from 'src/modules/offer/dto/simple-offer.dto';
-import { BaseProductDto } from 'src/modules/product/dto/base-product.dto';
+import { BaseProductDto } from 'src/modules/product/dto/responses/base-product.dto';
 import { ProductExtraDto } from 'src/modules/product_extra/dto/extra-dto';
 import { ProductInstructionDto } from 'src/modules/product_instruction/dto/instruction-dto';
 import { ProductVariantDto } from 'src/modules/prouduct_variant/dto/variant-dto';

@@ -3,20 +3,6 @@ import { IsIn, IsNotEmpty, IsNumber, IsString, ValidateNested, IsArray } from "c
 import { ApiProperty } from "@nestjs/swagger";
 import { Language } from "src/common/enums/language";
 
-export class ExtraDto {
-    @Expose()
-    @ApiProperty({ example: 1 })
-    id: number;
-
-    @Expose()
-    @ApiProperty({ example: 'Extra Cheese' })
-    name: string;
-
-    @Expose()
-    @ApiProperty({ example: 5 })
-    additionalPrice: number;
-}
-
 export class ProductExtraLanguageDto {
     @Expose()
     @IsString()

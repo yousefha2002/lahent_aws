@@ -3,16 +3,6 @@ import { IsIn, IsNotEmpty, IsString } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 import { Language } from "src/common/enums/language";
 
-export class InstructionDto {
-    @Expose()
-    @ApiProperty({ example: 1 })
-    id: number;
-
-    @Expose()
-    @ApiProperty({ example: 'Cooking Instructions' })
-    name: string;
-}
-
 export class InstructionLanguageDto {
     @Expose()
     @IsString()

@@ -1,11 +1,11 @@
 import {BadRequestException,forwardRef,Inject,Injectable,} from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
 import { Product } from './entities/product.entity';
-import { CreateProductDto } from './dto/create-product.dto';
+import { CreateProductDto } from './dto/requests/create-product.dto';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { ProductImageService } from '../product_image/product_image.service';
 import { Sequelize, Transaction, Op } from 'sequelize';
-import { UpdateProductWithImageDto } from './dto/update-product-withImage.dto';
+import { UpdateProductWithImageDto } from './dto/requests/update-product-withImage.dto';
 import { ExistingImage } from 'src/common/validators/existing-images.validator';
 import { CategoryService } from '../category/category.service';
 import { ProductImage } from '../product_image/entities/product_image.entity';
