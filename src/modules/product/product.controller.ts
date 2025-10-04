@@ -8,9 +8,9 @@ import { multerOptions } from 'src/multer/multer.options';
 import { UpdateProductWithImageDto } from './dto/requests/update-product-withImage.dto';
 import {ExistingImage,validateExistingImages} from 'src/common/validators/existing-images.validator';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
-import { PaginatedProductWithOfferDto } from './dto/responses/productwithoffer.dto';
-import { PaginatedSimpleProductDto } from './dto/responses/product-for-store.dto';
-import { FullProductDetailsDto, fullProductDetailsWihtPrivateDetails } from './dto/responses/full-product-with-details.dto';
+import { PaginatedProductsCustomerViewDto } from './dto/responses/customer-product-view.dto';
+import { PaginatedProductsStoreViewDto } from './dto/responses/store-product-view.dto';
+import { FullProductDetailsDto, ProductFullDetailsForStoreDto } from './dto/responses/full-product-details.dto';
 import { ApprovedStoreGuard } from 'src/common/guards/approvedStore.guard';
 import { ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { I18n, I18nContext } from 'nestjs-i18n';
@@ -162,7 +162,7 @@ export class ProductController {
     return this.productService.getTopProductsBySales(store.id, lang,filter,specificDate);
   }
 
-  @Serilaize(PaginatedProductWithOfferDto)
+  @Serilaize(PaginatedProductsCustomerViewDto)
   @Get('all/:storeId')
   @ApiOperation({ summary: 'Get all products of a store for customers' })
   @ApiQuery({ name: 'categoryId', required: false, type: Number })
@@ -170,7 +170,7 @@ export class ProductController {
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiQuery({ name: 'name', required: false, type: String })
   @ApiParam({ name: 'storeId', type: Number })
-  @ApiResponse({status: 200,description: 'Paginated list of products with offers',type: PaginatedProductWithOfferDto})
+  @ApiResponse({status: 200,description: 'Paginated list of products with offers',type: PaginatedProductsCustomerViewDto})
   async getCustomerStoreProducts(
     @Param('storeId',ParseIntPipe) storeId: number,
     @I18n() i18n: I18nContext,
@@ -190,7 +190,7 @@ export class ProductController {
     );
   }
 
-  @Serilaize(PaginatedSimpleProductDto)
+  @Serilaize(PaginatedProductsStoreViewDto)
   @UseGuards(StoreGuard, ApprovedStoreGuard)
   @Get('all')
   @ApiOperation({ summary: 'Get all products of the current store' })
@@ -199,8 +199,8 @@ export class ProductController {
   @ApiQuery({ name: 'categoryId', required: false, type: Number })
   @ApiQuery({ name: 'name', required: false, type: String })
   @ApiSecurity('access-token')
-  @ApiResponse({ status: 200, description: 'Paginated list of products for the store', type: PaginatedSimpleProductDto})
-  async getProductsByStore(
+  @ApiResponse({ status: 200, description: 'Paginated list of products for the store', type: PaginatedProductsStoreViewDto})
+  async getStoreProducts(
     @CurrentUser() store: Store,
     @Query('categoryId') categoryId: number,
     @Query('page',new ParseIntPipe({ optional: true })) page = 1,
@@ -224,18 +224,18 @@ export class ProductController {
   @ApiOperation({ summary: 'Get full details of a product' })
   @ApiParam({ name: 'productId', example: 1 })
   @ApiResponse({ status: 200, type: FullProductDetailsDto })
-  getFullProductDetails(@Param('productId',ParseIntPipe) productId: string,@I18n() i18n: I18nContext,) {
+  getFullProductDetailsForCustomer(@Param('productId',ParseIntPipe) productId: string,@I18n() i18n: I18nContext,) {
     const lang = getLang(i18n);
     return this.productService.getFullProductDetails(+productId,lang);
   }
 
   @UseGuards(StoreGuard, ApprovedStoreGuard)
-  @Serilaize(fullProductDetailsWihtPrivateDetails)
+  @Serilaize(ProductFullDetailsForStoreDto)
   @Get('/:productId/byStore')
   @ApiOperation({ summary: 'Get full product details for the store (including inactive)' })
   @ApiSecurity('access-token')
   @ApiParam({ name: 'productId', example: 101 })
-  @ApiResponse({ status: 200, type: fullProductDetailsWihtPrivateDetails })
+  @ApiResponse({ status: 200, type: ProductFullDetailsForStoreDto })
   getFullProductDetailsForStore(@Param('productId',ParseIntPipe) productId: string, @I18n() i18n: I18nContext,) {
     const lang = getLang(i18n);
     return this.productService.getFullProductDetails(+productId,lang,{ includeInactive: true,includeAllLanguages:true });

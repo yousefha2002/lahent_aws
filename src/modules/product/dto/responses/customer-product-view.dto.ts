@@ -3,7 +3,7 @@ import { SimpleOfferDto } from 'src/modules/offer/dto/simple-offer.dto';
 import { BaseProductDto } from './base-product.dto';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class ProductExtraDetailsForCustomerDto extends BaseProductDto {
+class ProductCustomerDetailsDto extends BaseProductDto {
     @ApiProperty({ example: true })
     @Expose() 
     hasVariants: boolean;
@@ -18,11 +18,11 @@ export class ProductExtraDetailsForCustomerDto extends BaseProductDto {
     offer: SimpleOfferDto | null;
 }
 
-export class PaginatedProductWithOfferDto {
-    @ApiProperty({ type: [ProductExtraDetailsForCustomerDto] })
+export class PaginatedProductsCustomerViewDto {
+    @ApiProperty({ type: [ProductCustomerDetailsDto] })
     @Expose()
-    @Type(() => ProductExtraDetailsForCustomerDto)
-    data: ProductExtraDetailsForCustomerDto[];
+    @Type(() => ProductCustomerDetailsDto)
+    data: ProductCustomerDetailsDto[];
 
     @ApiProperty({ example: 5 })
     @Expose()

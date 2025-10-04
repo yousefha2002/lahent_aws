@@ -32,7 +32,7 @@ export class FullProductDetailsDto extends BaseProductDto {
     offer: SimpleOfferDto | null;
 }
 
-export class fullProductDetailsWihtPrivateDetails extends FullProductDetailsDto {
+export class ProductFullDetailsForStoreDto extends FullProductDetailsDto {
     @Expose()
     @ApiProperty({ example: 101 })
     productNumber: number;

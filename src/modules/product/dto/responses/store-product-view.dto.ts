@@ -2,7 +2,7 @@ import { Expose, Type } from 'class-transformer';
 import { BaseProductDto } from './base-product.dto';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class ProductForStoreDto extends BaseProductDto {
+class ProductStoreDetailsDto extends BaseProductDto {
     @ApiProperty({example:true})
     @Expose()
     isActive: boolean;
@@ -16,11 +16,11 @@ export class ProductForStoreDto extends BaseProductDto {
     sales:number
 }
 
-export class PaginatedSimpleProductDto {
-    @ApiProperty({ type: [ProductForStoreDto] })
+export class PaginatedProductsStoreViewDto {
+    @ApiProperty({ type: [ProductStoreDetailsDto] })
     @Expose()
-    @Type(() => ProductForStoreDto)
-    data: ProductForStoreDto[];
+    @Type(() => ProductStoreDetailsDto)
+    data: ProductStoreDetailsDto[];
 
     @ApiProperty({example:10})
     @Expose()

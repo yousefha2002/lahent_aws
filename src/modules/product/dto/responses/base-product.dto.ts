@@ -2,7 +2,7 @@ import { ApiProperty } from "@nestjs/swagger";
 import { Expose, Type } from "class-transformer";
 import { SimpleCategoryDto } from "src/modules/category/dto/category.dto";
 
-export class ProductLanguageDto {
+class ProductTranslationDto {
     @ApiProperty({ example: 'en' })
     @Expose()
     languageCode: string;
@@ -29,10 +29,10 @@ export class BaseProductDto {
     @Expose() 
     basePrice: number;
 
-    @ApiProperty({ type: [ProductLanguageDto] })
+    @ApiProperty({ type: [ProductTranslationDto] })
     @Expose()
-    @Type(() => ProductLanguageDto)
-    languages: ProductLanguageDto[];
+    @Type(() => ProductTranslationDto)
+    languages: ProductTranslationDto[];
 
     @ApiProperty({ example: ['url1', 'url2'] })
     @Expose() 
