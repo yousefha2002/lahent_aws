@@ -1,6 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Expose, Type } from "class-transformer";
-import { CustomerDto } from "src/modules/customer/dto/customer.dto";
 import { OwnerDto } from "src/modules/owner/dto/owner.dto";
 
 export class OwnerOtpSendToken {  

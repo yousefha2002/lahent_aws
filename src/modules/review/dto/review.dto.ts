@@ -1,6 +1,6 @@
 import { Expose, Type } from "class-transformer";
 import { ApiProperty } from "@nestjs/swagger";
-import { SimpleCustomerDto } from "src/modules/customer/dto/simple-customer.dto";
+import { CustomerSummaryDto } from "src/modules/customer/dto/customer.dto";
 
 export class ReviewDto {
     @ApiProperty({ example: 1 })
@@ -19,10 +19,10 @@ export class ReviewDto {
     @Expose()
     isAnonymous: boolean;
 
-    @ApiProperty({ type: () => SimpleCustomerDto })
+    @ApiProperty({ type: () => CustomerSummaryDto })
     @Expose()
-    @Type(() => SimpleCustomerDto)
-    customer: SimpleCustomerDto;
+    @Type(() => CustomerSummaryDto)
+    customer: CustomerSummaryDto;
 }
 
 export class PaginatedReviewDto {

@@ -1,37 +1,40 @@
-import { ApiProperty } from '@nestjs/swagger';
 import { Expose, Type } from 'class-transformer';
+import { ApiProperty } from '@nestjs/swagger';
 
-class SimpleEntityDto {
+export class SimpleEntityDto {
     @ApiProperty({ example: 1, description: 'ID of the entity' })
     @Expose()
     id: number;
 
-    @ApiProperty({ example: 'https://example.com/avatar.jpg', description: 'URL of the avatar' })
+    @ApiProperty({ example: 'https://example.com/avatar.png', description: 'URL of the entity image' })
     @Expose()
     url: string;
 }
 
-export class CustomerDto {
-    @ApiProperty({ example: 123, description: 'Customer ID' })
+export class CustomerSummaryDto {
+    @ApiProperty({ example: 101, description: 'Customer ID' })
     @Expose()
     id: number;
 
-    @ApiProperty({ example: '970599999999', description: 'Phone number' })
-    @Expose()
-    phone: string;
-
-    @ApiProperty({ example: 'John Doe', description: 'Customer name', nullable: true  })
+    @ApiProperty({ example: 'John Doe', description: 'Customer name' })
     @Expose()
     name: string;
 
-    @ApiProperty({ example: 'john@example.com', description: 'Email address' , nullable: true })
-    @Expose()
-    email: string;
-
-    @ApiProperty({ example: 'https://example.com/image.jpg', description: 'Customer image URL', nullable: true  })
+    @ApiProperty({ example: 'https://example.com/image.png', description: 'Customer image URL' })
     @Expose()
     imageUrl: string;
 
+    @ApiProperty({ example: '+123456789', description: 'Customer phone number' })
+    @Expose()
+    phone: string;
+    
+    @ApiProperty({ type: () => SimpleEntityDto, description: 'Customer avatar entity' })
+    @Expose()
+    @Type(() => SimpleEntityDto)
+    avatar: SimpleEntityDto;
+}
+
+export class CustomerDetailsDto extends CustomerSummaryDto {
     @ApiProperty({ example: 50, description: 'Points earned by customer' })
     @Expose()
     points: number;
@@ -40,27 +43,7 @@ export class CustomerDto {
     @Expose()
     walletBalance: number;
 
-    @ApiProperty({ example:false, description: 'Profile completion status' })
+    @ApiProperty({ example: false, description: 'Profile completion status' })
     @Expose()
     isCompletedProfile: boolean;
-
-    @ApiProperty({ type: SimpleEntityDto , nullable: true })
-    @Expose()
-    @Type(() => SimpleEntityDto)
-    avatar: SimpleEntityDto;
-}
-
-export class CustomerDtoWithMessageToken {
-    @Expose()
-    message: string;
-    
-    @Expose()
-    @Type(() => CustomerDto) 
-    customer: CustomerDto;
-
-    @Expose()
-    accessToken: string;
-
-    @Expose()
-    refreshToken:string
 }

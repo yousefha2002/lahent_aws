@@ -30,7 +30,6 @@ export class CouponDto {
     @Expose()
     startDate: Date;
 
-
     @ApiProperty({ example: true, description: 'Whether the coupon is active' })
     @Expose()
     isActive: boolean;

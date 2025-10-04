@@ -1,8 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { Expose, Transform, Type } from "class-transformer";
+import { Expose, Type } from "class-transformer";
 import { OrderStatus } from "src/common/enums/order_status";
 import { PickupType } from "src/common/enums/pickedup_type";
-import { SimpleCustomerDto } from "src/modules/customer/dto/simple-customer.dto";
+import { CustomerSummaryDto } from "src/modules/customer/dto/customer.dto";
 import { SimpleStoreDto } from "src/modules/store/dto/responses/simple-store.dto";
 
 export class OrderListDto {
@@ -30,10 +30,10 @@ export class OrderListDto {
     @Expose()
     orderNumber: number;
 
-    @ApiPropertyOptional({ type: () => SimpleCustomerDto, description: 'Customer information - just for store' })
+    @ApiPropertyOptional({ type: () => CustomerSummaryDto, description: 'Customer information - just for store' })
     @Expose()
-    @Type(() => SimpleCustomerDto)
-    customer?: SimpleCustomerDto;
+    @Type(() => CustomerSummaryDto)
+    customer?: CustomerSummaryDto;
 
     @ApiProperty({ example: '2025-08-29T10:00:00.000Z', description: 'وقت دفع العميل' })
     @Expose()

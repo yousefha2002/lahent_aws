@@ -1,7 +1,7 @@
 import { Expose, Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { SimpleCustomerDto } from 'src/modules/customer/dto/simple-customer.dto';
 import { BaseloyaltyOfferDto } from 'src/modules/loyalty_offer/dto/loyalty-offer.dto';
+import { CustomerSummaryDto } from 'src/modules/customer/dto/customer.dto';
 
 export class RelatedStoreDto {
     @Expose()
@@ -34,9 +34,9 @@ export class RelatedGiftDto {
     id: number;
 
     @Expose()
-    @Type(() => SimpleCustomerDto)
-    @ApiPropertyOptional({ type: SimpleCustomerDto, description: 'The other party involved in the gift' })
-    otherParty?: SimpleCustomerDto;
+    @Type(() => CustomerSummaryDto)
+    @ApiPropertyOptional({ type: CustomerSummaryDto, description: 'The other party involved in the gift' })
+    otherParty?: CustomerSummaryDto;
 }
 
 export class TransactionDto {

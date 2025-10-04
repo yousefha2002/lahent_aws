@@ -11,7 +11,8 @@ export class OfferProductDto {
     id: number;
 
     @ApiPropertyOptional({ example: 'https://example.com/product.jpg', nullable: true })
-    @Expose() image: string | null;
+    @Expose() 
+    image: string | null;
 }
 
 export class OfferStoreDto {

@@ -11,7 +11,7 @@ import { CartService } from '../../cart/cart.service';
 import {BadRequestException,forwardRef,Inject,Injectable} from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
 import { Order } from '../entities/order.entity';
-import { createOrderDto } from '../dto/create-order.dto';
+import { createOrderDto } from '../dto/requests/create-order.dto';
 import { OrderStatus } from 'src/common/enums/order_status';
 import { PickupType } from 'src/common/enums/pickedup_type';
 import { PaymentMethod } from 'src/common/enums/payment_method';

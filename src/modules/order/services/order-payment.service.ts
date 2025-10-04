@@ -20,7 +20,7 @@ import { OrderPointsService } from './order_points.service';
 import { I18nService } from 'nestjs-i18n';
 import { Language } from 'src/common/enums/language';
 import { PaymentSession } from 'src/modules/payment_session/entities/payment_session.entity';
-import { PayOrderDTO } from '../dto/pay-order-dto';
+import { PayOrderDTO } from '../dto/requests/pay-order-dto';
 import { formatCardForApi } from 'src/common/utils/formatCardForApi';
 import { PaymentCard } from 'src/modules/payment_card/entities/payment_card.entity';
 import { StoreUtilsService } from 'src/modules/store/services/storeUtils.service';

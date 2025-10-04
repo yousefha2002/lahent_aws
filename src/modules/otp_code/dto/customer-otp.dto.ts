@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Expose, Type } from "class-transformer";
-import { CustomerDto } from "src/modules/customer/dto/customer.dto";
+import { CustomerDetailsDto } from "src/modules/customer/dto/customer.dto";
 
 export class CustomerOtpSendToken {  
     @ApiProperty({ example: '1234', description: 'OTP code sent to phone' })  
@@ -17,10 +17,10 @@ export class CustomerOtpSendToken {
 }
 
 export class CustomerOtpVerifyToken {   
-    @ApiProperty({ type: CustomerDto}) 
+    @ApiProperty({ type: CustomerDetailsDto}) 
     @Expose()
-    @Type(() => CustomerDto) 
-    customer: CustomerDto;
+    @Type(() => CustomerDetailsDto) 
+    customer: CustomerDetailsDto;
 
     @ApiProperty({ example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...', description: 'Access token for the customer' })
     @Expose()

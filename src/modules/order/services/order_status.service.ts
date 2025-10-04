@@ -17,7 +17,7 @@ import { OrderItem } from 'src/modules/order_item/entities/order_item.entity';
 import { I18nService } from 'nestjs-i18n';
 import { Language } from 'src/common/enums/language';
 import { StoreTransactionType } from 'src/common/enums/transaction_type';
-import { AcceptOrderDto } from '../dto/accept-order.dto';
+import { AcceptOrderDto } from '../dto/requests/accept-order.dto';
 import { FcmTokenService } from 'src/modules/fcm_token/fcm_token.service';
 import { RoleStatus } from 'src/common/enums/role_status';
 import { OrderNotifications } from 'src/common/constants/notification/order-notifications';

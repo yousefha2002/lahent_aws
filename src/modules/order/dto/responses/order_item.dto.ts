@@ -3,11 +3,11 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ExtraDto } from 'src/modules/product_extra/dto/extra-dto';
 import { InstructionDto } from 'src/modules/product_instruction/dto/instruction-dto';
 import { VariantDto } from 'src/modules/prouduct_variant/dto/variant-dto';
-import { SimpleCustomerDto } from 'src/modules/customer/dto/simple-customer.dto';
 import { SimpleStoreDto } from 'src/modules/store/dto/responses/simple-store.dto';
 import { CustomerCarListDto } from 'src/modules/car/dto/customer-car-list.dto';
 import { OrderStatus } from 'src/common/enums/order_status';
 import { PickupType } from 'src/common/enums/pickedup_type';
+import { CustomerSummaryDto } from 'src/modules/customer/dto/customer.dto';
 
 export class OrderItemDto {
     @ApiProperty({ example: 1 }) @Expose() id: number;
@@ -81,7 +81,7 @@ export class OrderDto {
     @Expose()
     hasExtended:boolean
     
-    @ApiPropertyOptional({ type: () => SimpleCustomerDto }) @Expose() @Type(() => SimpleCustomerDto) customer?: SimpleCustomerDto;
+    @ApiPropertyOptional({ type: () => CustomerSummaryDto }) @Expose() @Type(() => CustomerSummaryDto) customer?: CustomerSummaryDto;
     @ApiPropertyOptional({ type: () => SimpleStoreDto }) @Expose() @Type(() => SimpleStoreDto) store?: SimpleStoreDto;
     @ApiPropertyOptional({ type: () => CustomerCarListDto }) @Expose() @Type(() => CustomerCarListDto) car?: CustomerCarListDto;
     @ApiProperty({ example: 10 }) @Expose() pointsEarned: number;

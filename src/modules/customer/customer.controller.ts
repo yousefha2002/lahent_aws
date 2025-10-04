@@ -7,12 +7,12 @@ import { CustomerGuard } from 'src/common/guards/customer.guard';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { Customer } from './entities/customer.entity';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
-import { CustomerDto } from './dto/customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
 import { ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { RefreshTokenDto } from '../user_token/dtos/refreshToken.dto';
+import { CustomerDetailsDto } from './dto/customer.dto';
 
 @Controller('customer')
 export class CustomerController {
@@ -20,8 +20,8 @@ export class CustomerController {
 
   @ApiSecurity('access-token')
   @ApiOperation({ summary: 'Get current logged in customer' })
-  @ApiResponse({ status: 200, description: 'Returns the currently logged in customer', type: CustomerDto })
-  @Serilaize(CustomerDto)
+  @ApiResponse({ status: 200, description: 'Returns the currently logged in customer', type: CustomerDetailsDto })
+  @Serilaize(CustomerDetailsDto)
   @UseGuards(CustomerGuard)
   @Get()
   getMine(@CurrentUser() user: Customer) {
@@ -43,8 +43,8 @@ export class CustomerController {
       required: ['name', 'email'],
     },
   })
-  @ApiResponse({ status: 200, description: 'Customer profile updated successfully', type: CustomerDto })
-  @Serilaize(CustomerDto)
+  @ApiResponse({ status: 200, description: 'Customer profile updated successfully', type: CustomerDetailsDto })
+  @Serilaize(CustomerDetailsDto)
   @UseGuards(CustomerGuard)
   @Put()
   @UseInterceptors(FileInterceptor('image', multerOptions))
