@@ -1,4 +1,5 @@
 export enum PointActionSoucre {
     ORDER = 'ORDER',
-    INVITE_FRIEND = 'INVITE_FRIEND',
+    INVITE_SENT = 'INVITE_SENT',
+    INVITE_ACCEPTED = 'INVITE_ACCEPTED'
 }

@@ -96,4 +96,7 @@ export class Customer extends Model {
 
   @HasMany(() => PaymentCard)
   cards: PaymentCard[];
+
+  @Column({ type: DataType.STRING, unique: true })
+  referralCode: string;
 }
