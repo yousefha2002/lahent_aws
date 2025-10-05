@@ -22,6 +22,7 @@ import { StoreLanguage } from '../entities/store_language.entity';
 import { SubtypeService } from 'src/modules/subtype/subtype.service';
 import { Sector } from 'src/modules/sector/entities/sector.entity';
 import { SectorLanguage } from 'src/modules/sector/entities/sectore_langauge.entity';
+import { Owner } from 'src/modules/owner/entities/owner.entity';
 
 @Injectable()
 export class StoreService {
@@ -480,6 +481,33 @@ export class StoreService {
     else{
       return {hasIncompleteStore:false}
     }
+  }
+
+    async getAllIncompleteStores(lang: Language,page = 1,limit = 10) {
+    const offset = (page - 1) * limit;
+
+    const { rows, count } = await this.storeRepo.findAndCountAll({
+      where: { isCompletedProfile: false },
+      include: [
+        { model: StoreLanguage },
+        {
+          model: Sector,
+          include: [{ model: SectorLanguage, where: { languageCode: lang } }],
+        },
+        { model: Owner, as: 'owner' }
+      ],
+      offset,
+      limit,
+      distinct: true,
+      col: 'id',
+      order: [['createdAt', 'DESC']],
+    });
+
+    return {
+      stores: rows,
+      totalPages: Math.ceil(count / limit),
+      totalItems: count,
+    };
   }
 
   // for soft and hard delete

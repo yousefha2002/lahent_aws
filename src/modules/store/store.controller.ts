@@ -29,7 +29,7 @@ import { StoreOptionsDto } from './dto/responses/store-options.dto';
 import { CurrentStoreDTO } from './dto/responses/current-store.dto';
 import { InitialCreateStoreDto } from './dto/requests/initial-create-store.dto';
 import { OwnerStoresResponseDto } from './dto/responses/owner-store-response.dto';
-import { IncompleteStoreResponseDto } from './dto/responses/in-completed-store-response.dto';
+import { IncompleteStoreResponseDto, PaginatedAdminIncompleteStoresDto } from './dto/responses/in-completed-store-response.dto';
 import { UpdatePasswordDto } from './dto/requests/update-password.dto';
 import { SelectOwnerForStoreDto } from './dto/requests/selectStoreForOwner.dto';
 import { RefreshTokenDto } from '../user_token/dtos/refreshToken.dto';
@@ -284,6 +284,21 @@ export class StoreController {
       subType,
       name,
     );
+  }
+
+  @Get('admin/all/incomplete')
+  @ApiOperation({ summary: 'Get all incomplete stores (for admin)' })
+  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number, default is 1' })
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Number of items per page, default is 10' })
+  @ApiResponse({status: 200,type: PaginatedAdminIncompleteStoresDto,})
+  @Serilaize(PaginatedAdminIncompleteStoresDto)
+  getAllIncompleteStores(
+    @I18n() i18n: I18nContext,
+    @Query('page', new ParseIntPipe({ optional: true })) page = 1,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit = 10,
+  ) {
+    const lang = getLang(i18n);
+    return this.storeService.getAllIncompleteStores(lang, page, limit);
   }
 
   @UseGuards(CustomerGuard)
