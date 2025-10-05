@@ -253,6 +253,39 @@ export class StoreController {
     );
   }
 
+  @Get('admin/all')
+  @UseGuards(AdminGuard)
+  @ApiOperation({ summary: 'Get all stores for admin, with optional status and filters' })
+  @ApiQuery({ name: 'type', required: false, type: Number, description: 'Filter by store type ID' })
+  @ApiQuery({ name: 'subType', required: false, type: Number, description: 'Filter by store sub-type ID' })
+  @ApiQuery({ name: 'status', required: false, enum: StoreStatus, description: 'Filter by store status' })
+  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number, default is 1' })
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Number of items per page, default is 10' })
+  @ApiQuery({ name: 'name', required: false, type: String, description: 'Filter by store name' })
+  @ApiResponse({ status: 200, description: 'Paginated list of stores', type: PaginatedCustomerStoreViewDto })
+  @ApiSecurity('access-token')
+  @Serilaize(PaginatedCustomerStoreViewDto)
+  findAllStoresForAdmin(
+    @I18n() i18n: I18nContext,
+    @Query('name') name: string,
+    @Query('type', new ParseIntPipe({ optional: true })) type?: number,
+    @Query('subType', new ParseIntPipe({ optional: true })) subType?: number,
+    @Query('status') status?: StoreStatus,
+    @Query('page', new ParseIntPipe({ optional: true })) page = 1,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit = 10,
+  ) {
+    const lang = getLang(i18n);
+    return this.storeService.findAllStoresForAdmin(
+      lang,
+      page,
+      limit,
+      status,
+      type,
+      subType,
+      name,
+    );
+  }
+
   @UseGuards(CustomerGuard)
   @Serilaize(FullDetailsCustomerStoreViewDto)
   @Get(':id')

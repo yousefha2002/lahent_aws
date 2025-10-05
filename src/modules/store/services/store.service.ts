@@ -137,6 +137,57 @@ export class StoreService {
     };
   }
 
+  async findAllStoresForAdmin(lang: Language,page = 1,limit = 10,status?: StoreStatus,typeId?: number,subTypeId?: number,name?: string) 
+  {
+    const offset = (page - 1) * limit;
+    const { rows, count } = await this.storeRepo.findAndCountAll({
+      where: {
+        ...(status && { status }),
+        ...(subTypeId && { subTypeId }),
+      },
+      include: [
+        {
+          model: StoreLanguage,
+          where: {
+            languageCode: lang,
+            ...(name && {
+              name: {
+                [Op.like]: `%${name}%`,
+              },
+            }),
+          },
+        },
+        {
+          model: SubType,
+          ...(typeId && { where: { typeId } }),
+          include: [
+            { model: SubTypeLanguage, where: { languageCode: lang } },
+            {
+              model: Type,
+              include: [{ model: TypeLanguage, where: { languageCode: lang } }],
+            },
+          ],
+        },
+        { model: OpeningHour },
+      ],
+      offset,
+      limit,
+      distinct: true,
+      col: 'id',
+      order: [['createdAt', 'DESC']],
+    });
+
+    const stores = rows.map((store) =>
+      this.storeUtilsService.mapStoreWithExtras(store),
+    );
+
+    return {
+      stores,
+      totalPages: Math.ceil(count / limit),
+      totalItems: count,
+    };
+  }
+
   async getStoreDetailsForAction(storeId: number,lang:Language)
   {
     const store = await this.storeRepo.findOne({
