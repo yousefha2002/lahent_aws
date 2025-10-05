@@ -23,6 +23,7 @@ import { SubtypeService } from 'src/modules/subtype/subtype.service';
 import { Sector } from 'src/modules/sector/entities/sector.entity';
 import { SectorLanguage } from 'src/modules/sector/entities/sectore_langauge.entity';
 import { Owner } from 'src/modules/owner/entities/owner.entity';
+import { StoreCommission } from 'src/modules/store_commission/entities/store_commission.entity';
 
 @Injectable()
 export class StoreService {
@@ -145,6 +146,7 @@ export class StoreService {
       where: {
         ...(status && { status }),
         ...(subTypeId && { subTypeId }),
+        isCompletedProfile:true
       },
       include: [
         {
@@ -249,6 +251,45 @@ export class StoreService {
       return {store:storeResponce,isFavorite}
     }
     return store
+  }
+
+  async getFullDetailsStoreAdmin(storeId: number, lang: Language) 
+  {
+    const store = await this.storeRepo.findOne({
+      where: {
+        id: storeId,
+      },
+      include: [
+        {
+          model: StoreLanguage,
+          where: { languageCode: lang },
+        },
+        {
+          model: SubType,
+          include: [
+            { model: SubTypeLanguage, where: { languageCode: lang } },
+            {
+              model: Type,
+              include: [{ model: TypeLanguage, where: { languageCode: lang } }],
+            },
+          ],
+        },
+        {
+          model: Sector,
+          include: [{ model: SectorLanguage, where: { languageCode: lang } }],
+        },
+        { model: OpeningHour },
+        { model: Owner},
+        {model:StoreCommission}
+      ],
+    });
+
+    if (!store) {
+      throw new NotFoundException(
+        this.i18n.t('translation.store.not_found'),
+      );
+    }
+    return this.storeUtilsService.mapStoreWithExtras(store);
   }
 
   async changeStoreStatus(status: StoreStatus, storeId: number,lang = Language.en) {

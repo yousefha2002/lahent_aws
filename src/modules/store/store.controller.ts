@@ -38,6 +38,7 @@ import { CompletedProfileGuard } from 'src/common/guards/completed-profile.guard
 import { RoleStatus } from 'src/common/enums/role_status';
 import { FullDetailsCustomerStoreViewDto, PaginatedCustomerStoreViewDto, StoreCustomerViewDto } from './dto/responses/customer-store.dto';
 import { StoreWithTokenDto } from './dto/responses/store-with-token.dto';
+import { StoreAdminViewDto } from './dto/responses/admin-store.dto';
 
 @Controller('store')
 export class StoreController {
@@ -315,6 +316,21 @@ export class StoreController {
   ) {
     const lang = getLang(i18n);
     return this.storeService.getFullDetailsStore(storeId, lang,customer.id);
+  }
+
+  @UseGuards(AdminGuard)
+  @Get('admin/:id/details')
+  @ApiOperation({ summary: 'Get full store details (Admin)' })
+  @ApiParam({ name: 'id', type: Number, description: 'Store ID' })
+  @ApiResponse({status: 200,type: StoreAdminViewDto})
+  @ApiSecurity('access-token')
+  @Serilaize(StoreAdminViewDto)
+  getFullDetailsStoreAdmin(
+    @I18n() i18n: I18nContext,
+    @Param('id', ParseIntPipe) storeId: number,
+  ) {
+    const lang = getLang(i18n);
+    return this.storeService.getFullDetailsStoreAdmin(storeId, lang);
   }
 
   @Serilaize(StoreCustomerViewDto)

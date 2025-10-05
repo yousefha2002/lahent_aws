@@ -12,6 +12,7 @@ import {
   Default,
   HasMany,
   BelongsToMany,
+  HasOne,
 } from 'sequelize-typescript';
 import { cities } from 'src/common/constants/cities';
 
@@ -27,6 +28,7 @@ import { Product } from 'src/modules/product/entities/product.entity';
 import { Review } from 'src/modules/review/entities/review.entity';
 import { SubType } from 'src/modules/subtype/entities/subtype.entity';
 import { StoreLanguage } from './store_language.entity';
+import { StoreCommission } from 'src/modules/store_commission/entities/store_commission.entity';
 
 @Table({ tableName: 'stores',paranoid:true })
 export class Store extends Model {
@@ -42,6 +44,9 @@ export class Store extends Model {
 
   @BelongsTo(() => Owner)
   owner: Owner;
+
+  @HasOne(() => StoreCommission)
+  commission: StoreCommission;
 
   @AllowNull(true)
   @ForeignKey(() => SubType)
