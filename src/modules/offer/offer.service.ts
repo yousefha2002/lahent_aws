@@ -20,6 +20,8 @@ import { I18nService } from 'nestjs-i18n';
 import { Language } from 'src/common/enums/language';
 import { StoreLanguage } from '../store/entities/store_language.entity';
 import { CategoryLanguage } from '../category/entities/category_language.entity';
+import { SubType } from '../subtype/entities/subtype.entity';
+import { Type } from '../type/entities/type.entity';
 
 @Injectable()
 export class OfferService {
@@ -102,12 +104,7 @@ export class OfferService {
     return { message: this.i18n.translate('translation.offer.active_status_updated', { lang }) };
   }
 
-  async getActiveOffersWithStoreDetails(
-    page: number,
-    limit: number,
-    lang=Language.ar,
-    storeId?: number,
-  ) {
+  async getActiveOffersWithStoreDetails(page: number,limit: number,lang:Language,storeId?: number,typeId?:number) {
     const now = new Date();
     const offset = (page - 1) * limit;
 
@@ -124,7 +121,18 @@ export class OfferService {
             model: Store,
             required:true,
             where: { status: StoreStatus.APPROVED },
-            include:[{model:StoreLanguage,where:{languageCode:lang}}]
+            include:[{model:StoreLanguage,where:{languageCode:lang}},
+              {
+              model: SubType,
+              required: !!typeId,
+              include: [
+                {
+                  model: Type,
+                  ...(typeId && { where: { id: typeId } })
+                },
+              ],
+            }
+            ]
           },
           {
             model: Product,

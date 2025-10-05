@@ -1,13 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Post,
-  Put,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
+import {Body,Controller,Get,Param,ParseIntPipe,Post,Put,Query,UseGuards} from '@nestjs/common';
 import { OfferService } from './offer.service';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { Store } from '../store/entities/store.entity';
@@ -65,6 +56,7 @@ export class OfferController {
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
   @ApiQuery({ name: 'storeId', required: false, type: Number, example: 5 })
+    @ApiQuery({ name: 'typeId', required: false, type: Number, example: 1 })
   @ApiResponse({ status: 200, description: 'Paginated list of active offers', type: PaginatedOfferResponseDto })
   @Get('active/all')
   getActiveOffersWithStoreDetails(
@@ -72,9 +64,10 @@ export class OfferController {
     @Query('limit') limit = 1,
     @I18n() i18n: I18nContext,
     @Query('storeId') storeId?: number,
+    @Query('typeId', new ParseIntPipe({ optional: true })) typeId?: number,
   ) {
     const lang = getLang(i18n);
-    return this.offerService.getActiveOffersWithStoreDetails(+page, +limit, lang, storeId);
+    return this.offerService.getActiveOffersWithStoreDetails(+page, +limit, lang, storeId,typeId);
   }
 
   @Serilaize(PaginatedOfferResponseDto)
