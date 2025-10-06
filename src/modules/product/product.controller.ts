@@ -90,11 +90,12 @@ export class ProductController {
     );
   }
 
-  @UseGuards(StoreGuard)
+  @UseGuards(StoreOrAdminGuard)
   @Serilaize(TopProductResponseDto)
   @Get('top-sales/byStore')
   @ApiOperation({ summary: 'Get top 4 selling products for a store' })
   @ApiResponse({ status: 200, type: [TopProductResponseDto] })
+  @ApiQuery({ name: 'storeId', required: false, example: 1 })
   @ApiSecurity('access-token')
   async getTopSellingProducts(
     @CurrentUser() store:Store,

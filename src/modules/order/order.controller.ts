@@ -67,9 +67,10 @@ export class OrderController {
   }
 
   @Serilaize(OrderAnalyticsResponseDto)
-  @UseGuards(StoreGuard, ApprovedStoreGuard)
+  @UseGuards(StoreOrAdminGuard, ApprovedStoreGuard)
   @Get('analytics/byStore')
   @ApiOperation({ summary: 'Get analytics (avg prep time + repeat rate) for a store' })
+  @ApiQuery({ name: 'storeId', required: false, example: 1 })
   @ApiSecurity('access-token')
   @ApiResponse({
     status: 200,

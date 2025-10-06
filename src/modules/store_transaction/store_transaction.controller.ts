@@ -9,18 +9,20 @@ import { StoreFinancialsFilterDto } from '../store/dto/requests/store-financials
 import { StoreFinancialsResponseDto } from './dto/store-financials-response.dto';
 import { StoreTransactionType } from 'src/common/enums/transaction_type';
 import { StoreGuard } from 'src/common/guards/store.guard';
+import { StoreOrAdminGuard } from 'src/common/guards/store-or-admin-guard';
 
 @Controller('store-transaction')
 export class StoreTransactionController {
     constructor(private readonly storeTransactionService: StoreTransactionService) {}
 
     @Serilaize(PaginatedStoreTransactionDto)
-    @UseGuards(StoreGuard)
+    @UseGuards(StoreOrAdminGuard)
     @ApiOperation({ summary: 'Get all transactions for a store with pagination' })
     @ApiSecurity('access-token')
     @ApiQuery({ name: 'page', required: false, example: 1 })
     @ApiQuery({ name: 'limit', required: false, example: 10 })
     @ApiQuery({ name: 'status', required: false, example: StoreTransactionType.CANCELED })
+    @ApiQuery({ name: 'storeId', required: false, example: 1 })
     @ApiResponse({ status: 200, description: 'List of transactions',type:PaginatedStoreTransactionDto })
     @Get('current-store')
     async getAll(
@@ -32,10 +34,11 @@ export class StoreTransactionController {
         return this.storeTransactionService.getAllByStore(store.id, page,limit,status);
     }
 
-    @UseGuards(StoreGuard)
+    @UseGuards(StoreOrAdminGuard)
     @ApiOperation({ summary: 'Get available balance for current store' })
     @ApiSecurity('access-token')
     @ApiResponse({ status: 200, description: 'Available balance of the store', type: Number})
+    @ApiQuery({ name: 'storeId', required: false, example: 1 })
     @Get('available-balance')
     async getAvailableBalance(@CurrentUser() store: Store) {
         const availableBalance = await this.storeTransactionService.findAvailableBalance(store.id);
@@ -43,8 +46,9 @@ export class StoreTransactionController {
     }
 
     @Serilaize(StoreFinancialsResponseDto)
-    @UseGuards(StoreGuard)
+    @UseGuards(StoreOrAdminGuard)
     @ApiOperation({ summary: 'Get store financials with filter' })
+    @ApiQuery({ name: 'storeId', required: false, example: 1 })
     @ApiSecurity('access-token')
     @ApiResponse({ status: 200, description: 'Store financials', type: StoreFinancialsResponseDto })
     @Get('financials/byStore')

@@ -1,16 +1,4 @@
-import {
-  Table,
-  Column,
-  Model,
-  DataType,
-  AutoIncrement,
-  PrimaryKey,
-  ForeignKey,
-  BelongsTo,
-  AllowNull,
-  Default,
-  BelongsToMany,
-} from 'sequelize-typescript';
+import {Table,Column,Model,DataType,AutoIncrement,PrimaryKey,ForeignKey,BelongsTo,AllowNull,Default,BelongsToMany} from 'sequelize-typescript';
 import { DurationUnit } from 'src/common/enums/dauration_unit';
 import { OfferType } from 'src/common/enums/offer_type';
 import { TargetType } from 'src/common/enums/target_type';
