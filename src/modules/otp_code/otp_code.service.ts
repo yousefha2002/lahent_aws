@@ -37,11 +37,11 @@ export class OtpCodeService {
     }
     const code = generateOtpCode();
     const smsMessage = this.i18n.translate('translation.sms.verification_code', {lang,args: { code },});  
-    await this.smsService.sendSms(phone, smsMessage);
+    // await this.smsService.sendSms(phone, smsMessage);
     if (type === 'owner') {
         const owner = await this.ownerService.findByPhone(dto.phone)
         const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
-        await this.otpCodeRepo.create({ phone, code,isVerified: false, type: 'owner',expiresAt });
+        await this.otpCodeRepo.create({ phone, code,isVerified: false, type: RoleStatus.OWNER,expiresAt });
         if (owner) {
             return {phone, code, status: 'login' };
         } 
@@ -53,7 +53,7 @@ export class OtpCodeService {
       if (type === 'customer') {
         const customer = await this.customerService.findByPhone(phone)
         const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
-        await this.otpCodeRepo.create({phone,code,type: 'customer',isVerified: false,expiresAt});
+        await this.otpCodeRepo.create({phone,code,type: RoleStatus.CUSTOMER,isVerified: false,expiresAt});
         if (customer) {
             return {phone, code, status: 'login' };
         } 
@@ -101,9 +101,10 @@ export class OtpCodeService {
     }
 
     const record = await this.otpCodeRepo.findOne({
-      where: { phone, code, isVerified: false, type },
+      where: { phone,code,isVerified:false,type},
       order: [['createdAt', 'DESC']],
     });
+    console.log(record)
 
     if (!record || record.expiresAt < new Date()) {
       const msg = this.i18n.translate('translation.otp.invalid', { lang });
