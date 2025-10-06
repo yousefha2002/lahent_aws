@@ -18,6 +18,7 @@ import { getLang } from 'src/common/utils/get-lang.util';
 import { TopProductResponseDto } from './dto/responses/top-product-response.dto';
 import { StoreFinancialsFilterDto } from '../store/dto/requests/store-financials-filter.dto';
 import { StoreGuard } from 'src/common/guards/store.guard';
+import { StoreOrAdminGuard } from 'src/common/guards/store-or-admin-guard';
 
 @Controller('product')
 export class ProductController {
@@ -59,7 +60,8 @@ export class ProductController {
     },
   })
   @ApiConsumes('multipart/form-data')
-  @UseGuards(StoreGuard, ApprovedStoreGuard)
+  @UseGuards(StoreOrAdminGuard, ApprovedStoreGuard)
+  @ApiQuery({ name: 'storeId', required: false, example: 1 })
   @UseInterceptors(AnyFilesInterceptor(multerOptions))
   async create(
     @CurrentUser() store: Store,
@@ -82,6 +84,7 @@ export class ProductController {
   @ApiSecurity('access-token')
   @ApiParam({ name: 'productId', example: 101 })
   @ApiConsumes('multipart/form-data')
+  @ApiQuery({ name: 'storeId', required: false, example: 1 })
   @ApiBody({
     schema: {
       type: 'object',
@@ -119,7 +122,7 @@ export class ProductController {
       },
     },
   })
-  @UseGuards(StoreGuard, ApprovedStoreGuard)
+  @UseGuards(StoreOrAdminGuard, ApprovedStoreGuard)
   @UseInterceptors(
     FileFieldsInterceptor([{ name: 'images', maxCount: 5 }], multerOptions),
   )
@@ -191,7 +194,7 @@ export class ProductController {
   }
 
   @Serilaize(PaginatedProductsStoreViewDto)
-  @UseGuards(StoreGuard, ApprovedStoreGuard)
+  @UseGuards(StoreOrAdminGuard, ApprovedStoreGuard)
   @Get('all')
   @ApiOperation({ summary: 'Get all products of the current store' })
   @ApiQuery({ name: 'page', required: false, type: Number })
@@ -199,6 +202,7 @@ export class ProductController {
   @ApiQuery({ name: 'categoryId', required: false, type: Number })
   @ApiQuery({ name: 'name', required: false, type: String })
   @ApiSecurity('access-token')
+  @ApiQuery({ name: 'storeId', required: false, example: 1 })
   @ApiResponse({ status: 200, description: 'Paginated list of products for the store', type: PaginatedProductsStoreViewDto})
   async getStoreProducts(
     @CurrentUser() store: Store,
@@ -229,20 +233,21 @@ export class ProductController {
     return this.productService.getFullProductDetails(+productId,lang);
   }
 
-  @UseGuards(StoreGuard, ApprovedStoreGuard)
+  @UseGuards(StoreOrAdminGuard, ApprovedStoreGuard)
   @Serilaize(ProductFullDetailsForStoreDto)
   @Get('/:productId/byStore')
   @ApiOperation({ summary: 'Get full product details for the store (including inactive)' })
   @ApiSecurity('access-token')
   @ApiParam({ name: 'productId', example: 101 })
   @ApiResponse({ status: 200, type: ProductFullDetailsForStoreDto })
+  @ApiQuery({ name: 'storeId', required: false, example: 1 })
   getFullProductDetailsForStore(@Param('productId',ParseIntPipe) productId: string, @I18n() i18n: I18nContext,) {
     const lang = getLang(i18n);
     return this.productService.getFullProductDetails(+productId,lang,{ includeInactive: true,includeAllLanguages:true });
   }
 
   @Put('active/:productId')
-  @UseGuards(StoreGuard)
+  @UseGuards(StoreOrAdminGuard)
   @ApiOperation({ summary: 'Toggle product active status' })
   @ApiSecurity('access-token')
   @ApiParam({ name: 'productId', example: 101 })
@@ -254,6 +259,7 @@ export class ProductController {
       },
     },
   })
+  @ApiQuery({ name: 'storeId', required: false, example: 1 })
   changeProductActivity(
     @Param('productId',ParseIntPipe) productId: number,
     @CurrentUser() store: Store,

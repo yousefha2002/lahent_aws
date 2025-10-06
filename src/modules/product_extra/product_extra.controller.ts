@@ -1,11 +1,4 @@
-import {
-  Body,
-  Controller,
-  Param,
-  Post,
-  Put,
-  UseGuards,
-} from '@nestjs/common';
+import {Body,Controller,Param,Post,Put,UseGuards} from '@nestjs/common';
 import { ProductExtraService } from './product_extra.service';
 import { UpdateProductExtraDto } from './dto/update-extra-product.dto';
 import { ApprovedStoreGuard } from 'src/common/guards/approved-store.guard';
@@ -14,16 +7,18 @@ import { Store } from '../store/entities/store.entity';
 import { CreateProductExtraDto } from './dto/create-product-extra.dto';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { StoreGuard } from 'src/common/guards/store.guard';
+import { StoreOrAdminGuard } from 'src/common/guards/store-or-admin-guard';
 
 @Controller('product-extra')
 export class ProductExtraController {
   constructor(private readonly productExtraService: ProductExtraService) {}
 
-  @UseGuards(StoreGuard, ApprovedStoreGuard)
+  @UseGuards(StoreOrAdminGuard, ApprovedStoreGuard)
   @Put(':extraId')
   @ApiOperation({ summary: 'Update a product extra' })
   @ApiSecurity('access-token')
   @ApiParam({ name: 'extraId', type: Number, description: 'ID of the product extra', example: 7 })
+  @ApiQuery({ name: 'storeId', required: false, example: 1 })
   @ApiBody({ type: UpdateProductExtraDto })
   @ApiResponse({
     status: 200,
@@ -44,11 +39,12 @@ export class ProductExtraController {
     );
   }
 
-  @UseGuards(StoreGuard, ApprovedStoreGuard)
+  @UseGuards(StoreOrAdminGuard, ApprovedStoreGuard)
   @Put('/active/:extraId')
   @ApiOperation({ summary: 'Toggle active status for a product extra' })
   @ApiSecurity('access-token')
   @ApiParam({ name: 'extraId', type: Number, description: 'ID of the product extra', example: 12 })
+  @ApiQuery({ name: 'storeId', required: false, example: 1 })
   @ApiResponse({
     status: 200,
     description: 'Active status updated successfully',
@@ -60,11 +56,12 @@ export class ProductExtraController {
     return this.productExtraService.updateIsActive(+extraId, store.id);
   }
 
-  @UseGuards(StoreGuard, ApprovedStoreGuard)
+  @UseGuards(StoreOrAdminGuard, ApprovedStoreGuard)
   @Post()
   @ApiOperation({ summary: 'Create or update product extras' })
   @ApiSecurity('access-token')
   @ApiBody({ type: CreateProductExtraDto })
+  @ApiQuery({ name: 'storeId', required: false, example: 1 })
   @ApiResponse({
     status: 201,
     description: 'Product extras created/updated successfully',

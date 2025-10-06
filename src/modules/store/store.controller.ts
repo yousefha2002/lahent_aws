@@ -173,7 +173,7 @@ export class StoreController {
   @Get('action/current')
   @ApiOperation({ summary: 'Get full details of a store by ID for actions (owner or store only)' })
   @ApiResponse({status: 200,description: 'full details of store',type: storeForAction})
-  @ApiQuery({ name: 'storeId', required: false, example: '1' })
+  @ApiQuery({ name: 'storeId', required: false, example: 1 })
   @ApiSecurity('access-token')
   async getStoreDetailsForAction(@CurrentUser() store:Store,@I18n() i18n: I18nContext)
   {
@@ -395,6 +395,7 @@ export class StoreController {
     description: 'Store updated successfully',
     schema: { example: { message: 'Store updated successfully' } },
   })
+  @ApiQuery({ name: 'storeId', required: false, example: 1 })
   @UseGuards(OwnerOrStoreGuard)
   updateStore(@CurrentUser() store: Store, @Body() dto: UpdateStoreDto,@I18n() i18n: I18nContext) {
     const lang = getLang(i18n);
@@ -405,7 +406,7 @@ export class StoreController {
   @UseGuards(OwnerOrStoreGuard)
   @ApiOperation({ summary: 'Update store images (logo / cover)' })
   @ApiSecurity('access-token')
-  @ApiQuery({ name: 'storeId', required: false, example: '1' })
+  @ApiQuery({ name: 'storeId', required: false, example: 1 })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
@@ -523,6 +524,7 @@ export class StoreController {
   @ApiOperation({ summary: 'Update store password (Store or Owner only)' })
   @ApiSecurity('access-token')
   @ApiBody({ type: UpdatePasswordDto })
+  @ApiQuery({ name: 'storeId', required: false, example: 1 })
   @ApiResponse({
     status: 200,
     description: 'Password updated successfully',
