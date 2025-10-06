@@ -36,7 +36,7 @@ export class OtpCodeService {
       return { phone, code: DEMO_OTP_CODE, status: 'login' };
     }
     const code = generateOtpCode();
-    const smsMessage = this.i18n.translate('translation.sms.verification_code', {lang,args: { code }});
+    const smsMessage = this.i18n.translate('translation.sms.verification_code', {lang,args: { code },});  
     await this.smsService.sendSms(phone, smsMessage);
     if (type === 'owner') {
         const owner = await this.ownerService.findByPhone(dto.phone)
