@@ -29,6 +29,7 @@ import { LoyaltySettingModule } from '../loyalty_setting/loyalty_setting.module'
 import { PaymentCardModule } from '../payment_card/payment_card.module';
 import { FcmTokenModule } from '../fcm_token/fcm_token.module';
 import { OrderPlacingService } from './services/order-placing.service';
+import { AdminModule } from '../admin/admin.module';
 
 @Module({
   controllers: [OrderController],
@@ -63,7 +64,8 @@ import { OrderPlacingService } from './services/order-placing.service';
     StoreTransactionModule,
     LoyaltySettingModule,
     PaymentCardModule,
-    FcmTokenModule
+    FcmTokenModule,
+    AdminModule
   ],
   exports: [OrderService,OrderPaymentService],
 })

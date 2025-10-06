@@ -29,6 +29,7 @@ import { StoreFinancialsFilterDto } from '../store/dto/requests/store-financials
 import { PayOrderDTO } from './dto/requests/pay-order-dto';
 import { StoreGuard } from 'src/common/guards/store.guard';
 import { ReorderResponseDto } from './dto/responses/reorder-response.dto';
+import { StoreOrAdminGuard } from 'src/common/guards/store-or-admin-guard';
 
 @Controller('order')
 export class OrderController {
@@ -194,12 +195,13 @@ export class OrderController {
   }
 
   @Serilaize(PaginatedOrderListDto)
-  @UseGuards(StoreGuard, ApprovedStoreGuard)
+  @UseGuards(StoreOrAdminGuard, ApprovedStoreGuard)
   @Get('byStore')
   @ApiOperation({ summary: 'Get paginated orders for a store' })
   @ApiSecurity('access-token')
   @ApiQuery({ name: 'page', required: false, description: 'Page number', example: 1 })
   @ApiQuery({ name: 'limit', required: false, description: 'Number of items per page', example: 10 })
+  @ApiQuery({ name: 'storeId', required: false, example: 1 })
   @ApiQuery({ name: 'status', required: false, description: 'Filter orders by status', enum: ['incoming', 'preparing', 'ready', 'arrived', 'completed', 'cancelled'] })
   @ApiResponse({ status: 200, description: 'Paginated list of orders for store', type: PaginatedOrderListDto })
   getOrdersByStore(@CurrentUser() store:Store,@Query('page',) page=1,@Query('limit') limit=10,@Query('status') filterStatus:filterStatusByStore)
@@ -237,12 +239,13 @@ export class OrderController {
   }
 
   @Serilaize(OrderDto)
-  @UseGuards(StoreGuard, ApprovedStoreGuard)
+  @UseGuards(StoreOrAdminGuard, ApprovedStoreGuard)
   @Get(':orderId/byStore')
   @ApiOperation({ summary: 'Get order details by store' })
   @ApiSecurity('access-token')
   @ApiParam({ name: 'orderId', description: 'ID of the order', example: 123 })
   @ApiResponse({ status: 200, description: 'Order details', type: OrderDto })
+  @ApiQuery({ name: 'storeId', required: false, example: 1 })
   getOrderByStore(@CurrentUser() store:Store,@Param('orderId',) orderId:number)
   {
     return this.orderService.getOrderByStore(store.id,orderId)
