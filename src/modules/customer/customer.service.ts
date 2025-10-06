@@ -1,12 +1,6 @@
 import { UserTokenService } from './../user_token/user_token.service';
 import { AvatarService } from './../avatar/avatar.service';
-import {
-  BadRequestException,
-  forwardRef,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import {BadRequestException,forwardRef,Inject,Injectable,NotFoundException} from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
 import { Customer } from './entities/customer.entity';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';

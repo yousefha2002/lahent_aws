@@ -39,7 +39,7 @@ export class Customer extends Model {
   name: string;
 
   @AllowNull(true)
-  @Column(DataType.STRING)
+  @Column({ type: DataType.STRING, unique: true })
   email: string;
 
   @Default(false)
