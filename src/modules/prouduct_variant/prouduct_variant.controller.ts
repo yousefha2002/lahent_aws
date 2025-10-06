@@ -9,7 +9,6 @@ import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { Store } from '../store/entities/store.entity';
 import { UpdateProductVariantDto } from './dto/update-variant.dto';
 import { ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
-import { StoreGuard } from 'src/common/guards/store.guard';
 import { StoreOrAdminGuard } from 'src/common/guards/store-or-admin-guard';
 
 @Controller('product-variant')

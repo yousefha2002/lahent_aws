@@ -13,12 +13,13 @@ import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
 import { OfferType } from 'src/common/enums/offer_type';
 import { StoreGuard } from 'src/common/guards/store.guard';
+import { StoreOrAdminGuard } from 'src/common/guards/store-or-admin-guard';
 
 @Controller('offer')
 export class OfferController {
   constructor(private readonly offerService: OfferService) {}
 
-  @UseGuards(StoreGuard, ApprovedStoreGuard)
+  @UseGuards(StoreOrAdminGuard, ApprovedStoreGuard)
   @Post()
   @ApiResponse({
     status: 201,
@@ -30,6 +31,7 @@ export class OfferController {
   })
   @ApiOperation({ summary: 'Create a new offer for the store' })
   @ApiSecurity('access-token')
+  @ApiQuery({ name: 'storeId', required: false, example: 1 })
   @ApiBody({ type: CreateOfferDto })
   async createOffer(
     @CurrentUser() store: Store,
@@ -56,7 +58,7 @@ export class OfferController {
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
   @ApiQuery({ name: 'storeId', required: false, type: Number, example: 5 })
-    @ApiQuery({ name: 'typeId', required: false, type: Number, example: 1 })
+  @ApiQuery({ name: 'typeId', required: false, type: Number, example: 1 })
   @ApiResponse({ status: 200, description: 'Paginated list of active offers', type: PaginatedOfferResponseDto })
   @Get('active/all')
   getActiveOffersWithStoreDetails(
@@ -71,14 +73,14 @@ export class OfferController {
   }
 
   @Serilaize(PaginatedOfferResponseDto)
-  @UseGuards(StoreGuard, ApprovedStoreGuard)
+  @UseGuards(StoreOrAdminGuard, ApprovedStoreGuard)
   @Get('byStore/all')
   @ApiOperation({ summary: 'Get all offers for the current store' })
   @ApiSecurity('access-token')
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
-  @ApiQuery({ name: 'type', required: false, enum: OfferType,example: OfferType.FIXED 
-})
+  @ApiQuery({ name: 'type', required: false, enum: OfferType,example: OfferType.FIXED})
+  @ApiQuery({ name: 'typeId', required: false, type: Number, example: 1 })
   @ApiResponse({ status: 200, description: 'Paginated list of offers for the store', type: PaginatedOfferResponseDto })
   getAllOffersForStore(
     @CurrentUser() store: Store,

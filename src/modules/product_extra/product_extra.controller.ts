@@ -6,7 +6,6 @@ import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { Store } from '../store/entities/store.entity';
 import { CreateProductExtraDto } from './dto/create-product-extra.dto';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
-import { StoreGuard } from 'src/common/guards/store.guard';
 import { StoreOrAdminGuard } from 'src/common/guards/store-or-admin-guard';
 
 @Controller('product-extra')
