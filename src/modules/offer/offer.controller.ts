@@ -4,7 +4,7 @@ import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { Store } from '../store/entities/store.entity';
 import { CreateOfferDto } from './dto/create-offer.dto';
 import { ChangeOfferActiveDto } from './dto/change-offer-active.dto';
-import { ApprovedStoreGuard } from 'src/common/guards/approvedStore.guard';
+import { ApprovedStoreGuard } from 'src/common/guards/approved-store.guard';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { PaginatedOfferResponseDto } from './dto/offer-response.dto';
 import { ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';

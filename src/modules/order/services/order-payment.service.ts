@@ -74,8 +74,8 @@ export class OrderPaymentService {
         const order = await this.orderRepo.findOne({ where: { id: orderId, customerId:customer.id }, transaction });
         if (!order) throw new NotFoundException(this.i18n.translate('translation.orders.not_found', { lang }));
 
-        const store = await this.storeService.storeById(order.storeId);
-        if (!store || store.status !== StoreStatus.APPROVED) {
+        const store = await this.storeService.getStoreById(order.storeId);
+        if (store.status !== StoreStatus.APPROVED) {
             throw new BadRequestException(this.i18n.translate('translation.orders.store_unavailable', { lang }));
         }
 

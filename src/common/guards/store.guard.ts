@@ -27,11 +27,7 @@ import { StoreService } from 'src/modules/store/services/store.service';
             throw new UnauthorizedException('Unauthorized role');
         }
 
-        const store = await this.storeService.storeById(decoded.id);
-        if (!store) {
-            throw new UnauthorizedException('Store not found');
-        }
-
+        const store = await this.storeService.getStoreById(decoded.id);
         request.currentUser = store;
         return !!decoded.id;
         } catch {

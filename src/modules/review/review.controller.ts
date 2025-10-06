@@ -1,19 +1,10 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Post,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
+import {Body,Controller,Delete,Get,Param,Post,Query,UseGuards} from '@nestjs/common';
 import { ReviewService } from './review.service';
 import { CustomerGuard } from 'src/common/guards/customer.guard';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { Customer } from '../customer/entities/customer.entity';
-import { ApprovedStoreGuard } from 'src/common/guards/approvedStore.guard';
+import { ApprovedStoreGuard } from 'src/common/guards/approved-store.guard';
 import { Store } from '../store/entities/store.entity';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { PaginatedReviewDto } from './dto/review.dto';

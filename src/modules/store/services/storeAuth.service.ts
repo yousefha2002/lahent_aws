@@ -228,10 +228,7 @@ export class StoreAuthService {
             if (!tokenRecord) {
                 throw new BadRequestException('Invalid or expired refresh token');
             }
-            const store = await this.storeService.storeById(decoded.id);
-            if (!store) {
-                throw new BadRequestException('store is not found');
-            }
+            const store = await this.storeService.getStoreById(decoded.id);
             const accessToken = generateAccessToken({ id: store.id, role: decoded.role });
             const newRefreshToken = generateRefreshToken({ id: store.id, role: decoded.role });
             await this.userTokenService.rotateToken(tokenRecord,newRefreshToken,new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS),);

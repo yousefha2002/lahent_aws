@@ -8,7 +8,7 @@ import { Customer } from '../customer/entities/customer.entity';
 import { createOrderDto } from './dto/requests/create-order.dto';
 import { Store } from '../store/entities/store.entity';
 import { ExtendOrderTimeDto } from './dto/requests/extend-order-time.dto';
-import { ApprovedStoreGuard } from 'src/common/guards/approvedStore.guard';
+import { ApprovedStoreGuard } from 'src/common/guards/approved-store.guard';
 import { OrderPaymentService } from './services/order-payment.service';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { PaginatedOrderListDto } from './dto/responses/store-order-list.dto';

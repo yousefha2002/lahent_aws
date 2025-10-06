@@ -16,7 +16,6 @@ import { CustomerGuard } from 'src/common/guards/customer.guard';
 import { Customer } from '../customer/entities/customer.entity';
 import { StoreStatus } from 'src/common/enums/store_status';
 import { AdminGuard } from 'src/common/guards/admin.guard';
-import { StoreOrOwnerGuard } from 'src/common/guards/StoreOrOwner.guard';
 import { Store } from './entities/store.entity';
 import { UpdateStoreDto } from './dto/requests/update-store.dto';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
@@ -39,6 +38,7 @@ import { RoleStatus } from 'src/common/enums/role_status';
 import { FullDetailsCustomerStoreViewDto, PaginatedCustomerStoreViewDto, StoreCustomerViewDto } from './dto/responses/customer-store.dto';
 import { StoreWithTokenDto } from './dto/responses/store-with-token.dto';
 import { StoreAdminViewDto } from './dto/responses/admin-store.dto';
+import { OwnerOrStoreGuard } from 'src/common/guards/owner-or-store.guard';
 
 @Controller('store')
 export class StoreController {
@@ -168,7 +168,7 @@ export class StoreController {
     return this.storeService.getCurrentStore(store.id)
   }
 
-  @UseGuards(StoreOrOwnerGuard)
+  @UseGuards(OwnerOrStoreGuard)
   @Serilaize(storeForAction)
   @Get('action/current')
   @ApiOperation({ summary: 'Get full details of a store by ID for actions (owner or store only)' })
@@ -395,14 +395,14 @@ export class StoreController {
     description: 'Store updated successfully',
     schema: { example: { message: 'Store updated successfully' } },
   })
-  @UseGuards(StoreOrOwnerGuard)
+  @UseGuards(OwnerOrStoreGuard)
   updateStore(@CurrentUser() store: Store, @Body() dto: UpdateStoreDto,@I18n() i18n: I18nContext) {
     const lang = getLang(i18n);
     return this.storeService.updateStore(store, dto,lang);
   }
 
   @Put('update-images')
-  @UseGuards(StoreOrOwnerGuard)
+  @UseGuards(OwnerOrStoreGuard)
   @ApiOperation({ summary: 'Update store images (logo / cover)' })
   @ApiSecurity('access-token')
   @ApiQuery({ name: 'storeId', required: false, example: '1' })
@@ -519,7 +519,7 @@ export class StoreController {
   }
 
   @Put('update-password')
-  @UseGuards(StoreOrOwnerGuard)
+  @UseGuards(OwnerOrStoreGuard)
   @ApiOperation({ summary: 'Update store password (Store or Owner only)' })
   @ApiSecurity('access-token')
   @ApiBody({ type: UpdatePasswordDto })

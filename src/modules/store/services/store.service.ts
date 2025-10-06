@@ -293,10 +293,7 @@ export class StoreService {
   }
 
   async changeStoreStatus(status: StoreStatus, storeId: number,lang = Language.en) {
-    const store = await this.storeById(storeId);
-    if (!store) {
-      throw new BadRequestException(this.i18n.t('translation.store.not_found',{lang}));
-    }
+    const store = await this.getStoreById(storeId);
     if (status === StoreStatus.APPROVED)
     {
       await this.storeCommissionService.getCommission(storeId)
@@ -306,8 +303,12 @@ export class StoreService {
     return {storeId:store.id, message: this.i18n.t('translation.store.status_updated',{lang}) };
   }
 
-  async storeById(id: string | number) {
-    return this.storeRepo.findByPk(id);
+  async getStoreById(id: string | number) {
+    const store = await this.storeRepo.findByPk(id);
+    if (!store) {
+      throw new BadRequestException('store is not found');
+    }
+    return store
   }
 
   countStoreBySubTypeId(subTypeId: number) {

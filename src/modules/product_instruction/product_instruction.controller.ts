@@ -7,7 +7,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ProductInstructionService } from './product_instruction.service';
-import { ApprovedStoreGuard } from 'src/common/guards/approvedStore.guard';
+import { ApprovedStoreGuard } from 'src/common/guards/approved-store.guard';
 import { UpdateProductInstructionDto } from './dto/update-product-instruction.sto';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { Store } from '../store/entities/store.entity';

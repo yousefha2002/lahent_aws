@@ -22,11 +22,7 @@ export class ReviewService {
     if (order.status !== OrderStatus.RECEIVED) {
       throw new BadRequestException('Order not received yet');
     }
-    const store = await this.storeService.storeById(order.storeId)
-
-    if (!store) {
-      throw new BadRequestException('Invalid store');
-    }
+    const store = await this.storeService.getStoreById(order.storeId)
 
     const existingReview = await this.reviewRepo.findOne({
       where: { customerId, orderId: dto.orderId },
@@ -72,10 +68,7 @@ export class ReviewService {
     }
 
     // 2. Get store before deleting
-    const store = await this.storeService.storeById(review.storeId);
-    if (!store) {
-      throw new BadRequestException('Invalid store');
-    }
+    const store = await this.storeService.getStoreById(review.storeId);
 
     // 3. Delete review
     await review.destroy();

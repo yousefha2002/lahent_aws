@@ -4,11 +4,11 @@ import { CustomerGuard } from 'src/common/guards/customer.guard';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { Customer } from 'src/modules/customer/entities/customer.entity';
 import { AdminGuard } from 'src/common/guards/admin.guard';
-import { StoreOrOwnerGuard } from 'src/common/guards/StoreOrOwner.guard';
 import { Store } from '../store/entities/store.entity';
 import { ApiTags, ApiOperation, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { OwnerGuard } from 'src/common/guards/owner.guard';
 import { Owner } from '../owner/entities/owner.entity';
+import { StoreGuard } from 'src/common/guards/store.guard';
 
 @ApiSecurity('access-token')
 @ApiTags('Deletion')
@@ -32,7 +32,7 @@ export class DeletionController {
     return this.deletionService.restoreCustomer(customerId);
   }
 
-  @UseGuards(StoreOrOwnerGuard)
+  @UseGuards(StoreGuard)
   @Delete('soft-store')
   @ApiOperation({ summary: 'Soft delete a store (Owner or Store Admin)' })
   @ApiResponse({ status: 200, description: 'Store soft deleted successfully' })

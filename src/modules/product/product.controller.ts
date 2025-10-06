@@ -11,7 +11,7 @@ import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { PaginatedProductsCustomerViewDto } from './dto/responses/customer-product-view.dto';
 import { PaginatedProductsStoreViewDto } from './dto/responses/store-product-view.dto';
 import { FullProductDetailsDto, ProductFullDetailsForStoreDto } from './dto/responses/full-product-details.dto';
-import { ApprovedStoreGuard } from 'src/common/guards/approvedStore.guard';
+import { ApprovedStoreGuard } from 'src/common/guards/approved-store.guard';
 import { ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';

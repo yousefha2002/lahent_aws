@@ -16,14 +16,7 @@ export class FaviroteService {
 
   async toggleFavorite(customerId: number, storeId: number, lang: Language = Language.en)
   {
-    const store = await this.storeService.storeById(storeId);
-
-    if (!store) {
-      throw new NotFoundException(
-        this.i18n.translate('translation.invalid_store', { lang }),
-      );
-    }
-
+    const store = await this.storeService.getStoreById(storeId);
     const favorite = await this.findFavoriteStore(storeId,customerId)
 
     if (favorite) {

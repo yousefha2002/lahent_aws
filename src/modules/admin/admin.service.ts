@@ -3,6 +3,7 @@ import {
   Inject,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
 import { Admin } from './entities/admin.entity';
@@ -94,9 +95,13 @@ export class AdminService {
     return this.adminRepo.findOne();
   }
 
-  findOneById(id:number)
+  async findOneById(id:number)
   {
-    return this.adminRepo.findByPk(id)
+    const admin = await this.adminRepo.findByPk(id)
+    if (!admin) {
+      throw new UnauthorizedException('Admin not found');
+    }
+    return admin
   }
 
   async create(email: string, password: string) {

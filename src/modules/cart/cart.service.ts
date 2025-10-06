@@ -49,14 +49,13 @@ export class CartService {
   async createProductCart(
     dto: CreateCartProductDto,
     customerId: number,
-    lang = Language.en,
+    lang = Language.ar,
   ) {
     const transaction = await this.sequelize.transaction();
     const product = await this.productService.productById(dto.productId)
-    const store = await this.storeService.storeById(product.storeId)
+    const store = await this.storeService.getStoreById(product.storeId)
     try {
       if (
-        store &&
         store.status === StoreStatus.APPROVED &&
         product.isActive
       ) {

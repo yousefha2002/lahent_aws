@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { ProductExtraService } from './product_extra.service';
 import { UpdateProductExtraDto } from './dto/update-extra-product.dto';
-import { ApprovedStoreGuard } from 'src/common/guards/approvedStore.guard';
+import { ApprovedStoreGuard } from 'src/common/guards/approved-store.guard';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { Store } from '../store/entities/store.entity';
 import { CreateProductExtraDto } from './dto/create-product-extra.dto';

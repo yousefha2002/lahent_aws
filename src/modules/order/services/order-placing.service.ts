@@ -56,11 +56,7 @@ export class OrderPlacingService {
             const pointsUsedSafe = dto.pointsUsed ?? 0;
 
             // جلب المتجر
-            const store = await this.storeService.storeById(dto.storeId);
-            if(!store)
-            {
-                throw new BadRequestException('store is not found')
-            }
+            const store = await this.storeService.getStoreById(dto.storeId);
 
             // التحقق من صلاحية المتجر والطلب
             await this.validateStoreAndOrder(user, pointsUsedSafe, dto, store, lang);

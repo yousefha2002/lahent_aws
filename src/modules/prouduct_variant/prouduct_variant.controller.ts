@@ -11,7 +11,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ProuductVariantService } from './prouduct_variant.service';
-import { ApprovedStoreGuard } from 'src/common/guards/approvedStore.guard';
+import { ApprovedStoreGuard } from 'src/common/guards/approved-store.guard';
 import { AnyFilesInterceptor, FileInterceptor } from '@nestjs/platform-express';
 import { multerOptions } from 'src/multer/multer.options';
 import { MulterExceptionFilter } from 'src/multer/multer.exception.filter';
