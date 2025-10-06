@@ -27,7 +27,7 @@ export class OtpCodeService {
     @Inject(forwardRef(() => CustomerService)) private customerService: CustomerService
   ) {}
 
-  async sendOtp(dto: SendOtpDto, type: 'customer' | 'owner') {
+  async sendOtp(dto: SendOtpDto, type: 'customer' | 'owner',lang:Language) {
     const {phone} = dto
     if (
       (type === 'owner' && phone === DEMO_OWNER_PHONE) ||
@@ -36,7 +36,8 @@ export class OtpCodeService {
       return { phone, code: DEMO_OTP_CODE, status: 'login' };
     }
     const code = generateOtpCode();
-    await this.smsService.sendSms(phone, `Your OTP code is: ${code}`);
+    const smsMessage = this.i18n.translate('translation.sms.verification_code', {lang,args: { code }});
+    await this.smsService.sendSms(phone, smsMessage);
     if (type === 'owner') {
         const owner = await this.ownerService.findByPhone(dto.phone)
         const expiresAt = new Date(Date.now() + 10 * 60 * 1000);

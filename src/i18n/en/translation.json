@@ -69,7 +69,6 @@
   "not_enough_balance": "You don't have enough money",
   "receiver_required": "Receiver name and phone are required for non-registered users",
   "gift_sent": "Gift sent to the user",
-  "gift_received_sms": "You have received a gift worth {{amount}}.",
   "gift_template": {
     "created": "Gift template has been created successfully",
     "updated": "Gift template has been updated successfully",
@@ -186,5 +185,10 @@
   },
   "invalid_dates": "Start or end date is invalid",
   "expired_date": "End date must be in the future",
-  "start_in_past": "Start date cannot be in the past"
+  "start_in_past": "Start date cannot be in the past",
+  "sms":{
+    "store_approved":"Your store has been approved 🎉. You can now start using the system.",
+    "gift_received": "You have received a gift worth {{amount}}.",
+    "verification_code": "Your OTP code is: {{code}}"
+  }
 }

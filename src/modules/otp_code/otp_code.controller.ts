@@ -62,9 +62,10 @@ export class OtpCodeController {
   @Serilaize(OwnerOtpSendToken)
   @Post('send/owner')
   sendOtpForOwner(
-    @Body() body: SendOtpDto,
+    @Body() body: SendOtpDto,@I18n() i18n: I18nContext,
   ) {
-    return this.otpCodeService.sendOtp(body, 'owner');
+    const lang = getLang(i18n);
+    return this.otpCodeService.sendOtp(body, 'owner',lang);
   }
 
   @ApiOperation({ summary: 'Send OTP to customer' })
@@ -76,8 +77,9 @@ export class OtpCodeController {
   })
   @Post('send/customer')
   sendOtpForCustomer(
-    @Body() body: SendOtpDto,
+    @Body() body: SendOtpDto,@I18n() i18n: I18nContext,
   ) {
-    return this.otpCodeService.sendOtp(body, 'customer');
+    const lang = getLang(i18n);
+    return this.otpCodeService.sendOtp(body, 'customer',lang);
   }
 }
