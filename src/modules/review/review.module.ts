@@ -6,11 +6,12 @@ import { CustomerModule } from '../customer/customer.module';
 import { StoreModule } from '../store/store.module';
 import { OwnerModule } from '../owner/owner.module';
 import { OrderModule } from '../order/order.module';
+import { AdminModule } from '../admin/admin.module';
 
 @Module({
   controllers: [ReviewController],
   providers: [ReviewService, ...ReviewProvider],
-  imports: [CustomerModule, StoreModule, OwnerModule, OrderModule],
+  imports: [CustomerModule, StoreModule, OwnerModule, OrderModule,AdminModule],
   exports:[ReviewService]
 })
 export class ReviewModule {}

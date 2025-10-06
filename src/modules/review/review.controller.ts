@@ -10,6 +10,7 @@ import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { PaginatedReviewDto } from './dto/review.dto';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { StoreGuard } from 'src/common/guards/store.guard';
+import { StoreOrAdminGuard } from 'src/common/guards/store-or-admin-guard';
 
 @Controller('review')
 export class ReviewController {
@@ -52,12 +53,13 @@ export class ReviewController {
 
   @Serilaize(PaginatedReviewDto)
   @Get('all')
-  @UseGuards(StoreGuard, ApprovedStoreGuard)
+  @UseGuards(StoreOrAdminGuard, ApprovedStoreGuard)
   @ApiOperation({ summary: 'Get all reviews for a store with pagination' })
   @ApiSecurity('access-token')
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
   @ApiQuery({ name: 'rating', required: false, type: Number, example: 5 })
+  @ApiQuery({ name: 'storeId', required: false, example: 1 })
   @ApiResponse({
     status: 200,
     description: 'Paginated list of reviews for the store',
