@@ -7,11 +7,12 @@ import { ProductModule } from '../product/product.module';
 import { StoreModule } from '../store/store.module';
 import { OwnerModule } from '../owner/owner.module';
 import { DatabaseModule } from 'src/database/database.module';
+import { AdminModule } from '../admin/admin.module';
 
 @Module({
   controllers: [ProductExtraController],
   providers: [ProductExtraService, ...ProductExtraProvider,...ProductExtraLanguageProvider],
   exports: [ProductExtraService],
-  imports: [StoreModule, OwnerModule, forwardRef(() => ProductModule),DatabaseModule],
+  imports: [StoreModule, OwnerModule, forwardRef(() => ProductModule),DatabaseModule,AdminModule],
 })
 export class ProductExtraModule {}

@@ -7,11 +7,12 @@ import { StoreModule } from '../store/store.module';
 import { OwnerModule } from '../owner/owner.module';
 import { ProductInstructionLanguageProvider } from './providers/product_instruction_language.provider';
 import { DatabaseModule } from 'src/database/database.module';
+import { AdminModule } from '../admin/admin.module';
 
 @Module({
   controllers: [ProductInstructionController],
   providers: [ProductInstructionService, ...ProductInstructionProvider,...ProductInstructionLanguageProvider],
   exports: [ProductInstructionService],
-  imports: [StoreModule, OwnerModule, forwardRef(() => ProductModule),DatabaseModule],
+  imports: [StoreModule, OwnerModule, forwardRef(() => ProductModule),DatabaseModule,AdminModule],
 })
 export class ProductInstructionModule {}

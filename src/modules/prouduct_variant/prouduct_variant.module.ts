@@ -10,6 +10,7 @@ import { ProductCategoryVariantModule } from '../product_category_variant/produc
 import { VariantCategoryModule } from '../variant_category/variant_category.module';
 import { ProductVariantLanguageProvider } from './providers/product_variant_language.provider';
 import { DatabaseModule } from 'src/database/database.module';
+import { AdminModule } from '../admin/admin.module';
 
 @Module({
   controllers: [ProuductVariantController],
@@ -22,7 +23,8 @@ import { DatabaseModule } from 'src/database/database.module';
     CloudinaryModule,
     ProductCategoryVariantModule,
     VariantCategoryModule,
-    DatabaseModule
+    DatabaseModule,
+    AdminModule
   ],
 })
 export class ProuductVariantModule {}
