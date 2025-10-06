@@ -26,7 +26,7 @@ export class SimpleOrderDto {
     @Expose()
     estimatedTime: number;
 
-    @ApiProperty({ example: 250.5, description: 'Final price to pay' })
+    @ApiProperty({ example: 70, description: 'Final price to pay' })
     @Expose()
     finalPriceToPay: number;
 

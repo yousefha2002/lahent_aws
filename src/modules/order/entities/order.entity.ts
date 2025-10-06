@@ -61,11 +61,15 @@ export class Order extends Model {
 
   @AllowNull(false)
   @Column(DataType.FLOAT)
-  subtotalBeforeDiscount: number;
+  totalOriginalPrice: number;
 
   @AllowNull(true)
   @Column(DataType.FLOAT)
-  discountCouponAmount: number;
+  offersDiscount: number;
+
+  @AllowNull(true)
+  @Column(DataType.FLOAT)
+  couponDiscountAmount: number;
 
   @AllowNull(false)
   @Column(DataType.FLOAT)

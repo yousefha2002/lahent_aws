@@ -5,20 +5,29 @@ import { OrderItemDto } from 'src/modules/order_item/dtos/order-item.dto';
 import { SimpleOrderDto } from './simple-order.dto';
 
 export class OrderDto extends SimpleOrderDto {
-    @ApiProperty({ example: 60 }) 
-    @Expose() subtotalBeforeDiscount: number;
-
     @ApiProperty({ example: 10 }) 
-    @Expose() discountCouponAmount: number;
+    @Expose() 
+    couponDiscountAmount: number;
+
+    @ApiProperty({ example: 100 }) 
+    @Expose() 
+    totalOriginalPrice: number;
+
+    @ApiProperty({ example: 20 }) 
+    @Expose() 
+    offersDiscount: number;
 
     @ApiProperty({ example: true }) 
-    @Expose() pickupByCustomer: boolean;
+    @Expose() 
+    pickupByCustomer: boolean;
 
     @ApiPropertyOptional({ example: 'John Doe' }) 
-    @Expose() pickupPersonName: string | null;
+    @Expose() 
+    pickupPersonName: string | null;
 
     @ApiPropertyOptional({ example: '596231312' }) 
-    @Expose() pickupPersonNumber: string | null;
+    @Expose() 
+    pickupPersonNumber: string | null;
 
     @ApiProperty({example:true,description:"هل تم تمديد الطلب من قبل العميل"})
     @Expose()

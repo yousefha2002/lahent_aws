@@ -79,10 +79,11 @@ export class OrderPlacingService {
             const order = await this.orderRepo.create({
                 customerId: user.id,
                 storeId: dto.storeId,
-                subtotalBeforeDiscount: cart.totalFinalPrice - cart.couponDiscountAmount,
                 estimatedTime,
-                discountCouponAmount: cart.couponDiscountAmount,
+                couponDiscountAmount: cart.couponDiscountAmount,
                 finalPriceToPay: cart.totalFinalPrice,
+                offersDiscount:cart.offersDiscount,
+                totalOriginalPrice:cart.totalOriginalPrice,
                 couponId: cart.couponId,
                 status: OrderStatus.PENDING_PAYMENT,
                 isPaid: false,
