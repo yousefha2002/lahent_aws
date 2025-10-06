@@ -7,11 +7,12 @@ import { OwnerModule } from '../owner/owner.module';
 import { ProductModule } from '../product/product.module';
 import { CategoryLanguageProvider } from './providers/category_language.provider';
 import { DatabaseModule } from 'src/database/database.module';
+import { AdminModule } from '../admin/admin.module';
 
 @Module({
   controllers: [CategoryController],
   providers: [CategoryService, ...CategoryProvider,...CategoryLanguageProvider],
-  imports: [StoreModule, OwnerModule, forwardRef(() => ProductModule),DatabaseModule],
+  imports: [StoreModule, OwnerModule, forwardRef(() => ProductModule),DatabaseModule,AdminModule],
   exports:[CategoryService]
 })
 export class CategoryModule {}
