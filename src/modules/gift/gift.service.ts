@@ -117,12 +117,8 @@ export class GiftService {
 
       await transaction.commit();
 
-      // إرسال SMS و FCM بعد commit لضمان أن كل شيء تم حفظه
-      // const smsMessage = this.i18n.translate('translation.gift_received_sms', {
-      //   lang,
-      //   args: { amount },
-      // });
-      // await this.smsService.sendSms(finalReceiverPhone, smsMessage);
+      const smsMessage = this.i18n.translate('translation.sms.gift_received', {lang,args: { amount }});
+      await this.smsService.sendSms(finalReceiverPhone, smsMessage);
 
       if (receiver) {
         await this.fcmTokenService.notifyUser(

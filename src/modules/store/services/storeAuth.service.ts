@@ -90,7 +90,7 @@ export class StoreAuthService {
         }
     }
 
-    async create(dto: CreateStoreDto,ownerId: string,hours: OpeningHourEnum[],lang : Language,logo?: Express.Multer.File,cover?: Express.Multer.File)
+    async create(dto: CreateStoreDto,ownerId: string,hours: OpeningHourEnum[],lang : Language,logo?: Express.Multer.File,cover?: Express.Multer.File,commercialRegisterFile?: Express.Multer.File,taxNumberFile?: Express.Multer.File)
     {
         const transaction = await this.sequelize.transaction();
         try {
@@ -121,8 +121,12 @@ export class StoreAuthService {
 
             let logoUpload: UploadApiResponse | undefined;
             let coverUpload: UploadApiResponse | undefined;
+            let commercialRegisterUpload: UploadApiResponse | undefined;
+            let taxNumberUpload: UploadApiResponse | undefined;
             if (logo) logoUpload = await this.cloudinaryService.uploadImage(logo);
             if (cover) coverUpload = await this.cloudinaryService.uploadImage(cover);
+            if (commercialRegisterFile) commercialRegisterUpload = await this.cloudinaryService.uploadImage(commercialRegisterFile);
+            if (taxNumberFile) taxNumberUpload = await this.cloudinaryService.uploadImage(taxNumberFile);
 
             const newStore = await store.update({
                 phone: dto.phone,
@@ -139,6 +143,8 @@ export class StoreAuthService {
                 isCompletedProfile:true,
                 ...(logoUpload ? { logoUrl: logoUpload.secure_url, logoPublicId: logoUpload.public_id } : {}),
                 ...(coverUpload ? { coverUrl: coverUpload.secure_url, coverPublicId: coverUpload.public_id } : {}),
+                ...(commercialRegisterUpload? {commercialRegisterUrl: commercialRegisterUpload.secure_url,commercialRegisterPublicId: commercialRegisterUpload.public_id}: {}),
+                ...(taxNumberUpload? {taxNumberUrl: taxNumberUpload.secure_url,taxNumberPublicId: taxNumberUpload.public_id,}: {}),
             }, { transaction });
 
             for (const t of translations) {

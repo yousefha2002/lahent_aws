@@ -66,50 +66,7 @@ export class StoreController {
   @ApiOperation({ summary: 'Create a new store (Owner only)' })
   @ApiSecurity('access-token')
   @ApiConsumes('multipart/form-data')
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        phone: { type: 'string', example: '0501234567' },
-        phoneLogin: { type: 'string', example: '0501234567' },
-        city: { type: 'string', example: 'الرياض' },
-        commercialRegister: { type: 'string', example: '1234567890' },
-        taxNumber: { type: 'string', example: '1234567890' },
-        password: { type: 'string', example: '123456' },
-        subTypeId: { type: 'string', example: '1' },
-        lat: { type: 'string', example: '24.7136' },
-        lng: { type: 'string', example: '46.6753' },
-        in_store: { type: 'boolean', example: true },
-        drive_thru: { type: 'boolean', example: false },
-        openingHours: {
-          type: 'string',
-          example: JSON.stringify([
-          { day: 'mon', openTime: '08:00', closeTime: '18:00' },
-          { day: 'tue', openTime: '08:00', closeTime: '18:00' },
-          { day: 'wed', openTime: '08:00', closeTime: '18:00' },
-          { day: 'thu', openTime: '08:00', closeTime: '18:00' },
-          { day: 'fri', openTime: '08:00', closeTime: '18:00' },
-          { day: 'sat', openTime: '08:00', closeTime: '18:00' },
-          { day: 'sun', openTime: '08:00', closeTime: '18:00' },
-        ]),
-        },
-        translations: {
-          type: 'string',
-          example: JSON.stringify([
-            { languageCode: 'en', name: 'My Store'},
-            { languageCode: 'ar', name: 'متجري'},
-          ]),
-        },
-        logo: { type: 'string', format: 'binary' },
-        cover: { type: 'string', format: 'binary' },
-      },
-      required: [
-        'phone', 'phoneLogin', 'city', 'commercialRegister', 'taxNumber',
-        'password', 'subTypeId', 'lat', 'lng', 'in_store', 'drive_thru',
-        'openingHours', 'translations', 'logo', 'cover'
-      ],
-    },
-  })
+  @ApiBody({ type: CreateStoreDto })
   @ApiResponse({status: 200,description: 'Store created successfully',schema: { example: { message: 'Created successfully' } },})
   @UseGuards(OwnerGuard)
   @UseInterceptors(
@@ -117,6 +74,8 @@ export class StoreController {
       [
         { name: 'logo', maxCount: 1 },
         { name: 'cover', maxCount: 1 },
+        { name: 'commercialRegisterFile', maxCount: 1 },
+        { name: 'taxNumberFile', maxCount: 1 },
       ],
       multerOptions,
     ),
@@ -125,14 +84,18 @@ export class StoreController {
     files: {
       logo?: Express.Multer.File[];
       cover?: Express.Multer.File[];
+      commercialRegisterFile?: Express.Multer.File[];
+      taxNumberFile?: Express.Multer.File[];
     },
   ) {
     const logo = files.logo?.[0];
     const cover = files.cover?.[0]
+    const commercialRegisterFile = files.commercialRegisterFile?.[0];
+    const taxNumberFile = files.taxNumberFile?.[0];
     const openingHours = validateAndParseOpeningHours(body.openingHours);
     const lang = getLang(i18n);
 
-    return this.storeAuthService.create(body,user.id,openingHours as OpeningHourEnum[],lang,logo,cover);
+    return this.storeAuthService.create(body,user.id,openingHours as OpeningHourEnum[],lang,logo,cover,commercialRegisterFile,taxNumberFile);
   }
 
   @Serilaize(StoreWithTokenDto)

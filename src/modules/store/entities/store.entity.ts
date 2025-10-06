@@ -110,7 +110,19 @@ export class Store extends Model {
   commercialRegister: string;
 
   @Column(DataType.STRING)
+  commercialRegisterUrl: string;
+
+  @Column(DataType.STRING)
+  commercialRegisterPublicId: string;
+
+  @Column(DataType.STRING)
   taxNumber: string;
+
+  @Column(DataType.STRING)
+  taxNumberUrl: string;
+
+  @Column(DataType.STRING)
+  taxNumberPublicId: string;
 
   @Default(StoreStatus.PENDING)
   @Column(DataType.ENUM(...Object.values(StoreStatus)))

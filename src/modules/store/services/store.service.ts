@@ -1,3 +1,4 @@
+import { SmsService } from './../../sms/sms.service';
 import { StoreCommissionService } from './../../store_commission/store_commission.service';
 import { SectorService } from './../../sector/sector.service';
 import { FaviroteService } from './../../favirote/favirote.service';
@@ -39,7 +40,8 @@ export class StoreService {
     @Inject(forwardRef(() => FaviroteService)) private faviroteService: FaviroteService,
     private sectorService:SectorService,
     @Inject('SEQUELIZE') private readonly sequelize: Sequelize,
-    private readonly storeCommissionService:StoreCommissionService
+    private readonly storeCommissionService:StoreCommissionService,
+    private readonly smsService:SmsService
   ) {}
 
   async findAllStores(
@@ -292,11 +294,13 @@ export class StoreService {
     return this.storeUtilsService.mapStoreWithExtras(store);
   }
 
-  async changeStoreStatus(status: StoreStatus, storeId: number,lang = Language.en) {
+  async changeStoreStatus(status: StoreStatus, storeId: number,lang = Language.ar) {
     const store = await this.getStoreById(storeId);
     if (status === StoreStatus.APPROVED)
     {
       await this.storeCommissionService.getCommission(storeId)
+      const message = this.i18n.t(`translation.sms.store_approved`, { lang });
+      await this.smsService.sendSms(store.phone, message);
     }
     store.status = status;
     await store.save();

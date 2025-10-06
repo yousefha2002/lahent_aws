@@ -19,6 +19,7 @@ import { SectorModule } from '../sector/sector.module';
 import { DatabaseModule } from 'src/database/database.module';
 import { StoreCommissionModule } from '../store_commission/store_commission.module';
 import { FcmTokenModule } from '../fcm_token/fcm_token.module';
+import { SmsModule } from '../sms/sms.module';
 
 @Module({
   controllers: [StoreController],
@@ -36,7 +37,8 @@ import { FcmTokenModule } from '../fcm_token/fcm_token.module';
     SectorModule,
     DatabaseModule,
     StoreCommissionModule,
-    FcmTokenModule
+    FcmTokenModule,
+    SmsModule
   ],
   exports: [StoreService,StoreUtilsService],
 })
