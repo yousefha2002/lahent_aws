@@ -24,10 +24,10 @@ export class AuditLog extends Model {
     @Column({ type: DataType.ENUM(...Object.values(AuditLogAction)), allowNull: false })
     action: AuditLogAction;
 
-    @Column({ type: DataType.JSONB, allowNull: true })
+    @Column({ type: DataType.JSON, allowNull: true })
     oldData: any;
 
-    @Column({ type: DataType.JSONB, allowNull: true })
+    @Column({ type: DataType.JSON, allowNull: true })
     newData: any;
 
     @Column({ type: DataType.TEXT, allowNull: true })
