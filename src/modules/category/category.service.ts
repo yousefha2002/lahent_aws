@@ -155,10 +155,14 @@ export class CategoryService {
     return category;
   }
 
-  async getCategoriesWithProductCount(storeId: number,lang:Language) {
+  async getCategoriesWithProductCount(storeId: number, lang?: Language) {
+    const includeLang = lang
+      ? [{ model: CategoryLanguage, where: { languageCode: lang } }]
+      : [{ model: CategoryLanguage }];
+
     const categories = await this.categoryRepo.findAll({
       where: { storeId },
-      include:[{model:CategoryLanguage,where:{languageCode:lang}}],
+      include: includeLang,
       attributes: {
         include: [
           [
@@ -178,7 +182,6 @@ export class CategoryService {
       productCount: Number(category.getDataValue('productCount')),
     }));
   }
-
   async validateCategoryBelongsToStore(
     categoryId: number,
     storeId: number,

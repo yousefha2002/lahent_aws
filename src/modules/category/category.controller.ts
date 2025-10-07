@@ -94,4 +94,15 @@ export class CategoryController {
     const lang = getLang(i18n);
     return this.categoryService.getCategoriesWithProductCount(+storeId, lang);
   }
+
+    @Get('/all/:storeId/action')
+    @ApiOperation({ summary: 'Get all categories of a store for action' })
+    @ApiParam({ name: 'storeId', example: 1 })
+    @ApiResponse({status: 200, description: 'List of categories', type: [CategoryDto]})
+    @Serilaize(CategoryDto)
+    getCategoriesForAction(
+      @Param('storeId') storeId: string,
+    ) {
+      return this.categoryService.getCategoriesWithProductCount(+storeId);
+    }
 }
