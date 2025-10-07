@@ -41,12 +41,13 @@ export class CartController {
   })
   @UseGuards(CustomerGuard, CompletedProfileGuard)
   addProductForCart(
-    @CurrentUser() customer: Customer,
+    @CurrentUser() user: CurrentUserType,
     @Body() body: CreateCartProductDto,
     @I18n() i18n: I18nContext
   ) {
     const lang = getLang(i18n);
-    return this.cartService.createProductCart(body, customer.id, lang);
+    const {context} = user
+    return this.cartService.createProductCart(body, context.id, lang);
   }
 
   @Put('update-product/:cartItemId')
