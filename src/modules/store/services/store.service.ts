@@ -159,8 +159,8 @@ export class StoreService {
       ...(status && { status }),
       ...(subTypeId && { subTypeId }),
       ...(city && { city }),
-      ...(phone && { phone }),
-      ...(commercialRegister && { commercialRegister }),
+      ...(phone && { phone: { [Op.like]: `%${phone}%` } }),
+      ...(commercialRegister && { commercialRegister: { [Op.like]: `%${commercialRegister}%` } }),
       ...(createdAt && { createdAt }),
       isCompletedProfile: true,
     };
