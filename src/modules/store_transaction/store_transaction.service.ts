@@ -1,8 +1,8 @@
 import { StoreCommissionService } from './../store_commission/store_commission.service';
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
 import { StoreTransaction } from './entities/store_transaction.entity';
-import { CreateStoreTransactionDto } from './dto/create-transaction.dto';
+import { CreateAdminStoreTransactionDto, CreateStoreTransactionDto } from './dto/create-transaction.dto';
 import { Order } from '../order/entities/order.entity';
 import { Customer } from '../customer/entities/customer.entity';
 import { Avatar } from '../avatar/entities/avatar.entity';
@@ -11,12 +11,15 @@ import { round2 } from 'src/common/utils/round2';
 import { getDateRange } from 'src/common/utils/getDateRange';
 import { Op } from 'sequelize';
 import { StoreTransactionType } from 'src/common/enums/transaction_type';
+import { Language } from 'src/common/enums/language';
+import { I18nService } from 'nestjs-i18n';
 
 @Injectable()
 export class StoreTransactionService {
     constructor(
         @Inject(repositories.store_transaction_repository) private storeTransactionRepo: typeof StoreTransaction,
-        private readonly storeCommissionService:StoreCommissionService
+        private readonly storeCommissionService:StoreCommissionService,
+        private readonly i18n: I18nService
     ) {}
 
     async create(dto: CreateStoreTransactionDto,transaction?: any) {
@@ -136,5 +139,14 @@ export class StoreTransactionService {
             totalRefunded: round2(Number(result?.get('totalRefunded')) || 0),
             totalEarning: round2(Number(result?.get('totalEarning')) || 0),
         };
+    }
+
+    async createAdminTransaction(lang:Language,dto:CreateAdminStoreTransactionDto,transaction?: any) {
+        const {status,storeId,totalAmount} = dto
+        if (![StoreTransactionType.SETTLEMENT, StoreTransactionType.ADMIN_WITHDRAW].includes(status)) {
+            throw new BadRequestException('Invalid transaction type. Must be SETTLEMENT or WITHDRAWAL');
+        }
+        await this.storeTransactionRepo.create({storeId,storeRevenue:totalAmount,status}, { transaction });
+        return {message: this.i18n.translate('translation.createdSuccefully', { lang }),}
     }
 }

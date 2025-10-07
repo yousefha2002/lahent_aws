@@ -1,6 +1,6 @@
-import { Controller, Get, Query, UseGuards, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards, ParseIntPipe, Post, Body } from '@nestjs/common';
 import { StoreTransactionService } from './store_transaction.service';
-import { ApiOperation, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { Store } from '../store/entities/store.entity';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
@@ -11,6 +11,11 @@ import { StoreTransactionType } from 'src/common/enums/transaction_type';
 import { StoreGuard } from 'src/common/guards/roles/store.guard';
 import { StoreOrAdminGuard } from 'src/common/guards/roles/store-or-admin-guard';
 import { CurrentUserType } from 'src/common/types/current-user.type';
+import { CreateAdminStoreTransactionDto } from './dto/create-transaction.dto';
+import { I18n, I18nContext } from 'nestjs-i18n';
+import { AdminGuard } from 'src/common/guards/roles/admin.guard';
+import { getLang } from 'src/common/utils/get-lang.util';
+import { AdminTransactionResponse } from './dto/admin-transaction-response.dto';
 
 @Controller('store-transaction')
 export class StoreTransactionController {
@@ -62,5 +67,20 @@ export class StoreTransactionController {
         const { filter, specificDate } = query;
         const {context} = user
         return this.storeTransactionService.getStoreFinancials(context.id, filter, specificDate);
+    }
+
+    @Serilaize(AdminTransactionResponse)
+    @UseGuards(AdminGuard)
+    @ApiOperation({ summary: 'Admin adds or withdraws money from store balance' })
+    @ApiSecurity('access-token')
+    @ApiBody({ type: CreateAdminStoreTransactionDto })
+    @ApiResponse({ status: 201, description: 'Transaction created successfully', type: AdminTransactionResponse })
+    @Post('admin/transaction')
+    async adminTransaction(
+        @Body() dto: CreateAdminStoreTransactionDto,
+        @I18n() i18n: I18nContext
+    ) {
+        const lang = getLang(i18n);
+        return this.storeTransactionService.createAdminTransaction(lang,dto);
     }
 }

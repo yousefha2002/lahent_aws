@@ -1,7 +1,7 @@
 {
   "createdSuccefully": "تم الانشاء بنجاح",
   "updatedSuccefully": "تم التعديل بنجاح",
-  "deletedSuccefully": "تم التعديل بنجاح",
+  "deletedSuccefully": "تم الحذف بنجاح",
   "file_required": "الملف مطلوب",
   "name_exists": "الاسم مستخدم مسبقًا",
   "not_found": "العنصر غير موجود",
