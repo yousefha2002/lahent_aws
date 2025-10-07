@@ -13,12 +13,10 @@ import {OpeningHourEnum,validateAndParseOpeningHours,} from 'src/common/validato
 import { LoginStoreDto } from './dto/requests/store-login.dto';
 import { GetNearbyStoresDto } from './dto/requests/get-nearby-store.dto';
 import { CustomerGuard } from 'src/common/guards/roles/customer.guard';
-import { Customer } from '../customer/entities/customer.entity';
 import { StoreStatus } from 'src/common/enums/store_status';
 import { Store } from './entities/store.entity';
 import { UpdateStoreDto } from './dto/requests/update-store.dto';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
-import { Owner } from '../owner/entities/owner.entity';
 import { storeForAction } from './dto/responses/store-for-action.dto';
 import { ApiBody, ApiConsumes, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { I18n, I18nContext } from 'nestjs-i18n';
