@@ -15,6 +15,7 @@ async function bootstrap() {
     AppModule,
     new ExpressAdapter(server),
   );
+  // app.setGlobalPrefix('api');
   const config = new DocumentBuilder()
     .setTitle('API Docs')
     .setDescription('NestJS API endpoints')
