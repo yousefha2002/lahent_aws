@@ -26,4 +26,8 @@ export class storeForAction extends StoreCustomerViewDto{
     @Expose()
     @Type(() => OpeningHourDTO)
     openingHours: OpeningHourDTO[];
+
+    @ApiProperty({ example: '2025-10-07T12:00:00Z', description: 'Store creation date' })
+    @Expose()
+    createdAt: Date;
 }

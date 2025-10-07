@@ -25,6 +25,7 @@ import { Sector } from 'src/modules/sector/entities/sector.entity';
 import { SectorLanguage } from 'src/modules/sector/entities/sectore_langauge.entity';
 import { Owner } from 'src/modules/owner/entities/owner.entity';
 import { StoreCommission } from 'src/modules/store_commission/entities/store_commission.entity';
+import { getDateRange } from 'src/common/utils/getDateRange';
 
 @Injectable()
 export class StoreService {
@@ -152,8 +153,9 @@ export class StoreService {
     city?: string,
     phone?: string,
     commercialRegister?: string,
-    createdAt?: string,) 
+    dateFilter?: string,) 
   {
+    const { start, end } = getDateRange(dateFilter);
     const offset = (page - 1) * limit;
     const whereStore: any = {
       ...(status && { status }),
@@ -161,7 +163,7 @@ export class StoreService {
       ...(city && { city }),
       ...(phone && { phone: { [Op.like]: `%${phone}%` } }),
       ...(commercialRegister && { commercialRegister: { [Op.like]: `%${commercialRegister}%` } }),
-      ...(createdAt && { createdAt }),
+      ...(dateFilter && { createdAt: { [Op.between]: [start, end] } }),
       isCompletedProfile: true,
     };
     const include: any = [

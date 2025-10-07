@@ -1,4 +1,4 @@
-export function getDateRange(filter: string, specificDate?: string) {
+export function getDateRange(filter?: string, specificDate?: string) {
     const now = new Date();
     let start: Date, end: Date;
 

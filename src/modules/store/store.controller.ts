@@ -244,7 +244,7 @@ export class StoreController {
     @Query('city') city?: string,
     @Query('phone') phone?: string,
     @Query('commercialRegister') commercialRegister?: string,
-    @Query('createdAt') createdAt?: string,
+    @Query('dateFilter') dateFilter?:string,
     @Query('type', new ParseIntPipe({ optional: true })) type?: number,
     @Query('subType', new ParseIntPipe({ optional: true })) subType?: number,
     @Query('status') status?: StoreStatus,
@@ -263,7 +263,7 @@ export class StoreController {
       city,
       phone,
       commercialRegister,
-      createdAt
+      dateFilter
     );
   }
 
