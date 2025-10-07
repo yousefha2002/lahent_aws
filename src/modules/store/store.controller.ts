@@ -336,6 +336,29 @@ export class StoreController {
     return this.storeService.changeStoreStatus(StoreStatus.APPROVED, +storeId,lang);
   }
 
+  @Put('/:storeId/suspend')
+  @ApiOperation({ summary: 'Suspend a store (Admin only)' })
+  @ApiSecurity('access-token')
+  @ApiParam({ name: 'storeId', description: 'ID of the store to suspend', example: 5 })
+  @UseGuards(AdminGuard)
+  @ApiResponse({
+    status: 200,
+    description: 'Store suspended successfully',
+    schema: {
+      example: {
+        message: 'Store status updated to SUSPENDED',
+        storeId: 5,
+      },
+    },
+  })
+  suspendStore(
+    @Param('storeId') storeId: string,
+    @I18n() i18n: I18nContext
+  ) {
+    const lang = getLang(i18n);
+    return this.storeService.changeStoreStatus(StoreStatus.SUSPENDED, +storeId, lang);
+  }
+
   @Put('/:storeId/rejected')
   @ApiOperation({ summary: 'Reject a store (Admin only)' })
   @ApiSecurity('access-token')
