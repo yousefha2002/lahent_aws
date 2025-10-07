@@ -2,20 +2,20 @@ import { OrderPlacingService } from './services/order-placing.service';
 import { OrderStatusService } from './services/order_status.service';
 import { Body, Controller, Get, Param, ParseIntPipe, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { OrderService } from './services/order.service';
-import { CustomerGuard } from 'src/common/guards/customer.guard';
+import { CustomerGuard } from 'src/common/guards/roles/customer.guard';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { Customer } from '../customer/entities/customer.entity';
 import { createOrderDto } from './dto/requests/create-order.dto';
 import { Store } from '../store/entities/store.entity';
 import { ExtendOrderTimeDto } from './dto/requests/extend-order-time.dto';
-import { ApprovedStoreGuard } from 'src/common/guards/approved-store.guard';
+import { ApprovedStoreGuard } from 'src/common/guards/auths/approved-store.guard';
 import { OrderPaymentService } from './services/order-payment.service';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { PaginatedOrderListDto } from './dto/responses/store-order-list.dto';
 import { filterStatusByStore } from 'src/common/types/filter-status';
 import { OrderDto } from './dto/responses/order-full-details.dto';
 import { Language } from 'src/common/enums/language';
-import { CompletedProfileGuard } from 'src/common/guards/completed-profile.guard';
+import { CompletedProfileGuard } from 'src/common/guards/auths/completed-profile.guard';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { CreateOrderResponseDto } from './dto/responses/create-order-response.dto';
 import { PaymentResponseDto } from './dto/responses/payment-order-respone.dto';
@@ -27,9 +27,10 @@ import { StoreOrderStatsResponseDto } from './dto/responses/order-stats-response
 import { OrderAnalyticsResponseDto } from './dto/responses/order-analytics.dto';
 import { StoreFinancialsFilterDto } from '../store/dto/requests/store-financials-filter.dto';
 import { PayOrderDTO } from './dto/requests/pay-order-dto';
-import { StoreGuard } from 'src/common/guards/store.guard';
+import { StoreGuard } from 'src/common/guards/roles/store.guard';
 import { ReorderResponseDto } from './dto/responses/reorder-response.dto';
-import { StoreOrAdminGuard } from 'src/common/guards/store-or-admin-guard';
+import { StoreOrAdminGuard } from 'src/common/guards/roles/store-or-admin-guard';
+import { CurrentUserType } from 'src/common/types/current-user.type';
 
 @Controller('order')
 export class OrderController {
@@ -47,10 +48,11 @@ export class OrderController {
   @ApiSecurity('access-token')
   @ApiBody({ type: createOrderDto })
   @ApiResponse({ status: 201, type: CreateOrderResponseDto })
-  placeOrder(@CurrentUser() user:Customer,@Body() dto:createOrderDto,@I18n() i18n: I18nContext)
+  placeOrder(@CurrentUser() user:CurrentUserType,@Body() dto:createOrderDto,@I18n() i18n: I18nContext)
   {
     const lang = getLang(i18n);
-    return this.orderPlacingService.placeOrder(user,dto,lang)
+    const {context} = user
+    return this.orderPlacingService.placeOrder(context,dto,lang)
   }
 
   @Serilaize(PaymentResponseDto)
@@ -60,14 +62,15 @@ export class OrderController {
   @ApiSecurity('access-token')
   @ApiParam({ name: 'orderId', description: 'ID of the order to pay', example: 1 })
   @ApiResponse({ status: 200, description: 'Payment result', type: PaymentResponseDto })
-  payOrder(@CurrentUser() user:Customer,@Param('orderId',ParseIntPipe) orderId:number,@I18n() i18n: I18nContext,@Body() dto: PayOrderDTO)
+  payOrder(@CurrentUser() user:CurrentUserType,@Param('orderId',ParseIntPipe) orderId:number,@I18n() i18n: I18nContext,@Body() dto: PayOrderDTO)
   {
     const lang = getLang(i18n);
-    return this.orderPaymentService.payOrder(orderId,user,dto,lang)
+    const {context} = user
+    return this.orderPaymentService.payOrder(orderId,context,dto,lang)
   }
 
   @Serilaize(OrderAnalyticsResponseDto)
-  @UseGuards(StoreOrAdminGuard, ApprovedStoreGuard)
+  @UseGuards(StoreOrAdminGuard)
   @Get('analytics/byStore')
   @ApiOperation({ summary: 'Get analytics (avg prep time + repeat rate) for a store' })
   @ApiQuery({ name: 'storeId', required: false, example: 1 })
@@ -78,11 +81,12 @@ export class OrderController {
     type: OrderAnalyticsResponseDto,
   })
   async getOrderAvgAnalyticsByStore(
-    @CurrentUser() store: Store,
+    @CurrentUser() user: CurrentUserType,
     @Query() query: StoreFinancialsFilterDto
   ) {
     const { filter, specificDate } = query;
-    return this.orderService.getOrderAvgAnalyticsByStore(store.id, filter, specificDate);
+    const {context} = user
+    return this.orderService.getOrderAvgAnalyticsByStore(context.id, filter, specificDate);
   }
 
   @Serilaize(OrderActionResponseDto)
@@ -92,10 +96,11 @@ export class OrderController {
   @ApiSecurity('access-token')
   @ApiParam({ name: 'orderId', description: 'ID of the order to reject', example: 123 })
   @ApiResponse({ status: 200, description: 'Order rejected successfully', type: OrderActionResponseDto })
-  rejectOrder(@CurrentUser() store:Store,@Param('orderId') orderId:number,@I18n() i18n: I18nContext)
+  rejectOrder(@CurrentUser() user:CurrentUserType,@Param('orderId') orderId:number,@I18n() i18n: I18nContext)
   {
     const lang = getLang(i18n);
-    return this.orderStatusService.rejectOrderByStore(orderId,store.id,lang)
+    const {context} = user
+    return this.orderStatusService.rejectOrderByStore(orderId,context.id,lang)
   }
 
   @Serilaize(OrderActionResponseDto)
@@ -106,10 +111,11 @@ export class OrderController {
   @ApiParam({ name: 'orderId', description: 'ID of the order to accept', example: 123 })
   @ApiResponse({ status: 200, description: 'Order accepted successfully', type: OrderActionResponseDto })
   @ApiBody({ type: AcceptOrderDto })
-  acceptOrder(@CurrentUser() store:Store,@Param('orderId') orderId:number,@Body() dto:AcceptOrderDto,@I18n() i18n: I18nContext)
+  acceptOrder(@CurrentUser() user:CurrentUserType,@Param('orderId') orderId:number,@Body() dto:AcceptOrderDto,@I18n() i18n: I18nContext)
   {
     const lang = getLang(i18n);
-    return this.orderStatusService.acceptOrderByStore(orderId,store.id,dto,lang)
+    const {context} = user
+    return this.orderStatusService.acceptOrderByStore(orderId,context.id,dto,lang)
   }
 
   @Serilaize(OrderActionResponseDto)
@@ -121,13 +127,14 @@ export class OrderController {
   @ApiBody({ type: ExtendOrderTimeDto })
   @ApiResponse({ status: 200, description: 'Decision timeout extended successfully', type: OrderActionResponseDto })
   extendDecisionTimeout(
-    @CurrentUser() user: Customer,
+    @CurrentUser() user: CurrentUserType,
     @Param('orderId', ParseIntPipe) orderId: number,
     @Body() body: ExtendOrderTimeDto,
     @I18n() i18n: I18nContext
   ) {
     const lang = getLang(i18n);
-    return this.orderStatusService.extendCustomerDecisionTimeout(orderId, user.id, body.extraMinutes,lang);
+    const {context} = user
+    return this.orderStatusService.extendCustomerDecisionTimeout(orderId, context.id, body.extraMinutes,lang);
   }
 
   @Serilaize(OrderActionResponseDto)
@@ -138,12 +145,13 @@ export class OrderController {
   @ApiParam({ name: 'orderId', description: 'ID of the order to cancel', example: 123 })
   @ApiResponse({ status: 200, description: 'Order canceled successfully', type: OrderActionResponseDto })
   cancelOrder(
-    @CurrentUser() user: Customer,
+    @CurrentUser() user: CurrentUserType,
     @Param('orderId', ParseIntPipe) orderId: number,
     @I18n() i18n: I18nContext
   ) {
     const lang = getLang(i18n);
-    return this.orderStatusService.refundOrder(orderId, user,lang);
+    const {context} = user
+    return this.orderStatusService.refundOrder(orderId, context,lang);
   }
 
   @Serilaize(OrderActionResponseDto)
@@ -154,12 +162,13 @@ export class OrderController {
   @ApiParam({ name: 'orderId', description: 'ID of the order to mark as arrived', example: 123 })
   @ApiResponse({ status: 200, description: 'Order marked as arrived successfully', type: OrderActionResponseDto })
   markArrived(
-    @CurrentUser() user: Customer,
+    @CurrentUser() user: CurrentUserType,
     @Param('orderId', ParseIntPipe) orderId: number,
     @I18n() i18n: I18nContext
   ) {
     const lang = getLang(i18n);
-    return this.orderStatusService.markOrderArrived(orderId, user.id,lang);
+    const {context} = user
+    return this.orderStatusService.markOrderArrived(orderId, context.id,lang);
   }
 
   @Serilaize(OrderActionResponseDto)
@@ -171,32 +180,34 @@ export class OrderController {
   @ApiQuery({ name: 'lang', enum: Language, required: false, example: 'en' })
   @ApiResponse({ status: 200, description: 'Order marked as received successfully', type: OrderActionResponseDto })
   markReceived(
-    @CurrentUser() user: Customer,
+    @CurrentUser() user: CurrentUserType,
     @Param('orderId', ParseIntPipe) orderId: number,
     @I18n() i18n: I18nContext
   ) {
     const lang = getLang(i18n);
-    return this.orderStatusService.markOrderReceived(orderId, user.id,lang);
+    const {context} = user
+    return this.orderStatusService.markOrderReceived(orderId, context.id,lang);
   }
 
   @Serilaize(OrderActionResponseDto)
-  @UseGuards(StoreGuard, ApprovedStoreGuard)
+  @UseGuards(StoreGuard)
   @ApiOperation({ summary: 'Mark order as ready by store' })
   @ApiSecurity('access-token')
   @ApiParam({ name: 'orderId', description: 'ID of the order to mark as ready', example: 123 })
   @ApiResponse({ status: 200, description: 'Order marked as ready successfully', type: OrderActionResponseDto })
   @Put('ready/:orderId')
   markReady(
-    @CurrentUser() store: Store,
+    @CurrentUser() user: CurrentUserType,
     @Param('orderId', ParseIntPipe) orderId: number,
     @I18n() i18n: I18nContext
   ) {
     const lang = getLang(i18n);
-    return this.orderStatusService.markOrderReady(orderId, store.id,lang);
+    const {context} = user
+    return this.orderStatusService.markOrderReady(orderId, context.id,lang);
   }
 
   @Serilaize(PaginatedOrderListDto)
-  @UseGuards(StoreOrAdminGuard, ApprovedStoreGuard)
+  @UseGuards(StoreOrAdminGuard)
   @Get('byStore')
   @ApiOperation({ summary: 'Get paginated orders for a store' })
   @ApiSecurity('access-token')
@@ -205,9 +216,10 @@ export class OrderController {
   @ApiQuery({ name: 'storeId', required: false, example: 1 })
   @ApiQuery({ name: 'status', required: false, description: 'Filter orders by status', enum: ['incoming', 'preparing', 'ready', 'arrived', 'completed', 'cancelled'] })
   @ApiResponse({ status: 200, description: 'Paginated list of orders for store', type: PaginatedOrderListDto })
-  getOrdersByStore(@CurrentUser() store:Store,@Query('page',) page=1,@Query('limit') limit=10,@Query('status') filterStatus:filterStatusByStore)
+  getOrdersByStore(@CurrentUser() user:any,@Query('page',) page=1,@Query('limit') limit=10,@Query('status') filterStatus:filterStatusByStore)
   {
-    return this.orderService.getOrdersByStore(store.id,+page,+limit,filterStatus)
+    const {context} = user
+    return this.orderService.getOrdersByStore(context.id,+page,+limit,filterStatus)
   }
 
   @Serilaize(PaginatedOrderListDto)
@@ -219,13 +231,14 @@ export class OrderController {
   @ApiQuery({ name: 'limit', required: false, description: 'Number of items per page', example: 10 })
   @ApiQuery({ name: 'storeId', required: false, description: 'Filter by store ID', example: 5 })
   @ApiResponse({ status: 200, description: 'Paginated list of orders for customer', type: PaginatedOrderListDto })
-  getOrdersByCustomer(@CurrentUser() customer:Customer,@Query('page',) page=1,@Query('limit') limit=10,@Query('storeId') storeId?: number)
+  getOrdersByCustomer(@CurrentUser() user:CurrentUserType,@Query('page',) page=1,@Query('limit') limit=10,@Query('storeId') storeId?: number)
   {
-    return this.orderService.getOrdersForCustomer(customer.id,+page,+limit,undefined,storeId)
+    const {context} = user
+    return this.orderService.getOrdersForCustomer(context.id,+page,+limit,undefined,storeId)
   }
 
   @Serilaize(StoreOrderStatsResponseDto)
-  @UseGuards(StoreGuard, ApprovedStoreGuard)
+  @UseGuards(StoreOrAdminGuard)
   @Get('stats/byStore')
   @ApiOperation({ summary: 'Get order statistics for a store' })
   @ApiSecurity('access-token')
@@ -234,22 +247,24 @@ export class OrderController {
     description: 'Order statistics grouped by status',
     type:StoreOrderStatsResponseDto
   })
-  async getStoreOrderStats(@CurrentUser() store: Store, @Query() query: StoreFinancialsFilterDto) {
+  async getStoreOrderStats(@CurrentUser() user: CurrentUserType, @Query() query: StoreFinancialsFilterDto) {
     const { filter, specificDate } = query;
-    return this.orderService.getStoreOrderStats(store.id,filter,specificDate);
+    const {context} = user
+    return this.orderService.getStoreOrderStats(context.id,filter,specificDate);
   }
 
   @Serilaize(OrderDto)
-  @UseGuards(StoreOrAdminGuard, ApprovedStoreGuard)
+  @UseGuards(StoreOrAdminGuard)
   @Get(':orderId/byStore')
   @ApiOperation({ summary: 'Get order details by store' })
   @ApiSecurity('access-token')
   @ApiParam({ name: 'orderId', description: 'ID of the order', example: 123 })
   @ApiResponse({ status: 200, description: 'Order details', type: OrderDto })
   @ApiQuery({ name: 'storeId', required: false, example: 1 })
-  getOrderByStore(@CurrentUser() store:Store,@Param('orderId',) orderId:number)
+  getOrderByStore(@CurrentUser() user:CurrentUserType,@Param('orderId',) orderId:number)
   {
-    return this.orderService.getOrderByStore(store.id,orderId)
+    const {context} = user
+    return this.orderService.getOrderByStore(context.id,orderId)
   }
 
   @Serilaize(OrderDto)
@@ -259,9 +274,10 @@ export class OrderController {
   @ApiSecurity('access-token')
   @ApiParam({ name: 'orderId', description: 'ID of the order', example: 123 })
   @ApiResponse({ status: 200, description: 'Order details', type: OrderDto })
-  getOrderByCustomer(@CurrentUser() customer:Customer,@Param('orderId',) orderId:number)
+  getOrderByCustomer(@CurrentUser() user:CurrentUserType,@Param('orderId',) orderId:number)
   {
-    return this.orderService.getOrderByCustomer(customer.id,orderId)
+    const {context} = user
+    return this.orderService.getOrderByCustomer(context.id,orderId)
   }
 
   @Serilaize(OrderActionResponseDto)
@@ -272,12 +288,13 @@ export class OrderController {
   @ApiParam({ name: 'orderId', description: 'ID of the order', example: 123 })
   @ApiResponse({ status: 200, description: 'Store notified that customer is on the way', type: OrderActionResponseDto })
   markOnTheWay(
-    @CurrentUser() user: Customer,
+    @CurrentUser() user: CurrentUserType,
     @Param('orderId', ParseIntPipe) orderId: number,
     @I18n() i18n: I18nContext
   ) {
     const lang = getLang(i18n);
-    return this.orderStatusService.markCustomerOnTheWay(orderId, user.id, lang);
+    const {context} = user
+    return this.orderStatusService.markCustomerOnTheWay(orderId, context.id, lang);
   }
 
   
@@ -293,11 +310,12 @@ export class OrderController {
     type: ReorderResponseDto,
   })
   async reorder(
-    @CurrentUser() customer: Customer,
+    @CurrentUser() user: CurrentUserType,
     @Param('orderId', ParseIntPipe) orderId: number,
     @I18n() i18n: I18nContext,
   ) {
     const lang = getLang(i18n);
-    return this.orderPlacingService.reorder(orderId, customer, lang);
+    const {context} = user
+    return this.orderPlacingService.reorder(orderId, context, lang);
   }
 }

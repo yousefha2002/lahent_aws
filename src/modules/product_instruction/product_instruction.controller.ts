@@ -1,12 +1,12 @@
 import {Body,Controller,Param,Post,Put,UseGuards} from '@nestjs/common';
 import { ProductInstructionService } from './product_instruction.service';
-import { ApprovedStoreGuard } from 'src/common/guards/approved-store.guard';
+import { ApprovedStoreGuard } from 'src/common/guards/auths/approved-store.guard';
 import { UpdateProductInstructionDto } from './dto/update-product-instruction.sto';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
-import { Store } from '../store/entities/store.entity';
 import { CreateProductInstructionDto } from './dto/create-product-instruction.dto';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
-import { StoreOrAdminGuard } from 'src/common/guards/store-or-admin-guard';
+import { StoreOrAdminGuard } from 'src/common/guards/roles/store-or-admin-guard';
+import { CurrentUserType } from 'src/common/types/current-user.type';
 
 @Controller('product-instruction')
 export class ProductInstructionController {
@@ -35,9 +35,10 @@ export class ProductInstructionController {
   update(
     @Body() body: UpdateProductInstructionDto,
     @Param('instructionId') instructionId: string,
-    @CurrentUser() store: Store,
+    @CurrentUser() user: CurrentUserType,
   ) {
-    return this.productInstructionService.updateProductInstruction(+instructionId,body,store.id);
+    const {context} = user
+    return this.productInstructionService.updateProductInstruction(+instructionId,body,context.id);
   }
 
   @UseGuards(StoreOrAdminGuard, ApprovedStoreGuard)
@@ -60,12 +61,10 @@ export class ProductInstructionController {
   })
   active(
     @Param('instructionId') instructionId: string,
-    @CurrentUser() store: Store,
+    @CurrentUser() user: CurrentUserType,
   ) {
-    return this.productInstructionService.updateIsActive(
-      +instructionId,
-      store.id,
-    );
+    const {context} = user
+    return this.productInstructionService.updateIsActive(+instructionId,context.id);
   }
 
   @UseGuards(StoreOrAdminGuard, ApprovedStoreGuard)
@@ -81,7 +80,8 @@ export class ProductInstructionController {
       example: { message: 'Product instructions created successfully' },
     },
   })
-  create(@Body() body: CreateProductInstructionDto,@CurrentUser() store:Store) {
-    return this.productInstructionService.createProductInstructions(body,store.id);
+  create(@Body() body: CreateProductInstructionDto,@CurrentUser() user:CurrentUserType) {
+    const {context} = user
+    return this.productInstructionService.createProductInstructions(body,context.id);
   }
 }

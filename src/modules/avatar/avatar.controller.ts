@@ -3,12 +3,12 @@ import { AvatarService } from './avatar.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { MulterExceptionFilter } from 'src/multer/multer.exception.filter';
 import { multerOptions } from 'src/multer/multer.options';
-import { AdminGuard } from 'src/common/guards/admin.guard';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { AvatarDto } from './dto/avatar.dto';
 import { ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
+import { AdminGuard } from 'src/common/guards/roles/admin.guard';
 
 @Controller('avatar')
 export class AvatarController {

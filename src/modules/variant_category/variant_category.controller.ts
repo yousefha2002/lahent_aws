@@ -1,14 +1,13 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { VariantCategoryService } from './variant_category.service';
-import { AdminGuard } from 'src/common/guards/admin.guard';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { VariantCategoryDto } from './dto/variant_category.dto';
 import { CreateVariantCategoryDto } from './dto/create_variant_category.dto';
-import { Language } from 'src/common/enums/language';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { getLang } from 'src/common/utils/get-lang.util';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { UpdateVariantCategoryDto } from './dto/update_variant_category.dto';
+import { AdminGuard } from 'src/common/guards/roles/admin.guard';
 
 @Controller('variant-category')
 export class VariantCategoryController {

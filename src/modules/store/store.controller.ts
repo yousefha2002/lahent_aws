@@ -6,16 +6,15 @@ import {Controller,Post,Body,UseGuards,UseInterceptors,UploadedFiles,Get,Query,P
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { CreateStoreDto } from './dto/requests/create-store.dto';
 import { StoreService } from './services/store.service';
-import { OwnerGuard } from 'src/common/guards/owner.guard';
+import { OwnerGuard } from 'src/common/guards/roles/owner.guard';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { multerOptions } from 'src/multer/multer.options';
 import {OpeningHourEnum,validateAndParseOpeningHours,} from 'src/common/validators/validateAndParseOpeningHours';
 import { LoginStoreDto } from './dto/requests/store-login.dto';
 import { GetNearbyStoresDto } from './dto/requests/get-nearby-store.dto';
-import { CustomerGuard } from 'src/common/guards/customer.guard';
+import { CustomerGuard } from 'src/common/guards/roles/customer.guard';
 import { Customer } from '../customer/entities/customer.entity';
 import { StoreStatus } from 'src/common/enums/store_status';
-import { AdminGuard } from 'src/common/guards/admin.guard';
 import { Store } from './entities/store.entity';
 import { UpdateStoreDto } from './dto/requests/update-store.dto';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
@@ -32,13 +31,15 @@ import { IncompleteStoreResponseDto, PaginatedAdminIncompleteStoresDto } from '.
 import { UpdatePasswordDto } from './dto/requests/update-password.dto';
 import { SelectOwnerForStoreDto } from './dto/requests/selectStoreForOwner.dto';
 import { RefreshTokenDto } from '../user_token/dtos/refreshToken.dto';
-import { StoreGuard } from 'src/common/guards/store.guard';
-import { CompletedProfileGuard } from 'src/common/guards/completed-profile.guard';
+import { StoreGuard } from 'src/common/guards/roles/store.guard';
+import { CompletedProfileGuard } from 'src/common/guards/auths/completed-profile.guard';
 import { RoleStatus } from 'src/common/enums/role_status';
 import { FullDetailsCustomerStoreViewDto, PaginatedCustomerStoreViewDto, StoreCustomerViewDto } from './dto/responses/customer-store.dto';
 import { StoreWithTokenDto } from './dto/responses/store-with-token.dto';
 import { StoreAdminViewDto } from './dto/responses/admin-store.dto';
-import { OwnerOrStoreGuard } from 'src/common/guards/owner-or-store.guard';
+import { StoreOrAdminGuard } from 'src/common/guards/roles/store-or-admin-guard';
+import { AdminGuard } from 'src/common/guards/roles/admin.guard';
+import { CurrentUserType } from 'src/common/types/current-user.type';
 
 @Controller('store')
 export class StoreController {
@@ -56,10 +57,11 @@ export class StoreController {
   @ApiBody({ type: InitialCreateStoreDto })
   @ApiResponse({status: 200,schema: {example: {message: 'Store created successfully'}}})
   @UseGuards(OwnerGuard,CompletedProfileGuard)
-  async initialCreate(@Body() dto: InitialCreateStoreDto,@CurrentUser() owner: Owner,@I18n() i18n: I18nContext,) 
+  async initialCreate(@Body() dto: InitialCreateStoreDto,@CurrentUser() user: CurrentUserType,@I18n() i18n: I18nContext,) 
   {
     const lang = getLang(i18n);
-    return this.storeAuthService.initialCreation(owner.id, dto, lang);
+    const {context} = user
+    return this.storeAuthService.initialCreation(context.id, dto, lang);
   }
 
   @Post('create')
@@ -80,7 +82,7 @@ export class StoreController {
       multerOptions,
     ),
   )
-  async create(@Body() body: CreateStoreDto,@CurrentUser() user: any,@I18n() i18n: I18nContext,@UploadedFiles()    
+  async create(@Body() body: CreateStoreDto,@CurrentUser() user: CurrentUserType,@I18n() i18n: I18nContext,@UploadedFiles()    
     files: {
       logo?: Express.Multer.File[];
       cover?: Express.Multer.File[];
@@ -94,8 +96,9 @@ export class StoreController {
     const taxNumberFile = files.taxNumberFile?.[0];
     const openingHours = validateAndParseOpeningHours(body.openingHours);
     const lang = getLang(i18n);
+    const {context} = user
 
-    return this.storeAuthService.create(body,user.id,openingHours as OpeningHourEnum[],lang,logo,cover,commercialRegisterFile,taxNumberFile);
+    return this.storeAuthService.create(body,context.id,openingHours as OpeningHourEnum[],lang,logo,cover,commercialRegisterFile,taxNumberFile);
   }
 
   @Serilaize(StoreWithTokenDto)
@@ -115,9 +118,10 @@ export class StoreController {
   @ApiOperation({ summary: 'Get incomplete store info for owner' })
   @ApiSecurity('access-token')
   @ApiResponse({status: 200,description: 'Incomplete store info if exists',type: IncompleteStoreResponseDto})
-  async getIncompleteStore(@CurrentUser() owner: Owner, @I18n() i18n: I18nContext) {
+  async getIncompleteStore(@CurrentUser() user: CurrentUserType, @I18n() i18n: I18nContext) {
     const lang = getLang(i18n);
-    return this.storeService.getIncompleteStoreInfo(owner.id, lang);
+    const {context} = user
+    return this.storeService.getIncompleteStoreInfo(context.id, lang);
   }
 
   @Serilaize(CurrentStoreDTO)
@@ -126,22 +130,24 @@ export class StoreController {
   @ApiOperation({ summary: 'Get Current Store With Basic details (owner or store only)' })
   @ApiSecurity('access-token')
   @ApiResponse({status: 200,type: CurrentStoreDTO})
-  getCurrentStore(@CurrentUser() store:Store)
+  getCurrentStore(@CurrentUser() user:CurrentUserType)
   {
-    return this.storeService.getCurrentStore(store.id)
+    const {context} = user
+    return this.storeService.getCurrentStore(context.id)
   }
 
-  @UseGuards(OwnerOrStoreGuard)
+  @UseGuards(StoreOrAdminGuard)
   @Serilaize(storeForAction)
   @Get('action/current')
   @ApiOperation({ summary: 'Get full details of a store by ID for actions (owner or store only)' })
   @ApiResponse({status: 200,description: 'full details of store',type: storeForAction})
   @ApiQuery({ name: 'storeId', required: false, example: 1 })
   @ApiSecurity('access-token')
-  async getStoreDetailsForAction(@CurrentUser() store:Store,@I18n() i18n: I18nContext)
+  async getStoreDetailsForAction(@CurrentUser() user:CurrentUserType,@I18n() i18n: I18nContext)
   {
     const lang = getLang(i18n);
-    return this.storeService.getStoreDetailsForAction(store.id,lang)
+    const {context} = user
+    return this.storeService.getStoreDetailsForAction(context.id,lang)
   }
 
   @Get('byOwner')
@@ -150,9 +156,10 @@ export class StoreController {
   @ApiSecurity('access-token')
   @Serilaize(OwnerStoresResponseDto)
   @UseGuards(OwnerGuard)
-  findStoresByOwner(@CurrentUser() owner: Owner,@I18n() i18n: I18nContext) {
+  findStoresByOwner(@CurrentUser() user: CurrentUserType,@I18n() i18n: I18nContext) {
     const lang = getLang(i18n);
-    return this.storeService.findStoresByOwner(owner.id,lang);
+    const {context} = user
+    return this.storeService.findStoresByOwner(context.id,lang);
   }
 
   @Post('nearby')
@@ -250,6 +257,7 @@ export class StoreController {
     );
   }
 
+  @UseGuards(AdminGuard)
   @Get('admin/all/incomplete')
   @ApiOperation({ summary: 'Get all incomplete stores (for admin)' })
   @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number, default is 1' })
@@ -275,10 +283,11 @@ export class StoreController {
   async getFullDetailsStore(
     @Param('id') storeId: number,
     @I18n() i18n: I18nContext,
-    @CurrentUser() customer:Customer
+    @CurrentUser() user:CurrentUserType
   ) {
     const lang = getLang(i18n);
-    return this.storeService.getFullDetailsStore(storeId, lang,customer.id);
+    const {context} = user
+    return this.storeService.getFullDetailsStore(storeId, lang,context.id);
   }
 
   @UseGuards(AdminGuard)
@@ -359,14 +368,15 @@ export class StoreController {
     schema: { example: { message: 'Store updated successfully' } },
   })
   @ApiQuery({ name: 'storeId', required: false, example: 1 })
-  @UseGuards(OwnerOrStoreGuard)
-  updateStore(@CurrentUser() store: Store, @Body() dto: UpdateStoreDto,@I18n() i18n: I18nContext) {
+  @UseGuards(StoreOrAdminGuard)
+  updateStore(@CurrentUser() user: CurrentUserType, @Body() dto: UpdateStoreDto,@I18n() i18n: I18nContext) {
     const lang = getLang(i18n);
-    return this.storeService.updateStore(store, dto,lang);
+    const {context} = user
+    return this.storeService.updateStore(context.id, dto,lang);
   }
 
   @Put('update-images')
-  @UseGuards(OwnerOrStoreGuard)
+  @UseGuards(StoreOrAdminGuard)
   @ApiOperation({ summary: 'Update store images (logo / cover)' })
   @ApiSecurity('access-token')
   @ApiQuery({ name: 'storeId', required: false, example: 1 })
@@ -407,7 +417,7 @@ export class StoreController {
     ),
   )
   updateImages(
-    @CurrentUser() store: Store,
+    @CurrentUser() user: CurrentUserType,
     @I18n() i18n: I18nContext,
     @UploadedFiles()
     files: {
@@ -418,7 +428,8 @@ export class StoreController {
     const logo = files.logo?.[0];
     const cover = files.cover?.[0];
     const lang = getLang(i18n);
-    return this.storeService.updateStoreImages(store, logo, cover,lang);
+    const {context} = user
+    return this.storeService.updateStoreImages(context.id, logo, cover,lang);
   }
 
   @Get('favourite/byCustomer')
@@ -431,14 +442,15 @@ export class StoreController {
   @Serilaize(PaginatedCustomerStoreViewDto)
   @UseGuards(CustomerGuard)
   getFavouriteStoresByCustomer(
-    @CurrentUser() user: Customer,
+    @CurrentUser() user: CurrentUserType,
     @I18n() i18n: I18nContext,
     @Query('type', new ParseIntPipe({ optional: true })) type?: number,
     @Query('page', new ParseIntPipe({ optional: true })) page = 1,
     @Query('limit', new ParseIntPipe({ optional: true })) limit = 10) 
     {
     const lang = getLang(i18n);
-    return this.storeService.getFavouriteStoresByCustomer(user.id,lang,page,limit,type);
+    const {context} = user
+    return this.storeService.getFavouriteStoresByCustomer(context.id,lang,page,limit,type);
   }
 
   @Post('refresh-token')
@@ -464,11 +476,12 @@ export class StoreController {
   @ApiResponse({ status: 200, description: 'Store selected successfully', type: StoreWithTokenDto })
   @ApiBody({ type: SelectOwnerForStoreDto })
   @UseGuards(OwnerGuard)
-  selectStoreForOwner(@CurrentUser() owner:Owner,@Param('storeId') storeId:number,@Body() dto:SelectOwnerForStoreDto,@I18n() i18n: I18nContext,@Req() req: Request,@Ip() ip:string)
+  selectStoreForOwner(@CurrentUser() user:CurrentUserType,@Param('storeId') storeId:number,@Body() dto:SelectOwnerForStoreDto,@I18n() i18n: I18nContext,@Req() req: Request,@Ip() ip:string)
   {
     const lang = getLang(i18n)
     const device = req.headers['user-agent'] || 'unknown';
-    return this.storeAuthService.selectStoreForOnwer(storeId,owner.id,dto,lang,device,ip)
+    const {context} = user
+    return this.storeAuthService.selectStoreForOnwer(storeId,context.id,dto,lang,device,ip)
   }
 
   @Serilaize(StoreOptionsDto)
@@ -483,7 +496,7 @@ export class StoreController {
   }
 
   @Put('update-password')
-  @UseGuards(OwnerOrStoreGuard)
+  @UseGuards(StoreOrAdminGuard)
   @ApiOperation({ summary: 'Update store password (Store or Owner only)' })
   @ApiSecurity('access-token')
   @ApiBody({ type: UpdatePasswordDto })
@@ -494,10 +507,11 @@ export class StoreController {
     schema: { example: { message: 'Password updated successfully' } },
   })
   async updatePassword(
-    @CurrentUser() store: Store,
+    @CurrentUser() user: CurrentUserType,
     @Body() dto: UpdatePasswordDto,
   ) {
-    return this.storeAuthService.updatePassword(store, dto);
+    const {context} = user
+    return this.storeAuthService.updatePassword(context.id, dto);
   }
 
   @Post('logout')

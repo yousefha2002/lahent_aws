@@ -1,31 +1,17 @@
-import { 
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Post,
-  Put,
-  UseGuards 
-} from '@nestjs/common';
+import { Body,Controller,Delete,Get,Param,Post,Put,UseGuards} from '@nestjs/common';
 import { AddressService } from './address.service';
-import { CustomerGuard } from 'src/common/guards/customer.guard';
+import { CustomerGuard } from 'src/common/guards/roles/customer.guard';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { Customer } from '../customer/entities/customer.entity';
 import { CreateAddressDto } from './dto/create-address.dto';
 import { UpdateAddressDto } from './dto/update-address.dto';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { AddressDto } from './dto/address.dto';
-import { CompletedProfileGuard } from 'src/common/guards/completed-profile.guard';
-import { 
-  ApiBody, 
-  ApiOperation, 
-  ApiParam, 
-  ApiResponse, 
-  ApiSecurity 
-} from '@nestjs/swagger';
+import { CompletedProfileGuard } from 'src/common/guards/auths/completed-profile.guard';
+import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiSecurity} from '@nestjs/swagger';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
+import { CurrentUserType } from 'src/common/types/current-user.type';
 
 @Controller('address')
 export class AddressController {
@@ -55,42 +41,32 @@ export class AddressController {
   @UseGuards(CustomerGuard, CompletedProfileGuard)
   @ApiOperation({ summary: 'Update an existing address' })
   @ApiSecurity('access-token')
-  @ApiParam({
-    name: 'id',
-    description: 'ID of the address to update',
-    example: 1,
-  })
+  @ApiParam({name: 'id',description: 'ID of the address to update',example: 1})
   @ApiBody({ type: UpdateAddressDto })
-  @ApiResponse({
-    status: 200,
-    description: 'Address updated successfully',
-    type: AddressDto,
-  })
+  @ApiResponse({status: 200,type: AddressDto})
   @Put(':id')
   update(
-    @CurrentUser() user: Customer,
+    @CurrentUser() user: CurrentUserType,
     @Param('id') addressId: number,
     @Body() dto: UpdateAddressDto,
     @I18n() i18n: I18nContext,
   ) {
     const lang = getLang(i18n);
-    return this.addressService.update(user.id, addressId, dto, lang);
+    const {context} = user
+    return this.addressService.update(context.id, addressId, dto, lang);
   }
 
   @Serilaize(AddressDto)
   @UseGuards(CustomerGuard)
   @ApiOperation({ summary: 'Get all addresses for the current customer' })
   @ApiSecurity('access-token')
-  @ApiResponse({
-    status: 200,
-    description: 'List of addresses',
-    type: [AddressDto],
-  })
+  @ApiResponse({status: 200,type: [AddressDto]})
   @Get()
   getAll(
-    @CurrentUser() user: Customer,
+    @CurrentUser() user: CurrentUserType,
   ) {
-    return this.addressService.getAll(user.id);
+    const {context} = user
+    return this.addressService.getAll(context.id);
   }
 
   @UseGuards(CustomerGuard)
@@ -108,11 +84,12 @@ export class AddressController {
   })
   @Delete(':id')
   remove(
-    @CurrentUser() user: Customer,
+    @CurrentUser() user: CurrentUserType,
     @Param('id') addressId: number,
     @I18n() i18n: I18nContext
   ) {
     const lang = getLang(i18n);
-    return this.addressService.remove(user.id, addressId, lang);
+    const {context} = user
+    return this.addressService.remove(context.id, addressId, lang);
   }
 }

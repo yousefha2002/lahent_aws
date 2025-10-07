@@ -1,6 +1,6 @@
 import { Controller, Get, Param, UseGuards } from '@nestjs/common';
 import { CartItemService } from './cart_item.service';
-import { CustomerGuard } from 'src/common/guards/customer.guard';
+import { CustomerGuard } from 'src/common/guards/roles/customer.guard';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { Customer } from '../customer/entities/customer.entity';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';

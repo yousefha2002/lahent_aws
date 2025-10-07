@@ -1,12 +1,7 @@
-import { AdminService } from './../../modules/admin/admin.service';
-import {
-  Injectable,
-  CanActivate,
-  ExecutionContext,
-  UnauthorizedException,
-} from '@nestjs/common';
+import {Injectable,CanActivate,ExecutionContext,UnauthorizedException} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { RoleStatus } from '../enums/role_status';
+import { RoleStatus } from 'src/common/enums/role_status';
+import { AdminService } from 'src/modules/admin/admin.service';
 
 @Injectable()
 export class AdminGuard implements CanActivate {
@@ -18,8 +13,6 @@ export class AdminGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const token = request.headers.authorization;
-    console.log(token)
-
     if (!token) {
       throw new UnauthorizedException('Admin must be logged in');
     }
@@ -34,7 +27,10 @@ export class AdminGuard implements CanActivate {
       }
 
       const admin = await this.adminService.findOneById(decoded.id);
-      request.currentUser = admin;
+      request.currentUser = {
+        type: RoleStatus.ADMIN,
+        userId: admin.id,
+      };
       return !!decoded.id;
     } catch {
       throw new UnauthorizedException('Invalid or expired token');

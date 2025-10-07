@@ -1,15 +1,15 @@
 import {Body,Controller,Param,Post,Put,UploadedFile,UploadedFiles,UseFilters,UseGuards,UseInterceptors} from '@nestjs/common';
 import { ProuductVariantService } from './prouduct_variant.service';
-import { ApprovedStoreGuard } from 'src/common/guards/approved-store.guard';
+import { ApprovedStoreGuard } from 'src/common/guards/auths/approved-store.guard';
 import { AnyFilesInterceptor, FileInterceptor } from '@nestjs/platform-express';
 import { multerOptions } from 'src/multer/multer.options';
 import { MulterExceptionFilter } from 'src/multer/multer.exception.filter';
 import { CreateProductVariantsDto } from './dto/create-variant.dto';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
-import { Store } from '../store/entities/store.entity';
 import { UpdateProductVariantDto } from './dto/update-variant.dto';
 import { ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
-import { StoreOrAdminGuard } from 'src/common/guards/store-or-admin-guard';
+import { StoreOrAdminGuard } from 'src/common/guards/roles/store-or-admin-guard';
+import { CurrentUserType } from 'src/common/types/current-user.type';
 
 @Controller('product-variant')
 export class ProuductVariantController {
@@ -56,12 +56,13 @@ export class ProuductVariantController {
   update(
     @Body() body: UpdateProductVariantDto,
     @Param('variantId') variantId: string,
-    @CurrentUser() store: Store,
+    @CurrentUser() user: CurrentUserType,
     @UploadedFile() file?: Express.Multer.File,
   ) {
+    const {context} = user
     return this.prouductVariantService.updateVarianteProduct(
       +variantId,
-      store.id,
+      context.id,
       body,
       file,
     ); 
@@ -78,8 +79,9 @@ export class ProuductVariantController {
     schema: { example: { message: 'Variant active status updated' } },
   })
   @ApiQuery({ name: 'storeId', required: false, example: 1 })
-  active(@Param('variantId') variantId: string, @CurrentUser() store: Store) {
-    return this.prouductVariantService.updateIsActive(+variantId, store.id);
+  active(@Param('variantId') variantId: string, @CurrentUser() user: CurrentUserType) {
+    const {context} = user
+    return this.prouductVariantService.updateIsActive(+variantId, context.id);
   }
 
   @UseGuards(StoreOrAdminGuard, ApprovedStoreGuard)
@@ -125,12 +127,13 @@ export class ProuductVariantController {
   create(
     @Body() body:CreateProductVariantsDto,
     @UploadedFiles() files: Express.Multer.File[],
-    @CurrentUser() store:Store
+    @CurrentUser() user:CurrentUserType
   ) {
     const filesRecord: Record<string, Express.Multer.File> = {};
     files.forEach((file, index) => {
       filesRecord[`image_${index}`] = file;
     });
-    return this.prouductVariantService.createMultipleVariants(body,filesRecord,store.id);
+    const {context} = user
+    return this.prouductVariantService.createMultipleVariants(body,filesRecord,context.id);
     }
   }

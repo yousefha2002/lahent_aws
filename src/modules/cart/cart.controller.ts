@@ -11,7 +11,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { CartService } from './cart.service';
-import { CustomerGuard } from 'src/common/guards/customer.guard';
+import { CustomerGuard } from 'src/common/guards/roles/customer.guard';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { Customer } from '../customer/entities/customer.entity';
 import { CreateCartProductDto } from './dto/create-product-cart.dto';
@@ -19,11 +19,12 @@ import { UpdateCartProductQuantityDto } from './dto/update-productCart-quantity'
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { CartWithTotalsDto } from './dto/cart-item-with-offer.dto';
 import { CartWithStoreDto } from './dto/cart-with-store.dto';
-import { CompletedProfileGuard } from 'src/common/guards/completed-profile.guard';
+import { CompletedProfileGuard } from 'src/common/guards/auths/completed-profile.guard';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
 import { UpdateCartProductDto } from './dto/update-product-cart.dto';
+import { CurrentUserType } from 'src/common/types/current-user.type';
 
 @Controller('cart')
 export class CartController {
@@ -60,13 +61,14 @@ export class CartController {
     schema: { example: { message: 'Cart product updated successfully' } },
   })
   updateProductForCart(
-    @CurrentUser() customer: Customer,
+    @CurrentUser() user: CurrentUserType,
     @Body() body: UpdateCartProductDto,
     @Param('cartItemId') cartItemId: string,
     @I18n() i18n: I18nContext
   ) {
     const lang = getLang(i18n);
-    return this.cartService.updateProductCartItem(+cartItemId, body, customer.id, lang);
+    const {context} = user
+    return this.cartService.updateProductCartItem(+cartItemId, body, context.id, lang);
   }
 
   @Delete('remove-product/:cartItemId')
@@ -80,12 +82,13 @@ export class CartController {
     schema: { example: { message: 'Product removed from cart successfully' } },
   })
   removeProductForCart(
-    @CurrentUser() customer: Customer,
+    @CurrentUser() user: CurrentUserType,
     @Param('cartItemId') cartItemId: string,
     @I18n() i18n: I18nContext
   ) {
     const lang = getLang(i18n);
-    return this.cartService.deleteProductFromCart(+cartItemId, customer.id, lang);
+    const {context} = user
+    return this.cartService.deleteProductFromCart(+cartItemId, context.id, lang);
   }
 
   @Put('update-product-qty/:cartItemId')
@@ -100,13 +103,14 @@ export class CartController {
     schema: { example: { message: 'Product quantity updated successfully' } },
   })
   updateProductCartQty(
-    @CurrentUser() customer: Customer,
+    @CurrentUser() user: CurrentUserType,
     @Param('cartItemId') cartItemId: string,
     @Body() dto: UpdateCartProductQuantityDto,
     @I18n() i18n: I18nContext
   ) {
     const lang = getLang(i18n);
-    return this.cartService.updateProductQuantity(+cartItemId, customer.id, dto, lang);
+    const {context} = user
+    return this.cartService.updateProductQuantity(+cartItemId, context.id, dto, lang);
   }
 
   @Serilaize(CartWithTotalsDto)
@@ -122,13 +126,14 @@ export class CartController {
     type: [CartWithTotalsDto],
   })
   getCartItemsWithOffers(
-    @CurrentUser() user: Customer,
+    @CurrentUser() user: CurrentUserType,
     @Param('storeId', ParseIntPipe) storeId: number,
     @I18n() i18n: I18nContext,
     @Query('couponCode') couponCode: string
   ) {
     const lang = getLang(i18n);
-    return this.cartService.getCartItemsWithOffers(storeId, user.id, lang,couponCode);
+    const {context} = user
+    return this.cartService.getCartItemsWithOffers(storeId, context.id, lang,couponCode);
   }
 
   @Serilaize(CartWithStoreDto)
@@ -142,8 +147,9 @@ export class CartController {
     type: [CartWithStoreDto],
   })
   findAllCartsByCustomer(
-    @CurrentUser() user: Customer
+    @CurrentUser() user: CurrentUserType
   ) {
-    return this.cartService.findAllCartsByCustomer(user.id);
+    const {context} = user
+    return this.cartService.findAllCartsByCustomer(context.id);
   }
 }

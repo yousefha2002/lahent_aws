@@ -3,7 +3,7 @@ import { CustomerService } from './customer.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { multerOptions } from 'src/multer/multer.options';
 import { MulterExceptionFilter } from 'src/multer/multer.exception.filter';
-import { CustomerGuard } from 'src/common/guards/customer.guard';
+import { CustomerGuard } from 'src/common/guards/roles/customer.guard';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { Customer } from './entities/customer.entity';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
@@ -13,6 +13,7 @@ import { getLang } from 'src/common/utils/get-lang.util';
 import { ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { RefreshTokenDto } from '../user_token/dtos/refreshToken.dto';
 import { CustomerDetailsDto } from './dto/customer.dto';
+import { CurrentUserType } from 'src/common/types/current-user.type';
 
 @Controller('customer')
 export class CustomerController {
@@ -24,8 +25,9 @@ export class CustomerController {
   @Serilaize(CustomerDetailsDto)
   @UseGuards(CustomerGuard)
   @Get()
-  getMine(@CurrentUser() user: Customer) {
-    return user;
+  getMine(@CurrentUser() user: CurrentUserType) {
+    const {context} = user
+    return context;
   }
 
   @ApiSecurity('access-token')
@@ -50,13 +52,14 @@ export class CustomerController {
   @UseInterceptors(FileInterceptor('image', multerOptions))
   @UseFilters(MulterExceptionFilter)
   updateCustomer(
-    @CurrentUser() user: Customer,
+    @CurrentUser() user: CurrentUserType,
     @Body() body: UpdateCustomerDto,
     @I18n() i18n: I18nContext,
     @UploadedFile() file?: Express.Multer.File,
   ) {
     const lang = getLang(i18n);
-    return this.customerService.updateProfile(user.id, body, lang, file);
+    const {context} = user
+    return this.customerService.updateProfile(context.id, body, lang, file);
   }
 
   @ApiOperation({ summary: 'Refresh access token using refresh token' })

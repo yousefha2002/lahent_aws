@@ -1,6 +1,6 @@
 import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { RoleStatus } from '../enums/role_status';
+import { RoleStatus } from 'src/common/enums/role_status';
 
 @Injectable()
 export class AnyUserGuard implements CanActivate {

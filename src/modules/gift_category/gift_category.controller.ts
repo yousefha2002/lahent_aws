@@ -1,12 +1,12 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Post, Put, UseGuards } from '@nestjs/common';
 import { GiftCategoryService } from './gift_category.service';
-import { AdminGuard } from 'src/common/guards/admin.guard';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { GiftCategoryDto, GiftCategoryDtoWithMessage } from './dto/gift-category.dto';
 import { CreateGiftCategoryDto } from './dto/action-gift-category.dto';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { getLang } from 'src/common/utils/get-lang.util';
+import { AdminGuard } from 'src/common/guards/roles/admin.guard';
 
 @Controller('gift-category')
 export class GiftCategoryController {

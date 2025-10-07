@@ -1,7 +1,6 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Post, Put, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { GiftTemplateService } from './gift_template.service';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { AdminGuard } from 'src/common/guards/admin.guard';
 import { CreateGiftTemplateDto } from './dto/create-gift-template.dto';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { PaginatedAdminGiftTemplateDto, PaginatedGiftTemplateDto } from './dto/gift-template.dto';
@@ -9,6 +8,7 @@ import { I18n, I18nContext } from 'nestjs-i18n';
 import { ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { getLang } from 'src/common/utils/get-lang.util';
 import { UpdateGiftTemplateDto } from './dto/update-gift-template.dto';
+import { AdminGuard } from 'src/common/guards/roles/admin.guard';
 
 @Controller('gift-template')
 export class GiftTemplateController {

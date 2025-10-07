@@ -1,7 +1,7 @@
 import {Controller, Get, Param, UseGuards } from '@nestjs/common';
 import { PaymentSessionService } from './payment_session.service';
 import { ApiOperation, ApiParam, ApiResponse, ApiSecurity } from '@nestjs/swagger';
-import { CustomerGuard } from 'src/common/guards/customer.guard';
+import { CustomerGuard } from 'src/common/guards/roles/customer.guard';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { PaymentSessionDto } from './dto/payment-session.dto';
 

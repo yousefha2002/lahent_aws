@@ -1,9 +1,9 @@
 import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
 import { FcmTokenService } from './fcm_token.service';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
-import { AnyUserGuard } from 'src/common/guards/any-user-guard';
 import { RegisterFcmTokenDto } from './dtos/register_fcm_token.dto';
 import { ApiBody, ApiOperation, ApiResponse, ApiSecurity } from '@nestjs/swagger';
+import { AnyUserGuard } from 'src/common/guards/roles/any-user-guard';
 
 @Controller('fcm_token')
 export class FcmTokenController {

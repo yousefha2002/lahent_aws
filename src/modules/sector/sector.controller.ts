@@ -4,10 +4,10 @@ import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { CreateSectorDto } from './dto/create-sector.dto';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
-import { AdminGuard } from 'src/common/guards/admin.guard';
 import { SectorDto } from './dto/sector.dto';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { UpdateSectorDto } from './dto/update-sector.dto';
+import { AdminGuard } from 'src/common/guards/roles/admin.guard';
 
 @Controller('sector')
 export class SectorController {

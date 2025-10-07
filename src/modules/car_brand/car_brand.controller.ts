@@ -2,12 +2,12 @@ import {Body,Controller,Get,Param,Post,Put,UseGuards} from '@nestjs/common';
 import { CarBrandService } from './car_brand.service';
 import { CreateCarBrandDto } from './dto/create_car_brand.dto';
 import { UpdateCarBrandDto } from './dto/update_car_brand.dto';
-import { AdminGuard } from 'src/common/guards/admin.guard';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { CarBrandDto } from './dto/car-brand.dto';
 import {ApiBody,ApiOperation,ApiParam,ApiResponse,ApiSecurity} from '@nestjs/swagger';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
+import { AdminGuard } from 'src/common/guards/roles/admin.guard';
 
 @Controller('car-brand')
 export class CarBrandController {

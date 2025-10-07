@@ -13,7 +13,6 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { TypeService } from './type.service';
-import { AdminGuard } from 'src/common/guards/admin.guard';
 import { CreateTypeDto } from './dto/create-type.dto';
 import { MulterExceptionFilter } from 'src/multer/multer.exception.filter';
 import { multerOptions } from 'src/multer/multer.options';
@@ -23,6 +22,7 @@ import { TypeDto } from './dto/type.dto';
 import { ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
+import { AdminGuard } from 'src/common/guards/roles/admin.guard';
 
 @Controller('type')
 export class TypeController {

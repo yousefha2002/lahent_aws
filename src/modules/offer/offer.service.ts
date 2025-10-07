@@ -96,7 +96,7 @@ export class OfferService {
   async changeOfferActiveStatus(
     offerId: number,
     dto: ChangeOfferActiveDto,
-    lang = Language.en,
+    lang : Language,
   ) {
     const offer = await this.offerById(offerId, lang);
     offer.isActive = dto.isActive;

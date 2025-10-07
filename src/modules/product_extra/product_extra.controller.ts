@@ -1,12 +1,12 @@
 import {Body,Controller,Param,Post,Put,UseGuards} from '@nestjs/common';
 import { ProductExtraService } from './product_extra.service';
 import { UpdateProductExtraDto } from './dto/update-extra-product.dto';
-import { ApprovedStoreGuard } from 'src/common/guards/approved-store.guard';
+import { ApprovedStoreGuard } from 'src/common/guards/auths/approved-store.guard';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
-import { Store } from '../store/entities/store.entity';
 import { CreateProductExtraDto } from './dto/create-product-extra.dto';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
-import { StoreOrAdminGuard } from 'src/common/guards/store-or-admin-guard';
+import { StoreOrAdminGuard } from 'src/common/guards/roles/store-or-admin-guard';
+import { CurrentUserType } from 'src/common/types/current-user.type';
 
 @Controller('product-extra')
 export class ProductExtraController {
@@ -29,12 +29,13 @@ export class ProductExtraController {
   update(
     @Body() body: UpdateProductExtraDto,
     @Param('extraId') extraId: string,
-    @CurrentUser() store: Store,
+    @CurrentUser() user: CurrentUserType,
   ) {
+    const {context} = user
     return this.productExtraService.updateExtraProduct(
       +extraId,
       body,
-      store.id,
+      context.id,
     );
   }
 
@@ -51,8 +52,9 @@ export class ProductExtraController {
       example: { message: 'active status updated' },
     },
   })
-  active(@Param('extraId') extraId: string, @CurrentUser() store: Store) {
-    return this.productExtraService.updateIsActive(+extraId, store.id);
+  active(@Param('extraId') extraId: string, @CurrentUser() user: CurrentUserType) {
+    const {context} = user
+    return this.productExtraService.updateIsActive(+extraId, context.id);
   }
 
   @UseGuards(StoreOrAdminGuard, ApprovedStoreGuard)
@@ -70,7 +72,8 @@ export class ProductExtraController {
       },
     },
   })
-  createProductExtras(@Body() body: CreateProductExtraDto,@CurrentUser() store:Store) {
-    return this.productExtraService.createProductExtras(body,store.id);
+  createProductExtras(@Body() body: CreateProductExtraDto,@CurrentUser() user:CurrentUserType) {
+    const {context} = user
+    return this.productExtraService.createProductExtras(body,context.id);
   }
 }

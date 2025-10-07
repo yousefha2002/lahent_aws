@@ -1,6 +1,5 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { LoyaltyOfferService } from './loyalty_offer.service';
-import { AdminGuard } from 'src/common/guards/admin.guard';
 import { UpdateLoyaltyOfferDto } from './dto/update-loyalty-offer.dto';
 import { CreateLoyaltyOfferDto } from './dto/create-loyalty-offer.dto';
 import { BaseloyaltyOfferDto, ExtendedLoyaltyOfferDto, PaginatedLoyaltyOfferDto } from './dto/loyalty-offer.dto';
@@ -8,6 +7,7 @@ import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { getLang } from 'src/common/utils/get-lang.util';
+import { AdminGuard } from 'src/common/guards/roles/admin.guard';
 
 @Controller('loyalty-offer')
 export class LoyaltyOfferController {

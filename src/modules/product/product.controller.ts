@@ -1,7 +1,6 @@
 import {BadRequestException,Body,Controller,Get,Param,ParseIntPipe,Post,Put,Query,UploadedFiles,UseGuards,UseInterceptors} from '@nestjs/common';
 import {AnyFilesInterceptor,FileFieldsInterceptor} from '@nestjs/platform-express';
 import { ProductService } from './product.service';
-import { Store } from '../store/entities/store.entity';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { CreateProductDto } from './dto/requests/create-product.dto';
 import { multerOptions } from 'src/multer/multer.options';
@@ -11,14 +10,14 @@ import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { PaginatedProductsCustomerViewDto } from './dto/responses/customer-product-view.dto';
 import { PaginatedProductsStoreViewDto } from './dto/responses/store-product-view.dto';
 import { FullProductDetailsDto, ProductFullDetailsForStoreDto } from './dto/responses/full-product-details.dto';
-import { ApprovedStoreGuard } from 'src/common/guards/approved-store.guard';
+import { ApprovedStoreGuard } from 'src/common/guards/auths/approved-store.guard';
 import { ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
 import { TopProductResponseDto } from './dto/responses/top-product-response.dto';
 import { StoreFinancialsFilterDto } from '../store/dto/requests/store-financials-filter.dto';
-import { StoreGuard } from 'src/common/guards/store.guard';
-import { StoreOrAdminGuard } from 'src/common/guards/store-or-admin-guard';
+import { StoreOrAdminGuard } from 'src/common/guards/roles/store-or-admin-guard';
+import { CurrentUserType } from 'src/common/types/current-user.type';
 
 @Controller('product')
 export class ProductController {
@@ -34,11 +33,12 @@ export class ProductController {
   @ApiQuery({ name: 'storeId', required: false, example: 1 })
   @UseInterceptors(AnyFilesInterceptor(multerOptions))
   async create(
-    @CurrentUser() store: Store,
+    @CurrentUser() user: CurrentUserType,
     @Body() body: CreateProductDto,
     @UploadedFiles() files: Express.Multer.File[],
     @I18n() i18n: I18nContext,
   ) {
+    const {context} = user
     if (!files || files.length === 0) {
       throw new BadRequestException('يجب إرسال صورة واحدة على الأقل للمنتج');
     }
@@ -46,7 +46,7 @@ export class ProductController {
       throw new BadRequestException('يمكن رفع 5 صور فقط للمنتج');
     }
     const lang = getLang(i18n);
-    return this.productService.createProduct(store.id, body, files, lang);
+    return this.productService.createProduct(context.id, body, files, lang);
   }
 
   @Put('update/:productId')
@@ -98,13 +98,14 @@ export class ProductController {
   @ApiQuery({ name: 'storeId', required: false, example: 1 })
   @ApiSecurity('access-token')
   async getTopSellingProducts(
-    @CurrentUser() store:Store,
+    @CurrentUser() user:CurrentUserType,
     @I18n() i18n: I18nContext,
     @Query() query: StoreFinancialsFilterDto
   ) {
     const lang = getLang(i18n);
     const { filter, specificDate } = query;
-    return this.productService.getTopProductsBySales(store.id, lang,filter,specificDate);
+    const {context} = user
+    return this.productService.getTopProductsBySales(context.id, lang,filter,specificDate);
   }
 
   @Serilaize(PaginatedProductsCustomerViewDto)
@@ -136,7 +137,7 @@ export class ProductController {
   }
 
   @Serilaize(PaginatedProductsStoreViewDto)
-  @UseGuards(StoreOrAdminGuard, ApprovedStoreGuard)
+  @UseGuards(StoreOrAdminGuard)
   @Get('all')
   @ApiOperation({ summary: 'Get all products of the current store' })
   @ApiQuery({ name: 'page', required: false, type: Number })
@@ -147,7 +148,7 @@ export class ProductController {
   @ApiQuery({ name: 'storeId', required: false, example: 1 })
   @ApiResponse({ status: 200, description: 'Paginated list of products for the store', type: PaginatedProductsStoreViewDto})
   async getStoreProducts(
-    @CurrentUser() store: Store,
+    @CurrentUser() user: CurrentUserType,
     @Query('categoryId') categoryId: number,
     @Query('page',new ParseIntPipe({ optional: true })) page = 1,
     @Query('limit',new ParseIntPipe({ optional: true })) limit = 10,
@@ -155,8 +156,9 @@ export class ProductController {
     @I18n() i18n: I18nContext
   ) {
     const lang = getLang(i18n);
+    const {context} = user
     return this.productService.getProductsByStore(
-      store.id,
+      context.id,
       lang,
       page,
       limit,
@@ -175,7 +177,7 @@ export class ProductController {
     return this.productService.getFullProductDetails(+productId,lang);
   }
 
-  @UseGuards(StoreOrAdminGuard, ApprovedStoreGuard)
+  @UseGuards(StoreOrAdminGuard)
   @Serilaize(ProductFullDetailsForStoreDto)
   @Get('/:productId/byStore')
   @ApiOperation({ summary: 'Get full product details for the store (including inactive)' })
@@ -189,7 +191,7 @@ export class ProductController {
   }
 
   @Put('active/:productId')
-  @UseGuards(StoreOrAdminGuard)
+  @UseGuards(StoreOrAdminGuard,ApprovedStoreGuard)
   @ApiOperation({ summary: 'Toggle product active status' })
   @ApiSecurity('access-token')
   @ApiParam({ name: 'productId', example: 101 })
@@ -204,13 +206,14 @@ export class ProductController {
   @ApiQuery({ name: 'storeId', required: false, example: 1 })
   changeProductActivity(
     @Param('productId',ParseIntPipe) productId: number,
-    @CurrentUser() store: Store,
+    @CurrentUser() user: CurrentUserType,
     @I18n() i18n: I18nContext,
   ) {
     const lang = getLang(i18n);
+    const {context} = user
     return this.productService.changeProductActivity(
       +productId,
-      store.id,
+      context.id,
       lang,
     );
   }

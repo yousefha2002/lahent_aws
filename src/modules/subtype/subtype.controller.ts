@@ -1,13 +1,13 @@
 import {Body,Controller,Delete,Get,Param,Post,Put,UseGuards} from '@nestjs/common';
 import { SubtypeService } from './subtype.service';
 import { CreateSubTypeDto } from './dto/create-subType.dto';
-import { AdminGuard } from 'src/common/guards/admin.guard';
 import { UpdateSubTypeDto } from './dto/update-subType.dto';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { SubTypeDto } from './dto/subType.dto';
 import {ApiBody,ApiOperation,ApiParam,ApiResponse,ApiSecurity} from '@nestjs/swagger';
 import { getLang } from 'src/common/utils/get-lang.util';
 import { I18n, I18nContext } from 'nestjs-i18n';
+import { AdminGuard } from 'src/common/guards/roles/admin.guard';
 
 @Controller('subtype')
 export class SubtypeController {

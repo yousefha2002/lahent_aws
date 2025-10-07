@@ -1,7 +1,7 @@
 import { Body,Controller,Delete,Get,Param,Post,Put,UseGuards }from '@nestjs/common';
 import { PaymentCardService } from './payment_card.service';
-import { CustomerGuard } from 'src/common/guards/customer.guard';
-import { CompletedProfileGuard } from 'src/common/guards/completed-profile.guard';
+import { CustomerGuard } from 'src/common/guards/roles/customer.guard';
+import { CompletedProfileGuard } from 'src/common/guards/auths/completed-profile.guard';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { Customer } from '../customer/entities/customer.entity';
 import { CreatePaymentCardDto } from './dto/create-payment-card.dto';
@@ -11,6 +11,7 @@ import { PaymentCardDto } from './dto/payment-card.dto';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
+import { CurrentUserType } from 'src/common/types/current-user.type';
 
 @Controller('payment-card')
 export class PaymentCardController {
@@ -41,13 +42,14 @@ export class PaymentCardController {
   @ApiResponse({ status: 200, description: 'Payment card updated', type: PaymentCardDto })
   @Put(':id')
   update(
-    @CurrentUser() user: Customer,
+    @CurrentUser() user: CurrentUserType,
     @Param('id') cardId: number,
     @Body() dto: UpdatePaymentCardDto,
     @I18n() i18n: I18nContext
   ) {
     const lang = getLang(i18n);
-    return this.paymentCardService.update(cardId, dto, user.id);
+    const {context} = user
+    return this.paymentCardService.update(cardId, dto, context.id);
   }
 
   @Serilaize(PaymentCardDto)
@@ -56,8 +58,9 @@ export class PaymentCardController {
   @ApiSecurity('access-token')
   @ApiResponse({ status: 200, description: 'List of payment cards', type: [PaymentCardDto] })
   @Get()
-  getAll(@CurrentUser() user: Customer) {
-    return this.paymentCardService.getAll(user.id);
+  getAll(@CurrentUser() user: CurrentUserType) {
+    const {context} = user
+    return this.paymentCardService.getAll(context.id);
   }
 
   @Serilaize(PaymentCardDto)
@@ -67,8 +70,9 @@ export class PaymentCardController {
   @ApiParam({ name: 'id', example: 1, description: 'Payment card ID' })
   @ApiResponse({ status: 200, description: 'Payment card', type: PaymentCardDto })
   @Get(':id')
-  getOne(@CurrentUser() user: Customer, @Param('id') cardId: number) {
-    return this.paymentCardService.getOne(cardId, user.id);
+  getOne(@CurrentUser() user: CurrentUserType, @Param('id') cardId: number) {
+    const {context} = user
+    return this.paymentCardService.getOne(cardId, context.id);
   }
 
   @UseGuards(CustomerGuard)
@@ -77,7 +81,8 @@ export class PaymentCardController {
   @ApiParam({ name: 'id', example: 1, description: 'Payment card ID' })
   @ApiResponse({ status: 200, description: 'Payment card deleted', schema: { example: { message: 'Card deleted' } } })
   @Delete(':id')
-  remove(@CurrentUser() user: Customer, @Param('id') cardId: number) {
-    return this.paymentCardService.delete(cardId, user.id);
+  remove(@CurrentUser() user: CurrentUserType, @Param('id') cardId: number) {
+    const {context} = user
+    return this.paymentCardService.delete(cardId, context.id);
   }
 }

@@ -1,6 +1,5 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { CouponService } from './coupon.service';
-import { AdminGuard } from 'src/common/guards/admin.guard';
 import { CreateCouponDto } from './dto/create-coupon.dto';
 import { UpdateCouponDto } from './dto/update-coupon.dto';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
@@ -9,6 +8,7 @@ import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { PaginatedCouponDto } from './dto/paginated-coupon.dto';
+import { AdminGuard } from 'src/common/guards/roles/admin.guard';
 
 @Controller('coupon')
 export class CouponController {

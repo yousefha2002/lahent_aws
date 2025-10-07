@@ -4,10 +4,10 @@ import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
 import { CreatePageDto } from './dto/create-page.dto';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
-import { AdminGuard } from 'src/common/guards/admin.guard';
 import { PageDto } from './dto/page.dto';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { PageType } from 'src/common/enums/page_type';
+import { AdminGuard } from 'src/common/guards/roles/admin.guard';
 
 @Controller('page')
 export class PageController {

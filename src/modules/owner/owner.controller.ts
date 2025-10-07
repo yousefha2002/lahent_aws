@@ -1,15 +1,15 @@
 import { Body, Controller, Get, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { OwnerService } from './owner.service';
 import { UpdateOwnerDto } from './dto/updateOwner.dto';
-import { OwnerGuard } from 'src/common/guards/owner.guard';
+import { OwnerGuard } from 'src/common/guards/roles/owner.guard';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
-import { Owner } from './entities/owner.entity';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { OwnerDto } from './dto/owner.dto';
 import { ApiBody, ApiOperation, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
 import { RefreshTokenDto } from '../user_token/dtos/refreshToken.dto';
+import { CurrentUserType } from 'src/common/types/current-user.type';
 
 @Controller('owner')
 export class OwnerController {
@@ -28,11 +28,12 @@ export class OwnerController {
   @Put()
   async updateOwner(
     @Body() body: UpdateOwnerDto,
-    @CurrentUser() user: Owner,
+    @CurrentUser() user: CurrentUserType,
     @I18n() i18n: I18nContext
   ) {
     const lang = getLang(i18n);
-    return this.ownerService.updateOwnerProfile(user.id, body, lang);
+    const {context} = user
+    return this.ownerService.updateOwnerProfile(context.id, body, lang);
   }
 
   @ApiOperation({ summary: 'Refresh access token using refresh token' })
@@ -62,8 +63,9 @@ export class OwnerController {
   @Serilaize(OwnerDto)
   @UseGuards(OwnerGuard)
   @Get('current')
-  getCurrentOwner(@CurrentUser() owner:Owner)
+  getCurrentOwner(@CurrentUser() user:CurrentUserType)
   {
-    return owner
+    const {context} = user
+    return context
   }
 }

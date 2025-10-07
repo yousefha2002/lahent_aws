@@ -1,15 +1,16 @@
 import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
 import { GiftService } from './gift.service';
 import { CreateGiftDto } from './dto/create-gift.dto';
-import { CustomerGuard } from 'src/common/guards/customer.guard';
+import { CustomerGuard } from 'src/common/guards/roles/customer.guard';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { Customer } from '../customer/entities/customer.entity';
-import { CompletedProfileGuard } from 'src/common/guards/completed-profile.guard';
+import { CompletedProfileGuard } from 'src/common/guards/auths/completed-profile.guard';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
 import { ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { PaginatedGiftDto } from './dto/gift.dto';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
+import { CurrentUserType } from 'src/common/types/current-user.type';
 
 @Controller('gift')
 export class GiftController {
@@ -40,11 +41,12 @@ export class GiftController {
   @UseGuards(CustomerGuard, CompletedProfileGuard)
   sendGift(
     @Body() body: CreateGiftDto,
-    @CurrentUser() sender: Customer,
+    @CurrentUser() sender: CurrentUserType,
     @I18n() i18n: I18nContext
   ) {
     const lang = getLang(i18n);
-    return this.giftService.createGift(sender.id, body, lang);
+    const {context} = sender
+    return this.giftService.createGift(context.id, body, lang);
   }
 
   @Serilaize(PaginatedGiftDto)
@@ -56,10 +58,11 @@ export class GiftController {
   @Get('my-gifts')
   @UseGuards(CustomerGuard)
   async getMyGifts(
-    @CurrentUser() customer: Customer,
+    @CurrentUser() user: CurrentUserType,
     @Query('page') page = 1,
     @Query('limit') limit = 10,
   ) {
-    return this.giftService.getGiftsByCustomer(customer.id, Number(page), Number(limit));
+    const {context} = user
+    return this.giftService.getGiftsByCustomer(context.id, Number(page), Number(limit));
   }
 }

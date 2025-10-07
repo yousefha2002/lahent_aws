@@ -1,19 +1,18 @@
 import {Body,Controller,Get,Param,ParseIntPipe,Post,Put,Query,UseGuards} from '@nestjs/common';
 import { OfferService } from './offer.service';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
-import { Store } from '../store/entities/store.entity';
 import { CreateOfferDto } from './dto/create-offer.dto';
 import { ChangeOfferActiveDto } from './dto/change-offer-active.dto';
-import { ApprovedStoreGuard } from 'src/common/guards/approved-store.guard';
+import { ApprovedStoreGuard } from 'src/common/guards/auths/approved-store.guard';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { PaginatedOfferResponseDto } from './dto/offer-response.dto';
 import { ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
-import { AdminGuard } from 'src/common/guards/admin.guard';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
 import { OfferType } from 'src/common/enums/offer_type';
-import { StoreGuard } from 'src/common/guards/store.guard';
-import { StoreOrAdminGuard } from 'src/common/guards/store-or-admin-guard';
+import { StoreOrAdminGuard } from 'src/common/guards/roles/store-or-admin-guard';
+import { AdminGuard } from 'src/common/guards/roles/admin.guard';
+import { CurrentUserType } from 'src/common/types/current-user.type';
 
 @Controller('offer')
 export class OfferController {
@@ -34,12 +33,13 @@ export class OfferController {
   @ApiQuery({ name: 'storeId', required: false, example: 1 })
   @ApiBody({ type: CreateOfferDto })
   async createOffer(
-    @CurrentUser() store: Store,
+    @CurrentUser() user: CurrentUserType,
     @Body() dto: CreateOfferDto,
     @I18n() i18n: I18nContext
   ) {
     const lang = getLang(i18n);
-    return this.offerService.createOffer(dto, store.id, lang);
+    const {context} = user
+    return this.offerService.createOffer(dto, context.id, lang);
   }
 
   @UseGuards(AdminGuard)
@@ -73,7 +73,7 @@ export class OfferController {
   }
 
   @Serilaize(PaginatedOfferResponseDto)
-  @UseGuards(StoreOrAdminGuard, ApprovedStoreGuard)
+  @UseGuards(StoreOrAdminGuard)
   @Get('byStore/all')
   @ApiOperation({ summary: 'Get all offers for the current store' })
   @ApiSecurity('access-token')
@@ -83,13 +83,14 @@ export class OfferController {
   @ApiQuery({ name: 'typeId', required: false, type: Number, example: 1 })
   @ApiResponse({ status: 200, description: 'Paginated list of offers for the store', type: PaginatedOfferResponseDto })
   getAllOffersForStore(
-    @CurrentUser() store: Store,
+    @CurrentUser() user: CurrentUserType,
     @Query('page') page = 1,
     @Query('limit') limit = 10,
     @I18n() i18n: I18nContext,
     @Query('type') type?: string,
   ) {
     const lang = getLang(i18n);
-    return this.offerService.getAllOffersForStore(store.id, +page, +limit, lang, type);
+    const {context} = user
+    return this.offerService.getAllOffersForStore(context.id, +page, +limit, lang, type);
   }
 }

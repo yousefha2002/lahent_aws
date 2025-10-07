@@ -4,7 +4,7 @@ import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { StoreCommissionDto } from './dto/store_comimssion.dto';
 import { ApiBody, ApiOperation, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { CreateStoreCommissionDto } from './dto/create_store_commission.dto';
-import { AdminGuard } from 'src/common/guards/admin.guard';
+import { AdminGuard } from 'src/common/guards/roles/admin.guard';
 
 @Controller('store-commission')
 export class StoreCommissionController {

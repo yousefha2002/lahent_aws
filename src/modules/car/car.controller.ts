@@ -9,8 +9,8 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { CarService } from './car.service';
-import { CustomerGuard } from 'src/common/guards/customer.guard';
-import { CompletedProfileGuard } from 'src/common/guards/completed-profile.guard';
+import { CustomerGuard } from 'src/common/guards/roles/customer.guard';
+import { CompletedProfileGuard } from 'src/common/guards/auths/completed-profile.guard';
 import { CreateCarDto } from './dto/create_car.dto';
 import { UpdateCarDto } from './dto/update-car.dto';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
@@ -20,6 +20,7 @@ import { CustomerCarListDto } from './dto/customer-car-list.dto';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
+import { CurrentUserType } from 'src/common/types/current-user.type';
 
 @Controller('car')
 export class CarController {
@@ -74,12 +75,13 @@ export class CarController {
     description: 'Details of the requested car for the customer',
   })
   getCustomerCar(
-    @CurrentUser() user: Customer,
+    @CurrentUser() user: CurrentUserType,
     @Param('carId') carId: number,
     @I18n() i18n: I18nContext,
   ) {
     const lang = getLang(i18n);
-    return this.carService.getCustomerCar(user.id, carId, lang);
+    const {context} = user
+    return this.carService.getCustomerCar(context.id, carId, lang);
   }
 
   @UseGuards(CustomerGuard)
@@ -92,12 +94,13 @@ export class CarController {
     schema: { example: { message: 'Car deleted successfully' } },
   })
   deleteCustomerCar(
-    @CurrentUser() user: Customer,
+    @CurrentUser() user: CurrentUserType,
     @Param('carId') carId: number,
     @I18n() i18n: I18nContext,
   ) {
     const lang = getLang(i18n);
-    return this.carService.delete(user.id, carId, lang);
+    const {context} = user
+    return this.carService.delete(context.id, carId, lang);
   }
 
   @UseGuards(CustomerGuard)
@@ -112,11 +115,12 @@ export class CarController {
   })
   update(
     @Body() dto: UpdateCarDto,
-    @CurrentUser() user: Customer,
+    @CurrentUser() user: CurrentUserType,
     @Param('carId') carId: number,
     @I18n() i18n: I18nContext,
   ) {
     const lang = getLang(i18n);
-    return this.carService.update(user.id, carId, dto, lang);
+    const {context} = user
+    return this.carService.update(context.id, carId, dto, lang);
   }
 }

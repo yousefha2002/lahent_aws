@@ -1,4 +1,4 @@
-import { CustomerService } from './../../modules/customer/customer.service';
+import { CustomerService } from '../../../modules/customer/customer.service';
 import {
   Injectable,
   CanActivate,
@@ -6,7 +6,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { RoleStatus } from '../enums/role_status';
+import { RoleStatus } from '../../enums/role_status';
 
 @Injectable()
 export class CustomerGuard implements CanActivate {
@@ -31,7 +31,11 @@ export class CustomerGuard implements CanActivate {
         throw new UnauthorizedException('Unauthorized role');
       }
       const customer = await this.customerService.findById(decoded.id);
-      request.currentUser = customer;
+      request.currentUser = {
+        userId: customer.id,
+        type: RoleStatus.CUSTOMER,
+        context:customer
+      };
       return !!decoded.id;
     } catch {
       throw new UnauthorizedException('Invalid or expired token');

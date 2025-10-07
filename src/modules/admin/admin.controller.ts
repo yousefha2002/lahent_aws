@@ -11,10 +11,10 @@ import { AdminDto } from './dto/admin.dto';
 import { AdminEmailDto } from './dto/admin-email.dto';
 import { AdminPasswordDto } from './dto/admin-password.dto';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
-import { AdminGuard } from 'src/common/guards/admin.guard';
 import { ApiBody, ApiOperation, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
+import { AdminGuard } from 'src/common/guards/roles/admin.guard';
 
 @Controller('admin')
 export class AdminController {

@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { RoleStatus } from '../enums/role_status';
+import { RoleStatus } from '../../enums/role_status';
 import { OwnerService } from 'src/modules/owner/owner.service';
 
 @Injectable()
@@ -37,7 +37,11 @@ export class OwnerGuard implements CanActivate {
         throw new UnauthorizedException('Customer not found');
       }
 
-      request.currentUser = owner;
+      request.currentUser = {
+        type: RoleStatus.OWNER,
+        userId: owner.id,
+        context:owner
+      };
       return !!decoded.id;
     } catch {
       throw new UnauthorizedException('Invalid or expired token');

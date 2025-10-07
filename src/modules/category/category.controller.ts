@@ -1,8 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { CategoryService } from './category.service';
-import { ApprovedStoreGuard } from 'src/common/guards/approved-store.guard';
+import { ApprovedStoreGuard } from 'src/common/guards/auths/approved-store.guard';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
-import { Store } from '../store/entities/store.entity';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
@@ -10,8 +9,8 @@ import { CategoryDto } from './dto/category.dto';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
-import { StoreGuard } from 'src/common/guards/store.guard';
-import { StoreOrAdminGuard } from 'src/common/guards/store-or-admin-guard';
+import { StoreOrAdminGuard } from 'src/common/guards/roles/store-or-admin-guard';
+import { CurrentUserType } from 'src/common/types/current-user.type';
 
 @Controller('category')
 export class CategoryController {
@@ -25,12 +24,13 @@ export class CategoryController {
   @ApiResponse({status: 201, description: 'category created successfully', schema: {example: {message: 'Created successfully'}}})
   @UseGuards(StoreOrAdminGuard, ApprovedStoreGuard)
   createCategory(
-    @CurrentUser() store: Store,
+    @CurrentUser() user: CurrentUserType,
     @Body() body: CreateCategoryDto,
     @I18n() i18n: I18nContext
   ) {
     const lang = getLang(i18n);
-    return this.categoryService.create(store.id, body, lang);
+    const {context} = user
+    return this.categoryService.create(context.id, body, lang);
   }
 
   @Put(':categoryId')
@@ -44,11 +44,12 @@ export class CategoryController {
   updateCategory(
     @Body() body: UpdateCategoryDto,
     @Param('categoryId') categoryId: string,
-    @CurrentUser() store: Store,
+    @CurrentUser() user: CurrentUserType,
     @I18n() i18n: I18nContext
   ) {
     const lang = getLang(i18n);
-    return this.categoryService.update(+categoryId, store.id, body, lang);
+    const {context} = user
+    return this.categoryService.update(+categoryId, context.id, body, lang);
   }
 
   @Get('/:categoryId')
@@ -73,11 +74,12 @@ export class CategoryController {
   @ApiResponse({status: 200, description: 'Category deleted successfully', schema: { example: { message: 'Deleted successfully' }}})
   deleteOne(
     @Param('categoryId') categoryId: string,
-    @CurrentUser() store: Store,
+    @CurrentUser() user: CurrentUserType,
     @I18n() i18n: I18nContext
   ) {
     const lang = getLang(i18n);
-    return this.categoryService.deleteCategory(+categoryId, store.id, lang);
+    const {context} = user
+    return this.categoryService.deleteCategory(+categoryId, context.id, lang);
   }
 
   @Get('/all/:storeId')

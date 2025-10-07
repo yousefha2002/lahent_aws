@@ -1,7 +1,7 @@
 import { PaymentRedirectDto } from './../payment_session/dto/payment-redirect.dto';
 import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { TransactionService } from './transaction.service';
-import { CustomerGuard } from 'src/common/guards/customer.guard';
+import { CustomerGuard } from 'src/common/guards/roles/customer.guard';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { Customer } from '../customer/entities/customer.entity';
 import { ChargeWalletDTO } from './dto/charge-wallet.dto';
@@ -9,6 +9,7 @@ import { filterTypeTransaction } from 'src/common/types/filter-type-transaction'
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { PaginatedTransactionDto } from './dto/transaction.dto';
 import { ApiBody, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
+import { CurrentUserType } from 'src/common/types/current-user.type';
 
 @Controller('transaction')
 export class TransactionController {
@@ -22,9 +23,10 @@ export class TransactionController {
   @ApiResponse({status: 200,type: PaymentRedirectDto})
   @UseGuards(CustomerGuard)
   @Post('charge-wallet/:loyaltyOfferId')
-  chargeWallet(@CurrentUser() user:Customer,@Param('loyaltyOfferId') loyaltyOfferId:number,@Body() dto:ChargeWalletDTO)
+  chargeWallet(@CurrentUser() user:CurrentUserType,@Param('loyaltyOfferId') loyaltyOfferId:number,@Body() dto:ChargeWalletDTO)
   {
-    return this.transactionService.chargeWallet(loyaltyOfferId,user,dto)
+    const {context} = user
+    return this.transactionService.chargeWallet(loyaltyOfferId,context,dto)
   }
 
   @Serilaize(PaginatedTransactionDto)
@@ -43,12 +45,13 @@ export class TransactionController {
   @UseGuards(CustomerGuard)
   @Get()
   async getTransactions(
-    @CurrentUser() user: Customer,
+    @CurrentUser() user: CurrentUserType,
     @Query('page') page = 1,
     @Query('limit') limit = 10,
     @Query('typeFilter') typeFilter: filterTypeTransaction = 'all'
   ) 
   {
-    return this.transactionService.getTransactions(user.id,typeFilter,+page,+limit);
+    const {context} = user
+    return this.transactionService.getTransactions(context.id,typeFilter,+page,+limit);
   }
 }

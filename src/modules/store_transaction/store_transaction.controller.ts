@@ -8,8 +8,9 @@ import { PaginatedStoreTransactionDto } from './dto/store_transaction.dto';
 import { StoreFinancialsFilterDto } from '../store/dto/requests/store-financials-filter.dto';
 import { StoreFinancialsResponseDto } from './dto/store-financials-response.dto';
 import { StoreTransactionType } from 'src/common/enums/transaction_type';
-import { StoreGuard } from 'src/common/guards/store.guard';
-import { StoreOrAdminGuard } from 'src/common/guards/store-or-admin-guard';
+import { StoreGuard } from 'src/common/guards/roles/store.guard';
+import { StoreOrAdminGuard } from 'src/common/guards/roles/store-or-admin-guard';
+import { CurrentUserType } from 'src/common/types/current-user.type';
 
 @Controller('store-transaction')
 export class StoreTransactionController {
@@ -26,12 +27,13 @@ export class StoreTransactionController {
     @ApiResponse({ status: 200, description: 'List of transactions',type:PaginatedStoreTransactionDto })
     @Get('current-store')
     async getAll(
-        @CurrentUser() store:Store,
+        @CurrentUser() user:CurrentUserType,
         @Query('page',new ParseIntPipe({ optional: true })) page = 1,
         @Query('limit',new ParseIntPipe({ optional: true })) limit = 10,
         @Query('status') status?: StoreTransactionType,
     ) {
-        return this.storeTransactionService.getAllByStore(store.id, page,limit,status);
+        const {context} = user
+        return this.storeTransactionService.getAllByStore(context.id, page,limit,status);
     }
 
     @UseGuards(StoreOrAdminGuard)
@@ -40,8 +42,9 @@ export class StoreTransactionController {
     @ApiResponse({ status: 200, description: 'Available balance of the store', type: Number})
     @ApiQuery({ name: 'storeId', required: false, example: 1 })
     @Get('available-balance')
-    async getAvailableBalance(@CurrentUser() store: Store) {
-        const availableBalance = await this.storeTransactionService.findAvailableBalance(store.id);
+    async getAvailableBalance(@CurrentUser() user: CurrentUserType) {
+        const {context} = user
+        const availableBalance = await this.storeTransactionService.findAvailableBalance(context.id);
         return availableBalance;
     }
 
@@ -53,10 +56,11 @@ export class StoreTransactionController {
     @ApiResponse({ status: 200, description: 'Store financials', type: StoreFinancialsResponseDto })
     @Get('financials/byStore')
     async getStoreFinancials(
-        @CurrentUser() store: Store,
+        @CurrentUser() user: CurrentUserType,
         @Query() query: StoreFinancialsFilterDto
     ) {
         const { filter, specificDate } = query;
-        return this.storeTransactionService.getStoreFinancials(store.id, filter, specificDate);
+        const {context} = user
+        return this.storeTransactionService.getStoreFinancials(context.id, filter, specificDate);
     }
 }

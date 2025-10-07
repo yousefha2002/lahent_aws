@@ -1,12 +1,13 @@
 import { Controller, Delete, Post, Param, UseGuards } from '@nestjs/common';
 import { FaviroteService } from './favirote.service';
-import { CustomerGuard } from 'src/common/guards/customer.guard';
+import { CustomerGuard } from 'src/common/guards/roles/customer.guard';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { Customer } from '../customer/entities/customer.entity';
-import { CompletedProfileGuard } from 'src/common/guards/completed-profile.guard';
+import { CompletedProfileGuard } from 'src/common/guards/auths/completed-profile.guard';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
 import { ApiOperation, ApiParam, ApiResponse, ApiSecurity } from '@nestjs/swagger';
+import { CurrentUserType } from 'src/common/types/current-user.type';
 
 @Controller('favorite')
 export class FaviroteController {
@@ -20,11 +21,12 @@ export class FaviroteController {
   @ApiResponse({ status: 200, schema: { example: { message: 'Store added to favorites' } } })
   toggleFavorite(
     @Param('storeId') storeId: string,
-    @CurrentUser() user: Customer,
+    @CurrentUser() user: CurrentUserType,
     @I18n() i18n: I18nContext
   ) {
     const lang = getLang(i18n);
-    return this.faviroteService.toggleFavorite(user.id, +storeId, lang);
+    const {context} = user
+    return this.faviroteService.toggleFavorite(context.id, +storeId, lang);
   }
 
   @UseGuards(CustomerGuard)
@@ -35,10 +37,11 @@ export class FaviroteController {
   @ApiResponse({ status: 200, schema: { example: { message: 'Store removed from favorites' } } })
   removeFavorite(
     @Param('storeId') storeId: string,
-    @CurrentUser() user: Customer,
+    @CurrentUser() user: CurrentUserType,
     @I18n() i18n: I18nContext
   ) {
     const lang = getLang(i18n);
-    return this.faviroteService.removeFavorite(user.id, +storeId, lang);
+    const {context} = user
+    return this.faviroteService.removeFavorite(context.id, +storeId, lang);
   }
 }

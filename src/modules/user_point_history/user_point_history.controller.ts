@@ -2,12 +2,13 @@ import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { UserPointHistoryService } from './user_point_history.service';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { PaginatedUserPointHistoryDto } from './dto/user_point_history.dto';
-import { CustomerGuard } from 'src/common/guards/customer.guard';
+import { CustomerGuard } from 'src/common/guards/roles/customer.guard';
 import { ApiOkResponse, ApiOperation, ApiQuery, ApiSecurity } from '@nestjs/swagger';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { Customer } from '../customer/entities/customer.entity';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
+import { CurrentUserType } from 'src/common/types/current-user.type';
 
 @Controller('user-point-history')
 export class UserPointHistoryController {
@@ -22,12 +23,13 @@ export class UserPointHistoryController {
   @ApiSecurity('access-token')
   @ApiOkResponse({ type: PaginatedUserPointHistoryDto })
   async getUserPoints(
-    @CurrentUser() user: Customer,
+    @CurrentUser() user: CurrentUserType,
     @Query('page') page = 1,
     @Query('limit') limit = 10,
     @I18n() i18n: I18nContext
   ) {
     const lang = getLang(i18n);
-    return this.userPointHistoryService.getUserPoints(user.id, +page, +limit,lang);
+    const {context} = user
+    return this.userPointHistoryService.getUserPoints(context.id, +page, +limit,lang);
   }
 }

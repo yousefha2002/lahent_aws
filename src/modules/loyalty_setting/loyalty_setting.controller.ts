@@ -4,7 +4,7 @@ import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { LoyaltySettingDto } from './dto/loyaltysetting.dto';
 import { ApiBody, ApiOperation, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { CreateLoyaltySettingDto } from './dto/create_loyalty_setting.dto';
-import { AdminGuard } from 'src/common/guards/admin.guard';
+import { AdminGuard } from 'src/common/guards/roles/admin.guard';
 
 @Controller('loyalty-setting')
 export class LoyaltySettingController {

@@ -1,14 +1,15 @@
 import { Controller, Delete, Param, Put, UseGuards } from '@nestjs/common';
 import { DeletionService } from './deletion.service';
-import { CustomerGuard } from 'src/common/guards/customer.guard';
+import { CustomerGuard } from 'src/common/guards/roles/customer.guard';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { Customer } from 'src/modules/customer/entities/customer.entity';
-import { AdminGuard } from 'src/common/guards/admin.guard';
 import { Store } from '../store/entities/store.entity';
 import { ApiTags, ApiOperation, ApiResponse, ApiSecurity } from '@nestjs/swagger';
-import { OwnerGuard } from 'src/common/guards/owner.guard';
+import { OwnerGuard } from 'src/common/guards/roles/owner.guard';
 import { Owner } from '../owner/entities/owner.entity';
-import { StoreGuard } from 'src/common/guards/store.guard';
+import { StoreGuard } from 'src/common/guards/roles/store.guard';
+import { AdminGuard } from 'src/common/guards/roles/admin.guard';
+import { CurrentUserType } from 'src/common/types/current-user.type';
 
 @ApiSecurity('access-token')
 @ApiTags('Deletion')
@@ -20,8 +21,9 @@ export class DeletionController {
   @Delete('soft-customer')
   @ApiOperation({ summary: 'Soft delete customer account' })
   @ApiResponse({ status: 200, description: 'Customer soft deleted successfully' })
-  softDeleteCustomer(@CurrentUser() customer: Customer) {
-    return this.deletionService.softDeleteCustomer(customer);
+  softDeleteCustomer(@CurrentUser() user: CurrentUserType) {
+    const {context} = user
+    return this.deletionService.softDeleteCustomer(context);
   }
 
   @UseGuards(AdminGuard)
@@ -36,8 +38,9 @@ export class DeletionController {
   @Delete('soft-store')
   @ApiOperation({ summary: 'Soft delete a store (Owner or Store Admin)' })
   @ApiResponse({ status: 200, description: 'Store soft deleted successfully' })
-  softDeleteStore(@CurrentUser() store: Store) {
-    return this.deletionService.softDeleteStore(store);
+  softDeleteStore(@CurrentUser() user: CurrentUserType) {
+    const {context} = user
+    return this.deletionService.softDeleteStore(context);
   }
 
   @UseGuards(AdminGuard)
@@ -52,8 +55,9 @@ export class DeletionController {
   @Delete('soft')
   @ApiOperation({ summary: 'Soft delete owner account (and related stores)' })
   @ApiResponse({ status: 200, description: 'Owner soft deleted successfully' })
-  softDeleteOwner(@CurrentUser() owner: Owner) {
-    return this.deletionService.softDeleteOwner(owner);
+  softDeleteOwner(@CurrentUser() user: CurrentUserType) {
+    const {context} = user
+    return this.deletionService.softDeleteOwner(context);
   }
 
   @UseGuards(AdminGuard)

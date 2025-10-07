@@ -1,7 +1,7 @@
 import {Injectable,CanActivate,ExecutionContext,UnauthorizedException} from '@nestjs/common';
 import { StoreService } from 'src/modules/store/services/store.service';
 import { JwtService } from '@nestjs/jwt';
-import { RoleStatus } from '../enums/role_status';
+import { RoleStatus } from '../../enums/role_status';
 import { AdminService } from 'src/modules/admin/admin.service';
 @Injectable()
 export class StoreOrAdminGuard implements CanActivate {
@@ -20,19 +20,27 @@ export class StoreOrAdminGuard implements CanActivate {
 
         // لو Admin
         if (decoded.role === RoleStatus.ADMIN) {
-        await this.adminService.findOneById(decoded.id);
+        const admin = await this.adminService.findOneById(decoded.id);
         const storeId = request.query.storeId;
         if (!storeId) {
             throw new UnauthorizedException('Admin must provide storeId');
         }
         const store = await this.storeService.getStoreById(+storeId);
-        request.currentUser = store;
+        request.currentUser = {
+            type: RoleStatus.ADMIN,
+            userId: admin.id,
+            context: store 
+        };
         return true;
         }
 
         if (decoded.role === RoleStatus.STORE) {
         const store = await this.storeService.getStoreById(decoded.id);
-        request.currentUser = store;
+        request.currentUser = {
+            type: RoleStatus.STORE,
+            userId: store.id,
+            context: store
+        };
         return true;
         }
 

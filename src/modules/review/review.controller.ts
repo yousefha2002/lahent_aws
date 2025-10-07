@@ -1,16 +1,14 @@
 import {Body,Controller,Delete,Get,Param,Post,Query,UseGuards} from '@nestjs/common';
 import { ReviewService } from './review.service';
-import { CustomerGuard } from 'src/common/guards/customer.guard';
+import { CustomerGuard } from 'src/common/guards/roles/customer.guard';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { Customer } from '../customer/entities/customer.entity';
-import { ApprovedStoreGuard } from 'src/common/guards/approved-store.guard';
-import { Store } from '../store/entities/store.entity';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { PaginatedReviewDto } from './dto/review.dto';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
-import { StoreGuard } from 'src/common/guards/store.guard';
-import { StoreOrAdminGuard } from 'src/common/guards/store-or-admin-guard';
+import { StoreOrAdminGuard } from 'src/common/guards/roles/store-or-admin-guard';
+import { CurrentUserType } from 'src/common/types/current-user.type';
 
 @Controller('review')
 export class ReviewController {
@@ -28,8 +26,9 @@ export class ReviewController {
       example: { message: 'Review created successfully' },
     },
   })
-  create(@Body() body: CreateReviewDto, @CurrentUser() customer: Customer) {
-    return this.reviewService.createReview(customer.id, body);
+  create(@Body() body: CreateReviewDto, @CurrentUser() user: CurrentUserType) {
+    const {context} = user
+    return this.reviewService.createReview(context.id, body);
   }
 
   @Delete('/:reviewId')
@@ -45,15 +44,16 @@ export class ReviewController {
     },
   })
   delete(
-    @CurrentUser() customer: Customer,
+    @CurrentUser() user: CurrentUserType,
     @Param('reviewId') reviewId: string,
   ) {
-    return this.reviewService.deleteReview(+reviewId, customer.id);
+    const {context} = user
+    return this.reviewService.deleteReview(+reviewId, context.id);
   }
 
   @Serilaize(PaginatedReviewDto)
   @Get('all')
-  @UseGuards(StoreOrAdminGuard, ApprovedStoreGuard)
+  @UseGuards(StoreOrAdminGuard)
   @ApiOperation({ summary: 'Get all reviews for a store with pagination' })
   @ApiSecurity('access-token')
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
@@ -66,11 +66,12 @@ export class ReviewController {
     type: PaginatedReviewDto,
   })
   getAllReviewsForStore(
-    @CurrentUser() store: Store,
+    @CurrentUser() user: CurrentUserType,
     @Query('page') page = 1,
     @Query('limit') limit = 10,
     @Query('rating') rating?: number
   ) {
-    return this.reviewService.getStoreReviews(store.id, +page, +limit,rating);
+    const {context} = user
+    return this.reviewService.getStoreReviews(context.id, +page, +limit,rating);
   }
 }

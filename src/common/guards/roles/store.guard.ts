@@ -1,6 +1,6 @@
 import {Injectable,CanActivate,ExecutionContext,UnauthorizedException} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { RoleStatus } from '../enums/role_status';
+import { RoleStatus } from '../../enums/role_status';
 import { StoreService } from 'src/modules/store/services/store.service';
 
 @Injectable()
@@ -28,7 +28,11 @@ import { StoreService } from 'src/modules/store/services/store.service';
         }
 
         const store = await this.storeService.getStoreById(decoded.id);
-        request.currentUser = store;
+        request.currentUser = {
+            type: RoleStatus.STORE,
+            userId: store.id,
+            context: store
+        };
         return !!decoded.id;
         } catch {
         throw new UnauthorizedException('Invalid or expired token');
