@@ -62,7 +62,7 @@ export class OrderPlacingService {
             await this.validateStoreAndOrder(user, pointsUsedSafe, dto, store, lang);
 
             // التحقق من توفر المتجر في الوقت الحالي أو المجدول
-            await this.checkStoreAvailability(dto.storeId,lang, dto.scheduledAt);
+            await this.checkStoreAvailability(dto.storeId,store.timezone,lang, dto.scheduledAt);
 
             // التعامل مع السيارة للـ DRIVE_THRU
             const finalCarId = await this.resolveCar(user, dto, lang, transaction);
@@ -179,14 +179,14 @@ export class OrderPlacingService {
         return finalCarId;
     }
 
-    private async checkStoreAvailability(storeId: number,lang:Language, scheduledAt?: Date) 
+    private async checkStoreAvailability(storeId: number,timezone:string,lang:Language, scheduledAt?: Date) 
     {
         if (scheduledAt) {
-            const storeIsOpen = await this.storeUtilsService.isStoreOpenAt(storeId, scheduledAt);
+            const storeIsOpen = await this.storeUtilsService.isStoreOpenAt(storeId, scheduledAt,timezone);
             if (!storeIsOpen) throw this.i18n.translate('translation.orders.store_closed_scheduled', {lang,})
         } else {
             const now = new Date();
-            const storeIsOpenNow = await this.storeUtilsService.isStoreOpenAt(storeId, now);
+            const storeIsOpenNow = await this.storeUtilsService.isStoreOpenAt(storeId, now,timezone);
             if (!storeIsOpenNow) throw new BadRequestException(this.i18n.translate('translation.orders.store_closed_now',{lang,}))
         }
     }

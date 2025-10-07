@@ -79,7 +79,7 @@ export class OrderPaymentService {
             throw new BadRequestException(this.i18n.translate('translation.orders.store_unavailable', { lang }));
         }
 
-        if (!order.scheduledAt && !(await this.storeUtilsService.isStoreOpenAt(store.id, new Date()))) {
+        if (!order.scheduledAt && !(await this.storeUtilsService.isStoreOpenAt(store.id, new Date(),store.timezone))) {
             throw new BadRequestException(this.i18n.translate('translation.orders.store_closed_now', { lang }));
         }
 

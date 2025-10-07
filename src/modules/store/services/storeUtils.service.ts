@@ -3,6 +3,7 @@ import { Store } from '../entities/store.entity';
 import { getDayOfWeek } from 'src/common/utils/getDayOfWeek';
 import { OpeningHour } from 'src/modules/opening_hour/entites/opening_hour.entity';
 import { OpeningHourService } from 'src/modules/opening_hour/opening_hour.service';
+import { DateTime } from 'luxon';
 
 @Injectable()
 export class StoreUtilsService {
@@ -31,31 +32,28 @@ export class StoreUtilsService {
     };
     }
 
-    async isStoreOpenAt(storeId: number, date: Date): Promise<boolean> 
+    async isStoreOpenAt(storeId: number, date: Date, storeTimeZone: string): Promise<boolean> 
     {
         const dayEnum = getDayOfWeek(date);
-    
         const openingHours: OpeningHour[] = await this.openingHourService.getOpeningHoursByStoreId(storeId);
         const todayOpening = openingHours.find((hour) => hour.day === dayEnum);
-    
-        if (!todayOpening) return false;
-    
-        if (!todayOpening.openTime || !todayOpening.closeTime) return false;
-    
-        const openTimeParts = todayOpening.openTime.split(':');
-        const closeTimeParts = todayOpening.closeTime.split(':');
-    
-        const openDate = new Date(date);
-        openDate.setHours(parseInt(openTimeParts[0]),parseInt(openTimeParts[1]),0,0,);
-    
-        const closeDate = new Date(date);
-        closeDate.setHours(parseInt(closeTimeParts[0]),parseInt(closeTimeParts[1]),0,0,);
-    
-        // معالجة حالة الإغلاق بعد منتصف الليل
+
+        if (!todayOpening || !todayOpening.openTime || !todayOpening.closeTime) return false;
+
+        const [openHour, openMinute] = todayOpening.openTime.split(':').map(Number);
+        const [closeHour, closeMinute] = todayOpening.closeTime.split(':').map(Number);
+
+        // تحويل التاريخ للتوقيت المحلي للمتجر
+        const checkDate = DateTime.fromJSDate(date).setZone(storeTimeZone);
+
+        let openDate = checkDate.set({ hour: openHour, minute: openMinute, second: 0, millisecond: 0 });
+        let closeDate = checkDate.set({ hour: closeHour, minute: closeMinute, second: 0, millisecond: 0 });
+
+        // معالجة الإغلاق بعد منتصف الليل
         if (closeDate <= openDate) {
-          // إذا وقت الإغلاق أقل أو يساوي وقت الفتح => يعني الإغلاق في اليوم التالي
-            closeDate.setDate(closeDate.getDate() + 1);
+            closeDate = closeDate.plus({ days: 1 });
         }
-        return date >= openDate && date <= closeDate;
+
+        return checkDate >= openDate && checkDate <= closeDate;
     }
 }

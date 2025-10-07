@@ -45,6 +45,7 @@
     "i18next-fs-backend": "^2.6.0",
     "i18next-http-middleware": "^3.8.0",
     "ioredis": "^5.7.0",
+    "luxon": "^3.7.2",
     "mysql2": "^3.12.0",
     "nestjs-i18n": "^10.5.1",
     "nodemailer": "^7.0.3",
