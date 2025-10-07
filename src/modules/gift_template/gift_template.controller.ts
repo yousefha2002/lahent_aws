@@ -17,16 +17,7 @@ export class GiftTemplateController {
   @ApiOperation({ summary: 'Create a Gift Template (admin only)' })
   @ApiConsumes('multipart/form-data')
   @ApiSecurity('access-token')
-  @ApiBody({
-      schema: {
-        type: 'object',
-        properties: {
-          categoryId: { type: 'string', example: '1', nullable: true },
-          image: { type: 'string', format: 'binary' },
-        },
-        required: ['categoryId', 'image'],
-      },
-    })
+  @ApiBody({type:CreateGiftTemplateDto})
   @ApiResponse({ status: 201, description: 'Gift template created successfully', schema: { example: { message: 'Created successfully' } } })
   @UseGuards(AdminGuard)
   @Post()

@@ -48,11 +48,7 @@ export class ProuductVariantController {
       required: ['additional_price'],
     },
   })
-  @ApiResponse({
-    status: 200,
-    description: 'Variant updated successfully',
-    schema: { example: { message: 'Variant updated successfully' } },
-  })
+  @ApiResponse({status: 200,schema: { example: { message: 'Variant updated successfully' } },})
   update(
     @Body() body: UpdateProductVariantDto,
     @Param('variantId') variantId: string,
@@ -92,33 +88,7 @@ export class ProuductVariantController {
   @ApiSecurity('access-token')
   @ApiConsumes('multipart/form-data')
   @ApiQuery({ name: 'storeId', required: false, example: 1 })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        productId: { type: 'string', example: '1' },
-        variants: {
-          type: 'string',
-          example: JSON.stringify([
-            {
-              additionalPrice: 10,
-              categoryId: 2,
-              languages: [
-                { languageCode: 'en', name: 'Small' },
-                { languageCode: 'ar', name: 'صغير' },
-              ],
-            },
-          ]),
-        },
-        images: {
-          type: 'array',
-          items: { type: 'string', format: 'binary' },
-          description: 'Upload images for each variant',
-        },
-      },
-      required: ['productId', 'variants', 'images'],
-    },
-  })
+  @ApiBody({type:CreateProductVariantsDto})
   @ApiResponse({
     status: 201,
     description: 'Variants have been created successfully',
@@ -135,5 +105,5 @@ export class ProuductVariantController {
     });
     const {context} = user
     return this.prouductVariantService.createMultipleVariants(body,filesRecord,context.id);
-    }
+  }
   }
