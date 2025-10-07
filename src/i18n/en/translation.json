@@ -177,7 +177,8 @@
     "images_updated": "Store images updated successfully",
     "created": "Store has been created",
     "phoneInUse": "Store phone already used",
-    "loginPhoneInUse": "Store login phone already used"
+    "loginPhoneInUse": "Store login phone already used",
+    "incomplete_profile": "Store cannot be approved because the profile is incomplete"
   },
   "auth": {
     "invalidPhone": "Invalid Phone Number",

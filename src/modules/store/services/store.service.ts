@@ -308,6 +308,10 @@ export class StoreService {
     const store = await this.getStoreById(storeId);
     if (status === StoreStatus.APPROVED)
     {
+      if(!store.isCompletedProfile)
+      {
+        throw new BadRequestException(this.i18n.translate('translation.store.incomplete_profile', { lang }));
+      }
       await this.storeCommissionService.getCommission(storeId)
       const message = this.i18n.t(`translation.sms.store_approved`, { lang });
       await this.smsService.sendSms(store.phone, message);
