@@ -28,7 +28,6 @@ export class Transaction extends Model {
     @Column(DataType.ENUM(...Object.values(TransactionType)))
     type: TransactionType;
 
-    // 🔗 ربط بـ Order (لو العملية من أجل شراء)
     @ForeignKey(() => Order)
     @AllowNull(true)
     @Column(DataType.INTEGER)
