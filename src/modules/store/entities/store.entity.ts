@@ -1,21 +1,6 @@
 import { Sector } from './../../sector/entities/sector.entity';
-import {
-  Table,
-  Column,
-  Model,
-  DataType,
-  AllowNull,
-  PrimaryKey,
-  AutoIncrement,
-  ForeignKey,
-  BelongsTo,
-  Default,
-  HasMany,
-  BelongsToMany,
-  HasOne,
-} from 'sequelize-typescript';
+import {Table,Column,Model,DataType,AllowNull,PrimaryKey,AutoIncrement,ForeignKey,BelongsTo,Default,HasMany,BelongsToMany,HasOne} from 'sequelize-typescript';
 import { cities } from 'src/common/constants/cities';
-
 import { StoreStatus } from 'src/common/enums/store_status';
 import { City } from 'src/common/types/city';
 import { Category } from 'src/modules/category/entities/category.entity';

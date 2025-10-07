@@ -141,40 +141,50 @@ export class StoreService {
     };
   }
 
-  async findAllStoresForAdmin(lang: Language,page = 1,limit = 10,status?: StoreStatus,typeId?: number,subTypeId?: number,name?: string) 
+  async findAllStoresForAdmin(
+    lang: Language,
+    page = 1,
+    limit = 10,
+    status?: StoreStatus,
+    typeId?: number,
+    subTypeId?: number,
+    name?: string,
+    city?: string,
+    phone?: string,
+    commercialRegister?: string,
+    createdAt?: string,) 
   {
     const offset = (page - 1) * limit;
-    const { rows, count } = await this.storeRepo.findAndCountAll({
-      where: {
-        ...(status && { status }),
-        ...(subTypeId && { subTypeId }),
-        isCompletedProfile:true
+    const whereStore: any = {
+      ...(status && { status }),
+      ...(subTypeId && { subTypeId }),
+      ...(city && { city }),
+      ...(phone && { phone }),
+      ...(commercialRegister && { commercialRegister }),
+      ...(createdAt && { createdAt }),
+      isCompletedProfile: true,
+    };
+    const include: any = [
+    {
+        model: StoreLanguage,
+        where: {
+          languageCode: lang,
+          ...(name && { name: { [Op.like]: `%${name}%` } }),
+        },
       },
-      include: [
-        {
-          model: StoreLanguage,
-          where: {
-            languageCode: lang,
-            ...(name && {
-              name: {
-                [Op.like]: `%${name}%`,
-              },
-            }),
-          },
-        },
-        {
-          model: SubType,
-          ...(typeId && { where: { typeId } }),
-          include: [
-            { model: SubTypeLanguage, where: { languageCode: lang } },
-            {
-              model: Type,
-              include: [{ model: TypeLanguage, where: { languageCode: lang } }],
-            },
-          ],
-        },
-        { model: OpeningHour },
-      ],
+      {
+        model: SubType,
+        ...(typeId && { where: { typeId } }),
+        include: [
+          { model: SubTypeLanguage, where: { languageCode: lang } },
+          { model: Type, include: [{ model: TypeLanguage, where: { languageCode: lang } }] },
+        ],
+      },
+      { model: OpeningHour },
+    ];
+    const { rows, count } = await this.storeRepo.findAndCountAll({
+      where:whereStore,
+      include,
       offset,
       limit,
       distinct: true,

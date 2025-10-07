@@ -7,13 +7,11 @@ export class CreateGiftTemplateDto {
     @IsNotEmpty()
     categoryId:string
 
-    @ApiProperty({ example: "2025-03-01", required: false })
+    @ApiProperty({ example: "2025-12-31T23:59:59.000Z", required: false })
     @IsOptional()
-    @IsDateString()
     startDate?: string;
 
-    @ApiProperty({ example: "2025-03-30", required: false })
+    @ApiProperty({ example: "2025-12-31T23:59:59.000Z", required: false })
     @IsOptional()
-    @IsDateString()
     endDate?: string;
 }

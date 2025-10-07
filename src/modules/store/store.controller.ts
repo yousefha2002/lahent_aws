@@ -231,12 +231,20 @@ export class StoreController {
   @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number, default is 1' })
   @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Number of items per page, default is 10' })
   @ApiQuery({ name: 'name', required: false, type: String, description: 'Filter by store name' })
+  @ApiQuery({ name: 'city', required: false, type: String, description: 'Filter by city' })
+  @ApiQuery({ name: 'phone', required: false, type: String, description: 'Filter by store phone' })
+  @ApiQuery({ name: 'commercialRegister', required: false, type: String, description: 'Filter by commercial register' })
+  @ApiQuery({ name: 'createdAt', required: false, type: String, description: 'Filter by creation date (YYYY-MM-DD)' })
   @ApiResponse({ status: 200, description: 'Paginated list of stores', type: PaginatedCustomerStoreViewDto })
   @ApiSecurity('access-token')
   @Serilaize(PaginatedCustomerStoreViewDto)
   findAllStoresForAdmin(
     @I18n() i18n: I18nContext,
-    @Query('name') name: string,
+    @Query('name') name?: string,
+    @Query('city') city?: string,
+    @Query('phone') phone?: string,
+    @Query('commercialRegister') commercialRegister?: string,
+    @Query('createdAt') createdAt?: string,
     @Query('type', new ParseIntPipe({ optional: true })) type?: number,
     @Query('subType', new ParseIntPipe({ optional: true })) subType?: number,
     @Query('status') status?: StoreStatus,
@@ -252,6 +260,10 @@ export class StoreController {
       type,
       subType,
       name,
+      city,
+      phone,
+      commercialRegister,
+      createdAt
     );
   }
 
