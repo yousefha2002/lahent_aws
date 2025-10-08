@@ -22,7 +22,7 @@ export class storeForAction extends StoreCustomerViewDto{
     @Expose()
     taxNumber:string
 
-    @ApiProperty({ example: 'https://example.com/logo.png' })
+    @ApiProperty({ example: 'https://example.com/image.png' })
     @Expose()
     taxNumberUrl: string;
 
