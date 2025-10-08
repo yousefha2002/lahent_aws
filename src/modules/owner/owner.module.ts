@@ -3,11 +3,12 @@ import { OwnerService } from './owner.service';
 import { OwnerController } from './owner.controller';
 import { OwnerProvider } from './providers/owner.provider';
 import { UserTokenModule } from '../user_token/user_token.module';
+import { AdminModule } from '../admin/admin.module';
 
 @Module({
   controllers: [OwnerController],
   providers: [OwnerService, ...OwnerProvider],
   exports: [OwnerService],
-  imports:[UserTokenModule]
+  imports:[UserTokenModule,AdminModule]
 })
 export class OwnerModule {}
