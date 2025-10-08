@@ -86,6 +86,21 @@ export class OwnerService {
   {
     return this.ownerRepo.findOne({ where: { phone} ,paranoid: false});
   }
+
+  async findAll(page = 1, limit = 10) 
+  {
+    const offset = (page - 1) * limit;
+    const { rows, count } = await this.ownerRepo.findAndCountAll({
+      limit,
+      offset,
+    });
+    const totalPages = Math.ceil(count / limit);
+    return {
+      data: rows,
+      totalItems: count,
+      totalPages,
+    };
+  }
   
   //deletion
   async findDeletedOwner(ownerId:number,transaction?:any)

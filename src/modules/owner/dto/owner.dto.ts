@@ -1,4 +1,4 @@
-import { Expose } from 'class-transformer';
+import { Expose, Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class OwnerDto {
@@ -25,4 +25,19 @@ export class OwnerDto {
     @ApiProperty({ example:false, description: 'Profile completion status' })
     @Expose()
     isCompletedProfile: boolean;
+}
+
+export class PaginationOwnerDto {
+    @ApiProperty({ type: [OwnerDto] })
+    @Expose()
+    @Type(() => OwnerDto)
+    data: OwnerDto[];
+
+    @ApiProperty({ example: 100 })
+    @Expose()
+    totalItems: number;
+
+    @ApiProperty({ example: 10 })
+    @Expose()
+    totalPages: number;
 }
