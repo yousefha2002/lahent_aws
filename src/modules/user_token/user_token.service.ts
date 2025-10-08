@@ -5,6 +5,7 @@ import { CreateTokenDto } from './dtos/createToken.dto';
 import { Op } from 'sequelize';
 import { RoleStatus } from 'src/common/enums/role_status';
 import { RefreshTokenDto } from './dtos/refreshToken.dto';
+import { REFRESH_TOKEN_EXPIRES_MS } from 'src/common/constants';
 @Injectable()
 export class UserTokenService {
     constructor(
@@ -59,6 +60,23 @@ export class UserTokenService {
         await token.save();
 
         return { message: 'Logged out successfully' };
+    }
+
+    async handleUserToken(type: RoleStatus,entityId: number,refreshToken: string,deviceId: string,device?: string,ip?: string) 
+    {
+        const existingToken = await this.findExistingToken(type, entityId, deviceId);
+
+        if (existingToken) 
+        {
+            await this.rotateToken(existingToken,refreshToken,new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS));
+            existingToken.lastLoginAt = new Date();
+            await existingToken.save();
+        } 
+        else 
+            {
+            const idField = type === RoleStatus.OWNER ? 'ownerId' : 'customerId';
+            await this.createToken({[idField]: entityId,role: type,refreshToken,expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS),device,deviceId,ip,});
+        }
     }
 
     deleteByCustomer(customerId:number,transaction?:any)

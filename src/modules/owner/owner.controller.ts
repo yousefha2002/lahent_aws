@@ -1,7 +1,6 @@
 import { Body, Controller, Get, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { OwnerService } from './owner.service';
 import { UpdateOwnerDto } from './dto/updateOwner.dto';
-import { OwnerGuard } from 'src/common/guards/roles/owner.guard';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { OwnerDto, PaginationOwnerDto } from './dto/owner.dto';
@@ -26,7 +25,7 @@ export class OwnerController {
     type: OwnerDto,
   })
   @Serilaize(OwnerDto)
-  @UseGuards(OwnerGuard)
+  @UseGuards(OwnerOrAdminGuard)
   @Put()
   async updateOwner(
     @Body() body: UpdateOwnerDto,

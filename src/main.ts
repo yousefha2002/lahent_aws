@@ -2,6 +2,8 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import * as bodyParser from 'body-parser';
 import * as dotenv from 'dotenv';
+import * as basicAuth from 'express-basic-auth';
+
 dotenv.config();
 
 import {ExpressAdapter,NestExpressApplication} from '@nestjs/platform-express';
@@ -28,6 +30,13 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
+  // app.use(
+  //   ['/api'],
+  //   basicAuth({
+  //     users: { 'admin': '123456' },
+  //     challenge: true,
+  //   }),
+  // );
   SwaggerModule.setup('api', app, document,{
     swaggerOptions: {
       docExpansion: 'none',
