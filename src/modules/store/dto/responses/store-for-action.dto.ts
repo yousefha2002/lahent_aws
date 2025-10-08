@@ -22,6 +22,14 @@ export class storeForAction extends StoreCustomerViewDto{
     @Expose()
     taxNumber:string
 
+    @ApiProperty({ example: 'https://example.com/logo.png' })
+    @Expose()
+    taxNumberUrl: string;
+
+    @ApiProperty({ example: 'https://example.com/image.png' })
+    @Expose()
+    commercialRegisterUrl: string;
+
     @ApiProperty({ type: [OpeningHourDTO] })
     @Expose()
     @Type(() => OpeningHourDTO)
