@@ -25,17 +25,18 @@ export class OwnerOrAdminGuard implements CanActivate {
             secret: 'token',
         });
 
-        // ✅ لو ADMIN
         if (decoded.role === RoleStatus.ADMIN) {
             const admin = await this.adminService.findOneById(decoded.id);
-            if (!admin) {
-            throw new UnauthorizedException('Admin not found');
+            const ownerId = request.query.ownerId;
+            if (!ownerId) {
+            throw new UnauthorizedException('Admin must provide ownerId');
             }
 
+            const owner = await this.ownerService.findById(+ownerId);
             request.currentUser = {
             type: RoleStatus.ADMIN,
             userId: admin.id,
-            context: admin,
+            context: owner,
             };
             return true;
         }
@@ -43,10 +44,6 @@ export class OwnerOrAdminGuard implements CanActivate {
         // ✅ لو OWNER
         if (decoded.role === RoleStatus.OWNER) {
             const owner = await this.ownerService.findById(decoded.id);
-            if (!owner) {
-            throw new UnauthorizedException('Owner not found');
-            }
-
             request.currentUser = {
             type: RoleStatus.OWNER,
             userId: owner.id,

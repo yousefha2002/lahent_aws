@@ -64,10 +64,6 @@ export class OwnerService {
           throw new BadRequestException('Invalid or expired refresh token');
         }
         const owner = await this.findById(decoded.id);
-        if(!owner)
-        {
-          throw new BadRequestException('owner is not found')
-        }
         const accessToken = generateAccessToken({ id: owner.id, role: decoded.role });
         const newRefreshToken = generateRefreshToken({id: owner.id,role: decoded.role});
         await this.userTokenService.rotateToken(tokenRecord,newRefreshToken,new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS));
@@ -78,7 +74,12 @@ export class OwnerService {
     }
 
   async findById(id: number) {
-    return this.ownerRepo.findOne({ where: { id } });
+    const owner = await this.ownerRepo.findOne({ where: { id } });
+    if(!owner)
+    {
+      throw new BadRequestException('owner is not found')
+    }
+    return owner
   }
 
   async findByPhone(phone:string)

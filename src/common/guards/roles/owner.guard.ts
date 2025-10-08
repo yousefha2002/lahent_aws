@@ -28,10 +28,6 @@ export class OwnerGuard implements CanActivate {
       }
 
       const owner = await this.ownerService.findById(decoded.id);
-      if (!owner) {
-        throw new UnauthorizedException('Customer not found');
-      }
-
       request.currentUser = {
         type: RoleStatus.OWNER,
         userId: owner.id,
