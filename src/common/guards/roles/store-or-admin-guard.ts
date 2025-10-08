@@ -18,7 +18,6 @@ export class StoreOrAdminGuard implements CanActivate {
 
         const decoded = await this.jwtService.verifyAsync(token, { secret: 'token' });
 
-        // لو Admin
         if (decoded.role === RoleStatus.ADMIN) {
         const admin = await this.adminService.findOneById(decoded.id);
         const storeId = request.query.storeId;
@@ -36,6 +35,8 @@ export class StoreOrAdminGuard implements CanActivate {
 
         if (decoded.role === RoleStatus.STORE) {
         const store = await this.storeService.getStoreById(decoded.id);
+        store.lastActive = new Date();
+        await store.save();
         request.currentUser = {
             type: RoleStatus.STORE,
             userId: store.id,

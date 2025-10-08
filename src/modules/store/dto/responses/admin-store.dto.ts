@@ -14,4 +14,8 @@ export class StoreAdminViewDto extends storeForAction {
     @Type(() => OwnerDto)
     @Expose()
     owner:OwnerDto
+
+    @ApiProperty({ example: '2025-08-29T10:00:00.000Z'})
+    @Expose()
+    lastActive: Date | null;
 }

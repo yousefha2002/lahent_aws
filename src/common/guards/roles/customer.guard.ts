@@ -31,6 +31,8 @@ export class CustomerGuard implements CanActivate {
         throw new UnauthorizedException('Unauthorized role');
       }
       const customer = await this.customerService.findById(decoded.id);
+      customer.lastActive = new Date();
+      await customer.save();
       request.currentUser = {
         userId: customer.id,
         type: RoleStatus.CUSTOMER,

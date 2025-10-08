@@ -28,6 +28,8 @@ import { StoreService } from 'src/modules/store/services/store.service';
         }
 
         const store = await this.storeService.getStoreById(decoded.id);
+        store.lastActive = new Date();
+        await store.save();
         request.currentUser = {
             type: RoleStatus.STORE,
             userId: store.id,
