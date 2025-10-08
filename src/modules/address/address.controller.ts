@@ -29,12 +29,13 @@ export class AddressController {
   })
   @Post()
   create(
-    @CurrentUser() user: Customer,
+    @CurrentUser() user: CurrentUserType,
     @Body() dto: CreateAddressDto,
     @I18n() i18n: I18nContext,
   ) {
     const lang = getLang(i18n);
-    return this.addressService.create(user.id, dto, lang);
+    const {context} = user
+    return this.addressService.create(context.id, dto, lang);
   }
 
   @Serilaize(AddressDto)

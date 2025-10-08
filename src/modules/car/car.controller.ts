@@ -38,11 +38,12 @@ export class CarController {
   })
   create(
     @Body() dto: CreateCarDto,
-    @CurrentUser() user: Customer,
+    @CurrentUser() user: CurrentUserType,
     @I18n() i18n: I18nContext,
   ) {
     const lang = getLang(i18n);
-    return this.carService.create(user.id, dto, lang);
+    const {context} = user
+    return this.carService.create(context.id, dto, lang);
   }
 
   @Serilaize(CustomerCarListDto)
@@ -56,11 +57,12 @@ export class CarController {
     type: CustomerCarListDto,
   })
   getAllCustomerCars(
-    @CurrentUser() user: Customer,
+    @CurrentUser() user: CurrentUserType,
     @I18n() i18n: I18nContext,
   ) {
     const lang = getLang(i18n);
-    return this.carService.getAllCustomerCars(user.id, lang);
+    const {context} = user
+    return this.carService.getAllCustomerCars(context.id, lang);
   }
 
   @Serilaize(CustomerCarListDto)

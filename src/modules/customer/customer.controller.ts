@@ -5,7 +5,6 @@ import { multerOptions } from 'src/multer/multer.options';
 import { MulterExceptionFilter } from 'src/multer/multer.exception.filter';
 import { CustomerGuard } from 'src/common/guards/roles/customer.guard';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
-import { Customer } from './entities/customer.entity';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { I18n, I18nContext } from 'nestjs-i18n';

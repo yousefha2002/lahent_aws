@@ -3,7 +3,6 @@ import { PaymentCardService } from './payment_card.service';
 import { CustomerGuard } from 'src/common/guards/roles/customer.guard';
 import { CompletedProfileGuard } from 'src/common/guards/auths/completed-profile.guard';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
-import { Customer } from '../customer/entities/customer.entity';
 import { CreatePaymentCardDto } from './dto/create-payment-card.dto';
 import { UpdatePaymentCardDto } from './dto/update-payment-card.dto';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
@@ -25,12 +24,13 @@ export class PaymentCardController {
   @ApiResponse({ status: 201, description: 'Payment card created', type: PaymentCardDto })
   @Post()
   create(
-    @CurrentUser() user: Customer,
+    @CurrentUser() user: CurrentUserType,
     @Body() dto: CreatePaymentCardDto,
     @I18n() i18n: I18nContext
   ) {
     const lang = getLang(i18n);
-    return this.paymentCardService.create(dto, user.id);
+    const {context} = user
+    return this.paymentCardService.create(dto, context.id);
   }
 
   @Serilaize(PaymentCardDto)

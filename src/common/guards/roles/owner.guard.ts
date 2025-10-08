@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  CanActivate,
-  ExecutionContext,
-  UnauthorizedException,
-} from '@nestjs/common';
+import {Injectable,CanActivate,ExecutionContext,UnauthorizedException} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { RoleStatus } from '../../enums/role_status';
 import { OwnerService } from 'src/modules/owner/owner.service';

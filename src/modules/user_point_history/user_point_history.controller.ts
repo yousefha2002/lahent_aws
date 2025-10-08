@@ -5,7 +5,6 @@ import { PaginatedUserPointHistoryDto } from './dto/user_point_history.dto';
 import { CustomerGuard } from 'src/common/guards/roles/customer.guard';
 import { ApiOkResponse, ApiOperation, ApiQuery, ApiSecurity } from '@nestjs/swagger';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
-import { Customer } from '../customer/entities/customer.entity';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
 import { CurrentUserType } from 'src/common/types/current-user.type';

@@ -4,9 +4,7 @@ import { Body, Controller, Get, Param, ParseIntPipe, Post, Put, Query, Req, UseG
 import { OrderService } from './services/order.service';
 import { CustomerGuard } from 'src/common/guards/roles/customer.guard';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
-import { Customer } from '../customer/entities/customer.entity';
 import { createOrderDto } from './dto/requests/create-order.dto';
-import { Store } from '../store/entities/store.entity';
 import { ExtendOrderTimeDto } from './dto/requests/extend-order-time.dto';
 import { ApprovedStoreGuard } from 'src/common/guards/auths/approved-store.guard';
 import { OrderPaymentService } from './services/order-payment.service';

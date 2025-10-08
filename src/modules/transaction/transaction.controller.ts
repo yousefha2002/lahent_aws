@@ -3,7 +3,6 @@ import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/co
 import { TransactionService } from './transaction.service';
 import { CustomerGuard } from 'src/common/guards/roles/customer.guard';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
-import { Customer } from '../customer/entities/customer.entity';
 import { ChargeWalletDTO } from './dto/charge-wallet.dto';
 import { filterTypeTransaction } from 'src/common/types/filter-type-transaction';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';

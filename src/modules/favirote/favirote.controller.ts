@@ -2,7 +2,6 @@ import { Controller, Delete, Post, Param, UseGuards } from '@nestjs/common';
 import { FaviroteService } from './favirote.service';
 import { CustomerGuard } from 'src/common/guards/roles/customer.guard';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
-import { Customer } from '../customer/entities/customer.entity';
 import { CompletedProfileGuard } from 'src/common/guards/auths/completed-profile.guard';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
