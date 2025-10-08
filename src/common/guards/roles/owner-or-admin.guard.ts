@@ -34,20 +34,19 @@ export class OwnerOrAdminGuard implements CanActivate {
 
             const owner = await this.ownerService.findById(+ownerId);
             request.currentUser = {
-            type: RoleStatus.ADMIN,
-            userId: admin.id,
-            context: owner,
+                type: RoleStatus.ADMIN,
+                userId: admin.id,
+                context: owner,
             };
             return true;
         }
 
-        // ✅ لو OWNER
         if (decoded.role === RoleStatus.OWNER) {
             const owner = await this.ownerService.findById(decoded.id);
             request.currentUser = {
-            type: RoleStatus.OWNER,
-            userId: owner.id,
-            context: owner,
+                type: RoleStatus.OWNER,
+                userId: owner.id,
+                context: owner,
             };
             return true;
         }

@@ -6,7 +6,6 @@ import {Controller,Post,Body,UseGuards,UseInterceptors,UploadedFiles,Get,Query,P
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { CreateStoreDto } from './dto/requests/create-store.dto';
 import { StoreService } from './services/store.service';
-import { OwnerGuard } from 'src/common/guards/roles/owner.guard';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { multerOptions } from 'src/multer/multer.options';
 import {OpeningHourEnum,validateAndParseOpeningHours,} from 'src/common/validators/validateAndParseOpeningHours';
@@ -38,6 +37,7 @@ import { StoreAdminViewDto } from './dto/responses/admin-store.dto';
 import { StoreOrAdminGuard } from 'src/common/guards/roles/store-or-admin-guard';
 import { AdminGuard } from 'src/common/guards/roles/admin.guard';
 import { CurrentUserType } from 'src/common/types/current-user.type';
+import { OwnerOrAdminGuard } from 'src/common/guards/roles/owner-or-admin.guard';
 
 @Controller('store')
 export class StoreController {
@@ -54,7 +54,8 @@ export class StoreController {
   @ApiSecurity('access-token')
   @ApiBody({ type: InitialCreateStoreDto })
   @ApiResponse({status: 200,schema: {example: {message: 'Store created successfully'}}})
-  @UseGuards(OwnerGuard,CompletedProfileGuard)
+  @ApiQuery({ name: 'ownerId', required: false, example: 1 })
+  @UseGuards(OwnerOrAdminGuard,CompletedProfileGuard)
   async initialCreate(@Body() dto: InitialCreateStoreDto,@CurrentUser() user: CurrentUserType,@I18n() i18n: I18nContext,) 
   {
     const lang = getLang(i18n);
@@ -67,8 +68,9 @@ export class StoreController {
   @ApiSecurity('access-token')
   @ApiConsumes('multipart/form-data')
   @ApiBody({ type: CreateStoreDto })
+  @ApiQuery({ name: 'ownerId', required: false, example: 1 })
   @ApiResponse({status: 200,description: 'Store created successfully',schema: { example: { message: 'Created successfully' } },})
-  @UseGuards(OwnerGuard)
+  @UseGuards(OwnerOrAdminGuard)
   @UseInterceptors(
     FileFieldsInterceptor(
       [
@@ -112,9 +114,10 @@ export class StoreController {
 
   @Serilaize(IncompleteStoreResponseDto)
   @Get('incomplete')
-  @UseGuards(OwnerGuard)
+  @UseGuards(OwnerOrAdminGuard)
   @ApiOperation({ summary: 'Get incomplete store info for owner' })
   @ApiSecurity('access-token')
+  @ApiQuery({ name: 'ownerId', required: false, example: 1 })
   @ApiResponse({status: 200,description: 'Incomplete store info if exists',type: IncompleteStoreResponseDto})
   async getIncompleteStore(@CurrentUser() user: CurrentUserType, @I18n() i18n: I18nContext) {
     const lang = getLang(i18n);
@@ -152,8 +155,9 @@ export class StoreController {
   @ApiOperation({ summary: 'Get all stores of the owner' })
   @ApiResponse({status: 200,type: [OwnerStoresResponseDto]})
   @ApiSecurity('access-token')
+  @ApiQuery({ name: 'ownerId', required: false, example: 1 })
   @Serilaize(OwnerStoresResponseDto)
-  @UseGuards(OwnerGuard)
+  @UseGuards(OwnerOrAdminGuard)
   findStoresByOwner(@CurrentUser() user: CurrentUserType,@I18n() i18n: I18nContext) {
     const lang = getLang(i18n);
     const {context} = user
@@ -507,8 +511,9 @@ export class StoreController {
   @ApiOperation({ summary: 'Select a store for the current owner' })
   @ApiParam({ name: 'storeId', description: 'ID of the store to select', type: Number })
   @ApiResponse({ status: 200, description: 'Store selected successfully', type: StoreWithTokenDto })
+  @ApiQuery({ name: 'ownerId', required: false, example: 1 })
   @ApiBody({ type: SelectOwnerForStoreDto })
-  @UseGuards(OwnerGuard)
+  @UseGuards(OwnerOrAdminGuard)
   selectStoreForOwner(@CurrentUser() user:CurrentUserType,@Param('storeId') storeId:number,@Body() dto:SelectOwnerForStoreDto,@I18n() i18n: I18nContext,@Req() req: Request,@Ip() ip:string)
   {
     const lang = getLang(i18n)
