@@ -1,17 +1,4 @@
-import {
-  Table,
-  Column,
-  Model,
-  DataType,
-  AutoIncrement,
-  PrimaryKey,
-  AllowNull,
-  HasMany,
-  ForeignKey,
-  BelongsTo,
-  Default,
-  BelongsToMany,
-} from 'sequelize-typescript';
+import {Table,Column,Model,DataType,AutoIncrement,PrimaryKey,AllowNull,HasMany,ForeignKey,BelongsTo,Default,BelongsToMany} from 'sequelize-typescript';
 import { Address } from 'src/modules/address/entities/address.entity';
 import { Avatar } from 'src/modules/avatar/entities/avatar.entity';
 import { Car } from 'src/modules/car/entities/car.entity';
@@ -99,4 +86,7 @@ export class Customer extends Model {
 
   @Column({ type: DataType.STRING, unique: true })
   referralCode: string;
+
+  @Column({ type: DataType.DATE,allowNull: true,})
+  lastActive: Date;
 }

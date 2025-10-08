@@ -149,4 +149,7 @@ export class Store extends Model {
 
   @Column({type: DataType.STRING,allowNull: false,defaultValue: 'Asia/Riyadh'})
   timezone: string;
+
+  @Column({ type: DataType.DATE,allowNull: true,})
+  lastActive: Date;
 }
