@@ -8,6 +8,7 @@ import { CartItemWithProductOptionsDto } from './dto/cart_item.dto';
 import { ApiOperation, ApiParam, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
+import { CurrentUserType } from 'src/common/types/current-user.type';
 
 @Controller('cart-item')
 export class CartItemController {
@@ -26,10 +27,11 @@ export class CartItemController {
   })
   getCartItemWithProductOptions(
     @Param('id') cartItemId: number,
-    @CurrentUser() user: Customer,
+    @CurrentUser() user: CurrentUserType,
     @I18n() i18n: I18nContext
   ) {
     const lang = getLang(i18n);
-    return this.cartItemService.getCartItemWithProductOptions(cartItemId, user.id, lang);
+    const {context} = user
+    return this.cartItemService.getCartItemWithProductOptions(cartItemId, context.id, lang);
   }
 }
