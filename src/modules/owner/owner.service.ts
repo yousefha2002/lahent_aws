@@ -5,11 +5,12 @@ import { Owner } from './entities/owner.entity';
 import { UpdateOwnerDto } from './dto/updateOwner.dto';
 import { I18nService } from 'nestjs-i18n';
 import { Language } from 'src/common/enums/language';
-import { generateAccessToken, generateRefreshToken } from 'src/common/utils/generateToken';
+import {generateTokens } from 'src/common/utils/generateToken';
 import { JwtService } from '@nestjs/jwt';
 import { REFRESH_TOKEN_EXPIRES_MS } from 'src/common/constants';
 import { Op } from 'sequelize';
 import { RefreshTokenDto } from '../user_token/dtos/refreshToken.dto';
+import { RoleStatus } from 'src/common/enums/role_status';
 
 @Injectable()
 export class OwnerService {
@@ -64,10 +65,9 @@ export class OwnerService {
           throw new BadRequestException('Invalid or expired refresh token');
         }
         const owner = await this.findById(decoded.id);
-        const accessToken = generateAccessToken({ id: owner.id, role: decoded.role });
-        const newRefreshToken = generateRefreshToken({id: owner.id,role: decoded.role});
-        await this.userTokenService.rotateToken(tokenRecord,newRefreshToken,new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS));
-        return { accessToken, refreshToken: newRefreshToken };
+        const tokens = generateTokens(owner.id, RoleStatus.OWNER);
+        await this.userTokenService.rotateToken(tokenRecord,tokens.refreshToken,new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS));
+        return { accessToken:tokens.accessToken, refreshToken: tokens.refreshToken };
       } catch (err) {
         throw new BadRequestException('Invalid or expired refresh token');
       }

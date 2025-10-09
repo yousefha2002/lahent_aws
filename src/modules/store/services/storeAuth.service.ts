@@ -15,7 +15,7 @@ import { RoleStatus } from 'src/common/enums/role_status';
 import { SubtypeService } from '../../subtype/subtype.service';
 import { I18nService } from 'nestjs-i18n';
 import { Language } from 'src/common/enums/language';
-import { generateAccessToken, generateRefreshToken } from 'src/common/utils/generateToken';
+import { generateAccessToken, generateRefreshToken, generateTokens } from 'src/common/utils/generateToken';
 import { JwtService } from '@nestjs/jwt';
 import { validateAndParseStoreTranslations } from 'src/common/validators/validate-store-translations.validator';
 import { StoreLanguage } from '../entities/store_language.entity';
@@ -198,14 +198,11 @@ export class StoreAuthService {
         if (!isMatch) {
         throw new BadRequestException(this.i18n.t('translation.auth.invalidPassword',{lang}));
         }
-
-        const payload = { id: storeByPass.id, role: RoleStatus.STORE };
-        const accessToken = generateAccessToken(payload);
-        const refreshToken = generateRefreshToken(payload)
+        const tokens = generateTokens(storeByPass.id, RoleStatus.STORE);
         const existingToken = await this.userTokenService.findExistingToken(RoleStatus.STORE,storeByPass.id,dto.deviceId);
         if(existingToken)
         {
-            await this.userTokenService.rotateToken(existingToken,refreshToken,new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS))
+            await this.userTokenService.rotateToken(existingToken,tokens.refreshToken,new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS))
             existingToken.lastLoginAt = new Date();
             await existingToken.save();
         }
@@ -213,7 +210,7 @@ export class StoreAuthService {
             await this.userTokenService.createToken({
                 storeId: storeByPass.id,
                 role: RoleStatus.STORE,
-                refreshToken,
+                refreshToken:tokens.refreshToken,
                 expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS),
                 device,
                 ip,
@@ -222,7 +219,7 @@ export class StoreAuthService {
         }
         await storeByPass.save()
 
-        return {store: storeByPass,accessToken,refreshToken};
+        return {store: storeByPass,accessToken:tokens.accessToken,refreshToken:tokens.refreshToken};
     }
 
     async refreshToken(dto:RefreshTokenDto)
@@ -235,11 +232,10 @@ export class StoreAuthService {
                 throw new BadRequestException('Invalid or expired refresh token');
             }
             const store = await this.storeService.getStoreById(decoded.id);
-            const accessToken = generateAccessToken({ id: store.id, role: decoded.role });
-            const newRefreshToken = generateRefreshToken({ id: store.id, role: decoded.role });
-            await this.userTokenService.rotateToken(tokenRecord,newRefreshToken,new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS),);
+            const tokens = generateTokens(store.id, RoleStatus.STORE);
+            await this.userTokenService.rotateToken(tokenRecord,tokens.refreshToken,new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS),);
 
-            return {accessToken,refreshToken: newRefreshToken,};
+            return {accessToken:tokens.accessToken,refreshToken:tokens.refreshToken};
         } catch (err) {
             throw new BadRequestException('Invalid or expired refresh token');
         }
@@ -253,15 +249,13 @@ export class StoreAuthService {
         {
             throw new ForbiddenException('You are not the owner of the store')
         }
-        const payload = { id: store.id, role: RoleStatus.STORE };
-        const accessToken = generateAccessToken(payload);
-        const refreshToken = generateRefreshToken(payload);
+        const tokens = generateTokens(store.id, RoleStatus.STORE);
         const existingToken = await this.userTokenService.findExistingToken(RoleStatus.STORE,storeId,deviceId);
 
         if (existingToken) {
             await this.userTokenService.rotateToken(
                 existingToken,
-                refreshToken,
+                tokens.refreshToken,
                 new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS),
             );
         } else {
@@ -269,14 +263,14 @@ export class StoreAuthService {
             ownerId:ownerId,
             storeId: store.id,
             role: RoleStatus.STORE,
-            refreshToken,
+            refreshToken:tokens.refreshToken,
             expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS),
             device,
             ip,
             deviceId
         });
         }
-        return { accessToken ,refreshToken,store};
+        return { accessToken:tokens.accessToken ,refreshToken:tokens.refreshToken,store};
     }
 
     async updatePassword(store:Store,dto:UpdatePasswordDto)
