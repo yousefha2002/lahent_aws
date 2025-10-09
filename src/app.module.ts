@@ -64,6 +64,7 @@ import { CityModule } from './modules/city/city.module';
 import { PaymentCardModule } from './modules/payment_card/payment_card.module';
 import { FcmTokenModule } from './modules/fcm_token/fcm_token.module';
 import { AuditLogModule } from './modules/audit_log/audit_log.module';
+import { UserContextModule } from './modules/user-context/user-context.module';
 
 @Module({
   imports: [
@@ -143,6 +144,7 @@ import { AuditLogModule } from './modules/audit_log/audit_log.module';
     PaymentCardModule,
     FcmTokenModule,
     AuditLogModule,
+    UserContextModule,
   ],
   providers: [MulterConfigService],
 })

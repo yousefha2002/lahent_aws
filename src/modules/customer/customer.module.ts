@@ -18,7 +18,7 @@ import { DatabaseModule } from 'src/database/database.module';
     AvatarModule,
     forwardRef(() => GiftModule),
     UserTokenModule,
-    DatabaseModule
+    DatabaseModule,
   ],
   exports: [CustomerService],
 })

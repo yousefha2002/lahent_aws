@@ -35,8 +35,7 @@ export class OtpCodeService {
       return { phone, code: DEMO_OTP_CODE, status: 'login' };
     }
     const code = generateOtpCode();
-    const smsMessage = this.i18n.translate('translation.sms.verification_code', {lang,args: { code },});  
-    await this.smsService.sendSms(phone, smsMessage);
+    await this.smsService.sendSms(phone, `Your OTP code is: ${code}`);
     const serviceMap = {
       owner: { service: this.ownerService, role: RoleStatus.OWNER },
       customer: { service: this.customerService, role: RoleStatus.CUSTOMER },

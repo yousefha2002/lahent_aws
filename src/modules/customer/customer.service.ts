@@ -9,13 +9,11 @@ import { Language } from 'src/common/enums/language';
 import { Avatar } from '../avatar/entities/avatar.entity';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { GiftService } from '../gift/gift.service';
-import {generateTokens } from 'src/common/utils/generateToken';
+import {generateAccessToken, generateRefreshToken } from 'src/common/utils/generateToken';
 import { JwtService } from '@nestjs/jwt';
 import { REFRESH_TOKEN_EXPIRES_MS } from 'src/common/constants';
-import { Sequelize } from 'sequelize';
 import { Op } from 'sequelize';
 import { RefreshTokenDto } from '../user_token/dtos/refreshToken.dto';
-import { RoleStatus } from 'src/common/enums/role_status';
 
 @Injectable()
 export class CustomerService {
@@ -29,7 +27,6 @@ export class CustomerService {
     private giftService: GiftService,
     private jwtService: JwtService,
     private userTokenService:UserTokenService,
-    @Inject('SEQUELIZE') private readonly sequelize: Sequelize,
   ) {}
   async createCustomer(phone:string,lang=Language.en)
   {
@@ -74,9 +71,10 @@ export class CustomerService {
         throw new BadRequestException('Invalid or expired refresh token');
       }
       const customer = await this.findById(decoded.id);
-      const tokens = generateTokens(customer.id, RoleStatus.CUSTOMER);
-      await this.userTokenService.rotateToken(tokenRecord,tokens.refreshToken,new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS));
-      return { accessToken:tokens.accessToken, refreshToken: tokens.refreshToken };
+      const accessToken = generateAccessToken({ id: customer.id, role: decoded.role });
+      const newRefreshToken = generateRefreshToken({id: customer.id,role: decoded.role});
+      await this.userTokenService.rotateToken(tokenRecord,newRefreshToken,new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS));
+      return { accessToken, refreshToken: newRefreshToken };
     } catch (err) {
       throw new BadRequestException(err.message || 'Invalid or expired refresh token');
     }
