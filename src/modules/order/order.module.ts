@@ -15,7 +15,6 @@ import { StoreModule } from '../store/store.module';
 import { TransactionModule } from '../transaction/transaction.module';
 import { PaymentSessionModule } from '../payment_session/payment_session.module';
 import { UserPointHistoryModule } from '../user_point_history/user_point_history.module';
-import { OwnerModule } from '../owner/owner.module';
 import { OrderPaymentService } from './services/order-payment.service';
 import { OrderPointsService } from './services/order_points.service';
 import { OrderStatusService } from './services/order_status.service';
@@ -29,7 +28,7 @@ import { LoyaltySettingModule } from '../loyalty_setting/loyalty_setting.module'
 import { PaymentCardModule } from '../payment_card/payment_card.module';
 import { FcmTokenModule } from '../fcm_token/fcm_token.module';
 import { OrderPlacingService } from './services/order-placing.service';
-import { AdminModule } from '../admin/admin.module';
+import { UserContextModule } from '../user-context/user-context.module';
 
 @Module({
   controllers: [OrderController],
@@ -56,7 +55,6 @@ import { AdminModule } from '../admin/admin.module';
     StoreModule,
     forwardRef(()=>TransactionModule),
     UserPointHistoryModule,
-    OwnerModule,
     OfferModule,
     ProductModule,
     forwardRef(()=>PaymentSessionModule),
@@ -65,7 +63,7 @@ import { AdminModule } from '../admin/admin.module';
     LoyaltySettingModule,
     PaymentCardModule,
     FcmTokenModule,
-    AdminModule
+    forwardRef(()=>UserContextModule)
   ],
   exports: [OrderService,OrderPaymentService],
 })

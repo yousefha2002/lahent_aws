@@ -1,4 +1,4 @@
-import {Body,Controller,Get,Param,Post,Put,UseGuards} from '@nestjs/common';
+import {Body,Controller,Get,Param,Post,Put} from '@nestjs/common';
 import { CarBrandService } from './car_brand.service';
 import { CreateCarBrandDto } from './dto/create_car_brand.dto';
 import { UpdateCarBrandDto } from './dto/update_car_brand.dto';
@@ -7,7 +7,8 @@ import { CarBrandDto } from './dto/car-brand.dto';
 import {ApiBody,ApiOperation,ApiParam,ApiResponse,ApiSecurity} from '@nestjs/swagger';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
-import { AdminGuard } from 'src/common/guards/roles/admin.guard';
+import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
+import { RoleStatus } from 'src/common/enums/role_status';
 
 @Controller('car-brand')
 export class CarBrandController {
@@ -29,7 +30,7 @@ export class CarBrandController {
     description: 'Car brand created successfully',
     schema: { example: { message: 'Created successfully' } },
   })
-  @UseGuards(AdminGuard)
+  @PermissionGuard([RoleStatus.ADMIN])
   @Post()
   create(@Body() dto: CreateCarBrandDto, @I18n() i18n: I18nContext) {
     const lang = getLang(i18n);
@@ -53,7 +54,7 @@ export class CarBrandController {
     description: 'Car brand updated successfully',
     schema: { example: { message: 'Updated successfully' } },
   })
-  @UseGuards(AdminGuard)
+  @PermissionGuard([RoleStatus.ADMIN])
   @Put(':id')
   update(@Param('id') id: number, @Body() dto: UpdateCarBrandDto) {
     return this.carBrandService.update(id, dto);
@@ -77,7 +78,7 @@ export class CarBrandController {
   @ApiOperation({ summary: 'Get all car brands for admin' })
   @ApiResponse({type:[CarBrandDto]})
   @Get('admin')
-  @UseGuards(AdminGuard)
+  @PermissionGuard([RoleStatus.ADMIN])
   @Serilaize(CarBrandDto)
   getAllAdmin() {
     return this.carBrandService.getAll();

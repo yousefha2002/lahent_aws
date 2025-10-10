@@ -1,4 +1,4 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { OtpCodeService } from './otp_code.service';
 import { OtpCodeController } from './otp_code.controller';
 import { OptCodeProvider } from './providers/opt_code.provider';
@@ -11,6 +11,6 @@ import { UserTokenModule } from '../user_token/user_token.module';
   controllers: [OtpCodeController],
   providers: [OtpCodeService, ...OptCodeProvider],
   exports: [OtpCodeService],
-  imports:[SmsModule,forwardRef(() => CustomerModule),OwnerModule,UserTokenModule]
+  imports:[SmsModule,CustomerModule,OwnerModule,UserTokenModule]
 })
 export class OtpCodeModule {}

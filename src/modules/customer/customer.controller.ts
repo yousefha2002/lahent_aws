@@ -1,9 +1,8 @@
-import { Body, Controller, Get, Post, Put, UploadedFile, UseFilters, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Post, Put, UploadedFile, UseFilters, UseInterceptors } from '@nestjs/common';
 import { CustomerService } from './customer.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { multerOptions } from 'src/multer/multer.options';
 import { MulterExceptionFilter } from 'src/multer/multer.exception.filter';
-import { CustomerGuard } from 'src/common/guards/roles/customer.guard';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
@@ -13,6 +12,8 @@ import { ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiSecurity } from '@n
 import { RefreshTokenDto } from '../user_token/dtos/refreshToken.dto';
 import { CustomerDetailsDto } from './dto/customer.dto';
 import { CurrentUserType } from 'src/common/types/current-user.type';
+import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
+import { RoleStatus } from 'src/common/enums/role_status';
 
 @Controller('customer')
 export class CustomerController {
@@ -22,7 +23,7 @@ export class CustomerController {
   @ApiOperation({ summary: 'Get current logged in customer' })
   @ApiResponse({ status: 200, description: 'Returns the currently logged in customer', type: CustomerDetailsDto })
   @Serilaize(CustomerDetailsDto)
-  @UseGuards(CustomerGuard)
+  @PermissionGuard([RoleStatus.CUSTOMER])
   @Get()
   getMine(@CurrentUser() user: CurrentUserType) {
     const {context} = user
@@ -46,7 +47,7 @@ export class CustomerController {
   })
   @ApiResponse({ status: 200, description: 'Customer profile updated successfully', type: CustomerDetailsDto })
   @Serilaize(CustomerDetailsDto)
-  @UseGuards(CustomerGuard)
+  @PermissionGuard([RoleStatus.CUSTOMER,RoleStatus.ADMIN])
   @Put()
   @UseInterceptors(FileInterceptor('image', multerOptions))
   @UseFilters(MulterExceptionFilter)

@@ -4,6 +4,8 @@ import { ApiOperation, ApiParam, ApiResponse, ApiSecurity } from '@nestjs/swagge
 import { CustomerGuard } from 'src/common/guards/roles/customer.guard';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { PaymentSessionDto } from './dto/payment-session.dto';
+import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
+import { RoleStatus } from 'src/common/enums/role_status';
 
 @Controller('payment-session')
 export class PaymentSessionController {
@@ -15,7 +17,7 @@ export class PaymentSessionController {
   @ApiResponse({ status: 200, type:PaymentSessionDto })
   @ApiResponse({ status: 404, description: 'Payment session not found' })
   @ApiSecurity('access-token')
-  @UseGuards(CustomerGuard)
+  @PermissionGuard([RoleStatus.CUSTOMER])
   @Get('status/:paymentId')
   async checkStatus(@Param('paymentId') paymentId: number) {
     return this.paymentSessionService.checkPaymentStatus(paymentId);

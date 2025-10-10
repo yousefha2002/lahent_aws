@@ -8,6 +8,8 @@ import {ApiBody,ApiOperation,ApiParam,ApiResponse,ApiSecurity} from '@nestjs/swa
 import { getLang } from 'src/common/utils/get-lang.util';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { AdminGuard } from 'src/common/guards/roles/admin.guard';
+import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
+import { RoleStatus } from 'src/common/enums/role_status';
 
 @Controller('subtype')
 export class SubtypeController {
@@ -36,7 +38,7 @@ export class SubtypeController {
     },
   })
   @Post('/create')
-  @UseGuards(AdminGuard)
+  @PermissionGuard([RoleStatus.ADMIN])
   createSubType(@Body() body: CreateSubTypeDto) {
     return this.subtypeService.createSubType(body);
   }
@@ -66,7 +68,7 @@ export class SubtypeController {
     },
   })
   @Put('/update/:subTypeId')
-  @UseGuards(AdminGuard)
+  @PermissionGuard([RoleStatus.ADMIN])
   updateSubType(
     @Body() body: UpdateSubTypeDto,
     @Param('subTypeId') subTypeId: number,
@@ -89,7 +91,7 @@ export class SubtypeController {
     },
   })
   @Delete('/:subTypeId')
-  @UseGuards(AdminGuard)
+  @PermissionGuard([RoleStatus.ADMIN])
   deleteSubType(@Param('subTypeId') subTypeId: number) {
     return this.subtypeService.deleteSubType(+subTypeId);
   }
@@ -113,7 +115,7 @@ export class SubtypeController {
   }
 
   @Get('admin/byType/:typeId')
-  @UseGuards(AdminGuard)
+  @PermissionGuard([RoleStatus.ADMIN])
   @Serilaize(SubTypeDto)
   fetchAllByTypeIdAdmin(@Param('typeId') typeId: string) {
     return this.subtypeService.getAllSubTypesByTypeId(+typeId);

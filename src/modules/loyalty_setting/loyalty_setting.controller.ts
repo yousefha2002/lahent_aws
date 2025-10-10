@@ -1,10 +1,11 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { LoyaltySettingService } from './loyalty_setting.service';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { LoyaltySettingDto } from './dto/loyaltysetting.dto';
 import { ApiBody, ApiOperation, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { CreateLoyaltySettingDto } from './dto/create_loyalty_setting.dto';
-import { AdminGuard } from 'src/common/guards/roles/admin.guard';
+import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
+import { RoleStatus } from 'src/common/enums/role_status';
 
 @Controller('loyalty-setting')
 export class LoyaltySettingController {
@@ -22,7 +23,7 @@ export class LoyaltySettingController {
     return this.loyaltySettingService.getSettings();
   }
 
-  @UseGuards(AdminGuard)
+  @PermissionGuard([RoleStatus.ADMIN])
   @Serilaize(LoyaltySettingDto)
   @ApiOperation({ summary: 'Create or update loyalty settings' })
   @ApiSecurity('access-token')

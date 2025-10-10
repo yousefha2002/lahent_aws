@@ -1,13 +1,13 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { LoyaltyOfferService } from './loyalty_offer.service';
 import { LoyaltyOfferController } from './loyalty_offer.controller';
 import { LoyaltyOfferProvider } from './providers/loyalty_offer.provider';
-import { AdminModule } from '../admin/admin.module';
+import { UserContextModule } from '../user-context/user-context.module';
 
 @Module({
   controllers: [LoyaltyOfferController],
   providers: [LoyaltyOfferService,...LoyaltyOfferProvider],
-  imports:[AdminModule],
+  imports:[forwardRef(()=>UserContextModule)],
   exports:[LoyaltyOfferService]
 })
 export class LoyaltyOfferModule {}

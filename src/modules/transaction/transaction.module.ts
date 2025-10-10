@@ -7,6 +7,7 @@ import { LoyaltyOfferModule } from '../loyalty_offer/loyalty_offer.module';
 import { CustomerModule } from '../customer/customer.module';
 import { GiftModule } from '../gift/gift.module';
 import { PaymentCardModule } from '../payment_card/payment_card.module';
+import { UserContextModule } from '../user-context/user-context.module';
 
 @Module({
   controllers: [TransactionController],
@@ -14,6 +15,7 @@ import { PaymentCardModule } from '../payment_card/payment_card.module';
   imports: [
     LoyaltyOfferModule,
     forwardRef(() => CustomerModule),
+    forwardRef(() => UserContextModule),
     PaymentSessionModule,
     forwardRef(() => GiftModule),
     forwardRef(()=>PaymentCardModule)

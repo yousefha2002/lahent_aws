@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Put, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Put, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { GiftTemplateService } from './gift_template.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateGiftTemplateDto } from './dto/create-gift-template.dto';
@@ -8,7 +8,8 @@ import { I18n, I18nContext } from 'nestjs-i18n';
 import { ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { getLang } from 'src/common/utils/get-lang.util';
 import { UpdateGiftTemplateDto } from './dto/update-gift-template.dto';
-import { AdminGuard } from 'src/common/guards/roles/admin.guard';
+import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
+import { RoleStatus } from 'src/common/enums/role_status';
 
 @Controller('gift-template')
 export class GiftTemplateController {
@@ -19,7 +20,7 @@ export class GiftTemplateController {
   @ApiSecurity('access-token')
   @ApiBody({type:CreateGiftTemplateDto})
   @ApiResponse({ status: 201, description: 'Gift template created successfully', schema: { example: { message: 'Created successfully' } } })
-  @UseGuards(AdminGuard)
+  @PermissionGuard([RoleStatus.ADMIN])
   @Post()
   @UseInterceptors(FileInterceptor('image'))
   async create(
@@ -36,7 +37,7 @@ export class GiftTemplateController {
   @ApiSecurity('access-token')
   @ApiBody({ type: UpdateGiftTemplateDto })
   @ApiResponse({ status: 201, description: 'Gift template updated successfully', schema: { example: { message: 'Updated successfully' } } })
-  @UseGuards(AdminGuard)
+  @PermissionGuard([RoleStatus.ADMIN])
   @Put(':id')
   @UseInterceptors(FileInterceptor('image'))
   async update(
@@ -74,7 +75,7 @@ export class GiftTemplateController {
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
   @ApiResponse({ status: 200, description: 'All gift templates by gift category (including inactive)', type: PaginatedAdminGiftTemplateDto })
   @ApiSecurity('access-token')
-  @UseGuards(AdminGuard)
+  @PermissionGuard([RoleStatus.ADMIN])
   @Serilaize(PaginatedAdminGiftTemplateDto)
   @Get('admin/by-category/:categoryId')
   async findByCategoryForAdmin(

@@ -9,24 +9,24 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { CarService } from './car.service';
-import { CustomerGuard } from 'src/common/guards/roles/customer.guard';
 import { CompletedProfileGuard } from 'src/common/guards/auths/completed-profile.guard';
 import { CreateCarDto } from './dto/create_car.dto';
 import { UpdateCarDto } from './dto/update-car.dto';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
-import { Customer } from '../customer/entities/customer.entity';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { CustomerCarListDto } from './dto/customer-car-list.dto';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
 import { CurrentUserType } from 'src/common/types/current-user.type';
+import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
+import { RoleStatus } from 'src/common/enums/role_status';
 
 @Controller('car')
 export class CarController {
   constructor(private readonly carService: CarService) {}
 
-  @UseGuards(CustomerGuard, CompletedProfileGuard)
+  @PermissionGuard([RoleStatus.CUSTOMER],CompletedProfileGuard)
   @Post()
   @ApiOperation({ summary: 'Create a new car for the customer' })
   @ApiSecurity('access-token')
@@ -47,7 +47,7 @@ export class CarController {
   }
 
   @Serilaize(CustomerCarListDto)
-  @UseGuards(CustomerGuard)
+  @PermissionGuard([RoleStatus.CUSTOMER])
   @Get('all/byCustomer/saved')
   @ApiOperation({ summary: 'Get all saved cars for the current customer' })
   @ApiSecurity('access-token')
@@ -66,7 +66,7 @@ export class CarController {
   }
 
   @Serilaize(CustomerCarListDto)
-  @UseGuards(CustomerGuard)
+  @PermissionGuard([RoleStatus.CUSTOMER])
   @Get(':carId/byCustomer')
   @ApiOperation({ summary: 'Get details of a specific car for the current customer' })
   @ApiSecurity('access-token')
@@ -86,7 +86,7 @@ export class CarController {
     return this.carService.getCustomerCar(context.id, carId, lang);
   }
 
-  @UseGuards(CustomerGuard)
+  @PermissionGuard([RoleStatus.CUSTOMER])
   @Delete(':carId')
   @ApiOperation({ summary: 'Delete a specific car for the current customer' })
   @ApiSecurity('access-token')
@@ -105,7 +105,7 @@ export class CarController {
     return this.carService.delete(context.id, carId, lang);
   }
 
-  @UseGuards(CustomerGuard)
+  @PermissionGuard([RoleStatus.CUSTOMER])
   @Put(':carId')
   @ApiOperation({ summary: 'Update a specific car for the current customer' })
   @ApiSecurity('access-token')

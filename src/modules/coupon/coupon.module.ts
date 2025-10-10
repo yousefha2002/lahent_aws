@@ -1,16 +1,14 @@
-import { forwardRef, Module } from '@nestjs/common';
+import {forwardRef, Module } from '@nestjs/common';
 import { CouponService } from './coupon.service';
 import { CouponController } from './coupon.controller';
 import { CouponProvider } from './providers/coupon.provider';
-import { AdminModule } from '../admin/admin.module';
-import { StoreModule } from '../store/store.module';
-import { OwnerModule } from '../owner/owner.module';
 import { OrderModule } from '../order/order.module';
+import { UserContextModule } from '../user-context/user-context.module';
 
 @Module({
   controllers: [CouponController],
   providers: [CouponService, ...CouponProvider],
-  imports: [AdminModule, StoreModule, OwnerModule,forwardRef(()=>OrderModule)],
+  imports: [forwardRef(()=>UserContextModule),forwardRef(()=>OrderModule)],
   exports:[CouponService]
 })
 export class CouponModule {}

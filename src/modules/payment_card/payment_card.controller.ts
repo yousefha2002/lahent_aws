@@ -1,6 +1,5 @@
-import { Body,Controller,Delete,Get,Param,Post,Put,UseGuards }from '@nestjs/common';
+import { Body,Controller,Delete,Get,Param,Post,Put }from '@nestjs/common';
 import { PaymentCardService } from './payment_card.service';
-import { CustomerGuard } from 'src/common/guards/roles/customer.guard';
 import { CompletedProfileGuard } from 'src/common/guards/auths/completed-profile.guard';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { CreatePaymentCardDto } from './dto/create-payment-card.dto';
@@ -11,13 +10,15 @@ import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiSecurity } from '@nest
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
 import { CurrentUserType } from 'src/common/types/current-user.type';
+import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
+import { RoleStatus } from 'src/common/enums/role_status';
 
 @Controller('payment-card')
 export class PaymentCardController {
   constructor(private readonly paymentCardService: PaymentCardService) {}
 
   @Serilaize(PaymentCardDto)
-  @UseGuards(CustomerGuard, CompletedProfileGuard)
+  @PermissionGuard([RoleStatus.CUSTOMER],CompletedProfileGuard)
   @ApiOperation({ summary: 'Create a new payment card for the current customer' })
   @ApiSecurity('access-token')
   @ApiBody({ type: CreatePaymentCardDto })
@@ -34,7 +35,7 @@ export class PaymentCardController {
   }
 
   @Serilaize(PaymentCardDto)
-  @UseGuards(CustomerGuard, CompletedProfileGuard)
+  @PermissionGuard([RoleStatus.CUSTOMER],CompletedProfileGuard)
   @ApiOperation({ summary: 'Update an existing payment card' })
   @ApiSecurity('access-token')
   @ApiParam({ name: 'id', example: 1, description: 'Payment card ID' })
@@ -53,7 +54,7 @@ export class PaymentCardController {
   }
 
   @Serilaize(PaymentCardDto)
-  @UseGuards(CustomerGuard)
+  @PermissionGuard([RoleStatus.CUSTOMER,RoleStatus.ADMIN])
   @ApiOperation({ summary: 'Get all payment cards of the current customer' })
   @ApiSecurity('access-token')
   @ApiResponse({ status: 200, description: 'List of payment cards', type: [PaymentCardDto] })
@@ -64,7 +65,7 @@ export class PaymentCardController {
   }
 
   @Serilaize(PaymentCardDto)
-  @UseGuards(CustomerGuard)
+  @PermissionGuard([RoleStatus.CUSTOMER,RoleStatus.ADMIN])
   @ApiOperation({ summary: 'Get one payment card by ID' })
   @ApiSecurity('access-token')
   @ApiParam({ name: 'id', example: 1, description: 'Payment card ID' })
@@ -75,7 +76,7 @@ export class PaymentCardController {
     return this.paymentCardService.getOne(cardId, context.id);
   }
 
-  @UseGuards(CustomerGuard)
+  @PermissionGuard([RoleStatus.CUSTOMER])
   @ApiOperation({ summary: 'Delete a payment card by ID' })
   @ApiSecurity('access-token')
   @ApiParam({ name: 'id', example: 1, description: 'Payment card ID' })

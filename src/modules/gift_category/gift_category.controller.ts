@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
 import { GiftCategoryService } from './gift_category.service';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { GiftCategoryDto, GiftCategoryDtoWithMessage } from './dto/gift-category.dto';
@@ -6,7 +6,8 @@ import { CreateGiftCategoryDto } from './dto/action-gift-category.dto';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { getLang } from 'src/common/utils/get-lang.util';
-import { AdminGuard } from 'src/common/guards/roles/admin.guard';
+import { RoleStatus } from 'src/common/enums/role_status';
+import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
 
 @Controller('gift-category')
 export class GiftCategoryController {
@@ -17,7 +18,7 @@ export class GiftCategoryController {
   @ApiBody({ type: CreateGiftCategoryDto })
   @ApiResponse({ status: 201, description: 'Gift category created successfully', schema: { example: { message: 'Created successfully' } } })
   @Serilaize(GiftCategoryDtoWithMessage)
-  @UseGuards(AdminGuard)
+  @PermissionGuard([RoleStatus.ADMIN])
   @Post()
   async create(@Body() body: CreateGiftCategoryDto, @I18n() i18n: I18nContext) {
     return this.giftCategoryService.create(body, getLang(i18n));
@@ -29,7 +30,7 @@ export class GiftCategoryController {
   @ApiBody({ type: CreateGiftCategoryDto })
   @ApiResponse({ status: 201, description: 'Gift category updated successfully', schema: { example: { message: 'Updated successfully' } } })
   @Serilaize(GiftCategoryDto)
-  @UseGuards(AdminGuard)
+  @PermissionGuard([RoleStatus.ADMIN])
   @Put(':id')
   async update(@Param('id', ParseIntPipe) id: number, @Body() body: CreateGiftCategoryDto, @I18n() i18n: I18nContext) {
     return this.giftCategoryService.update(id, body, getLang(i18n));
@@ -47,7 +48,7 @@ export class GiftCategoryController {
   @ApiSecurity('access-token')
   @ApiResponse({ status: 200, description: 'All gift categories', type: GiftCategoryDto, isArray: true })
   @Serilaize(GiftCategoryDto)
-  @UseGuards(AdminGuard)
+  @PermissionGuard([RoleStatus.ADMIN])
   @Get('admin/all')
   async findAllForAdmin() {
     return this.giftCategoryService.findAllForAdmin();

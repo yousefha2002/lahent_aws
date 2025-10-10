@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Put, Query, Req } from '@nestjs/common';
 import { OwnerService } from './owner.service';
 import { UpdateOwnerDto } from './dto/updateOwner.dto';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
@@ -9,8 +9,8 @@ import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
 import { RefreshTokenDto } from '../user_token/dtos/refreshToken.dto';
 import { CurrentUserType } from 'src/common/types/current-user.type';
-import { OwnerOrAdminGuard } from 'src/common/guards/roles/owner-or-admin.guard';
-import { AdminGuard } from 'src/common/guards/roles/admin.guard';
+import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
+import { RoleStatus } from 'src/common/enums/role_status';
 
 @Controller('owner')
 export class OwnerController {
@@ -25,7 +25,7 @@ export class OwnerController {
     type: OwnerDto,
   })
   @Serilaize(OwnerDto)
-  @UseGuards(OwnerOrAdminGuard)
+  @PermissionGuard([RoleStatus.OWNER,RoleStatus.ADMIN])
   @Put()
   async updateOwner(
     @Body() body: UpdateOwnerDto,
@@ -62,7 +62,7 @@ export class OwnerController {
     type: OwnerDto,
   })
   @Serilaize(OwnerDto)
-  @UseGuards(OwnerOrAdminGuard)
+  @PermissionGuard([RoleStatus.OWNER,RoleStatus.ADMIN])
   @Get('current')
   getCurrentOwner(@CurrentUser() user:CurrentUserType)
   {
@@ -74,7 +74,7 @@ export class OwnerController {
   @ApiSecurity('access-token')
   @ApiResponse({status: 200,type: PaginationOwnerDto})
   @Serilaize(PaginationOwnerDto)
-  @UseGuards(AdminGuard)
+  @PermissionGuard([RoleStatus.ADMIN])
   @Get('all')
   async getAllOwners(@Query('page') page: number = 1,@Query('limit') limit: number = 10)
   {

@@ -1,14 +1,14 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { CartItemService } from './cart_item.service';
 import { CartItemController } from './cart_item.controller';
 import { CartItemProvider } from './providers/cart_item.provider';
-import { CustomerModule } from '../customer/customer.module';
 import { OfferModule } from '../offer/offer.module';
+import { UserContextModule } from '../user-context/user-context.module';
 
 @Module({
   controllers: [CartItemController],
   providers: [CartItemService, ...CartItemProvider],
   exports: [CartItemService],
-  imports:[CustomerModule,OfferModule]
+  imports:[forwardRef(()=>UserContextModule),OfferModule]
 })
 export class CartItemModule {}

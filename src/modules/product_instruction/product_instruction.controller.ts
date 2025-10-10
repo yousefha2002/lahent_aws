@@ -7,6 +7,8 @@ import { CreateProductInstructionDto } from './dto/create-product-instruction.dt
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { StoreOrAdminGuard } from 'src/common/guards/roles/store-or-admin-guard';
 import { CurrentUserType } from 'src/common/types/current-user.type';
+import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
+import { RoleStatus } from 'src/common/enums/role_status';
 
 @Controller('product-instruction')
 export class ProductInstructionController {
@@ -14,7 +16,7 @@ export class ProductInstructionController {
     private readonly productInstructionService: ProductInstructionService,
   ) {}
 
-  @UseGuards(StoreOrAdminGuard, ApprovedStoreGuard)
+  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],ApprovedStoreGuard)
   @Put(':instructionId')
   @ApiOperation({ summary: 'Update a product instruction' })
   @ApiSecurity('access-token')
@@ -41,7 +43,7 @@ export class ProductInstructionController {
     return this.productInstructionService.updateProductInstruction(+instructionId,body,context.id);
   }
 
-  @UseGuards(StoreOrAdminGuard, ApprovedStoreGuard)
+  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],ApprovedStoreGuard)
   @Put('/active/:instructionId')
   @ApiOperation({ summary: 'Toggle active status for a product instruction' })
   @ApiSecurity('access-token')
@@ -67,7 +69,7 @@ export class ProductInstructionController {
     return this.productInstructionService.updateIsActive(+instructionId,context.id);
   }
 
-  @UseGuards(StoreOrAdminGuard, ApprovedStoreGuard)
+  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],ApprovedStoreGuard)
   @Post()
   @ApiOperation({ summary: 'Create product instructions' })
   @ApiSecurity('access-token')

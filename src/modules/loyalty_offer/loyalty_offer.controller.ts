@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query } from '@nestjs/common';
 import { LoyaltyOfferService } from './loyalty_offer.service';
 import { UpdateLoyaltyOfferDto } from './dto/update-loyalty-offer.dto';
 import { CreateLoyaltyOfferDto } from './dto/create-loyalty-offer.dto';
@@ -7,14 +7,15 @@ import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { getLang } from 'src/common/utils/get-lang.util';
-import { AdminGuard } from 'src/common/guards/roles/admin.guard';
+import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
+import { RoleStatus } from 'src/common/enums/role_status';
 
 @Controller('loyalty-offer')
 export class LoyaltyOfferController {
   constructor(private readonly loyaltyOfferService: LoyaltyOfferService) {}
 
   @Serilaize(ExtendedLoyaltyOfferDto)
-  @UseGuards(AdminGuard)
+  @PermissionGuard([RoleStatus.ADMIN])
   @Post()
   @ApiOperation({ summary: 'Create a new loyalty offer' })
   @ApiSecurity('access-token')
@@ -25,7 +26,7 @@ export class LoyaltyOfferController {
   }
 
   @Serilaize(PaginatedLoyaltyOfferDto)
-  @UseGuards(AdminGuard)
+  @PermissionGuard([RoleStatus.ADMIN])
   @Get('admin')
   @ApiOperation({ summary: 'Get all loyalty offers for admin' })
   @ApiQuery({ name: 'page', required: false, type: Number })
@@ -45,7 +46,7 @@ export class LoyaltyOfferController {
   }
 
   @Serilaize(ExtendedLoyaltyOfferDto)
-  @UseGuards(AdminGuard)
+  @PermissionGuard([RoleStatus.ADMIN])
   @Patch(':id')
   @ApiOperation({ summary: 'Update a loyalty offer by ID' })
   @ApiSecurity('access-token')
@@ -57,7 +58,7 @@ export class LoyaltyOfferController {
   }
 
   @Serilaize(ExtendedLoyaltyOfferDto)
-  @UseGuards(AdminGuard)
+  @PermissionGuard([RoleStatus.ADMIN])
   @Patch(':id/toggle')
   @ApiOperation({ summary: 'Toggle the status of a loyalty offer by ID' })
   @ApiSecurity('access-token')

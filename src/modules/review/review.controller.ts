@@ -9,13 +9,15 @@ import { PaginatedReviewDto } from './dto/review.dto';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { StoreOrAdminGuard } from 'src/common/guards/roles/store-or-admin-guard';
 import { CurrentUserType } from 'src/common/types/current-user.type';
+import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
+import { RoleStatus } from 'src/common/enums/role_status';
 
 @Controller('review')
 export class ReviewController {
   constructor(private readonly reviewService: ReviewService) {}
 
   @Post()
-  @UseGuards(CustomerGuard)
+  @PermissionGuard([RoleStatus.CUSTOMER,RoleStatus.ADMIN])
   @ApiOperation({ summary: 'Create a review for a store/order' })
   @ApiSecurity('access-token')
   @ApiBody({ type: CreateReviewDto })
@@ -32,7 +34,7 @@ export class ReviewController {
   }
 
   @Delete('/:reviewId')
-  @UseGuards(CustomerGuard)
+  @PermissionGuard([RoleStatus.CUSTOMER])
   @ApiOperation({ summary: 'Delete a review by ID' })
   @ApiSecurity('access-token')
   @ApiParam({ name: 'reviewId', type: Number, description: 'ID of the review to delete', example: 12 })
@@ -53,7 +55,7 @@ export class ReviewController {
 
   @Serilaize(PaginatedReviewDto)
   @Get('all')
-  @UseGuards(StoreOrAdminGuard)
+  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN])
   @ApiOperation({ summary: 'Get all reviews for a store with pagination' })
   @ApiSecurity('access-token')
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })

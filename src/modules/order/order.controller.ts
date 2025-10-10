@@ -25,10 +25,10 @@ import { StoreOrderStatsResponseDto } from './dto/responses/order-stats-response
 import { OrderAnalyticsResponseDto } from './dto/responses/order-analytics.dto';
 import { StoreFinancialsFilterDto } from '../store/dto/requests/store-financials-filter.dto';
 import { PayOrderDTO } from './dto/requests/pay-order-dto';
-import { StoreGuard } from 'src/common/guards/roles/store.guard';
 import { ReorderResponseDto } from './dto/responses/reorder-response.dto';
-import { StoreOrAdminGuard } from 'src/common/guards/roles/store-or-admin-guard';
 import { CurrentUserType } from 'src/common/types/current-user.type';
+import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
+import { RoleStatus } from 'src/common/enums/role_status';
 
 @Controller('order')
 export class OrderController {
@@ -40,7 +40,7 @@ export class OrderController {
   ) {}
 
   @Serilaize(CreateOrderResponseDto)
-  @UseGuards(CustomerGuard,CompletedProfileGuard)
+  @PermissionGuard([RoleStatus.CUSTOMER],CompletedProfileGuard)
   @Post('place')
   @ApiOperation({ summary: 'Place a new order' })
   @ApiSecurity('access-token')
@@ -54,7 +54,7 @@ export class OrderController {
   }
 
   @Serilaize(PaymentResponseDto)
-  @UseGuards(CustomerGuard)
+  @PermissionGuard([RoleStatus.CUSTOMER])
   @Post('pay/:orderId')
   @ApiOperation({ summary: 'Pay for an order' })
   @ApiSecurity('access-token')
@@ -68,7 +68,7 @@ export class OrderController {
   }
 
   @Serilaize(OrderAnalyticsResponseDto)
-  @UseGuards(StoreOrAdminGuard)
+  @PermissionGuard([RoleStatus.ADMIN,RoleStatus.STORE])
   @Get('analytics/byStore')
   @ApiOperation({ summary: 'Get analytics (avg prep time + repeat rate) for a store' })
   @ApiQuery({ name: 'storeId', required: false, example: 1 })
@@ -88,7 +88,7 @@ export class OrderController {
   }
 
   @Serilaize(OrderActionResponseDto)
-  @UseGuards(StoreGuard,ApprovedStoreGuard)
+  @PermissionGuard([RoleStatus.STORE],ApprovedStoreGuard)
   @Put('reject/:orderId')
   @ApiOperation({ summary: 'Reject an order by store' })
   @ApiSecurity('access-token')
@@ -102,7 +102,7 @@ export class OrderController {
   }
 
   @Serilaize(OrderActionResponseDto)
-  @UseGuards(StoreGuard,ApprovedStoreGuard)
+  @PermissionGuard([RoleStatus.STORE],ApprovedStoreGuard)
   @Put('accept/:orderId')
   @ApiOperation({ summary: 'Accept an order by store' })
   @ApiSecurity('access-token')
@@ -117,7 +117,7 @@ export class OrderController {
   }
 
   @Serilaize(OrderActionResponseDto)
-  @UseGuards(CustomerGuard)
+  @PermissionGuard([RoleStatus.CUSTOMER])
   @Put('extend-decision/:orderId')
   @ApiOperation({ summary: 'Extend the decision timeout for a customer order' })
   @ApiSecurity('access-token')
@@ -136,7 +136,7 @@ export class OrderController {
   }
 
   @Serilaize(OrderActionResponseDto)
-  @UseGuards(CustomerGuard)
+  @PermissionGuard([RoleStatus.CUSTOMER])
   @Put('cancel/:orderId')
   @ApiOperation({ summary: 'Cancel an order and request refund' })
   @ApiSecurity('access-token')
@@ -153,7 +153,7 @@ export class OrderController {
   }
 
   @Serilaize(OrderActionResponseDto)
-  @UseGuards(CustomerGuard)
+  @PermissionGuard([RoleStatus.CUSTOMER])
   @Put('arrived/:orderId')
   @ApiOperation({ summary: 'Mark order as arrived by customer' })
   @ApiSecurity('access-token')
@@ -170,7 +170,7 @@ export class OrderController {
   }
 
   @Serilaize(OrderActionResponseDto)
-  @UseGuards(CustomerGuard)
+  @PermissionGuard([RoleStatus.CUSTOMER])
   @Put('received/:orderId')
   @ApiOperation({ summary: 'Mark order as received by customer' })
   @ApiSecurity('access-token')
@@ -188,7 +188,7 @@ export class OrderController {
   }
 
   @Serilaize(OrderActionResponseDto)
-  @UseGuards(StoreGuard)
+  @PermissionGuard([RoleStatus.STORE])
   @ApiOperation({ summary: 'Mark order as ready by store' })
   @ApiSecurity('access-token')
   @ApiParam({ name: 'orderId', description: 'ID of the order to mark as ready', example: 123 })
@@ -205,7 +205,7 @@ export class OrderController {
   }
 
   @Serilaize(PaginatedOrderListDto)
-  @UseGuards(StoreOrAdminGuard)
+  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN])
   @Get('byStore')
   @ApiOperation({ summary: 'Get paginated orders for a store' })
   @ApiSecurity('access-token')
@@ -221,7 +221,7 @@ export class OrderController {
   }
 
   @Serilaize(PaginatedOrderListDto)
-  @UseGuards(CustomerGuard)
+  @PermissionGuard([RoleStatus.CUSTOMER])
   @Get('byCustomer')
   @ApiOperation({ summary: 'Get paginated orders for a customer' })
   @ApiSecurity('access-token')
@@ -236,7 +236,7 @@ export class OrderController {
   }
 
   @Serilaize(StoreOrderStatsResponseDto)
-  @UseGuards(StoreOrAdminGuard)
+  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN])
   @Get('stats/byStore')
   @ApiOperation({ summary: 'Get order statistics for a store' })
   @ApiSecurity('access-token')
@@ -252,7 +252,7 @@ export class OrderController {
   }
 
   @Serilaize(OrderDto)
-  @UseGuards(StoreOrAdminGuard)
+  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN])
   @Get(':orderId/byStore')
   @ApiOperation({ summary: 'Get order details by store' })
   @ApiSecurity('access-token')
@@ -266,7 +266,7 @@ export class OrderController {
   }
 
   @Serilaize(OrderDto)
-  @UseGuards(CustomerGuard)
+  @PermissionGuard([RoleStatus.CUSTOMER])
   @Get(':orderId/byCustomer')
   @ApiOperation({ summary: 'Get order details by customer' })
   @ApiSecurity('access-token')
@@ -279,7 +279,7 @@ export class OrderController {
   }
 
   @Serilaize(OrderActionResponseDto)
-  @UseGuards(CustomerGuard)
+  @PermissionGuard([RoleStatus.CUSTOMER])
   @Put('on-the-way/:orderId')
   @ApiOperation({ summary: 'Customer marks that they are on the way' })
   @ApiSecurity('access-token')
@@ -297,7 +297,7 @@ export class OrderController {
 
   
   @Serilaize(ReorderResponseDto)
-  @UseGuards(CustomerGuard)
+  @PermissionGuard([RoleStatus.CUSTOMER])
   @Post('reorder/:orderId')
   @ApiOperation({ summary: 'Reorder a previous order' })
   @ApiSecurity('access-token')

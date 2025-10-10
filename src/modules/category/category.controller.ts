@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { ApprovedStoreGuard } from 'src/common/guards/auths/approved-store.guard';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
@@ -9,8 +9,9 @@ import { CategoryDto } from './dto/category.dto';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
-import { StoreOrAdminGuard } from 'src/common/guards/roles/store-or-admin-guard';
 import { CurrentUserType } from 'src/common/types/current-user.type';
+import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
+import { RoleStatus } from 'src/common/enums/role_status';
 
 @Controller('category')
 export class CategoryController {
@@ -22,7 +23,7 @@ export class CategoryController {
   @ApiBody({ type: CreateCategoryDto })
   @ApiQuery({ name: 'storeId', required: false, example: 1 })
   @ApiResponse({status: 201, description: 'category created successfully', schema: {example: {message: 'Created successfully'}}})
-  @UseGuards(StoreOrAdminGuard, ApprovedStoreGuard)
+  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],ApprovedStoreGuard)
   createCategory(
     @CurrentUser() user: CurrentUserType,
     @Body() body: CreateCategoryDto,
@@ -40,7 +41,7 @@ export class CategoryController {
   @ApiBody({ type: UpdateCategoryDto })
   @ApiResponse({status: 201, description: 'category updated successfully', schema: {example: {message: 'Updated successfully'}}})
   @ApiQuery({ name: 'storeId', required: false, example: 1 })
-  @UseGuards(StoreOrAdminGuard, ApprovedStoreGuard)
+  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],ApprovedStoreGuard)
   updateCategory(
     @Body() body: UpdateCategoryDto,
     @Param('categoryId') categoryId: string,
@@ -66,7 +67,7 @@ export class CategoryController {
   }
 
   @Delete('/:categoryId')
-  @UseGuards(StoreOrAdminGuard, ApprovedStoreGuard)
+  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],ApprovedStoreGuard)
   @ApiOperation({ summary: 'Delete a category (store or owner only)' })
   @ApiSecurity('access-token')
   @ApiParam({ name: 'categoryId', example: 1 })

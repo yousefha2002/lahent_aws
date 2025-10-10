@@ -1,18 +1,19 @@
-import {Body,Controller,Param,Post,Put,UseGuards} from '@nestjs/common';
+import {Body,Controller,Param,Post,Put} from '@nestjs/common';
 import { ProductExtraService } from './product_extra.service';
 import { UpdateProductExtraDto } from './dto/update-extra-product.dto';
 import { ApprovedStoreGuard } from 'src/common/guards/auths/approved-store.guard';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { CreateProductExtraDto } from './dto/create-product-extra.dto';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
-import { StoreOrAdminGuard } from 'src/common/guards/roles/store-or-admin-guard';
 import { CurrentUserType } from 'src/common/types/current-user.type';
+import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
+import { RoleStatus } from 'src/common/enums/role_status';
 
 @Controller('product-extra')
 export class ProductExtraController {
   constructor(private readonly productExtraService: ProductExtraService) {}
 
-  @UseGuards(StoreOrAdminGuard, ApprovedStoreGuard)
+  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],ApprovedStoreGuard)
   @Put(':extraId')
   @ApiOperation({ summary: 'Update a product extra' })
   @ApiSecurity('access-token')
@@ -39,7 +40,7 @@ export class ProductExtraController {
     );
   }
 
-  @UseGuards(StoreOrAdminGuard, ApprovedStoreGuard)
+  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],ApprovedStoreGuard)
   @Put('/active/:extraId')
   @ApiOperation({ summary: 'Toggle active status for a product extra' })
   @ApiSecurity('access-token')
@@ -57,7 +58,7 @@ export class ProductExtraController {
     return this.productExtraService.updateIsActive(+extraId, context.id);
   }
 
-  @UseGuards(StoreOrAdminGuard, ApprovedStoreGuard)
+  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],ApprovedStoreGuard)
   @Post()
   @ApiOperation({ summary: 'Create or update product extras' })
   @ApiSecurity('access-token')

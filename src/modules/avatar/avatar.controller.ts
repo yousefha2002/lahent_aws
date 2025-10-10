@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post, Put, UploadedFile, UseFilters, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Param, Post, Put, UploadedFile, UseFilters, UseInterceptors } from '@nestjs/common';
 import { AvatarService } from './avatar.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { MulterExceptionFilter } from 'src/multer/multer.exception.filter';
@@ -8,7 +8,8 @@ import { AvatarDto } from './dto/avatar.dto';
 import { ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
-import { AdminGuard } from 'src/common/guards/roles/admin.guard';
+import { RoleStatus } from 'src/common/enums/role_status';
+import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
 
 @Controller('avatar')
 export class AvatarController {
@@ -48,7 +49,7 @@ export class AvatarController {
       example: { message: 'Created successfully' },
     },
   })
-  @UseGuards(AdminGuard)
+  @PermissionGuard([RoleStatus.ADMIN])
   @Post()
   @UseInterceptors(FileInterceptor('image', multerOptions))
   @UseFilters(MulterExceptionFilter)
@@ -76,7 +77,7 @@ export class AvatarController {
     description: 'Avatar updated successfully',
     schema: { example: { message: 'Updated successfully' } },
   })
-  @UseGuards(AdminGuard)
+  @PermissionGuard([RoleStatus.ADMIN])
   @Put(':id')
   @UseInterceptors(FileInterceptor('image', multerOptions))
   @UseFilters(MulterExceptionFilter)

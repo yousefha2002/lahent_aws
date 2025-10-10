@@ -7,6 +7,8 @@ import { OwnerGuard } from 'src/common/guards/roles/owner.guard';
 import { StoreGuard } from 'src/common/guards/roles/store.guard';
 import { AdminGuard } from 'src/common/guards/roles/admin.guard';
 import { CurrentUserType } from 'src/common/types/current-user.type';
+import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
+import { RoleStatus } from 'src/common/enums/role_status';
 
 @ApiSecurity('access-token')
 @ApiTags('Deletion')
@@ -14,7 +16,7 @@ import { CurrentUserType } from 'src/common/types/current-user.type';
 export class DeletionController {
   constructor(private readonly deletionService: DeletionService) {}
 
-  @UseGuards(CustomerGuard)
+  @PermissionGuard([RoleStatus.CUSTOMER])
   @Delete('soft-customer')
   @ApiOperation({ summary: 'Soft delete customer account' })
   @ApiResponse({ status: 200, description: 'Customer soft deleted successfully' })
@@ -23,7 +25,7 @@ export class DeletionController {
     return this.deletionService.softDeleteCustomer(context);
   }
 
-  @UseGuards(AdminGuard)
+  @PermissionGuard([RoleStatus.ADMIN])
   @Put('restore-customer/:customerId')
   @ApiOperation({ summary: 'Restore a soft-deleted customer by ID (Admin only)' })
   @ApiResponse({ status: 200, description: 'Customer restored successfully' })
@@ -31,7 +33,7 @@ export class DeletionController {
     return this.deletionService.restoreCustomer(customerId);
   }
 
-  @UseGuards(StoreGuard)
+  @PermissionGuard([RoleStatus.STORE])
   @Delete('soft-store')
   @ApiOperation({ summary: 'Soft delete a store (Owner or Store Admin)' })
   @ApiResponse({ status: 200, description: 'Store soft deleted successfully' })
@@ -40,7 +42,7 @@ export class DeletionController {
     return this.deletionService.softDeleteStore(context);
   }
 
-  @UseGuards(AdminGuard)
+  @PermissionGuard([RoleStatus.ADMIN])
   @Put('restore-store/:storeId')
   @ApiOperation({ summary: 'Restore a soft-deleted store by ID (Admin only)' })
   @ApiResponse({ status: 200, description: 'Store restored successfully' })
@@ -48,7 +50,7 @@ export class DeletionController {
     return this.deletionService.restoreStore(storeId);
   }
 
-  @UseGuards(OwnerGuard)
+  @PermissionGuard([RoleStatus.OWNER])
   @Delete('soft')
   @ApiOperation({ summary: 'Soft delete owner account (and related stores)' })
   @ApiResponse({ status: 200, description: 'Owner soft deleted successfully' })
@@ -57,7 +59,7 @@ export class DeletionController {
     return this.deletionService.softDeleteOwner(context);
   }
 
-  @UseGuards(AdminGuard)
+  @PermissionGuard([RoleStatus.ADMIN])
   @Put('restore/:ownerId')
   @ApiOperation({ summary: 'Restore a soft-deleted owner by ID (Admin only)' })
   @ApiResponse({ status: 200, description: 'Owner restored successfully' })

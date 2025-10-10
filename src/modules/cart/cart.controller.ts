@@ -13,7 +13,6 @@ import {
 import { CartService } from './cart.service';
 import { CustomerGuard } from 'src/common/guards/roles/customer.guard';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
-import { Customer } from '../customer/entities/customer.entity';
 import { CreateCartProductDto } from './dto/create-product-cart.dto';
 import { UpdateCartProductQuantityDto } from './dto/update-productCart-quantity';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';

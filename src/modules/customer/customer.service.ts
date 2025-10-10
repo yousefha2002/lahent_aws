@@ -23,8 +23,7 @@ export class CustomerService {
     private cloudinaryService: CloudinaryService,
     private avatarService: AvatarService,
     private readonly i18n: I18nService,
-    @Inject(forwardRef(() => GiftService))
-    private giftService: GiftService,
+    @Inject(forwardRef(() => GiftService)) private giftService: GiftService,
     private jwtService: JwtService,
     private userTokenService:UserTokenService,
   ) {}

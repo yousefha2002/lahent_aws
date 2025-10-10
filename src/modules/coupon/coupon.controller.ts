@@ -9,12 +9,14 @@ import { getLang } from 'src/common/utils/get-lang.util';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { PaginatedCouponDto } from './dto/paginated-coupon.dto';
 import { AdminGuard } from 'src/common/guards/roles/admin.guard';
+import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
+import { RoleStatus } from 'src/common/enums/role_status';
 
 @Controller('coupon')
 export class CouponController {
   constructor(private readonly couponService: CouponService) {}
 
-  @UseGuards(AdminGuard)
+  @PermissionGuard([RoleStatus.ADMIN])
   @Serilaize(CouponDto)
   @Post()
   @ApiOperation({ summary: 'Create a new coupon' })
@@ -26,7 +28,7 @@ export class CouponController {
     return this.couponService.createCoupon(dto, lang);
   }
 
-  @UseGuards(AdminGuard)
+  @PermissionGuard([RoleStatus.ADMIN])
   @Serilaize(CouponDto)
   @Patch(':id')
   @ApiOperation({ summary: 'Update a coupon by ID' })
@@ -40,7 +42,7 @@ export class CouponController {
     return this.couponService.updateCoupon(id, dto, lang);
   }
 
-  @UseGuards(AdminGuard)
+  @PermissionGuard([RoleStatus.ADMIN])
   @Get('admin')
   @Serilaize(PaginatedCouponDto)
   @ApiOperation({ summary: 'Get all coupons with pagination (Admin only)' })

@@ -23,6 +23,8 @@ import { ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiResponse, ApiSecurity 
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
 import { AdminGuard } from 'src/common/guards/roles/admin.guard';
+import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
+import { RoleStatus } from 'src/common/enums/role_status';
 
 @Controller('type')
 export class TypeController {
@@ -52,7 +54,7 @@ export class TypeController {
     },
   })
   @Post('create')
-  @UseGuards(AdminGuard)
+  @PermissionGuard([RoleStatus.ADMIN])
   @UseInterceptors(FileInterceptor('image', multerOptions))
   @UseFilters(MulterExceptionFilter)
   createType(
@@ -90,7 +92,7 @@ export class TypeController {
     },
   })
   @Put('update/:typeId')
-  @UseGuards(AdminGuard)
+  @PermissionGuard([RoleStatus.ADMIN])
   @UseInterceptors(FileInterceptor('image', multerOptions))
   @UseFilters(MulterExceptionFilter)
   updateType(
@@ -112,7 +114,7 @@ export class TypeController {
     schema: { example: { message: 'Deleted successfully' } },
   })
   @Delete(':typeId')
-  @UseGuards(AdminGuard)
+  @PermissionGuard([RoleStatus.ADMIN])
   deleteType(
     @Param('typeId') typeId: string,
     @I18n() i18n: I18nContext,
@@ -134,7 +136,7 @@ export class TypeController {
   @ApiSecurity('access-token')
   @ApiResponse({ status: 200, description: 'List of all types', type: [TypeDto] })
   @Get('admin/all')
-  @UseGuards(AdminGuard)
+  @PermissionGuard([RoleStatus.ADMIN])
   @Serilaize(TypeDto)
   getAllTypesAdmin() {
     return this.typeService.getAllTypes();

@@ -8,13 +8,15 @@ import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
 import { CurrentUserType } from 'src/common/types/current-user.type';
+import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
+import { RoleStatus } from 'src/common/enums/role_status';
 
 @Controller('user-point-history')
 export class UserPointHistoryController {
   constructor(private readonly userPointHistoryService: UserPointHistoryService) {}
 
   @Serilaize(PaginatedUserPointHistoryDto)
-  @UseGuards(CustomerGuard)
+  @PermissionGuard([RoleStatus.CUSTOMER])
   @Get()
   @ApiOperation({ summary: 'Get user points history with related orders and stores' })
   @ApiQuery({ name: 'page', required: false, example: 1, description: 'Page number' })

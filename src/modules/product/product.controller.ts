@@ -1,4 +1,4 @@
-import {BadRequestException,Body,Controller,Get,Param,ParseIntPipe,Post,Put,Query,UploadedFiles,UseGuards,UseInterceptors} from '@nestjs/common';
+import {BadRequestException,Body,Controller,Get,Param,ParseIntPipe,Post,Put,Query,UploadedFiles,UseInterceptors} from '@nestjs/common';
 import {AnyFilesInterceptor,FileFieldsInterceptor} from '@nestjs/platform-express';
 import { ProductService } from './product.service';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
@@ -16,8 +16,9 @@ import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
 import { TopProductResponseDto } from './dto/responses/top-product-response.dto';
 import { StoreFinancialsFilterDto } from '../store/dto/requests/store-financials-filter.dto';
-import { StoreOrAdminGuard } from 'src/common/guards/roles/store-or-admin-guard';
 import { CurrentUserType } from 'src/common/types/current-user.type';
+import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
+import { RoleStatus } from 'src/common/enums/role_status';
 
 @Controller('product')
 export class ProductController {
@@ -29,7 +30,7 @@ export class ProductController {
   @ApiBody({ type: CreateProductDto })
   @ApiResponse({status: 201,schema: {example: {message: 'Product created successfully',productId: 123}}})
   @ApiConsumes('multipart/form-data')
-  @UseGuards(StoreOrAdminGuard, ApprovedStoreGuard)
+  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],ApprovedStoreGuard)
   @ApiQuery({ name: 'storeId', required: false, example: 1 })
   @UseInterceptors(AnyFilesInterceptor(multerOptions))
   async create(
@@ -65,7 +66,7 @@ export class ProductController {
       },
     },
   })
-  @UseGuards(StoreOrAdminGuard, ApprovedStoreGuard)
+  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],ApprovedStoreGuard)
   @UseInterceptors(FileFieldsInterceptor([{ name: 'images', maxCount: 5 }], multerOptions),)
   async updateProductWithImage(
     @Param('productId',ParseIntPipe) productId: number,
@@ -90,7 +91,7 @@ export class ProductController {
     );
   }
 
-  @UseGuards(StoreOrAdminGuard)
+  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN])
   @Serilaize(TopProductResponseDto)
   @Get('top-sales/byStore')
   @ApiOperation({ summary: 'Get top 4 selling products for a store' })
@@ -137,7 +138,7 @@ export class ProductController {
   }
 
   @Serilaize(PaginatedProductsStoreViewDto)
-  @UseGuards(StoreOrAdminGuard)
+  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN])
   @Get('all')
   @ApiOperation({ summary: 'Get all products of the current store' })
   @ApiQuery({ name: 'page', required: false, type: Number })
@@ -177,7 +178,7 @@ export class ProductController {
     return this.productService.getFullProductDetails(+productId,lang);
   }
 
-  @UseGuards(StoreOrAdminGuard)
+  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN])
   @Serilaize(ProductFullDetailsForStoreDto)
   @Get('/:productId/byStore')
   @ApiOperation({ summary: 'Get full product details for the store (including inactive)' })
@@ -191,7 +192,7 @@ export class ProductController {
   }
 
   @Put('active/:productId')
-  @UseGuards(StoreOrAdminGuard,ApprovedStoreGuard)
+  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],ApprovedStoreGuard)
   @ApiOperation({ summary: 'Toggle product active status' })
   @ApiSecurity('access-token')
   @ApiParam({ name: 'productId', example: 101 })

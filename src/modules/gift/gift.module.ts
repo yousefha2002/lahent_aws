@@ -8,6 +8,7 @@ import { TransactionModule } from '../transaction/transaction.module';
 import { FcmTokenModule } from '../fcm_token/fcm_token.module';
 import { SmsModule } from '../sms/sms.module';
 import { DatabaseModule } from 'src/database/database.module';
+import { UserContextModule } from '../user-context/user-context.module';
 
 @Module({
   controllers: [GiftController],
@@ -16,6 +17,7 @@ import { DatabaseModule } from 'src/database/database.module';
     GiftTemplateModule,
     forwardRef(() => TransactionModule),
     forwardRef(() => CustomerModule),
+    forwardRef(()=>UserContextModule),
     FcmTokenModule,
     SmsModule,
     DatabaseModule

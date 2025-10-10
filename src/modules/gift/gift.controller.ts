@@ -1,7 +1,6 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { GiftService } from './gift.service';
 import { CreateGiftDto } from './dto/create-gift.dto';
-import { CustomerGuard } from 'src/common/guards/roles/customer.guard';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { CompletedProfileGuard } from 'src/common/guards/auths/completed-profile.guard';
 import { I18n, I18nContext } from 'nestjs-i18n';
@@ -10,6 +9,8 @@ import { ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiSecurity } from '@nest
 import { PaginatedGiftDto } from './dto/gift.dto';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { CurrentUserType } from 'src/common/types/current-user.type';
+import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
+import { RoleStatus } from 'src/common/enums/role_status';
 
 @Controller('gift')
 export class GiftController {
@@ -37,7 +38,7 @@ export class GiftController {
     },
   })
   @Post('create')
-  @UseGuards(CustomerGuard, CompletedProfileGuard)
+  @PermissionGuard([RoleStatus.CUSTOMER],CompletedProfileGuard)
   sendGift(
     @Body() body: CreateGiftDto,
     @CurrentUser() sender: CurrentUserType,
@@ -55,7 +56,7 @@ export class GiftController {
   @ApiQuery({ name: 'limit', required: false, example: 10 })
   @ApiResponse({ status: 200, type: PaginatedGiftDto })
   @Get('my-gifts')
-  @UseGuards(CustomerGuard)
+  @PermissionGuard([RoleStatus.CUSTOMER])
   async getMyGifts(
     @CurrentUser() user: CurrentUserType,
     @Query('page') page = 1,

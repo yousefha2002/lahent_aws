@@ -1,14 +1,14 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { AvatarService } from './avatar.service';
 import { AvatarController } from './avatar.controller';
 import { AvatarProvider } from './providers/avatar.provider';
-import { AdminModule } from '../admin/admin.module';
 import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
+import { UserContextModule } from '../user-context/user-context.module';
 
 @Module({
   controllers: [AvatarController],
   providers: [AvatarService,...AvatarProvider],
   exports:[AvatarService],
-  imports:[AdminModule,CloudinaryModule]
+  imports:[forwardRef(()=>UserContextModule),CloudinaryModule]
 })
 export class AvatarModule {}

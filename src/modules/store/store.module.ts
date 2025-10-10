@@ -20,18 +20,17 @@ import { DatabaseModule } from 'src/database/database.module';
 import { StoreCommissionModule } from '../store_commission/store_commission.module';
 import { FcmTokenModule } from '../fcm_token/fcm_token.module';
 import { SmsModule } from '../sms/sms.module';
+import { UserContextModule } from '../user-context/user-context.module';
 
 @Module({
   controllers: [StoreController],
   providers: [StoreService,StoreAuthService,StoreGeolocationService,StoreUtilsService, ...StoreProvider,...StoreLanguageProvider],
   imports: [
-    OwnerModule,
     CloudinaryModule,
     TypeModule,
     forwardRef(() => SubtypeModule),
     OpeningHourModule,
-    CustomerModule,
-    AdminModule,
+    forwardRef(()=>UserContextModule),
     UserTokenModule,
     forwardRef(()=>FaviroteModule),
     SectorModule,

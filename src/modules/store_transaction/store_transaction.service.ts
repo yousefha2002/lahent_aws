@@ -74,6 +74,7 @@ export class StoreTransactionService {
                 CASE
                 WHEN status = 'COMPLETED' THEN storeRevenue
                 WHEN status = 'SETTLEMENT' THEN -storeRevenue
+                WHEN status = 'ADMIN_WITHDRAW' THEN storeRevenue
                 ELSE 0
                 END
             )
@@ -96,6 +97,7 @@ export class StoreTransactionService {
                         CASE
                             WHEN status = 'COMPLETED' THEN storeRevenue
                             WHEN status = 'SETTLEMENT' THEN -storeRevenue
+                            WHEN status = 'ADMIN_WITHDRAW' THEN storeRevenue
                             ELSE 0
                         END
                     )

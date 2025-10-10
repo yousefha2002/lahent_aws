@@ -1,4 +1,4 @@
-import {Body,Controller,Get,Param,ParseIntPipe,Post,Put,Query,UseGuards} from '@nestjs/common';
+import {Body,Controller,Get,Param,ParseIntPipe,Post,Put,Query} from '@nestjs/common';
 import { OfferService } from './offer.service';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { CreateOfferDto } from './dto/create-offer.dto';
@@ -10,15 +10,15 @@ import { ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiSecurity } from '@nest
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
 import { OfferType } from 'src/common/enums/offer_type';
-import { StoreOrAdminGuard } from 'src/common/guards/roles/store-or-admin-guard';
-import { AdminGuard } from 'src/common/guards/roles/admin.guard';
 import { CurrentUserType } from 'src/common/types/current-user.type';
+import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
+import { RoleStatus } from 'src/common/enums/role_status';
 
 @Controller('offer')
 export class OfferController {
   constructor(private readonly offerService: OfferService) {}
 
-  @UseGuards(StoreOrAdminGuard, ApprovedStoreGuard)
+  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],ApprovedStoreGuard)
   @Post()
   @ApiResponse({
     status: 201,
@@ -42,7 +42,7 @@ export class OfferController {
     return this.offerService.createOffer(dto, context.id, lang);
   }
 
-  @UseGuards(AdminGuard)
+  @PermissionGuard([RoleStatus.ADMIN])
   @Put('/active-status/:offerId')
   async changeOfferActiveStatus(
     @Param('offerId') offerId: string,
@@ -73,7 +73,7 @@ export class OfferController {
   }
 
   @Serilaize(PaginatedOfferResponseDto)
-  @UseGuards(StoreOrAdminGuard)
+  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN])
   @Get('byStore/all')
   @ApiOperation({ summary: 'Get all offers for the current store' })
   @ApiSecurity('access-token')

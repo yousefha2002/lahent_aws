@@ -5,12 +5,13 @@ import { SubTypeProvider } from './providers/subtype.provider';
 import { TypeModule } from '../type/type.module';
 import { AdminModule } from '../admin/admin.module';
 import { StoreModule } from '../store/store.module';
+import { UserContextModule } from '../user-context/user-context.module';
 
 @Module({
   controllers: [SubtypeController],
   providers: [SubtypeService, ...SubTypeProvider],
   imports: [
-    AdminModule,
+    forwardRef(()=>UserContextModule),
     forwardRef(() => StoreModule),
     forwardRef(() => TypeModule),
   ],
