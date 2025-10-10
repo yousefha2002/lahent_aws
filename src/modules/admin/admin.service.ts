@@ -8,7 +8,6 @@ import {
 import { repositories } from 'src/common/enums/repositories';
 import { Admin } from './entities/admin.entity';
 import { comparePassword, hashPassword } from 'src/common/utils/password';
-import { AdminPasswordDto } from './dto/admin-password.dto';
 import { RoleStatus } from 'src/common/enums/role_status';
 import { I18nService } from 'nestjs-i18n';
 import { Language } from 'src/common/enums/language';
@@ -52,41 +51,7 @@ export class AdminService {
       token: access_token,
     };
   }
-
-  async changePassword(body: AdminPasswordDto,lang=Language.en) {
-    const { oldPassword, newPassword } = body;
-    const admin = await this.findOne();
-    if (!admin) {
-      const msg = this.i18n.translate('translation.admin.not_found', { lang });
-      throw new NotFoundException(msg);
-    }
-    const isMatch = await comparePassword(oldPassword, admin.password);
-    if (!isMatch) {
-      const msg = this.i18n.translate('translation.admin.old_password_incorrect', { lang });
-      throw new BadRequestException(msg);
-    }
-    const hashedPassword = await hashPassword(newPassword);
-    admin.password = hashedPassword;
-    await admin.save();
-    return admin;
-  }
-
-  async changeEmail(newEmail: string,lang=Language.en) {
-    const admin = await this.findOne();
-    if (!admin) {
-      const msg = this.i18n.translate('translation.admin.not_found', { lang });
-      throw new NotFoundException(msg);
-    }
-    const adminByEmail = await this.findByEmail(newEmail);
-    if (adminByEmail) {
-      const msg = this.i18n.translate('translation.email_exists', { lang });
-      throw new BadRequestException(msg);
-    }
-    admin.email = newEmail;
-    await admin.save();
-    return admin;
-  }
-
+  
   findByEmail(email: string) {
     return this.adminRepo.findOne({ where: { email } });
   }

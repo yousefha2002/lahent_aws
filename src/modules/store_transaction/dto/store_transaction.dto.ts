@@ -51,6 +51,10 @@ export class StoreTransactionDto {
     @Type(() => TransactionOrderDto)
     @ApiProperty({ description: 'Associated order', type: TransactionOrderDto })
     order: TransactionOrderDto;
+
+    @Expose()
+    @ApiProperty({ description: 'Date of creation', nullable: true })
+    createdAt: Date;
 }
 
 export class PaginatedStoreTransactionDto {
