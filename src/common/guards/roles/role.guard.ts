@@ -21,7 +21,6 @@ export class RoleGuard implements CanActivate {
 
         const decoded: any = await this.jwtService.verifyAsync(token, { secret: 'token' });
 
-        console.log(allowedRoles.length && !allowedRoles.includes(decoded.role))
         if (allowedRoles.length && !allowedRoles.includes(decoded.role)) {
         throw new UnauthorizedException('Role not allowed');
         }

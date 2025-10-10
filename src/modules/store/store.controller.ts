@@ -27,7 +27,6 @@ import { IncompleteStoreResponseDto, PaginatedAdminIncompleteStoresDto } from '.
 import { UpdatePasswordDto } from './dto/requests/update-password.dto';
 import { SelectOwnerForStoreDto } from './dto/requests/selectStoreForOwner.dto';
 import { RefreshTokenDto } from '../user_token/dtos/refreshToken.dto';
-import { StoreGuard } from 'src/common/guards/roles/store.guard';
 import { CompletedProfileGuard } from 'src/common/guards/auths/completed-profile.guard';
 import { RoleStatus } from 'src/common/enums/role_status';
 import { FullDetailsCustomerStoreViewDto, PaginatedCustomerStoreViewDto, StoreCustomerViewDto } from './dto/responses/customer-store.dto';

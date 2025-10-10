@@ -2,7 +2,6 @@ import { OrderPlacingService } from './services/order-placing.service';
 import { OrderStatusService } from './services/order_status.service';
 import { Body, Controller, Get, Param, ParseIntPipe, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { OrderService } from './services/order.service';
-import { CustomerGuard } from 'src/common/guards/roles/customer.guard';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { createOrderDto } from './dto/requests/create-order.dto';
 import { ExtendOrderTimeDto } from './dto/requests/extend-order-time.dto';

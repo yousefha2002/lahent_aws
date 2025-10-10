@@ -7,7 +7,6 @@ import { getLang } from 'src/common/utils/get-lang.util';
 import { SectorDto } from './dto/sector.dto';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { UpdateSectorDto } from './dto/update-sector.dto';
-import { AdminGuard } from 'src/common/guards/roles/admin.guard';
 import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
 import { RoleStatus } from 'src/common/enums/role_status';
 

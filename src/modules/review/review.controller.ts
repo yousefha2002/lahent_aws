@@ -1,13 +1,10 @@
 import {Body,Controller,Delete,Get,Param,Post,Query,UseGuards} from '@nestjs/common';
 import { ReviewService } from './review.service';
-import { CustomerGuard } from 'src/common/guards/roles/customer.guard';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
-import { Customer } from '../customer/entities/customer.entity';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { PaginatedReviewDto } from './dto/review.dto';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
-import { StoreOrAdminGuard } from 'src/common/guards/roles/store-or-admin-guard';
 import { CurrentUserType } from 'src/common/types/current-user.type';
 import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
 import { RoleStatus } from 'src/common/enums/role_status';

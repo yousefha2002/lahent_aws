@@ -5,7 +5,6 @@ import { UpdateProductInstructionDto } from './dto/update-product-instruction.st
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { CreateProductInstructionDto } from './dto/create-product-instruction.dto';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
-import { StoreOrAdminGuard } from 'src/common/guards/roles/store-or-admin-guard';
 import { CurrentUserType } from 'src/common/types/current-user.type';
 import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
 import { RoleStatus } from 'src/common/enums/role_status';

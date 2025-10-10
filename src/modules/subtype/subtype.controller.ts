@@ -7,7 +7,6 @@ import { SubTypeDto } from './dto/subType.dto';
 import {ApiBody,ApiOperation,ApiParam,ApiResponse,ApiSecurity} from '@nestjs/swagger';
 import { getLang } from 'src/common/utils/get-lang.util';
 import { I18n, I18nContext } from 'nestjs-i18n';
-import { AdminGuard } from 'src/common/guards/roles/admin.guard';
 import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
 import { RoleStatus } from 'src/common/enums/role_status';
 

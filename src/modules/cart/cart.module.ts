@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { CartService } from './cart.service';
 import { CartController } from './cart.controller';
 import { CartProvider } from './providers/cart.provider';
@@ -14,12 +14,13 @@ import { OfferModule } from '../offer/offer.module';
 import { ProuductVariantModule } from '../prouduct_variant/prouduct_variant.module';
 import { LoyaltySettingModule } from '../loyalty_setting/loyalty_setting.module';
 import { CouponModule } from '../coupon/coupon.module';
+import { UserContextModule } from '../user-context/user-context.module';
 
 @Module({
   controllers: [CartController],
   providers: [CartService, ...CartProvider],
   imports: [
-    CustomerModule,
+    forwardRef(()=>UserContextModule),
     StoreModule,
     CartItemModule,
     ProductModule,

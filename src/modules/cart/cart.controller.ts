@@ -8,10 +8,8 @@ import {
   Post,
   Put,
   Query,
-  UseGuards,
 } from '@nestjs/common';
 import { CartService } from './cart.service';
-import { CustomerGuard } from 'src/common/guards/roles/customer.guard';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { CreateCartProductDto } from './dto/create-product-cart.dto';
 import { UpdateCartProductQuantityDto } from './dto/update-productCart-quantity';
@@ -24,6 +22,8 @@ import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
 import { UpdateCartProductDto } from './dto/update-product-cart.dto';
 import { CurrentUserType } from 'src/common/types/current-user.type';
+import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
+import { RoleStatus } from 'src/common/enums/role_status';
 
 @Controller('cart')
 export class CartController {
@@ -38,7 +38,7 @@ export class CartController {
     description: 'Product successfully added to cart',
     schema: { example: { message: 'Product added to cart successfully' } },
   })
-  @UseGuards(CustomerGuard, CompletedProfileGuard)
+  @PermissionGuard([RoleStatus.CUSTOMER],CompletedProfileGuard)
   addProductForCart(
     @CurrentUser() user: CurrentUserType,
     @Body() body: CreateCartProductDto,
@@ -50,7 +50,7 @@ export class CartController {
   }
 
   @Put('update-product/:cartItemId')
-  @UseGuards(CustomerGuard)
+  @PermissionGuard([RoleStatus.CUSTOMER])
   @ApiOperation({ summary: 'Update a product in the customer cart' })
   @ApiSecurity('access-token')
   @ApiParam({ name: 'cartItemId', type: Number, description: 'ID of the cart item', example: 10 })
@@ -72,7 +72,7 @@ export class CartController {
   }
 
   @Delete('remove-product/:cartItemId')
-  @UseGuards(CustomerGuard)
+  @PermissionGuard([RoleStatus.CUSTOMER])
   @ApiOperation({ summary: 'Remove a product from the customer cart' })
   @ApiSecurity('access-token')
   @ApiParam({ name: 'cartItemId', type: Number, description: 'ID of the cart item', example: 10 })
@@ -92,7 +92,7 @@ export class CartController {
   }
 
   @Put('update-product-qty/:cartItemId')
-  @UseGuards(CustomerGuard)
+  @PermissionGuard([RoleStatus.CUSTOMER])
   @ApiOperation({ summary: 'Update quantity of a product in the customer cart' })
   @ApiSecurity('access-token')
   @ApiParam({ name: 'cartItemId', type: Number, description: 'ID of the cart item', example: 10 })
@@ -114,7 +114,7 @@ export class CartController {
   }
 
   @Serilaize(CartWithTotalsDto)
-  @UseGuards(CustomerGuard)
+  @PermissionGuard([RoleStatus.CUSTOMER])
   @Get(':storeId')
   @ApiOperation({ summary: 'Get all cart items for a store with offers' })
   @ApiSecurity('access-token')
@@ -137,7 +137,7 @@ export class CartController {
   }
 
   @Serilaize(CartWithStoreDto)
-  @UseGuards(CustomerGuard)
+  @PermissionGuard([RoleStatus.CUSTOMER])
   @Get('all/byCustomer')
   @ApiOperation({ summary: 'Get all carts for the current customer' })
   @ApiSecurity('access-token')

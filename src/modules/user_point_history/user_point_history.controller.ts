@@ -1,8 +1,7 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 import { UserPointHistoryService } from './user_point_history.service';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { PaginatedUserPointHistoryDto } from './dto/user_point_history.dto';
-import { CustomerGuard } from 'src/common/guards/roles/customer.guard';
 import { ApiOkResponse, ApiOperation, ApiQuery, ApiSecurity } from '@nestjs/swagger';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { I18n, I18nContext } from 'nestjs-i18n';
