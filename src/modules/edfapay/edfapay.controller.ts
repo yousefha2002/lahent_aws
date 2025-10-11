@@ -1,7 +1,7 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { EdfapayService } from './edfapay.service';
 
-@Controller('api/edfapay')
+@Controller('edfapay')
 export class EdfapayController {
   constructor(private readonly edfapayService: EdfapayService) {}
 
@@ -9,4 +9,4 @@ export class EdfapayController {
   async notification(@Body() body: any) {
     return this.edfapayService.handleNotification(body)
   }
-}
+} 
