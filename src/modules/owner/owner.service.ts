@@ -87,12 +87,20 @@ export class OwnerService {
     return this.ownerRepo.findOne({ where: { phone} ,paranoid: false});
   }
 
-  async findAll(page = 1, limit = 10) 
+  async findAll(page = 1, limit = 10,name?: string,city?: string,phone?: string,email?:string) 
   {
     const offset = (page - 1) * limit;
+    const whereStore: any = {
+      ...(city && { city:{ [Op.like]: `%${city}%` } }),
+      ...(phone && { phone: { [Op.like]: `%${phone}%` } }),
+      ...(email && { email: { [Op.like]: `%${email}%` } }),
+      ...(name && { name: { [Op.like]: `%${name}%` } })
+    };
     const { rows, count } = await this.ownerRepo.findAndCountAll({
       limit,
       offset,
+      where:whereStore,
+      order: [['createdAt', 'DESC']]
     });
     const totalPages = Math.ceil(count / limit);
     return {

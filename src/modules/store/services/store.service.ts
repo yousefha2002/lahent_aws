@@ -161,7 +161,7 @@ export class StoreService {
     const whereStore: any = {
       ...(status && { status }),
       ...(subTypeId && { subTypeId }),
-      ...(city && { city }),
+      ...(city && { city:{ [Op.like]: `%${city}%` } }),
       ...(phone && { phone: { [Op.like]: `%${phone}%` } }),
       ...(commercialRegister && { commercialRegister: { [Op.like]: `%${commercialRegister}%` } }),
       ...(dateFilter && { createdAt: { [Op.between]: [start, end] } }),

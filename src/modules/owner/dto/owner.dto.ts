@@ -25,6 +25,10 @@ export class OwnerDto {
     @ApiProperty({ example:false, description: 'Profile completion status' })
     @Expose()
     isCompletedProfile: boolean;
+
+    @ApiProperty({example:"2025-08-29T10:00:00.000Z"})
+    @Expose()
+    createdAt:Date
 }
 
 export class PaginationOwnerDto {

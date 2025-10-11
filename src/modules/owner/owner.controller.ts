@@ -4,7 +4,7 @@ import { UpdateOwnerDto } from './dto/updateOwner.dto';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { OwnerDto, PaginationOwnerDto } from './dto/owner.dto';
-import { ApiBody, ApiOperation, ApiResponse, ApiSecurity } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
 import { RefreshTokenDto } from '../user_token/dtos/refreshToken.dto';
@@ -73,11 +73,21 @@ export class OwnerController {
   @ApiOperation({ summary: 'Get all owners (Admin only) with pagination' })
   @ApiSecurity('access-token')
   @ApiResponse({status: 200,type: PaginationOwnerDto})
+  @ApiQuery({ name: 'name', required: false, type: String, description: 'Filter by store name' })
+  @ApiQuery({ name: 'city', required: false, type: String, description: 'Filter by city' })
+  @ApiQuery({ name: 'phone', required: false, type: String, description: 'Filter by phone' })
+  @ApiQuery({ name: 'email', required: false, type: String, description: 'Filter by email' })
   @Serilaize(PaginationOwnerDto)
   @PermissionGuard([RoleStatus.ADMIN])
   @Get('all')
-  async getAllOwners(@Query('page') page: number = 1,@Query('limit') limit: number = 10)
+  async getAllOwners(
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10,
+    @Query('name') name?: string,
+    @Query('city') city?: string,
+    @Query('phone') phone?: string,
+    @Query('phone') email?: string)
   {
-    return this.ownerService.findAll(page, limit);
+    return this.ownerService.findAll(page, limit,name,city,phone,email);
   }
 }
