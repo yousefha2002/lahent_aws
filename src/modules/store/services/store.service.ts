@@ -368,7 +368,7 @@ export class StoreService {
         ...(dto.commercialRegister !== undefined && { commercialRegister: dto.commercialRegister }),
         ...(dto.taxNumber !== undefined && { taxNumber: dto.taxNumber }),
         ...(dto.lat !== undefined && { lat: dto.lat }),
-        ...(dto.lat !== undefined && { lat: dto.lat }),
+        ...(dto.lng !== undefined && { lat: dto.lng }),
         ...(dto.isOnline !== undefined && { isOnline: dto.isOnline }),
         ...(dto.subTypeId !== undefined && { subTypeId: dto.subTypeId }),
         ...(dto.sectorId !== undefined && { sectorId: dto.sectorId }),

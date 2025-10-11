@@ -191,12 +191,12 @@ export class StoreAuthService {
             include:[{model:StoreLanguage,where:{languageCode:lang}}]
         });
         if (!storeByPass) {
-            throw new NotFoundException(this.i18n.t('translation.auth.invalidPhone',{lang}));
+            throw new NotFoundException(this.i18n.t('translation.auth.invalidPasswordOrPhone',{lang}));
         }
 
         const isMatch = await comparePassword(dto.password, storeByPass.password);
         if (!isMatch) {
-        throw new BadRequestException(this.i18n.t('translation.auth.invalidPassword',{lang}));
+        throw new BadRequestException(this.i18n.t('translation.auth.invalidPasswordOrPhone',{lang}));
         }
         const tokens = generateTokens(storeByPass.id, RoleStatus.STORE);
         const existingToken = await this.userTokenService.findExistingToken(RoleStatus.STORE,storeByPass.id,dto.deviceId);

@@ -182,14 +182,10 @@
   },
   "auth": {
     "invalidPhone": "Invalid Phone Number",
-    "invalidPassword": "Invalid Password"
+    "invalidPassword": "Invalid Password",
+    "invalidPasswordOrPhone": "Invalid Phone Number or Password"
   },
   "invalid_dates": "Start or end date is invalid",
   "expired_date": "End date must be in the future",
-  "start_in_past": "Start date cannot be in the past",
-  "sms":{
-    "store_approved":"Your store has been approved 🎉. You can now start using the system.",
-    "gift_received": "You have received a gift worth {{amount}}.",
-    "verification_code": "Your OTP code is: {{code}}"
-  }
+  "start_in_past": "Start date cannot be in the past"
 }
