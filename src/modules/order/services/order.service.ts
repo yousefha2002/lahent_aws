@@ -145,6 +145,19 @@ export class OrderService {
     };
   }
 
+  async countOrdersForCustomer(customerId: number, storeId?: number) 
+  {
+    const where: any = { customerId };
+
+    if (storeId) {
+      where.storeId = storeId;
+    }
+
+    const count = await this.orderRepo.count({ where });
+
+    return { totalOrders: count };
+  }
+
   async getOrderByStore(storeId: number, orderId: number, lang = Language.en) {
     const order = await this.orderRepo.findOne({
       where: { id: orderId, storeId },

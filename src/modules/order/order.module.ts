@@ -52,7 +52,7 @@ import { UserContextModule } from '../user-context/user-context.module';
     OrderItemVariantModule,
     CarModule,
     DatabaseModule,
-    StoreModule,
+    forwardRef(()=>StoreModule),
     forwardRef(()=>TransactionModule),
     UserPointHistoryModule,
     OfferModule,
