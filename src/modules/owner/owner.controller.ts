@@ -86,7 +86,7 @@ export class OwnerController {
     @Query('name') name?: string,
     @Query('city') city?: string,
     @Query('phone') phone?: string,
-    @Query('phone') email?: string)
+    @Query('email') email?: string)
   {
     return this.ownerService.findAll(page, limit,name,city,phone,email);
   }
