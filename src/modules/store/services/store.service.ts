@@ -372,6 +372,7 @@ export class StoreService {
         ...(dto.isOnline !== undefined && { isOnline: dto.isOnline }),
         ...(dto.subTypeId !== undefined && { subTypeId: dto.subTypeId }),
         ...(dto.sectorId !== undefined && { sectorId: dto.sectorId }),
+        ...(dto.phoneLogin !== undefined && { phoneLogin: dto.phoneLogin }),
       });
       await store.save({ transaction });
 

@@ -23,6 +23,12 @@ export class UpdateStoreDto {
   @IsMobilePhone()
   phone?: string;
 
+  @ApiProperty({ example: '0501234567', required: false })
+  @Transform(({ value }) => value?.replace(/\D/g, ''))
+  @IsOptional()
+  @IsMobilePhone()
+  phoneLogin?: string;
+
   @ApiProperty({ example: true, required: false })
   @IsOptional()
   @IsBoolean()
