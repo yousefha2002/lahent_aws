@@ -63,7 +63,7 @@ import { UserContextModule } from '../user-context/user-context.module';
     LoyaltySettingModule,
     PaymentCardModule,
     FcmTokenModule,
-    forwardRef(()=>UserContextModule)
+    forwardRef(()=>UserContextModule),
   ],
   exports: [OrderService,OrderPaymentService],
 })

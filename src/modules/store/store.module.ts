@@ -21,6 +21,7 @@ import { StoreCommissionModule } from '../store_commission/store_commission.modu
 import { FcmTokenModule } from '../fcm_token/fcm_token.module';
 import { SmsModule } from '../sms/sms.module';
 import { UserContextModule } from '../user-context/user-context.module';
+import { OrderModule } from '../order/order.module';
 
 @Module({
   controllers: [StoreController],
@@ -37,7 +38,8 @@ import { UserContextModule } from '../user-context/user-context.module';
     DatabaseModule,
     StoreCommissionModule,
     FcmTokenModule,
-    SmsModule
+    SmsModule,
+    forwardRef(()=>OrderModule)
   ],
   exports: [StoreService,StoreUtilsService],
 })

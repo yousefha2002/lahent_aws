@@ -28,6 +28,8 @@ import { StoreCommission } from 'src/modules/store_commission/entities/store_com
 import { getDateRange } from 'src/common/utils/getDateRange';
 import { UpdateStoreLegalInfoDto } from '../dto/requests/update-store-legal.dto';
 import { SMSMessages } from 'src/common/constants/notification/sms-messages';
+import { OrderService } from 'src/modules/order/services/order.service';
+import { haversineDistance } from 'src/common/utils/haversine-distance';
 
 @Injectable()
 export class StoreService {
@@ -44,7 +46,8 @@ export class StoreService {
     private sectorService:SectorService,
     @Inject('SEQUELIZE') private readonly sequelize: Sequelize,
     private readonly storeCommissionService:StoreCommissionService,
-    private readonly smsService:SmsService
+    private readonly smsService:SmsService,
+    @Inject(forwardRef(() => OrderService)) private orderService: OrderService,
   ) {}
 
   async findAllStores(
@@ -231,7 +234,7 @@ export class StoreService {
     return store
   }
 
-  async getFullDetailsStore(storeId: number, lang: Language,customerId?:number) {
+  async getFullDetailsStore(storeId: number, lang: Language,customerId?:number,customerLat?: number,customerLng?: number) {
     const store = await this.storeRepo.findOne({
       where: {
         id: storeId,
@@ -258,13 +261,18 @@ export class StoreService {
         this.i18n.t('translation.store.not_found_or_not_approved'),
       );
     }
+    let distance: number | null = null;
+    if (customerLat && customerLng && store.lat && store.lng) {
+      distance = haversineDistance(customerLat, customerLng, store.lat, store.lng);
+    }
     if(customerId)
     {
       let isFavorite = false
       const favorite = await this.faviroteService.findFavoriteStore(storeId,customerId)
       isFavorite = favorite ? true : false
+      const ordersCount = await this.orderService.countOrdersForCustomer(customerId,storeId)
       const storeResponce = await this.storeUtilsService.mapStoreWithExtras(store);
-      return {store:storeResponce,isFavorite}
+      return {store:{...storeResponce,distance},isFavorite,ordersCount}
     }
     return store
   }

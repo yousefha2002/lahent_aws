@@ -155,7 +155,7 @@ export class OrderService {
 
     const count = await this.orderRepo.count({ where });
 
-    return { totalOrders: count };
+    return count;
   }
 
   async getOrderByStore(storeId: number, orderId: number, lang = Language.en) {

@@ -290,15 +290,21 @@ export class StoreController {
   @ApiOperation({ summary: 'Get full details of a store by ID (customer only)' })
   @ApiSecurity('access-token')
   @ApiParam({ name: 'id', description: 'ID of the store', example: 1 })
+  @ApiQuery({ name: 'lat', required: false, description: 'Customer latitude', example: 31.5 })
+  @ApiQuery({ name: 'lng', required: false, description: 'Customer longitude', example: 35.1 })
   @ApiResponse({status: 200,description: 'full details of store',type: FullDetailsCustomerStoreViewDto})
   async getFullDetailsStore(
     @Param('id') storeId: number,
     @I18n() i18n: I18nContext,
-    @CurrentUser() user:CurrentUserType
+    @CurrentUser() user:CurrentUserType,
+    @Query('lat') lat?: string,
+    @Query('lng') lng?: string
   ) {
     const lang = getLang(i18n);
     const {context} = user
-    return this.storeService.getFullDetailsStore(storeId, lang,context.id);
+    const customerLat = lat ? parseFloat(lat) : undefined;
+    const customerLng = lng ? parseFloat(lng) : undefined;
+    return this.storeService.getFullDetailsStore(storeId, lang,context.id,customerLat,customerLng);
   }
 
   @PermissionGuard([RoleStatus.ADMIN])
@@ -320,13 +326,19 @@ export class StoreController {
   @Get('guest/:id')
   @ApiOperation({ summary: 'Get full details of a store by ID (guest)' })
   @ApiParam({ name: 'id', description: 'ID of the store', example: 1 })
+  @ApiQuery({ name: 'lat', required: false, description: 'Customer latitude', example: 31.5 })
+  @ApiQuery({ name: 'lng', required: false, description: 'Customer longitude', example: 35.1 })
   @ApiResponse({ status: 200, description: 'full details of store', type: StoreCustomerViewDto })
   async getFullDetailsStoreGuest(
     @Param('id') storeId: number,
     @I18n() i18n: I18nContext,
+    @Query('lat') lat?: string,
+    @Query('lng') lng?: string
   ) {
     const lang = getLang(i18n);
-    return this.storeService.getFullDetailsStore(storeId, lang);
+    const customerLat = lat ? parseFloat(lat) : undefined;
+    const customerLng = lng ? parseFloat(lng) : undefined;
+    return this.storeService.getFullDetailsStore(storeId, lang,customerLat,customerLng);
   }
 
   @Put('/:storeId/approved')

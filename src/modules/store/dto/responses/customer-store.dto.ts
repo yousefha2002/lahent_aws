@@ -8,6 +8,10 @@ export class StoreCustomerViewDto extends SimpleStoreDto{
     @Expose()
     @Type(() => StoreSubTypeDto)
     subType: StoreSubTypeDto[];
+
+    @ApiProperty({example: 3})
+    @Expose()
+    distance:number
 }
 
 export class PaginatedCustomerStoreViewDto {
@@ -35,4 +39,8 @@ export class FullDetailsCustomerStoreViewDto {
     @ApiProperty({description: 'Indicates if the store is marked as favorite by the current customer',example: true})
     @Expose()
     isFavorite:boolean
+
+    @ApiProperty({example: 20})
+    @Expose()
+    ordersCount:number
 }
