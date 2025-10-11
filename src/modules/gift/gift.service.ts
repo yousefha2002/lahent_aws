@@ -18,6 +18,7 @@ import { Avatar } from '../avatar/entities/avatar.entity';
 import { GiftTemplate } from '../gift_template/entities/gift_template.entity';
 import { GiftNotifications } from 'src/common/constants/notification/gift-notification';
 import { RoleStatus } from 'src/common/enums/role_status';
+import { SMSMessages } from 'src/common/constants/notification/sms-messages';
 
 @Injectable()
 export class GiftService {
@@ -35,15 +36,11 @@ export class GiftService {
     @Inject('SEQUELIZE') private readonly sequelize: Sequelize,
   ) {}
 
-  async createGift(senderId: number, dto: CreateGiftDto, lang: Language = Language.ar) {
+  async createGift(sender: Customer, dto: CreateGiftDto, lang: Language = Language.ar) {
     const transaction = await this.sequelize.transaction();
     try {
       const { receiverPhone, receiverName, giftTemplateId, amount } = dto;
-
-      const [giftTemplate, sender] = await Promise.all([
-        this.giftTemplateService.findById(giftTemplateId),
-        this.customerService.findById(senderId),
-      ]);
+      const giftTemplate = await this.giftTemplateService.findById(giftTemplateId)
 
       if (sender.walletBalance < amount) {
         const message = this.i18n.translate('translation.not_enough_balance', { lang });
@@ -97,7 +94,7 @@ export class GiftService {
 
       // Create transaction for sender
       await this.transactionService.createTransaction({
-        customerId: senderId,
+        customerId: sender.id,
         amount,
         direction: 'OUT',
         type: TransactionType.GIFT_SENT,
@@ -117,7 +114,7 @@ export class GiftService {
 
       await transaction.commit();
 
-      const smsMessage = this.i18n.translate('translation.sms.gift_received', {lang,args: { amount }});
+      const smsMessage = SMSMessages.GIFT_RECEIVED(sender.phone, amount)[lang];
       await this.smsService.sendSms(finalReceiverPhone, smsMessage);
 
       if (receiver) {

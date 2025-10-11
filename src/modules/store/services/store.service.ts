@@ -27,6 +27,7 @@ import { Owner } from 'src/modules/owner/entities/owner.entity';
 import { StoreCommission } from 'src/modules/store_commission/entities/store_commission.entity';
 import { getDateRange } from 'src/common/utils/getDateRange';
 import { UpdateStoreLegalInfoDto } from '../dto/requests/update-store-legal.dto';
+import { SMSMessages } from 'src/common/constants/notification/sms-messages';
 
 @Injectable()
 export class StoreService {
@@ -316,7 +317,7 @@ export class StoreService {
         throw new BadRequestException(this.i18n.translate('translation.store.incomplete_profile', { lang }));
       }
       await this.storeCommissionService.getCommission(storeId)
-      const message = this.i18n.t(`translation.sms.store_approved`, { lang });
+      const message = SMSMessages.STORE_APPROVED()[lang];
       await this.smsService.sendSms(store.phone, message);
     }
     store.status = status;

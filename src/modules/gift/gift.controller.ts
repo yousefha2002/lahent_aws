@@ -46,7 +46,7 @@ export class GiftController {
   ) {
     const lang = getLang(i18n);
     const {context} = sender
-    return this.giftService.createGift(context.id, body, lang);
+    return this.giftService.createGift(context, body, lang);
   }
 
   @Serilaize(PaginatedGiftDto)

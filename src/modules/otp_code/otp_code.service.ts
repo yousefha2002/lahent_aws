@@ -13,6 +13,7 @@ import { generateTokens } from 'src/common/utils/generateToken';
 import { RoleStatus } from 'src/common/enums/role_status';
 import { DEMO_CUSTOMER_PHONE, DEMO_OTP_CODE, DEMO_OWNER_PHONE } from 'src/common/constants/demos';
 import { VerifyOtpDto } from './dto/verify_opt.dto';
+import { SMSMessages } from 'src/common/constants/notification/sms-messages';
 
 @Injectable()
 export class OtpCodeService {
@@ -35,7 +36,8 @@ export class OtpCodeService {
       return { phone, code: DEMO_OTP_CODE, status: 'login' };
     }
     const code = generateOtpCode();
-    await this.smsService.sendSms(phone, `Your OTP code is: ${code}`);
+    const message = SMSMessages.SEND_CODE(code)[lang] || SMSMessages.SEND_CODE(code).ar;
+    await this.smsService.sendSms(phone,message);
     const serviceMap = {
       owner: { service: this.ownerService, role: RoleStatus.OWNER },
       customer: { service: this.customerService, role: RoleStatus.CUSTOMER },
