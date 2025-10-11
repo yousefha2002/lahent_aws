@@ -26,6 +26,7 @@ import { SectorLanguage } from 'src/modules/sector/entities/sectore_langauge.ent
 import { Owner } from 'src/modules/owner/entities/owner.entity';
 import { StoreCommission } from 'src/modules/store_commission/entities/store_commission.entity';
 import { getDateRange } from 'src/common/utils/getDateRange';
+import { UpdateStoreLegalInfoDto } from '../dto/requests/update-store-legal.dto';
 
 @Injectable()
 export class StoreService {
@@ -431,12 +432,7 @@ export class StoreService {
     }
   }
 
-  async updateStoreImages(
-    store: Store,
-    logo?: Express.Multer.File,
-    cover?: Express.Multer.File,
-    lang = Language.en
-  ) {
+  async updateStoreImages(store: Store,logo?: Express.Multer.File,cover?: Express.Multer.File,lang?: Language) {
     if (!logo && !cover) {
       return {
         message: this.i18n.t('translation.store.no_image_changes',{lang}),
@@ -466,6 +462,35 @@ export class StoreService {
       logoUrl: store.logoUrl,
       coverUrl: store.coverUrl,
     };
+  }
+
+  async updateStoreLegalInfo(store: Store,dto: UpdateStoreLegalInfoDto,taxNumberFile?: Express.Multer.File,commercialRegisterFile?: Express.Multer.File) 
+  {
+    const { taxNumber, commercialRegister } = dto;
+    if (taxNumberFile) {
+      if (store.taxNumberPublicId)
+        await this.cloudinaryService.deleteImage(store.taxNumberPublicId);
+
+      const uploaded = await this.cloudinaryService.uploadImage(taxNumberFile);
+      store.taxNumberUrl = uploaded.secure_url;
+      store.taxNumberPublicId = uploaded.public_id;
+    }
+
+    if (commercialRegisterFile) {
+      if (store.commercialRegisterPublicId)
+        await this.cloudinaryService.deleteImage(store.commercialRegisterPublicId);
+
+      const uploaded = await this.cloudinaryService.uploadImage(commercialRegisterFile);
+      store.commercialRegisterUrl = uploaded.secure_url;
+      store.commercialRegisterPublicId = uploaded.public_id;
+    }
+
+    if (taxNumber) store.taxNumber = taxNumber;
+    if (commercialRegister) store.commercialRegister = commercialRegister;
+
+    await store.save();
+
+    return {message: 'Legal info updated successfully',};
   }
 
   async getFavouriteStoresByCustomer(customerId: number, lang: Language = Language.en,page:number,limit:number,type?:number)

@@ -34,6 +34,7 @@ import { StoreWithTokenDto } from './dto/responses/store-with-token.dto';
 import { StoreAdminViewDto } from './dto/responses/admin-store.dto';
 import { CurrentUserType } from 'src/common/types/current-user.type';
 import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
+import { UpdateStoreLegalInfoDto } from './dto/requests/update-store-legal.dto';
 
 @Controller('store')
 export class StoreController {
@@ -463,6 +464,38 @@ export class StoreController {
     const lang = getLang(i18n);
     const {context} = user
     return this.storeService.updateStoreImages(context, logo, cover,lang);
+  }
+
+  @Put('update-legal-info')
+  @PermissionGuard([RoleStatus.STORE, RoleStatus.ADMIN])
+  @ApiOperation({ summary: 'Update store legal information (tax number & commercial register)' })
+  @ApiSecurity('access-token')
+  @ApiQuery({ name: 'storeId', required: false, example: 1 })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({type:UpdateStoreLegalInfoDto})
+  @ApiResponse({status: 200,schema: {example: {message: 'Legal info updated successfully'}}})
+  @UseInterceptors(
+    FileFieldsInterceptor(
+      [
+        { name: 'taxNumberFile', maxCount: 1 },
+        { name: 'commercialRegisterFile', maxCount: 1 },
+      ],
+      multerOptions,
+    ),
+  )
+  async updateLegalInfo(
+    @CurrentUser() user: CurrentUserType,
+    @UploadedFiles()
+    files: {
+      taxNumberFile?: Express.Multer.File[];
+      commercialRegisterFile?: Express.Multer.File[];
+    },
+    @Body() dto: UpdateStoreLegalInfoDto,
+  ) {
+    const taxNumberFile = files.taxNumberFile?.[0];
+    const commercialRegisterFile = files.commercialRegisterFile?.[0];
+    const { context } = user;
+    return this.storeService.updateStoreLegalInfo(context, dto, taxNumberFile, commercialRegisterFile);
   }
 
   @Get('favourite/byCustomer')
