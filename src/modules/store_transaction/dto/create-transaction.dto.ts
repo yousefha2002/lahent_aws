@@ -24,7 +24,7 @@ export class CreateStoreTransactionDto extends BaseStoreTransactionDto{
 }
 
 export class CreateAdminStoreTransactionDto extends BaseStoreTransactionDto {
-    @ApiPropertyOptional({ example: 101})
+    @ApiPropertyOptional({ example: "Note"})
     @IsNumber()
     note: string;
 
