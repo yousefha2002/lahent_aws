@@ -19,7 +19,7 @@ export class PayOrderDTO {
     @IsOptional()
     newCard?: CreatePaymentCardWithSaveDto;
 
-    @ApiProperty({ type: ApplePayPaymentDTO, description: 'Apple Pay payment details' })
-    @IsNotEmpty()
+    @ApiPropertyOptional({ type: ApplePayPaymentDTO, description: 'Apple Pay payment details' })
+    @IsOptional()
     applePayPayment: ApplePayPaymentDTO;
 }
