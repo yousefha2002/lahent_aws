@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsNumber, IsOptional, IsPositive } from 'class-validator';
+import { IsEnum, IsNumber, IsOptional, IsPositive, IsString } from 'class-validator';
 import { StoreTransactionType } from 'src/common/enums/transaction_type';
 
 class BaseStoreTransactionDto {
@@ -25,7 +25,7 @@ export class CreateStoreTransactionDto extends BaseStoreTransactionDto{
 
 export class CreateAdminStoreTransactionDto{
     @ApiProperty({ example: "1", description: 'ID of the store' })
-    @IsNumber()
+    @IsString()
     storeId: string;
 
     @ApiProperty({ example: "200", description: 'Amount involved in the transaction' })
@@ -35,7 +35,7 @@ export class CreateAdminStoreTransactionDto{
     status: string;
 
     @ApiPropertyOptional({ example: "Note"})
-    @IsNumber()
+    @IsString()
     note: string;
 
     @ApiPropertyOptional({ type: 'string', format: 'binary', description: 'Upload a receipt(optional)' })
