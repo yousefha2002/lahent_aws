@@ -2,7 +2,7 @@ import { PaymentCardService } from './../../payment_card/payment_card.service';
 import { OrderNotificationService } from './order_notification.service';
 import { OrderService } from './order.service';
 import { PaymentSessionService } from '../../payment_session/payment_session.service';
-import { TransactionService } from '../../transaction/transaction.service';
+import { TransactionService } from '../../transaction/services/transaction.service';
 import { CustomerService } from '../../customer/customer.service';
 import { StoreService } from 'src/modules/store/services/store.service';
 import { BadRequestException, forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';

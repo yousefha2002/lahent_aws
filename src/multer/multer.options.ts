@@ -23,3 +23,31 @@ export const multerOptions = {
     }
   },
 };
+
+export const multerReceiptOptions = {
+  storage: multer.memoryStorage(), // أو diskStorage لو تحب تحفظ محليًا
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB max
+  fileFilter: (
+    req: Express.Request,
+    file: Express.Multer.File,
+    cb: multer.FileFilterCallback,
+  ) => {
+    const allowedMimeTypes = [
+      'image/png',
+      'image/jpeg',
+      'image/jpg',
+      'application/pdf',
+    ];
+
+    if (allowedMimeTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(
+        new BadRequestException(
+          'Only .png, .jpg, .jpeg images or PDF files are allowed!',
+        ) as any,
+        false,
+      );
+    }
+  },
+};

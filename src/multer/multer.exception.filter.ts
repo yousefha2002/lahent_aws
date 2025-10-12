@@ -3,7 +3,6 @@ import {
   ExceptionFilter,
   Catch,
   ArgumentsHost,
-  BadRequestException,
 } from '@nestjs/common';
 import { MulterError } from 'multer';
 

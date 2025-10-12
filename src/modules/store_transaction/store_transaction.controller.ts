@@ -1,6 +1,6 @@
-import { Controller, Get, Query, ParseIntPipe, Post, Body } from '@nestjs/common';
+import { Controller, Get, Query, ParseIntPipe, Post, Body, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { StoreTransactionService } from './store_transaction.service';
-import { ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { PaginatedStoreTransactionDto } from './dto/store_transaction.dto';
@@ -14,6 +14,8 @@ import { getLang } from 'src/common/utils/get-lang.util';
 import { AdminTransactionResponse } from './dto/admin-transaction-response.dto';
 import { RoleStatus } from 'src/common/enums/role_status';
 import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { multerOptions, multerReceiptOptions } from 'src/multer/multer.options';
 
 @Controller('store-transaction')
 export class StoreTransactionController {
@@ -68,17 +70,20 @@ export class StoreTransactionController {
     }
 
     @Serilaize(AdminTransactionResponse)
-   @PermissionGuard([RoleStatus.ADMIN])
+    @PermissionGuard([RoleStatus.ADMIN])
     @ApiOperation({ summary: 'Admin adds or withdraws money from store balance' })
     @ApiSecurity('access-token')
     @ApiBody({ type: CreateAdminStoreTransactionDto })
+    @UseInterceptors(FileInterceptor('receipt', multerReceiptOptions))
+    @ApiConsumes('multipart/form-data')
     @ApiResponse({ status: 201, description: 'Transaction created successfully', type: AdminTransactionResponse })
     @Post('admin/transaction')
     async adminTransaction(
         @Body() dto: CreateAdminStoreTransactionDto,
-        @I18n() i18n: I18nContext
+        @I18n() i18n: I18nContext,
+        @UploadedFile() file?: Express.Multer.File,
     ) {
         const lang = getLang(i18n);
-        return this.storeTransactionService.createAdminTransaction(lang,dto);
+        return this.storeTransactionService.createAdminTransaction(lang,dto,file);
     }
 }

@@ -45,7 +45,7 @@ export class CustomerService {
     return new_customer
   }
 
-  async findById(id: number, lang = Language.en) {
+  async findById(id: number, lang = Language.ar) {
     const customer = await this.customerRepo.findOne({
       where: { id },
       include: [{ model: Avatar }],

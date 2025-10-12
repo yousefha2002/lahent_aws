@@ -13,13 +13,15 @@ import { Op } from 'sequelize';
 import { StoreTransactionType } from 'src/common/enums/transaction_type';
 import { Language } from 'src/common/enums/language';
 import { I18nService } from 'nestjs-i18n';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 
 @Injectable()
 export class StoreTransactionService {
     constructor(
         @Inject(repositories.store_transaction_repository) private storeTransactionRepo: typeof StoreTransaction,
         private readonly storeCommissionService:StoreCommissionService,
-        private readonly i18n: I18nService
+        private readonly i18n: I18nService,
+        private cloudinaryService: CloudinaryService
     ) {}
 
     async create(dto: CreateStoreTransactionDto,transaction?: any) {
@@ -143,12 +145,17 @@ export class StoreTransactionService {
         };
     }
 
-    async createAdminTransaction(lang:Language,dto:CreateAdminStoreTransactionDto,transaction?: any) {
-        const {status,storeId,totalAmount} = dto
+    async createAdminTransaction(lang:Language,dto:CreateAdminStoreTransactionDto,file?:Express.Multer.File,transaction?: any) {
+        const {status,storeId,totalAmount,note} = dto
         if (![StoreTransactionType.SETTLEMENT, StoreTransactionType.ADMIN_WITHDRAW].includes(status)) {
             throw new BadRequestException('Invalid transaction type. Must be SETTLEMENT or WITHDRAWAL');
         }
-        await this.storeTransactionRepo.create({storeId,storeRevenue:totalAmount,status}, { transaction });
+        let receiptUrl: string | null = null;
+        if (file) {
+            const uploaded = await this.cloudinaryService.uploadImage(file);
+            receiptUrl = uploaded.secure_url;
+        }
+        await this.storeTransactionRepo.create({storeId,storeRevenue:totalAmount,status,note,receipt:receiptUrl}, { transaction });
         return {message: this.i18n.translate('translation.createdSuccefully', { lang }),}
     }
 }

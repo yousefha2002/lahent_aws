@@ -1,6 +1,6 @@
 import { PaymentGateway } from "../interfaces/payment_session.interface";
 import axios from "axios";
-import { generateCardHash } from "src/common/utils/generateHash";
+import { generateApplePayHash, generateCardHash } from "src/common/utils/generateHash";
 import { Customer } from "src/modules/customer/entities/customer.entity";
 import * as NodeFormData from 'form-data';
 import { v4 as uuidv4 } from 'uuid';
@@ -98,8 +98,7 @@ export class EdFapayGateway implements PaymentGateway {
     async createApplePayPayment(amount: number,currency: string,callbackUrl: string,customer: Customer,applePayData: ApplePayPaymentDTO) {
         const orderId = uuidv4();
         const description = `ApplePay payment for order ${orderId}`;
-        const hash = generateCardHash(customer.email, this.secretKey, orderId);
-
+        const hash = generateApplePayHash(orderId,amount.toString(),currency,description,this.secretKey)
         const holderParts = customer.name.trim().split(' ');
         const firstName = holderParts.shift() || '';
         const lastName = holderParts.join(' ') || '';
@@ -125,12 +124,16 @@ export class EdFapayGateway implements PaymentGateway {
         formData.append('payer_ip', '176.44.76.222');
 
         // Apple Pay fields
-        formData.append('transactionIdentifier', applePayData.transactionIdentifier);
-        formData.append('paymentMethod', JSON.stringify(applePayData.paymentMethod));
-        formData.append('version', applePayData.version);
-        formData.append('data', applePayData.data);
-        formData.append('header', JSON.stringify(applePayData.header));
-        formData.append('signature', applePayData.signature);
+        formData.append('parameters', JSON.stringify({
+            transactionIdentifier: applePayData.transactionIdentifier,
+            paymentMethod: applePayData.paymentMethod,
+            paymentData: {
+            version: applePayData.version,
+            data: applePayData.data,
+            header: applePayData.header,
+            signature: applePayData.signature,
+            },
+        }));
 
         const response = await axios.post(this.applePayUrl, formData, {
             headers: { ...formData.getHeaders(), Accept: 'application/json', 'X-User-Agent': 'ios' },

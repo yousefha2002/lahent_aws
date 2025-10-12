@@ -8,7 +8,7 @@ import { GiftStatus } from 'src/common/enums/gift_status';
 import { CreateGiftDto } from './dto/create-gift.dto';
 import { CustomerService } from '../customer/customer.service';
 import { formatPhoneNumber } from 'src/common/utils/formatPhoneNumber';
-import { TransactionService } from '../transaction/transaction.service';
+import { TransactionService } from '../transaction/services/transaction.service';
 import { TransactionType } from 'src/common/enums/transaction_type';
 import { I18nService } from 'nestjs-i18n';
 import { Language } from 'src/common/enums/language';

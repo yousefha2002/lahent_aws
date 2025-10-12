@@ -4,11 +4,12 @@ import { StoreTransactionService } from './store_transaction.service';
 import { StoreTransactionProvider } from './providers/store_transaction.provider';
 import { StoreTransactionController } from './store_transaction.controller';
 import { UserContextModule } from '../user-context/user-context.module';
+import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
 
 @Module({
   controllers: [StoreTransactionController],
   providers: [StoreTransactionService,...StoreTransactionProvider],
-  imports:[StoreCommissionModule,forwardRef(()=>UserContextModule)],
+  imports:[StoreCommissionModule,forwardRef(()=>UserContextModule),CloudinaryModule],
   exports:[StoreTransactionService]
 })
 export class StoreTransactionModule {}

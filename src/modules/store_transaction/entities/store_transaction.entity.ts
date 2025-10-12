@@ -33,4 +33,10 @@ export class StoreTransaction extends Model {
     @Default(StoreTransactionType.COMPLETED)
     @Column(DataType.ENUM(...Object.values(StoreTransactionType)))
     status: StoreTransactionType;
+
+    @Column({type: DataType.TEXT,allowNull: false,})
+    note: string;
+
+    @Column({type: DataType.STRING,allowNull: false})
+    receipt: string;
 }

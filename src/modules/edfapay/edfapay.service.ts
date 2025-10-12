@@ -1,16 +1,17 @@
 import { OrderPaymentService } from './../order/services/order-payment.service';
-import { TransactionService } from './../transaction/transaction.service';
+import { TransactionService } from '../transaction/services/transaction.service';
 import { PaymentSessionService } from './../payment_session/payment_session.service';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { GatewaySource } from 'src/common/enums/gateway-source';
 import { PaymentGatewayFactory } from '../payment_session/payment_gateway.factory';
 import { GatewayType } from 'src/common/enums/gateway_type';
+import { WalletService } from '../transaction/services/wallet.service';
 
 @Injectable()
 export class EdfapayService {
     constructor(
         private paymentSessionService:PaymentSessionService,
-        private transactionService:TransactionService,
+        private walletService:WalletService,
         private orderPaymentService:OrderPaymentService,
     ){}
 
@@ -39,7 +40,7 @@ export class EdfapayService {
         if (isSettled) {
             session.status = 'success';
             if (session.purpose === GatewaySource.wallet) {
-                await this.transactionService.confirmChargeWallet(session);
+                await this.walletService.confirmChargeWallet(session);
             } else if (session.purpose === GatewaySource.order) {
                 await this.orderPaymentService.confirmOrderPayment(session);
             }
