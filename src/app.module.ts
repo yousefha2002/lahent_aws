@@ -65,6 +65,7 @@ import { PaymentCardModule } from './modules/payment_card/payment_card.module';
 import { FcmTokenModule } from './modules/fcm_token/fcm_token.module';
 import { AuditLogModule } from './modules/audit_log/audit_log.module';
 import { UserContextModule } from './modules/user-context/user-context.module';
+import { S3Module } from './modules/s3/s3.module';
 
 @Module({
   imports: [
@@ -145,6 +146,7 @@ import { UserContextModule } from './modules/user-context/user-context.module';
     FcmTokenModule,
     AuditLogModule,
     UserContextModule,
+    S3Module,
   ],
   providers: [MulterConfigService],
 })

@@ -9,6 +9,6 @@ import { UserContextModule } from '../user-context/user-context.module';
   controllers: [AvatarController],
   providers: [AvatarService,...AvatarProvider],
   exports:[AvatarService],
-  imports:[forwardRef(()=>UserContextModule),CloudinaryModule]
+  imports:[forwardRef(()=>UserContextModule),CloudinaryModule,]
 })
 export class AvatarModule {}

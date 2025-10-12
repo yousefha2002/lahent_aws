@@ -16,6 +16,9 @@ export class FcmTokenService {
     async registerToken(userId: number,role: RoleStatus,dto:RegisterFcmTokenDto,deviceName?: string) 
     {
         const {deviceId,token} = dto
+        const tokens = await this.fcmTokenRepo.findAll({where:{token}})
+        console.log(tokens)
+        await this.fcmTokenRepo.destroy({ where: { token } });
         const existing = await this.fcmTokenRepo.findOne({ where: { userId, role, deviceId } });
         if (!existing) {
             await this.fcmTokenRepo.create({ userId, role, token, deviceId, deviceName });
