@@ -29,9 +29,11 @@ export class CreateAdminStoreTransactionDto{
     storeId: string;
 
     @ApiProperty({ example: "200", description: 'Amount involved in the transaction' })
+    @IsString()
     totalAmount: string;
 
     @ApiProperty({ example: StoreTransactionType.SETTLEMENT })
+    @IsString()
     status: string;
 
     @ApiPropertyOptional({ example: "Note"})

@@ -147,9 +147,10 @@ export class StoreTransactionService {
 
     async createAdminTransaction(lang:Language,dto:CreateAdminStoreTransactionDto,file?:Express.Multer.File,transaction?: any) {
         const {status,storeId,totalAmount,note} = dto
-        if (![StoreTransactionType.SETTLEMENT, StoreTransactionType.ADMIN_WITHDRAW].includes(status as StoreTransactionType)) {
-            throw new BadRequestException('Invalid transaction type. Must be SETTLEMENT or WITHDRAWAL');
+        if (status !== StoreTransactionType.SETTLEMENT && status !== StoreTransactionType.ADMIN_WITHDRAW) {
+                throw new BadRequestException('Invalid transaction type. Must be SETTLEMENT or ADMIN_WITHDRAW');
         }
+
         const amountNumber = parseFloat(totalAmount);
         if (isNaN(amountNumber) || amountNumber <= 0) {
             throw new BadRequestException('totalAmount must be a number greater than 0');
