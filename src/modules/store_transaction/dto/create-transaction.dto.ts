@@ -23,7 +23,17 @@ export class CreateStoreTransactionDto extends BaseStoreTransactionDto{
     orderId: number;
 }
 
-export class CreateAdminStoreTransactionDto extends BaseStoreTransactionDto {
+export class CreateAdminStoreTransactionDto{
+    @ApiProperty({ example: "1", description: 'ID of the store' })
+    @IsNumber()
+    storeId: string;
+
+    @ApiProperty({ example: "200", description: 'Amount involved in the transaction' })
+    totalAmount: string;
+
+    @ApiProperty({ example: StoreTransactionType.SETTLEMENT })
+    status: string;
+
     @ApiPropertyOptional({ example: "Note"})
     @IsNumber()
     note: string;
