@@ -55,6 +55,14 @@ export class StoreTransactionDto {
     @Expose()
     @ApiProperty({ description: 'Date of creation', nullable: true })
     createdAt: Date;
+
+    @Expose()
+    @ApiProperty({ description: 'Note of transaction ', nullable: true })
+    note: string;
+
+    @Expose()
+    @ApiProperty({ description: 'Recepit of url', nullable: true })
+    recepit: string;
 }
 
 export class PaginatedStoreTransactionDto {

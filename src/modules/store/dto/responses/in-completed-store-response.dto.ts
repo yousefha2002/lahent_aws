@@ -16,7 +16,7 @@ class StoreLanguageInfoDto {
 class IncompleteStoreDto {
     @ApiProperty({ example: 1 })
     @Expose()
-    storeId: number;
+    id: number;
 
     @ApiProperty({ type: [StoreLanguageInfoDto] })
     @Expose()
