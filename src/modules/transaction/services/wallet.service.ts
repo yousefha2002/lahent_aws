@@ -1,6 +1,5 @@
 import { TransactionService } from './transaction.service';
 import { BadRequestException, forwardRef, Inject, Injectable } from '@nestjs/common';
-import { repositories } from 'src/common/enums/repositories';
 import { TransactionType } from 'src/common/enums/transaction_type';
 import { GatewaySource } from 'src/common/enums/gateway-source';
 import { formatCardForApi } from 'src/common/utils/formatCardForApi';
@@ -18,7 +17,6 @@ import { PaymentGatewayFactory } from 'src/modules/payment_session/payment_gatew
 @Injectable()
 export class WalletService {
   constructor(
-    @Inject(repositories.transaction_repository)
     private readonly loyaltyOfferService: LoyaltyOfferService,
 
     @Inject(forwardRef(() => PaymentSessionService))

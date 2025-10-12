@@ -24,6 +24,8 @@ import { PayOrderDTO } from '../dto/requests/pay-order-dto';
 import { formatCardForApi } from 'src/common/utils/formatCardForApi';
 import { PaymentCard } from 'src/modules/payment_card/entities/payment_card.entity';
 import { StoreUtilsService } from 'src/modules/store/services/storeUtils.service';
+import { ApplePayPaymentDTO } from 'src/modules/payment_session/dto/apple-payment.dto';
+import { PaymentGatewayFactory } from 'src/modules/payment_session/payment_gateway.factory';
 
 @Injectable()
 export class OrderPaymentService {
@@ -60,7 +62,11 @@ export class OrderPaymentService {
                 case PaymentMethod.WALLET:
                     return await this.handleWalletPayment(order, customer, amountLeftToPay, transaction, lang);
                 case PaymentMethod.GATEWAY:
-                    return await this.handleGatewayPayment(order, customer, dto, amountLeftToPay, transaction);
+                    if (dto.applePayPayment) {
+                    return await this.handleApplePayPayment(order, customer, dto.applePayPayment, amountLeftToPay, transaction,lang);
+                    } else {
+                        return await this.handleGatewayPayment(order, customer, dto, amountLeftToPay, transaction);
+                    }
                 default:
                     throw new BadRequestException(this.i18n.translate('translation.orders.invalid_payment_method', { lang }));
             }
@@ -181,6 +187,30 @@ export class OrderPaymentService {
         });
 
         return { redirect: { redirectUrl, redirectMethod, redirectParams, paymentId } };
+    }
+
+    private async handleApplePayPayment(order: Order, customer: Customer, applePayData: ApplePayPaymentDTO, amountLeft: number, transaction: any,lang:Language) {
+        const gateway = PaymentGatewayFactory.getProvider(order.paymentGateway);
+        const paymentSuccess = await gateway.createApplePayPayment(amountLeft, 'SAR', 'https://lahent.sa/api', customer, applePayData);
+
+        if (!paymentSuccess) {
+            throw new BadRequestException('Apple Pay payment failed');
+        }
+
+        await this.updateOrderPaymentInfo(order, transaction);
+        await this.transactionService.createTransaction({
+                customerId: order.customerId,
+                amount: amountLeft ?? 0,
+                direction: 'OUT',
+                type: TransactionType.PURCHASE_GATEWAY,
+                orderId: order.id,
+            }, transaction);
+
+        await transaction.commit();
+
+        this.orderNotificationService.notifyStoreSocket({ orderId: order.id, status: order.status, storeId: order.storeId });
+        await this.orderNotificationService.sendNewOrderNotificationToStore(order.id,order.orderNumber, order.status, order.storeId, lang);
+        return { success: true, message: 'Paid with Apple Pay' };
     }
 
     async confirmOrderPayment(session: PaymentSession, lang: Language = Language.ar) 

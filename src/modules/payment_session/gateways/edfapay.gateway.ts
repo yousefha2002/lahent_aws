@@ -95,10 +95,18 @@ export class EdFapayGateway implements PaymentGateway {
         }
     }
 
-    async createApplePayPayment(amount: number,currency: string,callbackUrl: string,customer: Customer,applePayData: ApplePayPaymentDTO) {
+    async createApplePayPayment(
+    amount: number,
+    currency: string,
+    callbackUrl: string,
+    customer: Customer,
+    applePayData: ApplePayPaymentDTO,
+    ) {
+    try {
         const orderId = uuidv4();
         const description = `ApplePay payment for order ${orderId}`;
-        const hash = generateApplePayHash(orderId,amount.toString(),currency,description,this.secretKey)
+        const hash = generateApplePayHash(orderId, amount.toString(), currency, description, this.secretKey);
+
         const holderParts = customer.name.trim().split(' ');
         const firstName = holderParts.shift() || '';
         const lastName = holderParts.join(' ') || '';
@@ -124,7 +132,9 @@ export class EdFapayGateway implements PaymentGateway {
         formData.append('payer_ip', '176.44.76.222');
 
         // Apple Pay fields
-        formData.append('parameters', JSON.stringify({
+        formData.append(
+        'parameters',
+        JSON.stringify({
             transactionIdentifier: applePayData.transactionIdentifier,
             paymentMethod: applePayData.paymentMethod,
             paymentData: {
@@ -133,18 +143,23 @@ export class EdFapayGateway implements PaymentGateway {
             header: applePayData.header,
             signature: applePayData.signature,
             },
-        }));
+        }),
+        );
 
         const response = await axios.post(this.applePayUrl, formData, {
-            headers: { ...formData.getHeaders(), Accept: 'application/json', 'X-User-Agent': 'ios' },
+        headers: { ...formData.getHeaders(), Accept: 'application/json', 'X-User-Agent': 'ios' },
         });
 
-        if (response.data.result !== 'SUCCESS' || response.data.result !== 'SALE') {
-            throw new BadRequestException(
-            `Payment failed: ${response.data.decline_reason || response.data.result}`
-            );
+        if (response.data.result !== 'SUCCESS' && response.data.result !== 'SALE') {
+        throw new BadRequestException(
+            `Payment failed: ${response.data.decline_reason || response.data.result}`,
+        );
         }
 
         return true;
+    } catch (error) {
+        console.error('Apple Pay Payment Error:', error);
+        throw new BadRequestException(`Apple Pay payment error: ${error.message || error}`);
+    }
     }
 }
