@@ -345,7 +345,7 @@ export class StoreService {
     return this.storeRepo.count({ where: { subTypeId } });
   }
 
-  async updateStore(store: Store, dto: UpdateStoreDto, lang = Language.en) {
+  async updateStore(store: Store, dto: UpdateStoreDto, lang : Language) {
     const transaction = await this.sequelize.transaction();
 
     try {
@@ -376,7 +376,7 @@ export class StoreService {
         ...(dto.commercialRegister !== undefined && { commercialRegister: dto.commercialRegister }),
         ...(dto.taxNumber !== undefined && { taxNumber: dto.taxNumber }),
         ...(dto.lat !== undefined && { lat: dto.lat }),
-        ...(dto.lng !== undefined && { lat: dto.lng }),
+        ...(dto.lng !== undefined && { lng: dto.lng }),
         ...(dto.isOnline !== undefined && { isOnline: dto.isOnline }),
         ...(dto.subTypeId !== undefined && { subTypeId: dto.subTypeId }),
         ...(dto.sectorId !== undefined && { sectorId: dto.sectorId }),
