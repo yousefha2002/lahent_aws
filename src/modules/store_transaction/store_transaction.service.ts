@@ -1,3 +1,4 @@
+import { StoreService } from 'src/modules/store/services/store.service';
 import { StoreCommissionService } from './../store_commission/store_commission.service';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
@@ -21,7 +22,8 @@ export class StoreTransactionService {
         @Inject(repositories.store_transaction_repository) private storeTransactionRepo: typeof StoreTransaction,
         private readonly storeCommissionService:StoreCommissionService,
         private readonly i18n: I18nService,
-        private cloudinaryService: CloudinaryService
+        private cloudinaryService: CloudinaryService,
+        private readonly storeService:StoreService
     ) {}
 
     async create(dto: CreateStoreTransactionDto,transaction?: any) {
@@ -155,6 +157,7 @@ export class StoreTransactionService {
         if (isNaN(amountNumber) || amountNumber <= 0) {
             throw new BadRequestException('totalAmount must be a number greater than 0');
         }
+        await this.storeService.getStoreById(storeId)
         let receiptUrl: string | null = null;
         if (file) {
             const uploaded = await this.cloudinaryService.uploadImage(file);

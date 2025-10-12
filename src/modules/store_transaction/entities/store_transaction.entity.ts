@@ -1,4 +1,4 @@
-import { Table, Column, Model, DataType, ForeignKey, BelongsTo, Default } from 'sequelize-typescript';
+import { Table, Column, Model, DataType, ForeignKey, BelongsTo, Default, AllowNull } from 'sequelize-typescript';
 import { StoreTransactionType } from 'src/common/enums/transaction_type';
 import { Order } from 'src/modules/order/entities/order.entity';
 import { Store } from 'src/modules/store/entities/store.entity';
@@ -11,6 +11,7 @@ export class StoreTransaction extends Model {
     @BelongsTo(() => Store,{onDelete: 'SET NULL'})
     store: Store;
 
+    @AllowNull(true)
     @ForeignKey(() => Order)
     @Column(DataType.INTEGER)
     orderId: number;
