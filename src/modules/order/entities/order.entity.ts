@@ -188,4 +188,8 @@ export class Order extends Model {
 
   @Column({ type: DataType.BOOLEAN, defaultValue: false })
   hasExtended: boolean;
+
+  @AllowNull(true)
+  @Column({ type: DataType.STRING(16)})
+  cardNumber: string;
 }

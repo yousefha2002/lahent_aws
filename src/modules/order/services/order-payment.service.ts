@@ -166,6 +166,8 @@ export class OrderPaymentService {
         }
 
         const apiCard = formatCardForApi(card);
+        order.cardNumber = apiCard.cardNumber
+        await order.save()
 
         await transaction.rollback();
 

@@ -6,6 +6,7 @@ import * as NodeFormData from 'form-data';
 import { v4 as uuidv4 } from 'uuid';
 import { BadRequestException } from "@nestjs/common";
 import { CardForApi } from "src/common/types/cardForApi";
+import { ApplePayPaymentDTO } from "../dto/apple-payment.dto";
 
 
 export class EdFapayGateway implements PaymentGateway {
@@ -13,18 +14,20 @@ export class EdFapayGateway implements PaymentGateway {
     private merchantId: string;
     private secretKey: string;
     private statusUrl: string;
+    private applePayUrl: string;
     constructor() {
-        if (!process.env.EDFA_API_PAYMENT_URL || !process.env.EDFA_MERCHANT_ID || !process.env.EDFA_SECRET_KEY || !process.env.EDFA_STATUS_URL) {
+        if (!process.env.EDFA_API_PAYMENT_URL || !process.env.EDFA_MERCHANT_ID || !process.env.EDFA_SECRET_KEY || !process.env.EDFA_STATUS_URL || !process.env.EDFA_APPLEPAY_API_URL) {
             throw new Error('EDFAPAY environment variables are missing');
         }
         this.apiUrl = process.env.EDFA_API_PAYMENT_URL;
         this.merchantId = process.env.EDFA_MERCHANT_ID;
         this.secretKey = process.env.EDFA_SECRET_KEY;
         this.statusUrl = process.env.EDFA_STATUS_URL;
+        this.applePayUrl = process.env.EDFA_APPLEPAY_API_URL;
+        
     }
     
-    async createPayment(
-        amount: number, currency: string, callbackUrl: string,customer:Customer,card:CardForApi) 
+    async createPayment(amount: number, currency: string, callbackUrl: string,customer:Customer,card:CardForApi) 
     {
         const paymentOrderId = uuidv4();
         const description = `Payment for order ${paymentOrderId}`;
@@ -90,5 +93,55 @@ export class EdFapayGateway implements PaymentGateway {
         } else {
             return false
         }
+    }
+
+    async createApplePayPayment(amount: number,currency: string,callbackUrl: string,customer: Customer,applePayData: ApplePayPaymentDTO) {
+        const orderId = uuidv4();
+        const description = `ApplePay payment for order ${orderId}`;
+        const hash = generateCardHash(customer.email, this.secretKey, orderId);
+
+        const holderParts = customer.name.trim().split(' ');
+        const firstName = holderParts.shift() || '';
+        const lastName = holderParts.join(' ') || '';
+
+        const formData = new NodeFormData();
+        formData.append('action', 'SALE');
+        formData.append('brand', 'applepay');
+        formData.append('client_key', this.merchantId);
+        formData.append('hash', hash);
+        formData.append('order_id', orderId);
+        formData.append('order_description', description);
+        formData.append('order_currency', currency);
+        formData.append('order_amount', amount.toString());
+        formData.append('return_url', callbackUrl);
+        formData.append('identifier', applePayData.transactionIdentifier);
+
+        formData.append('payer_first_name', firstName);
+        formData.append('payer_last_name', lastName);
+        formData.append('payer_email', customer.email);
+        formData.append('payer_phone', customer.phone);
+        formData.append('payer_country', 'SA');
+        formData.append('payer_city', 'Riyadh');
+        formData.append('payer_ip', '176.44.76.222');
+
+        // Apple Pay fields
+        formData.append('transactionIdentifier', applePayData.transactionIdentifier);
+        formData.append('paymentMethod', JSON.stringify(applePayData.paymentMethod));
+        formData.append('version', applePayData.version);
+        formData.append('data', applePayData.data);
+        formData.append('header', JSON.stringify(applePayData.header));
+        formData.append('signature', applePayData.signature);
+
+        const response = await axios.post(this.applePayUrl, formData, {
+            headers: { ...formData.getHeaders(), Accept: 'application/json', 'X-User-Agent': 'ios' },
+        });
+
+        if (response.data.result !== 'SUCCESS' || response.data.result !== 'SALE') {
+            throw new BadRequestException(
+            `Payment failed: ${response.data.decline_reason || response.data.result}`
+            );
+        }
+
+        return true;
     }
 }

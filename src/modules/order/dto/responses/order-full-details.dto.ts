@@ -42,6 +42,10 @@ export class OrderDto extends SimpleOrderDto {
     @Expose() 
     pointsEarned: number;
 
+    @ApiProperty({ example: "1234567891011123" }) 
+    @Expose() 
+    carNumber: string;
+
     @ApiProperty({ type: () => [OrderItemDto] }) 
     @Expose() @Type(() => OrderItemDto) 
     orderItems: OrderItemDto[];
