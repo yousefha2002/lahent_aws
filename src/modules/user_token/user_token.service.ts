@@ -45,6 +45,8 @@ export class UserTokenService {
             break;
             case RoleStatus.ADMIN:
             where.adminId = entityId;
+            case RoleStatus.STORE:
+            where.storeId = entityId;
             break;
             default:
             throw new BadRequestException('Invalid role type');

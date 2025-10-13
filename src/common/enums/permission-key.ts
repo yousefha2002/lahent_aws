@@ -58,11 +58,6 @@ export enum PermissionKey {
     UpdateTypeOfStore = "update_type_of_store",
     ViewTypeOfStore = "view_type_of_store",
 
-    // Subtypes Of Store
-    CreateSubtypeOfStore = "create_subtype_of_store",
-    UpdateSubtypeOfStore = "update_subtype_of_store",
-    ViewSubtypeOfStore = "view_subtype_of_store",
-
     // Sectors
     CreateSector = "create_sector",
     UpdateSector = "update_sector",
