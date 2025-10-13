@@ -9,6 +9,7 @@ import { OwnerOtpSendToken, OwnerOtpVerifyToken } from './dto/owner-otp.dto';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
 import { RoleStatus } from 'src/common/enums/role_status';
+import { AdminOtpSendToken, AdminOtpVerifyToken } from './dto/admin-otp.dto';
 
 @Controller('otp-code')
 export class OtpCodeController {
@@ -81,5 +82,28 @@ export class OtpCodeController {
   ) {
     const lang = getLang(i18n);
     return this.otpCodeService.sendOtp(body, RoleStatus.CUSTOMER,lang);
+  }
+
+  @ApiOperation({ summary: 'Verify OTP for admin' })
+  @Serilaize(AdminOtpVerifyToken)
+  @ApiBody({ type: VerifyOtpDto })
+  @Post('verify/admin')
+  async verifyOtpAdmin(@Body() body: VerifyOtpDto, @I18n() i18n: I18nContext, @Req() req: Request,@Ip() ip:string) {
+    const lang = getLang(i18n);
+    const device = req.headers['user-agent'] || 'unknown';
+    return this.otpCodeService.verifyOtp(body, RoleStatus.ADMIN, lang, device, ip);
+  }
+
+  @ApiOperation({ summary: 'Send OTP to admin' })
+  @ApiBody({ type: SendOtpDto })
+  @ApiResponse({
+    status: 201,
+    description: 'OTP sent successfully to customer',
+    type: AdminOtpSendToken,
+  })
+  @Post('send/admin')
+  sendOtpForAdmin(@Body() body: SendOtpDto,@I18n() i18n: I18nContext) {
+    const lang = getLang(i18n);
+    return this.otpCodeService.sendOtp(body, RoleStatus.ADMIN, lang);
   }
 }

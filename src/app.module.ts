@@ -66,6 +66,8 @@ import { FcmTokenModule } from './modules/fcm_token/fcm_token.module';
 import { AuditLogModule } from './modules/audit_log/audit_log.module';
 import { UserContextModule } from './modules/user-context/user-context.module';
 import { S3Module } from './modules/s3/s3.module';
+import { RolePermissionModule } from './modules/role_permission/role_permission.module';
+import { RoleModule } from './modules/role/role.module';
 
 @Module({
   imports: [
@@ -147,6 +149,8 @@ import { S3Module } from './modules/s3/s3.module';
     AuditLogModule,
     UserContextModule,
     S3Module,
+    RolePermissionModule,
+    RoleModule,
   ],
   providers: [MulterConfigService],
 })

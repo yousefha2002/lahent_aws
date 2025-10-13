@@ -6,11 +6,12 @@ import { SmsModule } from '../sms/sms.module';
 import { CustomerModule } from '../customer/customer.module';
 import { OwnerModule } from '../owner/owner.module';
 import { UserTokenModule } from '../user_token/user_token.module';
+import { AdminModule } from '../admin/admin.module';
 
 @Module({
   controllers: [OtpCodeController],
   providers: [OtpCodeService, ...OptCodeProvider],
   exports: [OtpCodeService],
-  imports:[SmsModule,CustomerModule,OwnerModule,UserTokenModule]
+  imports:[SmsModule,CustomerModule,OwnerModule,UserTokenModule,AdminModule]
 })
 export class OtpCodeModule {}

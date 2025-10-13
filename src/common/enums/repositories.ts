@@ -65,5 +65,7 @@ export enum repositories {
   pageLanguage_repository = 'pageLanguage_repository',
   payment_card_repository='payment_card_repository',
   fcm_token_repository='fcm_token_repository',
-  audit_log_repository='audit_log_repository'
+  role_repository='role_repository',
+  role_permission_repository='role_permission_repository',
+  audit_log_repository='audit_log_repository',
 }

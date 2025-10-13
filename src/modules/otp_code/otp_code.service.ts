@@ -1,3 +1,4 @@
+import { AdminService } from 'src/modules/admin/admin.service';
 import { UserTokenService } from './../user_token/user_token.service';
 import { OwnerService } from 'src/modules/owner/owner.service';
 import { BadRequestException, forwardRef, Inject, Injectable } from '@nestjs/common';
@@ -24,6 +25,7 @@ export class OtpCodeService {
     private readonly userTokenService:UserTokenService,
     private readonly i18n: I18nService,
     private readonly ownerService:OwnerService,
+    private readonly adminService:AdminService,
     @Inject(forwardRef(() => CustomerService)) private customerService: CustomerService
   ) {}
 
@@ -36,16 +38,24 @@ export class OtpCodeService {
       return { phone, code: DEMO_OTP_CODE, status: 'login' };
     }
     const code = generateOtpCode();
-    const message = SMSMessages.SEND_CODE(code)[lang] || SMSMessages.SEND_CODE(code).ar;
-    await this.smsService.sendSms(phone,message);
+    // const message = SMSMessages.SEND_CODE(code)[lang] || SMSMessages.SEND_CODE(code).ar;
+    // await this.smsService.sendSms(phone,message);
     const serviceMap = {
       owner: { service: this.ownerService, role: RoleStatus.OWNER },
       customer: { service: this.customerService, role: RoleStatus.CUSTOMER },
+      admin: { service: this.adminService, role: RoleStatus.ADMIN }
     };
     const { service, role } = serviceMap[type] || {};
     if (!service) throw new BadRequestException('Invalid type');
     const entity = await service.findByPhone(phone);
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+    if (type === RoleStatus.ADMIN) {
+      if (!entity) {
+        throw new BadRequestException('Admin with this phone not found');
+      }
+      await this.otpCodeRepo.create({ phone, code, type, isVerified: false, expiresAt});
+      return { phone, code, status: 'login' };
+    }
     await this.otpCodeRepo.create({phone,code,type: role,isVerified: false,expiresAt});
     return {phone,code,status: entity ? 'login' : 'signup',};
   }
@@ -56,6 +66,7 @@ export class OtpCodeService {
     const serviceMap = {
       [RoleStatus.OWNER]: { service: this.ownerService, entityName: 'owner', createFn: this.ownerService.createOwner.bind(this.ownerService) },
       [RoleStatus.CUSTOMER]: { service: this.customerService, entityName: 'customer', createFn: this.customerService.createCustomer.bind(this.customerService) },
+      [RoleStatus.ADMIN]: { service: this.adminService, entityName: 'admin' }
     };
     const mapEntry = serviceMap[type];
     if (!mapEntry) throw new BadRequestException('Invalid type');
@@ -86,6 +97,9 @@ export class OtpCodeService {
 
     let entity = await service.findByPhone(phone);
     let status: 'login' | 'signup' = 'login';
+    if (type === RoleStatus.ADMIN && !entity) {
+      throw new BadRequestException('Admin with this phone not found');
+    }
     if (!entity) {
       entity = await createFn(phone);
       status = 'signup';
