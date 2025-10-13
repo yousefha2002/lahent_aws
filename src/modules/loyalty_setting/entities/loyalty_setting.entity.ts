@@ -15,4 +15,11 @@ export class LoyaltySetting extends Model {
         comment: 'قيمة النقطة عند الاستعمال للخصم'
     })
     currencyPerPoint: number;
+
+    @Column({
+        type: DataType.INTEGER,
+        defaultValue: 5, // عدد النقاط المكتسبة عند قبول الدعوة
+        comment: 'عدد النقاط المكتسبة عند قبول الدعوة'
+    })
+    pointsPerInviteAcceptance: number;
 }

@@ -1,5 +1,5 @@
 import { Table, Column, Model, DataType, HasMany } from 'sequelize-typescript';
-import { RolePermission } from 'src/modules/role_permission/entiites/role_permission.entity';
+import { RolePermission } from 'src/modules/role/entites/role_permission.entity';
 
 @Table({ tableName: 'roles' })
 export class Role extends Model {

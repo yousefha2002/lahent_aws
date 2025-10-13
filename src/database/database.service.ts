@@ -64,7 +64,7 @@ import { PageLanguage } from 'src/modules/page/entities/page_language.entity';
 import { PaymentCard } from 'src/modules/payment_card/entities/payment_card.entity';
 import { FcmToken } from 'src/modules/fcm_token/entities/fcm_token.entity';
 import { AuditLog } from 'src/modules/audit_log/entities/audit_log.entity';
-import { RolePermission } from 'src/modules/role_permission/entiites/role_permission.entity';
+import { RolePermission } from 'src/modules/role/entites/role_permission.entity';
 import { Role } from 'src/modules/role/entites/role.entity';
 
 export const databaseProviders = [

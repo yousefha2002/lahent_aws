@@ -1,4 +1,4 @@
-import { IsNumber, Min } from 'class-validator';
+import { IsNumber, IsOptional, Min } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateLoyaltySettingDto {
@@ -11,4 +11,9 @@ export class CreateLoyaltySettingDto {
     @IsNumber()
     @Min(0)
     currencyPerPoint: number;
+
+    @ApiProperty({ description: 'عدد النقاط المكتسبة عند قبول الدعوة', example: 10 })
+    @IsNumber()
+    @Min(0)
+    pointsPerInviteAcceptance: number;
 }

@@ -35,7 +35,6 @@ export class LoyaltySettingController {
   })
   @Post()
   async createOrUpdate(@Body() dto: CreateLoyaltySettingDto) {
-    const { pointsPerCurrency, currencyPerPoint } = dto;
-    return this.loyaltySettingService.createOrUpdate(pointsPerCurrency, currencyPerPoint);
+    return this.loyaltySettingService.createOrUpdate(dto);
   }
 }
