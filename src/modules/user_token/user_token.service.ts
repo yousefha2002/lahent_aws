@@ -17,7 +17,7 @@ export class UserTokenService {
         customerId: dto.customerId || null,
         storeId: dto.storeId || null,
         ownerId: dto.ownerId || null,
-        adminId: dto.ownerId || null,
+        adminId: dto.adminId || null,
         role: dto.role,
         refreshToken: dto.refreshToken,
         expiresAt: dto.expiresAt,
@@ -32,14 +32,25 @@ export class UserTokenService {
         return this.userTokenRepo.findOne({ where: {  refreshToken, deviceId,isRevoked:false,expiresAt: {[Op.gt]: new Date()}}});
     }
 
-    async findExistingToken(role: RoleStatus, userId: number, deviceId: string) 
-    {
-        const whereClause: any = {role,isRevoked:false,deviceId,expiresAt: { [Op.gt]: new Date() }};
-        if (role === 'store') whereClause.storeId = userId;
-        else if (role === 'owner') whereClause.ownerId = userId;
-        else if (role === 'customer') whereClause.customerId = userId;
-        else if (role === 'admin') whereClause.adminId = userId;
-        return this.userTokenRepo.findOne({ where: whereClause });
+
+    async findExistingToken(type: RoleStatus, entityId: number, deviceId: string) {
+        const where: any = { deviceId, role: type,expiresAt: { [Op.gt]: new Date() },isRevoked:false };
+
+        switch (type) {
+            case RoleStatus.OWNER:
+            where.ownerId = entityId;
+            break;
+            case RoleStatus.CUSTOMER:
+            where.customerId = entityId;
+            break;
+            case RoleStatus.ADMIN:
+            where.adminId = entityId;
+            break;
+            default:
+            throw new BadRequestException('Invalid role type');
+        }
+
+        return this.userTokenRepo.findOne({ where });
     }
 
     async rotateToken(token: UserToken,newRefreshToken: string,expiresAt: Date,) 

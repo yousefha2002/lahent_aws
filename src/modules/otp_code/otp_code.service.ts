@@ -96,6 +96,7 @@ export class OtpCodeService {
     await record.save();
 
     let entity = await service.findByPhone(phone);
+    console.log(entity.id)
     let status: 'login' | 'signup' = 'login';
     if (type === RoleStatus.ADMIN && !entity) {
       throw new BadRequestException('Admin with this phone not found');
