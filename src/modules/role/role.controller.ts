@@ -1,6 +1,6 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
 import { RoleService } from './role.service';
-import { ApiBody, ApiOperation, ApiResponse, ApiSecurity } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { RoleStatus } from 'src/common/enums/role_status';
 import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
@@ -33,5 +33,21 @@ export class RoleController {
     @Get()
     async getAllRolesWithCounts(){
         return this.roleService.findAllRolesWithCounts();
+    }
+
+    @ApiOperation({ summary: 'Update a role with permissions (admin only)' })
+    @ApiSecurity('access-token')
+    @ApiParam({ name: 'roleId', type: Number })
+    @ApiBody({ type: CreateRoleDto })
+    @ApiResponse({ status: 200, schema: { example: { message: 'Updated successfully' } } })
+    @PermissionGuard([RoleStatus.ADMIN])
+    @Put(':roleId')
+    async updateRole(
+      @Param('roleId') roleId: number,
+      @Body() dto: CreateRoleDto,
+      @I18n() i18n: I18nContext,
+    ) {
+      const lang = getLang(i18n);
+      return this.roleService.updateRoleWithPermissions(roleId, dto, lang);
     }
 }

@@ -60,4 +60,37 @@ export class RoleService {
             permissionCount: role.rolePermissions?.length || 0,
         }));
     }
+
+    async updateRoleWithPermissions(roleId: number, dto: CreateRoleDto, lang: Language) 
+    {
+        const role = await this.roleRepo.findByPk(roleId);
+        if (!role) {
+            throw new BadRequestException(this.i18n.translate('translation.not_found', { lang }));
+        }
+
+        if (dto.name && dto.name !== role.name) {
+            const existing = await this.roleRepo.findOne({ where: { name: dto.name } });
+            if (existing) {
+                throw new BadRequestException(this.i18n.translate('translation.name_exists', { lang }));
+            }
+            role.name = dto.name;
+            await role.save();
+        }
+
+        await this.rolePermissionRepo.destroy({ where: { roleId } });
+
+        const permissions = dto.permissions
+            .filter(p => p)
+            .map(permission => ({
+                roleId: role.id,
+                permission,
+            }));
+
+        if (permissions.length > 0) {
+            await this.rolePermissionRepo.bulkCreate(permissions);
+        }
+
+        const message = this.i18n.translate('translation.updatedSuccefully', { lang });
+        return { message };
+    }
 }
