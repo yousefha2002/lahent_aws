@@ -1,8 +1,5 @@
-import { Body, Controller, Get, Post, Put, UploadedFile, UseFilters, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Post, Put } from '@nestjs/common';
 import { CustomerService } from './customer.service';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { multerOptions } from 'src/multer/multer.options';
-import { MulterExceptionFilter } from 'src/multer/multer.exception.filter';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
@@ -32,34 +29,19 @@ export class CustomerController {
 
   @ApiSecurity('access-token')
   @ApiOperation({ summary: 'Update current customer profile' })
-  @ApiConsumes('multipart/form-data')
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        name: { type: 'string', example: 'John Doe' },
-        email: { type: 'string', example: 'johndoe@example.com' },
-        avatarId: { type: 'string', example: '1', nullable: true },
-        image: { type: 'string', format: 'binary' },
-      },
-      required: ['name', 'email'],
-    },
-  })
+  @ApiBody({type:UpdateCustomerDto})
   @ApiResponse({ status: 200, description: 'Customer profile updated successfully', type: CustomerDetailsDto })
   @Serilaize(CustomerDetailsDto)
   @PermissionGuard([RoleStatus.CUSTOMER,RoleStatus.ADMIN])
   @Put()
-  @UseInterceptors(FileInterceptor('image', multerOptions))
-  @UseFilters(MulterExceptionFilter)
   updateCustomer(
     @CurrentUser() user: CurrentUserType,
     @Body() body: UpdateCustomerDto,
     @I18n() i18n: I18nContext,
-    @UploadedFile() file?: Express.Multer.File,
   ) {
     const lang = getLang(i18n);
     const {context} = user
-    return this.customerService.updateProfile(context.id, body, lang, file);
+    return this.customerService.updateProfile(context, body, lang);
   }
 
   @ApiOperation({ summary: 'Refresh access token using refresh token' })

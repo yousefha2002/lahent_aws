@@ -3,7 +3,6 @@ import { AvatarService } from './../avatar/avatar.service';
 import {BadRequestException,forwardRef,Inject,Injectable,NotFoundException} from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
 import { Customer } from './entities/customer.entity';
-import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { I18nService } from 'nestjs-i18n';
 import { Language } from 'src/common/enums/language';
 import { Avatar } from '../avatar/entities/avatar.entity';
@@ -14,20 +13,21 @@ import { JwtService } from '@nestjs/jwt';
 import { REFRESH_TOKEN_EXPIRES_MS } from 'src/common/constants';
 import { Op } from 'sequelize';
 import { RefreshTokenDto } from '../user_token/dtos/refreshToken.dto';
+import { S3Service } from '../s3/s3.service';
 
 @Injectable()
 export class CustomerService {
   constructor(
     @Inject(repositories.customer_repository)
     private customerRepo: typeof Customer,
-    private cloudinaryService: CloudinaryService,
+    private s3Service: S3Service,
     private avatarService: AvatarService,
     private readonly i18n: I18nService,
     @Inject(forwardRef(() => GiftService)) private giftService: GiftService,
     private jwtService: JwtService,
     private userTokenService:UserTokenService,
   ) {}
-  async createCustomer(phone:string,lang=Language.en)
+  async createCustomer(phone:string,lang=Language.ar)
   {
     const customer = await this.findByPhone(phone)
     if(customer)
@@ -107,52 +107,47 @@ export class CustomerService {
     await customer.save({ transaction });
   }
 
-  async updateProfile(customerId: number,dto: UpdateCustomerDto,lang = Language.en,file?: Express.Multer.File,) {
-    const customer = await this.findById(customerId, lang);
+  async updateProfile(customer: Customer,dto: UpdateCustomerDto,lang : Language) 
+  {
+    const hasAvatarId = !!dto.avatarId;
+    const hasName = !!dto.name;
+    const hasEmail = !!dto.email;
 
-    if (dto.email && dto.email !== customer.email) {
+    // تحقق من البريد الإلكتروني إذا تم تغييره
+    if (hasEmail && dto.email !== customer.email) {
       const existing = await this.customerRepo.findOne({
         where: { email: dto.email },
       });
       if (existing) {
-        const message = this.i18n.translate('translation.email_exists', {lang});
+        const message = this.i18n.translate('translation.email_exists', { lang });
         throw new BadRequestException(message);
       }
     }
 
-    const hasFile = !!file;
-    const hasAvatarId = !!dto.avatarId;
+    // أول مرة فقط: لازم يرسل الثلاثة معاً
+    const isFirstTime =!customer.name && !customer.email && !customer.avatarId;
 
-    if (!hasFile && !hasAvatarId) {
-      if (!customer.imageUrl && !customer.avatarId) {
-        const message = this.i18n.translate(
-          'translation.no_avatar_or_image',
-          { lang },
-        );
-        throw new BadRequestException(message);
-      }
+    if (isFirstTime && (!hasName || !hasEmail || !hasAvatarId)) {
+      const message = this.i18n.translate(
+        'translation.must_send_all_first_time',
+        { lang },
+      );
+      throw new BadRequestException(message);
     }
 
-    if (hasFile) {
-      if (customer.imagePublicId) {
-        await this.cloudinaryService.deleteImage(customer.imagePublicId);
-      }
-      const uploaded = await this.cloudinaryService.uploadImage(file);
-      customer.imageUrl = uploaded.secure_url;
-      customer.imagePublicId = uploaded.public_id;
-      customer.avatarId = null;
-    } else if (hasAvatarId && dto.avatarId) {
+    if (hasAvatarId && dto.avatarId) {
       const avatar = await this.avatarService.findById(+dto.avatarId);
       customer.avatarId = +avatar.id;
-      customer.imageUrl = null;
-      customer.imagePublicId = null;
     }
 
-    customer.name = dto.name;
-    customer.email = dto.email;
+    if (hasName) customer.name = dto.name;
+    if (hasEmail) customer.email = dto.email;
+
     customer.isCompletedProfile = true;
+
     await customer.save();
     await customer.reload({ include: ['avatar'] });
+
     return customer;
   }
 

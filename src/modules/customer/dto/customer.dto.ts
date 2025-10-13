@@ -20,10 +20,6 @@ export class CustomerSummaryDto {
     @Expose()
     name: string;
 
-    @ApiProperty({ example: 'https://example.com/image.png', description: 'Customer image URL' })
-    @Expose()
-    imageUrl: string;
-
     @ApiProperty({ example: '+123456789', description: 'Customer phone number' })
     @Expose()
     phone: string;

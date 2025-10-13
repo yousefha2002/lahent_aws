@@ -2,18 +2,18 @@ import { CustomerProvider } from './providers/customer.provider';
 import { forwardRef, Module } from '@nestjs/common';
 import { CustomerService } from './customer.service';
 import { CustomerController } from './customer.controller';
-import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
 import { AvatarModule } from '../avatar/avatar.module';
 import { GiftModule } from '../gift/gift.module';
 import { UserTokenModule } from '../user_token/user_token.module';
 import { DatabaseModule } from 'src/database/database.module';
 import { UserContextModule } from '../user-context/user-context.module';
+import { S3Module } from '../s3/s3.module';
 
 @Module({
   controllers: [CustomerController],
   providers: [CustomerService, ...CustomerProvider],
   imports: [
-    CloudinaryModule,
+    S3Module,
     AvatarModule,
     forwardRef(() => GiftModule),
     UserTokenModule,

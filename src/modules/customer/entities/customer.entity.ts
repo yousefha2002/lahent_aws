@@ -33,14 +33,6 @@ export class Customer extends Model {
   @Column(DataType.BOOLEAN)
   isCompletedProfile: boolean;
 
-  @AllowNull(true)
-  @Column(DataType.STRING)
-  imageUrl: string | null;
-
-  @AllowNull(true)
-  @Column(DataType.STRING)
-  imagePublicId: string | null;
-
   @ForeignKey(() => Avatar)
   @AllowNull(true)
   @Column(DataType.INTEGER)
