@@ -1,4 +1,4 @@
-import {Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import {BadRequestException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
 import { UserToken } from './entities/user_token.entity';
 import { CreateTokenDto } from './dtos/createToken.dto';
@@ -17,6 +17,7 @@ export class UserTokenService {
         customerId: dto.customerId || null,
         storeId: dto.storeId || null,
         ownerId: dto.ownerId || null,
+        adminId: dto.ownerId || null,
         role: dto.role,
         refreshToken: dto.refreshToken,
         expiresAt: dto.expiresAt,
@@ -37,6 +38,7 @@ export class UserTokenService {
         if (role === 'store') whereClause.storeId = userId;
         else if (role === 'owner') whereClause.ownerId = userId;
         else if (role === 'customer') whereClause.customerId = userId;
+        else if (role === 'admin') whereClause.adminId = userId;
         return this.userTokenRepo.findOne({ where: whereClause });
     }
 
@@ -74,7 +76,20 @@ export class UserTokenService {
         } 
         else 
             {
-            const idField = type === RoleStatus.OWNER ? 'ownerId' : 'customerId';
+            let idField: 'ownerId' | 'customerId' | 'adminId';
+            switch (type) {
+                case RoleStatus.OWNER:
+                    idField = 'ownerId';
+                    break;
+                case RoleStatus.CUSTOMER:
+                    idField = 'customerId';
+                    break;
+                case RoleStatus.ADMIN:
+                    idField = 'adminId';
+                    break;
+                default:
+                    throw new BadRequestException('Invalid role type');
+            }
             await this.createToken({[idField]: entityId,role: type,refreshToken,expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS),device,deviceId,ip,});
         }
     }

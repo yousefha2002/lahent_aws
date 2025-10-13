@@ -30,8 +30,8 @@ export class OtpCode extends Model {
     isVerified: boolean;
 
     @AllowNull(false)
-    @Column(DataType.ENUM(RoleStatus.OWNER, RoleStatus.CUSTOMER))
-    type: RoleStatus.OWNER | RoleStatus.CUSTOMER;
+    @Column(DataType.ENUM(RoleStatus.OWNER, RoleStatus.CUSTOMER,RoleStatus.ADMIN))
+    type: RoleStatus.OWNER | RoleStatus.CUSTOMER | RoleStatus.ADMIN;
 
     @AllowNull(false)
     @Column(DataType.DATE)

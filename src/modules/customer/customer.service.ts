@@ -13,14 +13,12 @@ import { JwtService } from '@nestjs/jwt';
 import { REFRESH_TOKEN_EXPIRES_MS } from 'src/common/constants';
 import { Op } from 'sequelize';
 import { RefreshTokenDto } from '../user_token/dtos/refreshToken.dto';
-import { S3Service } from '../s3/s3.service';
 
 @Injectable()
 export class CustomerService {
   constructor(
     @Inject(repositories.customer_repository)
     private customerRepo: typeof Customer,
-    private s3Service: S3Service,
     private avatarService: AvatarService,
     private readonly i18n: I18nService,
     @Inject(forwardRef(() => GiftService)) private giftService: GiftService,
@@ -65,7 +63,6 @@ export class CustomerService {
     try {
       const decoded = await this.jwtService.verifyAsync(refreshToken, {secret: 'refresh_token'});
       const tokenRecord = await this.userTokenService.findTokenForRefreshing(refreshToken,deviceId)
-      console.log(decoded)
       if (!tokenRecord) {
         throw new BadRequestException('Invalid or expired refresh token');
       }

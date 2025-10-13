@@ -53,11 +53,11 @@ export class OtpCodeService {
       if (!entity) {
         throw new BadRequestException('Admin with this phone not found');
       }
-      await this.otpCodeRepo.create({ phone, code, type, isVerified: false, expiresAt});
+      await this.otpCodeRepo.create({ phone, code, type:role, isVerified: false, expiresAt});
       return { phone, code, status: 'login' };
     }
     await this.otpCodeRepo.create({phone,code,type: role,isVerified: false,expiresAt});
-    return {phone,code,status: entity ? 'login' : 'signup',};
+    return {phone,code,status: entity ? 'login' : 'signup',}; 
   }
 
   async verifyOtp(body: VerifyOtpDto,type: RoleStatus,lang: Language,device?: string,ip?: string,) 

@@ -20,6 +20,9 @@ export class UserToken extends Model {
     customerId?: number;
 
     @Column(DataType.INTEGER)
+    adminId?: number; 
+
+    @Column(DataType.INTEGER)
     ownerId?: number;
 
     @Column(DataType.INTEGER)
