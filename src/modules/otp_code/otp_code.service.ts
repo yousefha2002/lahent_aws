@@ -100,7 +100,7 @@ export class OtpCodeService {
     if (type === RoleStatus.ADMIN && !entity) {
       throw new BadRequestException('Admin with this phone not found');
     }
-    if (!entity) {
+    if (!entity && createFn) {
       entity = await createFn(phone);
       status = 'signup';
     }
