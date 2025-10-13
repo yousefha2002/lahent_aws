@@ -157,7 +157,7 @@ export const databaseProviders = [
         FcmToken,
         AuditLog,
         RolePermission,
-        Role
+        Role,
       ]); 
       await sequelize.sync({ alter: false});
       return sequelize;

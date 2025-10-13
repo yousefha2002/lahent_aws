@@ -19,7 +19,12 @@ export class RoleGuard implements CanActivate {
 
         const allowedRoles: RoleStatus[] = this.reflector.get('allowedRoles', context.getHandler()) || [];
 
-        const decoded: any = await this.jwtService.verifyAsync(token, { secret: 'token' });
+        let decoded: any;
+        try {
+            decoded = await this.jwtService.verifyAsync(token, { secret: 'token' });
+        } catch (err) {
+            throw new UnauthorizedException('Invalid or expired token');
+        }
 
         if (allowedRoles.length && !allowedRoles.includes(decoded.role)) {
         throw new UnauthorizedException('Role not allowed');

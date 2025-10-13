@@ -38,4 +38,10 @@ export class Admin extends Model {
 
     @BelongsTo(() => Role)
     role: Role;
+
+    @Column({
+        type: DataType.BOOLEAN,
+        defaultValue: true,
+    })
+    active: boolean;
 }
