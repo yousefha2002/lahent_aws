@@ -1,4 +1,4 @@
-import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { S3Service } from './../s3/s3.service';
 import {BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
 import { Avatar } from './entities/avatar.entity';
@@ -9,7 +9,7 @@ import { Language } from 'src/common/enums/language';
 export class AvatarService {
     constructor(
         @Inject(repositories.avatar_repository) private avatarRepo: typeof Avatar,
-        private cloudinaryService:CloudinaryService,
+        private s3Service:S3Service,
         private readonly i18n: I18nService,
     ){}
     async findById(id: number,lang=Language.ar) 
@@ -35,7 +35,7 @@ export class AvatarService {
             const message = this.i18n.translate('translation.file_required', { lang });   
             throw new BadRequestException(message)
         }
-        const result = await this.cloudinaryService.uploadImage(file);
+        const result = await this.s3Service.uploadImage(file);
         await this.avatarRepo.create({url: result.secure_url,publicId: result.public_id})
         const message = this.i18n.translate('translation.createdSuccefully', { lang });
         return {message}
@@ -49,9 +49,9 @@ export class AvatarService {
             throw new BadRequestException(message);
         }
         if (avatar.publicId) {
-            await this.cloudinaryService.deleteImage(avatar.publicId);
+            await this.s3Service.deleteImage(avatar.publicId);
         }
-        const result = await this.cloudinaryService.uploadImage(file);
+        const result = await this.s3Service.uploadImage(file);
         avatar.url = result.secure_url;
         avatar.publicId = result.public_id;
         await avatar.save();

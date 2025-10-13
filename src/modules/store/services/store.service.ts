@@ -1,3 +1,4 @@
+import { S3Service } from './../../s3/s3.service';
 import { SmsService } from './../../sms/sms.service';
 import { StoreCommissionService } from './../../store_commission/store_commission.service';
 import { SectorService } from './../../sector/sector.service';
@@ -6,7 +7,6 @@ import { StoreUtilsService } from './storeUtils.service';
 import {BadRequestException,forwardRef,Inject,Injectable,NotFoundException} from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
 import { Store } from '../entities/store.entity';
-import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { OpeningHourService } from '../../opening_hour/opening_hour.service';
 import { StoreStatus } from 'src/common/enums/store_status';
 import { OpeningHour } from '../../opening_hour/entites/opening_hour.entity';
@@ -36,7 +36,7 @@ export class StoreService {
   constructor(
     @Inject(repositories.store_repository)
     private storeRepo: typeof Store,
-    private readonly cloudinaryService: CloudinaryService,
+    private readonly s3Service: S3Service,
     private readonly openingHourService: OpeningHourService,
     private readonly storeUtilsService: StoreUtilsService,
     @Inject(repositories.store_langauge_repository) private storeLanguageRepo: typeof StoreLanguage,
@@ -452,15 +452,15 @@ export class StoreService {
     }
 
     if (logo) {
-      await this.cloudinaryService.deleteImage(store.logoPublicId);
-      const uploaded = await this.cloudinaryService.uploadImage(logo);
+      await this.s3Service.deleteImage(store.logoPublicId);
+      const uploaded = await this.s3Service.uploadImage(logo);
       store.logoUrl = uploaded.secure_url;
       store.logoPublicId = uploaded.public_id;
     }
 
     if (cover) {
-      await this.cloudinaryService.deleteImage(store.coverPublicId);
-      const uploaded = await this.cloudinaryService.uploadImage(cover);
+      await this.s3Service.deleteImage(store.coverPublicId);
+      const uploaded = await this.s3Service.uploadImage(cover);
       store.coverUrl = uploaded.secure_url;
       store.coverPublicId = uploaded.public_id;
     }
@@ -479,18 +479,18 @@ export class StoreService {
     const { taxNumber, commercialRegister } = dto;
     if (taxNumberFile) {
       if (store.taxNumberPublicId)
-        await this.cloudinaryService.deleteImage(store.taxNumberPublicId);
+        await this.s3Service.deleteImage(store.taxNumberPublicId);
 
-      const uploaded = await this.cloudinaryService.uploadImage(taxNumberFile);
+      const uploaded = await this.s3Service.uploadImage(taxNumberFile);
       store.taxNumberUrl = uploaded.secure_url;
       store.taxNumberPublicId = uploaded.public_id;
     }
 
     if (commercialRegisterFile) {
       if (store.commercialRegisterPublicId)
-        await this.cloudinaryService.deleteImage(store.commercialRegisterPublicId);
+        await this.s3Service.deleteImage(store.commercialRegisterPublicId);
 
-      const uploaded = await this.cloudinaryService.uploadImage(commercialRegisterFile);
+      const uploaded = await this.s3Service.uploadImage(commercialRegisterFile);
       store.commercialRegisterUrl = uploaded.secure_url;
       store.commercialRegisterPublicId = uploaded.public_id;
     }

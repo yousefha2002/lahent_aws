@@ -1,5 +1,5 @@
+import { S3Service } from './../s3/s3.service';
 import { GiftCategoryService } from './../gift_category/gift_category.service';
-import { CloudinaryService } from './../../cloudinary/cloudinary.service';
 import {BadRequestException,Inject,Injectable,NotFoundException} from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
 import { GiftTemplate } from './entities/gift_template.entity';
@@ -16,7 +16,7 @@ export class GiftTemplateService {
   constructor(
     @Inject(repositories.gift_template_repository)
     private giftTemplateRepo: typeof GiftTemplate,
-    private readonly cloudinaryService: CloudinaryService,
+    private readonly s3Service: S3Service,
     private readonly giftCategoryService: GiftCategoryService,
     private readonly i18n: I18nService,
   ) {}
@@ -38,7 +38,7 @@ export class GiftTemplateService {
         lang,
     });
 
-    const uploadResult = await this.cloudinaryService.uploadImage(file);
+    const uploadResult = await this.s3Service.uploadImage(file);
 
     await this.giftTemplateRepo.create({
         imageUrl: uploadResult.secure_url,
@@ -67,9 +67,9 @@ export class GiftTemplateService {
     }
     if (file) {
       if (giftTemplate.imagePublicId) {
-        await this.cloudinaryService.deleteImage(giftTemplate.imagePublicId);
+        await this.s3Service.deleteImage(giftTemplate.imagePublicId);
       }
-      const uploadResult = await this.cloudinaryService.uploadImage(file);
+      const uploadResult = await this.s3Service.uploadImage(file);
       giftTemplate.imageUrl = uploadResult.secure_url;
       giftTemplate.imagePublicId = uploadResult.public_id;
     }

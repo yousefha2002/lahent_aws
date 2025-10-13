@@ -3,6 +3,7 @@
   "createdSuccefully": "created succesfully!",
   "updatedSuccefully": "updated succesfully",
   "deletedSuccefully": "deleted succesfully",
+  "must_send_all_first_time_en": "You must send all data the first time",
   "name_exists": "Name is already in use",
   "not_found": "Item not found",
   "email_not_found": "Email is not registered",

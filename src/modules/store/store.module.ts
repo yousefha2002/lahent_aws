@@ -2,12 +2,8 @@ import { forwardRef, Module } from '@nestjs/common';
 import { StoreService } from './services/store.service';
 import { StoreController } from './store.controller';
 import { StoreProvider } from './providers/store.provider';
-import { OwnerModule } from '../owner/owner.module';
-import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
 import { TypeModule } from '../type/type.module';
 import { OpeningHourModule } from '../opening_hour/opening_hour.module';
-import { CustomerModule } from '../customer/customer.module';
-import { AdminModule } from '../admin/admin.module';
 import { SubtypeModule } from '../subtype/subtype.module';
 import { StoreAuthService } from './services/storeAuth.service';
 import { StoreGeolocationService } from './services/storeGeolocation.service';
@@ -22,12 +18,13 @@ import { FcmTokenModule } from '../fcm_token/fcm_token.module';
 import { SmsModule } from '../sms/sms.module';
 import { UserContextModule } from '../user-context/user-context.module';
 import { OrderModule } from '../order/order.module';
+import { S3Module } from '../s3/s3.module';
 
 @Module({
   controllers: [StoreController],
   providers: [StoreService,StoreAuthService,StoreGeolocationService,StoreUtilsService, ...StoreProvider,...StoreLanguageProvider],
   imports: [
-    CloudinaryModule,
+    S3Module,
     TypeModule,
     forwardRef(() => SubtypeModule),
     OpeningHourModule,

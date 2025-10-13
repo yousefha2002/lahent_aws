@@ -1,8 +1,8 @@
+import { S3Service } from './../s3/s3.service';
 import {BadRequestException,forwardRef,Inject,Injectable,} from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
 import { Product } from './entities/product.entity';
 import { CreateProductDto } from './dto/requests/create-product.dto';
-import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { ProductImageService } from '../product_image/product_image.service';
 import { Sequelize, Transaction, Op } from 'sequelize';
 import { UpdateProductWithImageDto } from './dto/requests/update-product-withImage.dto';
@@ -39,7 +39,7 @@ export class ProductService {
     private productRepo: typeof Product,
     @Inject(repositories.product_language_repository)
     private productLanguageRepo: typeof ProductLanguage,
-    private readonly cloudinaryService: CloudinaryService,
+    private readonly s3Service: S3Service,
     private readonly productImageService: ProductImageService,
     @Inject(forwardRef(() => CategoryService))
     private categoryService: CategoryService,
@@ -72,7 +72,7 @@ export class ProductService {
       );
       const uploadedImages = await Promise.all(
         images.map(async (file) => {
-          const result = await this.cloudinaryService.uploadImage(file);
+          const result = await this.s3Service.uploadImage(file);
           return {
             imageUrl: result.secure_url,
             imagePublicId: result.public_id,
@@ -156,13 +156,13 @@ export class ProductService {
       );
 
       for (const img of imagesToDelete) {
-        await this.cloudinaryService.deleteImage(img.imagePublicId);
+        await this.s3Service.deleteImage(img.imagePublicId);
         await this.productImageService.deleteImage(img.id, transaction);
       }
 
       if (newImageFiles && newImageFiles.length > 0) {
         const uploadedImages = await Promise.all(
-          newImageFiles.map((file) => this.cloudinaryService.uploadImage(file)),
+          newImageFiles.map((file) => this.s3Service.uploadImage(file)),
         );
         const imagesData = uploadedImages.map((img) => ({
           productId,

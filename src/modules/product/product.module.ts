@@ -2,7 +2,6 @@ import { forwardRef, Module } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { ProductController } from './product.controller';
 import { ProductProvider } from './providers/product.provider';
-import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
 import { ProductImageModule } from '../product_image/product_image.module';
 import { ProductInstructionModule } from '../product_instruction/product_instruction.module';
 import { ProductExtraModule } from '../product_extra/product_extra.module';
@@ -13,6 +12,7 @@ import { OfferModule } from '../offer/offer.module';
 import { ProductCategoryVariantModule } from '../product_category_variant/product_category_variant.module';
 import { ProductLanguageProvider } from './providers/product_language.provider';
 import { UserContextModule } from '../user-context/user-context.module';
+import { S3Module } from '../s3/s3.module';
 
 @Module({
   controllers: [ProductController],
@@ -20,7 +20,7 @@ import { UserContextModule } from '../user-context/user-context.module';
   exports: [ProductService],
   imports: [
     forwardRef(()=>UserContextModule),
-    CloudinaryModule,
+    S3Module,
     ProductImageModule,
     DatabaseModule,
     forwardRef(() => OfferModule),

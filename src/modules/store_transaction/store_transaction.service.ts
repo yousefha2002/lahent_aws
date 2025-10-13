@@ -14,7 +14,7 @@ import { Op } from 'sequelize';
 import { StoreTransactionType } from 'src/common/enums/transaction_type';
 import { Language } from 'src/common/enums/language';
 import { I18nService } from 'nestjs-i18n';
-import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { S3Service } from '../s3/s3.service';
 
 @Injectable()
 export class StoreTransactionService {
@@ -22,7 +22,7 @@ export class StoreTransactionService {
         @Inject(repositories.store_transaction_repository) private storeTransactionRepo: typeof StoreTransaction,
         private readonly storeCommissionService:StoreCommissionService,
         private readonly i18n: I18nService,
-        private cloudinaryService: CloudinaryService,
+        private s3Service: S3Service,
         private readonly storeService:StoreService
     ) {}
 
@@ -160,7 +160,7 @@ export class StoreTransactionService {
         await this.storeService.getStoreById(storeId)
         let receiptUrl: string | null = null;
         if (file) {
-            const uploaded = await this.cloudinaryService.uploadImage(file);
+            const uploaded = await this.s3Service.uploadImage(file);
             receiptUrl = uploaded.secure_url;
         }
         await this.storeTransactionRepo.create({storeId,storeRevenue:totalAmount,status,note,receipt:receiptUrl}, { transaction });

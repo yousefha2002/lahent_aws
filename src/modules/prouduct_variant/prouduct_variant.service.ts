@@ -1,3 +1,4 @@
+import { S3Service } from './../s3/s3.service';
 import { VariantCategoryService } from './../variant_category/variant_category.service';
 import { ProductCategoryVariantService } from './../product_category_variant/product_category_variant.service';
 import {BadRequestException,forwardRef,Inject,Injectable} from '@nestjs/common';
@@ -5,7 +6,6 @@ import { repositories } from 'src/common/enums/repositories';
 import { ProductVariant } from './entities/prouduct_variant.entity';
 import { ProductService } from '../product/product.service';
 import {CreateProductVariantsDto } from './dto/create-variant.dto';
-import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { ProductCategoryVariant } from '../product_category_variant/entities/product_category_variant.entity';
 import { Product } from '../product/entities/product.entity';
 import { UpdateProductVariantDto } from './dto/update-variant.dto';
@@ -21,7 +21,7 @@ export class ProuductVariantService {
     @Inject(repositories.productVariantLanguage_repository) private productVariantLanguageRepo: typeof ProductVariantLanguage,
     @Inject(forwardRef(() => ProductService))
     private productService: ProductService,
-    private readonly cloudinaryService: CloudinaryService,
+    private readonly s3Service: S3Service,
     private readonly productCategoryVariantService: ProductCategoryVariantService,
     private readonly variantCategoryService: VariantCategoryService,
     @Inject('SEQUELIZE') private readonly sequelize: Sequelize
@@ -46,9 +46,9 @@ export class ProuductVariantService {
 
     if (file) {
       if (variant.imageUrl) {
-        await this.cloudinaryService.deleteImage(variant.imagePublicId);
+        await this.s3Service.deleteImage(variant.imagePublicId);
       }
-      const result = await this.cloudinaryService.uploadImage(file);
+      const result = await this.s3Service.uploadImage(file);
       variant.imageUrl = result.secure_url;
       variant.imagePublicId = result.public_id;
     }
@@ -136,7 +136,7 @@ export class ProuductVariantService {
         let imagePublicId: string | undefined;
 
         if (files[fileKey]) {
-          const result = await this.cloudinaryService.uploadImage(files[fileKey]);
+          const result = await this.s3Service.uploadImage(files[fileKey]);
           imageUrl = result.secure_url;
           imagePublicId = result.public_id;
         }

@@ -1,13 +1,12 @@
+import { S3Service } from './../../s3/s3.service';
 import { SectorService } from './../../sector/sector.service';
 import { UserTokenService } from './../../user_token/user_token.service';
 import { StoreService } from './store.service';
 import {BadRequestException,ForbiddenException,forwardRef,Inject,Injectable,NotFoundException,} from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
 import { Store } from '../entities/store.entity';
-import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { CreateStoreDto } from '../dto/requests/create-store.dto';
 import { comparePassword, hashPassword } from 'src/common/utils/password';
-import { UploadApiResponse } from 'cloudinary';
 import { OpeningHourEnum } from 'src/common/validators/validateAndParseOpeningHours';
 import { OpeningHourService } from '../../opening_hour/opening_hour.service';
 import { LoginStoreDto } from '../dto/requests/store-login.dto';
@@ -15,7 +14,7 @@ import { RoleStatus } from 'src/common/enums/role_status';
 import { SubtypeService } from '../../subtype/subtype.service';
 import { I18nService } from 'nestjs-i18n';
 import { Language } from 'src/common/enums/language';
-import { generateAccessToken, generateRefreshToken, generateTokens } from 'src/common/utils/generateToken';
+import { generateTokens } from 'src/common/utils/generateToken';
 import { JwtService } from '@nestjs/jwt';
 import { validateAndParseStoreTranslations } from 'src/common/validators/validate-store-translations.validator';
 import { StoreLanguage } from '../entities/store_language.entity';
@@ -32,7 +31,7 @@ export class StoreAuthService {
     constructor(
         @Inject(repositories.store_repository) private storeRepo: typeof Store,
         @Inject(repositories.store_langauge_repository) private storeLanguageRepo: typeof StoreLanguage,
-        private readonly cloudinaryService: CloudinaryService,
+        private readonly s3Service: S3Service,
         private readonly openingHourService: OpeningHourService,
         @Inject(forwardRef(() => SubtypeService))
         private subTypeService: SubtypeService,
@@ -119,14 +118,14 @@ export class StoreAuthService {
                 this.subTypeService.subTypeById(+dto.subTypeId),
             ]);
 
-            let logoUpload: UploadApiResponse | undefined;
-            let coverUpload: UploadApiResponse | undefined;
-            let commercialRegisterUpload: UploadApiResponse | undefined;
-            let taxNumberUpload: UploadApiResponse | undefined;
-            if (logo) logoUpload = await this.cloudinaryService.uploadImage(logo);
-            if (cover) coverUpload = await this.cloudinaryService.uploadImage(cover);
-            if (commercialRegisterFile) commercialRegisterUpload = await this.cloudinaryService.uploadImage(commercialRegisterFile);
-            if (taxNumberFile) taxNumberUpload = await this.cloudinaryService.uploadImage(taxNumberFile);
+            let logoUpload: any | undefined;
+            let coverUpload: any | undefined;
+            let commercialRegisterUpload: any | undefined;
+            let taxNumberUpload: any | undefined;
+            if (logo) logoUpload = await this.s3Service.uploadImage(logo);
+            if (cover) coverUpload = await this.s3Service.uploadImage(cover);
+            if (commercialRegisterFile) commercialRegisterUpload = await this.s3Service.uploadImage(commercialRegisterFile);
+            if (taxNumberFile) taxNumberUpload = await this.s3Service.uploadImage(taxNumberFile);
 
             const newStore = await store.update({
                 phone: dto.phone,

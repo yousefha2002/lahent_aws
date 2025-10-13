@@ -17,7 +17,6 @@ export class FcmTokenService {
     {
         const {deviceId,token} = dto
         const tokens = await this.fcmTokenRepo.findAll({where:{token}})
-        console.log(tokens)
         await this.fcmTokenRepo.destroy({ where: { token } });
         const existing = await this.fcmTokenRepo.findOne({ where: { userId, role, deviceId } });
         if (!existing) {
