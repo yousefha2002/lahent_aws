@@ -6,6 +6,7 @@ import { RolePermission } from './entites/role_permission.entity';
 import { Language } from 'src/common/enums/language';
 import { I18nService } from 'nestjs-i18n';
 import { Admin } from '../admin/entities/admin.entity';
+import { Op } from 'sequelize';
 
 @Injectable()
 export class RoleService {
@@ -55,6 +56,7 @@ export class RoleService {
 
         // إذا مع count
         const roles = await this.roleRepo.findAll({
+            where: { name: { [Op.ne]: 'SuperAdmin' } },
             include: [
                 { model: this.rolePermissionRepo, attributes: ['id'] },
                 { model: Admin, attributes: ['id'] },
@@ -144,5 +146,5 @@ export class RoleService {
                 }))
                 : [],
         };
-        }
+    }
 }
