@@ -1,6 +1,6 @@
-import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { RoleService } from './role.service';
-import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiSecurity } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { RoleStatus } from 'src/common/enums/role_status';
 import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
@@ -30,9 +30,17 @@ export class RoleController {
     @ApiOperation({ summary: 'Get all roles with admin and permission counts' })
     @ApiResponse({status: 200,type: [RoleWithCountsDto]})
     @PermissionGuard([RoleStatus.ADMIN])
+    @ApiQuery({
+      name: 'withCounts',
+      required: false,
+      type: String,
+      enum: ['true', 'false'],
+      description: 'Include admin and permission counts if true',
+    })
     @Get()
-    async getAllRolesWithCounts(){
-        return this.roleService.findAllRolesWithCounts();
+    async getAllRolesWithCounts(@Query('withCounts') withCounts?: string){
+        const includeCounts = withCounts === 'true';
+        return this.roleService.findAllRoles(includeCounts);
     }
 
     @ApiOperation({ summary: 'Update a role with permissions (admin only)' })
