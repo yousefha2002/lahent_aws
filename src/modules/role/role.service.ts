@@ -102,33 +102,47 @@ export class RoleService {
         return { message };
     }
 
-    async findAllRolesWithDetails() 
+    async findOneRoleWithDetails(id: number, lang: Language, withAdmins = true) 
     {
-        const roles = await this.roleRepo.findAll({
-            include: [
+        const includeModels: any[] = [
             {
-                model: this.rolePermissionRepo,
-                attributes: ['id', 'permission'],
+            model: this.rolePermissionRepo,
+            attributes: ['id', 'permission'],
             },
-            {
-                model: Admin,
-                attributes: ['id', 'name', 'phone'],
-            },
-            ],
-        });
+        ];
 
-        return roles.map(role => ({
+        // فقط لو المستخدم طالب admin
+        if (withAdmins) {
+            includeModels.push({
+            model: Admin,
+            attributes: ['id', 'name', 'phone'],
+            });
+        }
+
+        const role = await this.roleRepo.findByPk(id, { include: includeModels });
+
+        if (!role) {
+            throw new BadRequestException(
+            this.i18n.translate('translation.not_found', { lang }),
+            );
+        }
+
+        return {
             id: role.id,
             name: role.name,
-            rolePermissions: role.rolePermissions?.map(p => ({
+            rolePermissions:
+            role.rolePermissions?.map((p) => ({
                 id: p.id,
                 permission: p.permission,
-                })) || [],
-            admins: role.admins?.map(a => ({
-                id: a.id,
-                name: a.name,
-                phone: a.phone,
             })) || [],
-        }));
+            admins:
+            withAdmins && role.admins
+                ? role.admins.map((a) => ({
+                    id: a.id,
+                    name: a.name,
+                    phone: a.phone,
+                }))
+                : [],
+        };
         }
 }

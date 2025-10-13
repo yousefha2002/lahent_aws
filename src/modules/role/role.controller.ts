@@ -7,6 +7,7 @@ import { PermissionGuard } from 'src/common/decorators/permession-guard.decorato
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
 import { RoleWithCountsDto } from './dto/role-with-count.dto';
+import { RoleWithDetailsDto } from './dto/role-with-details.dto';
 
 @Controller('role')
 export class RoleController {
@@ -57,5 +58,27 @@ export class RoleController {
     ) {
       const lang = getLang(i18n);
       return this.roleService.updateRoleWithPermissions(roleId, dto, lang);
+    }
+
+    @ApiSecurity('access-token')
+    @ApiOperation({ summary: 'Get role with its permissions and admins' })
+    @ApiResponse({ status: 200, type: RoleWithDetailsDto })
+    @ApiQuery({
+      name: 'withAdmins',
+      required: false,
+      type: Boolean,
+      description: 'Include admins in response (default: true)',
+    })
+    @PermissionGuard([RoleStatus.ADMIN])
+    @Get(':id')
+    @ApiParam({ name: 'id', type: Number, description: 'Role ID' })
+    async getRoleWithDetails(
+      @Param('id') id: number,
+      @I18n() i18n: I18nContext,
+      @Query('withAdmins') withAdmins?: string,
+    ) {
+      const lang = getLang(i18n);
+      const includeAdmins = withAdmins !== 'false';
+      return this.roleService.findOneRoleWithDetails(id, lang,includeAdmins);
     }
 }
