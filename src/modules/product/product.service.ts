@@ -156,7 +156,6 @@ export class ProductService {
       );
 
       for (const img of imagesToDelete) {
-        await this.s3Service.deleteImage(img.imagePublicId);
         await this.productImageService.deleteImage(img.id, transaction);
       }
 

@@ -1,7 +1,12 @@
-import {Body, Controller, Post} from '@nestjs/common';
+import {Body, Controller, Get, Param, ParseIntPipe, Post, Put, Query} from '@nestjs/common';
 import { AdminService } from './admin.service';
-import { ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { RefreshTokenDto } from '../user_token/dtos/refreshToken.dto';
+import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
+import { RoleStatus } from 'src/common/enums/role_status';
+import { CreateAdminDto } from './dto/create-admin.dto';
+import { PaginatedAdminsResponseDto } from './dto/admin-list.dto';
+import { UpdateAdminDto } from './dto/update-admin.dto';
 
 @Controller('admin')
 export class AdminController {
@@ -22,5 +27,43 @@ export class AdminController {
   @Post('refresh-token')
   async refreshToken(@Body() dto: RefreshTokenDto) {
     return this.adminService.refreshToken(dto);
+  }
+
+  @ApiSecurity('access-token')
+  @ApiOperation({ summary: 'Create a new admin (admin only)' })
+  @ApiResponse({ status: 201, description: 'Admin created successfully' })
+  @ApiBody({type:CreateAdminDto})
+  @PermissionGuard([RoleStatus.ADMIN])
+  @Post()
+  async createAdmin(@Body() dto: CreateAdminDto) {
+    return this.adminService.createAdmin(dto);
+  }
+
+  @ApiSecurity('access-token')
+  @ApiOperation({ summary: 'Get all admins with roles (excluding super admin)' })
+  @ApiQuery({ name: 'page', required: false, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, example: 10 })
+  @ApiResponse({ status: 200, type: PaginatedAdminsResponseDto })
+  @PermissionGuard([RoleStatus.ADMIN])
+  @Get()
+  async getAllAdmins(
+    @Query('page') page = '1',
+    @Query('limit') limit = '10',
+  ) {
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    return this.adminService.getAllAdmins(pageNum, limitNum);
+  }
+
+  @ApiSecurity('access-token')
+  @ApiOperation({ summary: 'Update an admin (exclude super admin)' })
+  @ApiResponse({ status: 200, description: 'Admin updated successfully' })
+  @PermissionGuard([RoleStatus.ADMIN])
+  @Put(':id')
+  async updateAdmin(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateAdminDto,
+  ) {
+    return this.adminService.updateAdmin(id, dto);
   }
 }

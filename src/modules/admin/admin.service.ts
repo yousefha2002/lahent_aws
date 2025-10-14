@@ -8,6 +8,8 @@ import { JwtService } from '@nestjs/jwt';
 import { generateAccessToken, generateRefreshToken, generateTokens } from 'src/common/utils/generateToken';
 import { RoleStatus } from 'src/common/enums/role_status';
 import { REFRESH_TOKEN_EXPIRES_MS } from 'src/common/constants';
+import { CreateAdminDto } from './dto/create-admin.dto';
+import { UpdateAdminDto } from './dto/update-admin.dto';
 
 @Injectable()
 export class AdminService {
@@ -63,5 +65,75 @@ export class AdminService {
       } catch (err) {
         throw new BadRequestException(err.message || 'Invalid or expired refresh token');
       }
+  
+  }
+
+  async createAdmin(dto: CreateAdminDto) {
+    const existing = await this.findByPhone(dto.phone);
+    if (existing) {
+      throw new BadRequestException('Phone number already exists');
     }
+
+    const role = await this.roleService.findById(dto.roleId);
+    if (!role) {
+      throw new BadRequestException('Invalid role ID');
+    }
+
+    const admin = await this.adminRepo.create({
+      name: dto.name,
+      phone: dto.phone,
+      roleId: dto.roleId,
+      isSuperAdmin: false,
+    });
+
+    return {message: 'Admin created successfully'};
+  }
+
+  async getAllAdmins(page = 1, limit = 10) {
+    const offset = (page - 1) * limit;
+
+    const { rows, count } = await this.adminRepo.findAndCountAll({
+      where: { isSuperAdmin: false },
+      include: [
+        {
+          association: 'role',
+          attributes: ['id', 'name'],
+        },
+      ],
+      attributes: ['id', 'name', 'phone','active'],
+      limit,
+      offset,
+      order: [['createdAt', 'DESC']],
+    });
+
+    return {
+      totalPages: Math.ceil(count / limit),
+      total: count,
+      data:rows,
+    };
+  }
+
+  async updateAdmin(id: number, dto: UpdateAdminDto) 
+  {
+    const admin = await this.findOneById(id);
+    if (admin.isSuperAdmin) throw new BadRequestException('Cannot update Super Admin');
+
+    if (dto.phone && dto.phone !== admin.phone) {
+      const existing = await this.findByPhone(dto.phone);
+      if (existing) throw new BadRequestException('Phone number already exists');
+    }
+
+    if (dto.roleId) {
+      const role = await this.roleService.findById(dto.roleId);
+      if (!role) throw new BadRequestException('Invalid role ID');
+    }
+
+    await admin.update({
+      name: dto.name ?? admin.name,
+      phone: dto.phone ?? admin.phone,
+      roleId: dto.roleId ?? admin.roleId,
+    });
+
+    return { message: 'Admin updated successfully' };
+  }
 }

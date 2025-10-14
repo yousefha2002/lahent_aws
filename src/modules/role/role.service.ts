@@ -147,4 +147,13 @@ export class RoleService {
                 : [],
         };
     }
+
+    async findById(id: number) {
+        return this.roleRepo.findOne({
+            where: {
+            id,
+            name: { [Op.ne]: 'SuperAdmin'},
+            },
+        });
+    }
 }

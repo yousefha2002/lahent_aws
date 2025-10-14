@@ -45,9 +45,6 @@ export class ProuductVariantService {
     }
 
     if (file) {
-      if (variant.imageUrl) {
-        await this.s3Service.deleteImage(variant.imagePublicId);
-      }
       const result = await this.s3Service.uploadImage(file);
       variant.imageUrl = result.secure_url;
       variant.imagePublicId = result.public_id;

@@ -593,16 +593,20 @@ export class StoreController {
     return this.storeAuthService.updatePassword(context, dto);
   }
 
+  @PermissionGuard([RoleStatus.STORE])
   @Post('logout')
   @ApiOperation({ summary: 'Logout store and invalidate refresh token' })
   @ApiBody({type:RefreshTokenDto})
+  @ApiSecurity('access-token')
   @ApiResponse({
     status: 200,
     description: 'Store logged out successfully',
     schema: { example: { message: 'Logged out successfully' } },
   })
-  async logoutStore(@CurrentUser() store: Store,@Body() body:RefreshTokenDto) {
+  async logoutStore(@CurrentUser() user: CurrentUserType,@Body() body:RefreshTokenDto) {
+    const {context} = user
     await this.userTokenService.logout(body);
-    await this.fcmTokenService.removeTokenByDevice(store.id,body.deviceId,RoleStatus.STORE);
+    await this.fcmTokenService.removeTokenByDevice(context.id,body.deviceId,RoleStatus.STORE);
+    return {message:"logout success"}
   }
 }
