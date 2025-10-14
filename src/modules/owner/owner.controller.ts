@@ -11,10 +11,17 @@ import { RefreshTokenDto } from '../user_token/dtos/refreshToken.dto';
 import { CurrentUserType } from 'src/common/types/current-user.type';
 import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
 import { RoleStatus } from 'src/common/enums/role_status';
+import { UserTokenService } from '../user_token/user_token.service';
+import { FcmTokenService } from '../fcm_token/fcm_token.service';
+import { Owner } from './entities/owner.entity';
 
 @Controller('owner')
 export class OwnerController {
-  constructor(private readonly ownerService: OwnerService) {}
+  constructor(
+    private readonly ownerService: OwnerService,
+    private readonly userTokenService:UserTokenService,
+      private readonly fcmTokenService:FcmTokenService
+  ) {}
 
   @ApiOperation({ summary: 'Update current owner profile' })
   @ApiSecurity('access-token')
@@ -89,5 +96,21 @@ export class OwnerController {
     @Query('email') email?: string)
   {
     return this.ownerService.findAll(page, limit,name,city,phone,email);
+  }
+
+  @PermissionGuard([RoleStatus.OWNER])
+  @Post('logout')
+  @ApiOperation({ summary: 'Logout owner and invalidate refresh token' })
+  @ApiBody({type:RefreshTokenDto})
+  @ApiSecurity('access-token')
+  @ApiResponse({
+    status: 200,
+    schema: { example: { message: 'Logged out successfully' } },
+  })
+  async logoutOwner(@CurrentUser() user: CurrentUserType,@Body() body:RefreshTokenDto) {
+    const {context} = user
+    await this.userTokenService.logout(body);
+    await this.fcmTokenService.removeTokenByDevice(context.id,body.deviceId,RoleStatus.OWNER);
+    return {message:"logout success"}
   }
 }
