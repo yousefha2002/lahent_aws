@@ -19,6 +19,7 @@ import { StoreFinancialsFilterDto } from '../store/dto/requests/store-financials
 import { CurrentUserType } from 'src/common/types/current-user.type';
 import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
 import { RoleStatus } from 'src/common/enums/role_status';
+import { PermissionKey } from 'src/common/enums/permission-key';
 
 @Controller('product')
 export class ProductController {
@@ -192,7 +193,7 @@ export class ProductController {
   }
 
   @Put('active/:productId')
-  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],ApprovedStoreGuard)
+  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],PermissionKey.ActivateProduct,ApprovedStoreGuard)
   @ApiOperation({ summary: 'Toggle product active status' })
   @ApiSecurity('access-token')
   @ApiParam({ name: 'productId', example: 101 })

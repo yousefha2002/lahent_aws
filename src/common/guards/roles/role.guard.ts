@@ -18,6 +18,7 @@ export class RoleGuard implements CanActivate {
         if (!token) throw new UnauthorizedException('Must be logged in');
 
         const allowedRoles: RoleStatus[] = this.reflector.get('allowedRoles', context.getHandler()) || [];
+        const permissionKey: string | null = this.reflector.get('permissionKey', context.getHandler()) || null;
 
         let decoded: any;
         try {
@@ -27,13 +28,14 @@ export class RoleGuard implements CanActivate {
         }
 
         if (allowedRoles.length && !allowedRoles.includes(decoded.role)) {
-        throw new UnauthorizedException('Role not allowed');
+            throw new UnauthorizedException('Role not allowed');
         }
 
         const userContext = await this.userContextService.getUserContext(
             decoded.role,
             decoded.id,
             request.query,
+            permissionKey,
         );
 
         request.currentUser = userContext;

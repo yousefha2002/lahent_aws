@@ -51,6 +51,7 @@ export class RoleService {
             // إذا بدون count
             return this.roleRepo.findAll({
                 attributes: ['id', 'name'],
+                where: { name: { [Op.ne]: 'SuperAdmin' } },
             });
         }
 

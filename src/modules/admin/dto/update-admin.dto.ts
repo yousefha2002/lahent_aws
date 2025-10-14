@@ -1,4 +1,4 @@
-import { IsInt, IsOptional, IsString, Matches } from 'class-validator';
+import { IsBoolean, IsInt, IsOptional, IsString, Matches } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdateAdminDto {
@@ -17,4 +17,9 @@ export class UpdateAdminDto {
     @IsInt()
     @IsOptional()
     roleId?: number;
+
+    @ApiPropertyOptional({ example: true, description: 'Activate admin' })
+    @IsBoolean()
+    @IsOptional()
+    active?: boolean;
 }

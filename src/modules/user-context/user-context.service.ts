@@ -15,12 +15,15 @@ export class UserContextService {
         private customerService: CustomerService,
     ) {}
 
-    async getUserContext(role: RoleStatus, id: number, contextIds?: any) {
+    async getUserContext(role: RoleStatus, id: number, contextIds?: any,permissionKey?:string|null) {
         let contextEntity:any|null = null;
         switch (role) {
         case RoleStatus.ADMIN:
-            const admin = await this.adminService.findOneById(id);
+            const admin = await this.adminService.findOneById(id, { includeRole: true });
             if (!admin) throw new NotFoundException('Admin not found');
+            if (permissionKey) {
+                await this.adminService.verifyAdminPermission(admin.id, permissionKey);
+            }
 
             // Optional context (store, owner, customer)
             if (contextIds?.storeId) contextEntity = await this.storeService.getStoreById(contextIds.storeId);

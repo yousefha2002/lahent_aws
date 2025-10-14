@@ -19,4 +19,8 @@ export class Role extends Model {
     
     @HasMany(()=>Admin)
     admins:Admin[]
+
+    get permissions(): string[] {
+        return this.rolePermissions?.map(p => p.permission) || [];
+    }
 }

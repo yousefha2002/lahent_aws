@@ -28,7 +28,7 @@ export class AddressService {
         return this.addressRepo.create({ ...dto, customerId });
     }
 
-    async update(customerId: number,addressId: number,dto: UpdateAddressDto,lang = Language.en)
+    async update(customerId: number,addressId: number,dto: UpdateAddressDto,lang = Language.ar)
     {
         const address = await this.findOneOrFail(addressId, customerId, lang);
         Object.assign(address, dto);

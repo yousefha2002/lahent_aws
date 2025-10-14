@@ -1,11 +1,11 @@
 import { UserTokenService } from './../user_token/user_token.service';
 import { RoleService } from './../role/role.service';
-import {BadRequestException, Inject,Injectable,UnauthorizedException,} from '@nestjs/common';
+import {BadRequestException, ForbiddenException, Inject,Injectable,} from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
 import { Admin } from './entities/admin.entity';
 import { RefreshTokenDto } from '../user_token/dtos/refreshToken.dto';
 import { JwtService } from '@nestjs/jwt';
-import { generateAccessToken, generateRefreshToken, generateTokens } from 'src/common/utils/generateToken';
+import {generateTokens } from 'src/common/utils/generateToken';
 import { RoleStatus } from 'src/common/enums/role_status';
 import { REFRESH_TOKEN_EXPIRES_MS } from 'src/common/constants';
 import { CreateAdminDto } from './dto/create-admin.dto';
@@ -19,14 +19,21 @@ export class AdminService {
     private readonly userTokenService:UserTokenService,
     private jwtService: JwtService,
   ) {}
-  async findOneById(id:number)
+  async findOneById(id: number, options?: { includeRole?: boolean }) 
   {
-    const admin = await this.adminRepo.findByPk(id)
-    if (!admin) {
-      throw new UnauthorizedException('Admin not found');
+    if (options?.includeRole) {
+      return this.adminRepo.findByPk(id, {
+        include: [
+          {
+            association: 'role',
+            include: ['permissions'], 
+          },
+        ],
+      });
     }
-    return admin
-  }
+
+  return this.adminRepo.findByPk(id);
+}
 
   async findByPhone(phone:string)
   {
@@ -59,6 +66,10 @@ export class AdminService {
           throw new BadRequestException('Invalid or expired refresh token');
         }
         const admin = await this.findOneById(decoded.id);
+        if(!admin)
+        {
+          throw new BadRequestException('admin is not found')
+        }
         const tokens = generateTokens(admin.id, RoleStatus.ADMIN);
         await this.userTokenService.rotateToken(tokenRecord,tokens.refreshToken,new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS));
         return { accessToken:tokens.accessToken, refreshToken: tokens.refreshToken };
@@ -116,6 +127,10 @@ export class AdminService {
   async updateAdmin(id: number, dto: UpdateAdminDto) 
   {
     const admin = await this.findOneById(id);
+    if(!admin)
+    {
+      throw new BadRequestException('admin is not found')
+    }
     if (admin.isSuperAdmin) throw new BadRequestException('Cannot update Super Admin');
 
     if (dto.phone && dto.phone !== admin.phone) {
@@ -131,9 +146,27 @@ export class AdminService {
     await admin.update({
       name: dto.name ?? admin.name,
       phone: dto.phone ?? admin.phone,
+      active:dto.active??dto.active,
       roleId: dto.roleId ?? admin.roleId,
     });
 
     return { message: 'Admin updated successfully' };
+  }
+
+  async verifyAdminPermission(adminId: number, permissionKey: string) 
+  {
+    const admin = await this.findOneById(adminId, { includeRole: true });
+
+    if (!admin) throw new ForbiddenException('Admin not found');
+
+    if (admin.isSuperAdmin) return true;
+
+    const permissions = admin.role?.permissions || [];
+
+    if (!permissions.includes(permissionKey)) {
+      throw new ForbiddenException('Permission denied');
+    }
+
+    return true;
   }
 }
