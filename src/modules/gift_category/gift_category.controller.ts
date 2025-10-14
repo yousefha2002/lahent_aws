@@ -8,6 +8,7 @@ import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiSecurity } from '@nest
 import { getLang } from 'src/common/utils/get-lang.util';
 import { RoleStatus } from 'src/common/enums/role_status';
 import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
+import { PermissionKey } from 'src/common/enums/permission-key';
 
 @Controller('gift-category')
 export class GiftCategoryController {
@@ -18,7 +19,7 @@ export class GiftCategoryController {
   @ApiBody({ type: CreateGiftCategoryDto })
   @ApiResponse({ status: 201, description: 'Gift category created successfully', schema: { example: { message: 'Created successfully' } } })
   @Serilaize(GiftCategoryDtoWithMessage)
-  @PermissionGuard([RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.ADMIN],PermissionKey.CreateGiftCategory)
   @Post()
   async create(@Body() body: CreateGiftCategoryDto, @I18n() i18n: I18nContext) {
     return this.giftCategoryService.create(body, getLang(i18n));
@@ -30,7 +31,7 @@ export class GiftCategoryController {
   @ApiBody({ type: CreateGiftCategoryDto })
   @ApiResponse({ status: 201, description: 'Gift category updated successfully', schema: { example: { message: 'Updated successfully' } } })
   @Serilaize(GiftCategoryDto)
-  @PermissionGuard([RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.ADMIN],PermissionKey.UpdateGiftCategory)
   @Put(':id')
   async update(@Param('id', ParseIntPipe) id: number, @Body() body: CreateGiftCategoryDto, @I18n() i18n: I18nContext) {
     return this.giftCategoryService.update(id, body, getLang(i18n));
@@ -48,7 +49,7 @@ export class GiftCategoryController {
   @ApiSecurity('access-token')
   @ApiResponse({ status: 200, description: 'All gift categories', type: GiftCategoryDto, isArray: true })
   @Serilaize(GiftCategoryDto)
-  @PermissionGuard([RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.ADMIN],PermissionKey.ViewGiftCategory)
   @Get('admin/all')
   async findAllForAdmin() {
     return this.giftCategoryService.findAllForAdmin();

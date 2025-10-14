@@ -9,7 +9,7 @@ export class CreateRoleDto {
 
     @ApiProperty({
         description: 'صلاحيات الدور (يجب اختيار واحدة أو أكثر)',
-        example: [PermissionKey.ActivateProduct, PermissionKey.CreateAvatar],
+        example: [PermissionKey.CreateAvatar],
         isArray: true,
         enum: PermissionKey,
     })

@@ -31,7 +31,7 @@ export class ProductController {
   @ApiBody({ type: CreateProductDto })
   @ApiResponse({status: 201,schema: {example: {message: 'Product created successfully',productId: 123}}})
   @ApiConsumes('multipart/form-data')
-  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],ApprovedStoreGuard)
+  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],PermissionKey.CreateProduct,ApprovedStoreGuard)
   @ApiQuery({ name: 'storeId', required: false, example: 1 })
   @UseInterceptors(AnyFilesInterceptor(multerOptions))
   async create(
@@ -67,7 +67,7 @@ export class ProductController {
       },
     },
   })
-  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],ApprovedStoreGuard)
+  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],PermissionKey.UpdateProduct,ApprovedStoreGuard)
   @UseInterceptors(FileFieldsInterceptor([{ name: 'images', maxCount: 5 }], multerOptions),)
   async updateProductWithImage(
     @Param('productId',ParseIntPipe) productId: number,
@@ -92,7 +92,7 @@ export class ProductController {
     );
   }
 
-  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],PermissionKey.ViewProduct)
   @Serilaize(TopProductResponseDto)
   @Get('top-sales/byStore')
   @ApiOperation({ summary: 'Get top 4 selling products for a store' })
@@ -139,7 +139,7 @@ export class ProductController {
   }
 
   @Serilaize(PaginatedProductsStoreViewDto)
-  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],PermissionKey.ViewProduct)
   @Get('all')
   @ApiOperation({ summary: 'Get all products of the current store' })
   @ApiQuery({ name: 'page', required: false, type: Number })
@@ -179,7 +179,7 @@ export class ProductController {
     return this.productService.getFullProductDetails(+productId,lang);
   }
 
-  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],PermissionKey.ViewProduct)
   @Serilaize(ProductFullDetailsForStoreDto)
   @Get('/:productId/byStore')
   @ApiOperation({ summary: 'Get full product details for the store (including inactive)' })
@@ -193,7 +193,7 @@ export class ProductController {
   }
 
   @Put('active/:productId')
-  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],PermissionKey.ActivateProduct,ApprovedStoreGuard)
+  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],PermissionKey.UpdateProduct,ApprovedStoreGuard)
   @ApiOperation({ summary: 'Toggle product active status' })
   @ApiSecurity('access-token')
   @ApiParam({ name: 'productId', example: 101 })

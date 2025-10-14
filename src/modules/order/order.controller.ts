@@ -28,6 +28,7 @@ import { ReorderResponseDto } from './dto/responses/reorder-response.dto';
 import { CurrentUserType } from 'src/common/types/current-user.type';
 import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
 import { RoleStatus } from 'src/common/enums/role_status';
+import { PermissionKey } from 'src/common/enums/permission-key';
 
 @Controller('order')
 export class OrderController {
@@ -67,7 +68,7 @@ export class OrderController {
   }
 
   @Serilaize(OrderAnalyticsResponseDto)
-  @PermissionGuard([RoleStatus.ADMIN,RoleStatus.STORE])
+  @PermissionGuard([RoleStatus.ADMIN,RoleStatus.STORE],PermissionKey.ViewStoreOrders)
   @Get('analytics/byStore')
   @ApiOperation({ summary: 'Get analytics (avg prep time + repeat rate) for a store' })
   @ApiQuery({ name: 'storeId', required: false, example: 1 })
@@ -204,7 +205,7 @@ export class OrderController {
   }
 
   @Serilaize(PaginatedOrderListDto)
-  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],PermissionKey.ViewStoreOrders)
   @Get('byStore')
   @ApiOperation({ summary: 'Get paginated orders for a store' })
   @ApiSecurity('access-token')
@@ -220,13 +221,14 @@ export class OrderController {
   }
 
   @Serilaize(PaginatedOrderListDto)
-  @PermissionGuard([RoleStatus.CUSTOMER])
+  @PermissionGuard([RoleStatus.CUSTOMER,RoleStatus.ADMIN])
   @Get('byCustomer')
   @ApiOperation({ summary: 'Get paginated orders for a customer' })
   @ApiSecurity('access-token')
   @ApiQuery({ name: 'page', required: false, description: 'Page number', example: 1 })
   @ApiQuery({ name: 'limit', required: false, description: 'Number of items per page', example: 10 })
   @ApiQuery({ name: 'storeId', required: false, description: 'Filter by store ID', example: 5 })
+  @ApiQuery({ name: 'customerId', required: false, example: 1 })
   @ApiResponse({ status: 200, description: 'Paginated list of orders for customer', type: PaginatedOrderListDto })
   getOrdersByCustomer(@CurrentUser() user:CurrentUserType,@Query('page',) page=1,@Query('limit') limit=10,@Query('storeId') storeId?: number)
   {
@@ -235,7 +237,7 @@ export class OrderController {
   }
 
   @Serilaize(StoreOrderStatsResponseDto)
-  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],PermissionKey.ViewStoreOrders)
   @Get('stats/byStore')
   @ApiOperation({ summary: 'Get order statistics for a store' })
   @ApiSecurity('access-token')
@@ -251,7 +253,7 @@ export class OrderController {
   }
 
   @Serilaize(OrderDto)
-  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],PermissionKey.ViewStoreOrders)
   @Get(':orderId/byStore')
   @ApiOperation({ summary: 'Get order details by store' })
   @ApiSecurity('access-token')
@@ -265,10 +267,11 @@ export class OrderController {
   }
 
   @Serilaize(OrderDto)
-  @PermissionGuard([RoleStatus.CUSTOMER])
+  @PermissionGuard([RoleStatus.CUSTOMER,RoleStatus.ADMIN],PermissionKey.ViewCustomerOrders)
   @Get(':orderId/byCustomer')
   @ApiOperation({ summary: 'Get order details by customer' })
   @ApiSecurity('access-token')
+  @ApiQuery({ name: 'storeId', required: false, example: 1 })
   @ApiParam({ name: 'orderId', description: 'ID of the order', example: 123 })
   @ApiResponse({ status: 200, description: 'Order details', type: OrderDto })
   getOrderByCustomer(@CurrentUser() user:CurrentUserType,@Param('orderId',) orderId:number)

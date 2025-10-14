@@ -11,6 +11,7 @@ import { ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse, Ap
 import { CurrentUserType } from 'src/common/types/current-user.type';
 import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
 import { RoleStatus } from 'src/common/enums/role_status';
+import { PermissionKey } from 'src/common/enums/permission-key';
 
 @Controller('product-variant')
 export class ProuductVariantController {
@@ -18,7 +19,7 @@ export class ProuductVariantController {
     private readonly prouductVariantService: ProuductVariantService,
   ) {}
 
-  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],ApprovedStoreGuard)
+  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],PermissionKey.UpdateProduct,ApprovedStoreGuard)
   @UseInterceptors(FileInterceptor('image', multerOptions))
   @UseFilters(MulterExceptionFilter)
   @Put(':variantId')
@@ -65,7 +66,7 @@ export class ProuductVariantController {
     ); 
   }
 
-  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],ApprovedStoreGuard)
+  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],PermissionKey.UpdateProduct,ApprovedStoreGuard)
   @Put('/active/:variantId')
   @ApiOperation({ summary: 'Toggle active status of a product variant' })
   @ApiSecurity('access-token')
@@ -81,7 +82,7 @@ export class ProuductVariantController {
     return this.prouductVariantService.updateIsActive(+variantId, context.id);
   }
 
-  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],ApprovedStoreGuard)
+  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],PermissionKey.CreateProduct,ApprovedStoreGuard)
   @UseInterceptors(AnyFilesInterceptor(multerOptions))
   @UseFilters(MulterExceptionFilter)
   @Post()

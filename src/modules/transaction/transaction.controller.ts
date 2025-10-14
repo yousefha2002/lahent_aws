@@ -12,6 +12,7 @@ import { CurrentUserType } from 'src/common/types/current-user.type';
 import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
 import { RoleStatus } from 'src/common/enums/role_status';
 import { ApplePayResponseDto, ChargeWalletApplePayDTO } from './dto/charge-wallet-apple-pay.dto';
+import { PermissionKey } from 'src/common/enums/permission-key';
 
 @Controller('transaction')
 export class TransactionController {
@@ -56,6 +57,7 @@ export class TransactionController {
   @ApiOperation({ summary: 'Get paginated list of transactions for the current customer' })
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1, description: 'Page number' })
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 10, description: 'Number of items per page' })
+  @ApiQuery({ name: 'customerId', required: false, example: 1 })
   @ApiQuery({ 
     name: 'typeFilter', 
     required: false, 
@@ -64,7 +66,7 @@ export class TransactionController {
     description: 'Filter transactions by type' 
   })
   @ApiOkResponse({ type: PaginatedTransactionDto, description: 'Paginated transactions list' })
-  @PermissionGuard([RoleStatus.CUSTOMER])
+  @PermissionGuard([RoleStatus.CUSTOMER,RoleStatus.ADMIN],PermissionKey.ViewCustomerTransactions)
   @Get()
   async getTransactions(
     @CurrentUser() user: CurrentUserType,

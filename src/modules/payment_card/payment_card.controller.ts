@@ -6,12 +6,13 @@ import { CreatePaymentCardDto } from './dto/create-payment-card.dto';
 import { UpdatePaymentCardDto } from './dto/update-payment-card.dto';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { PaymentCardDto } from './dto/payment-card.dto';
-import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiSecurity } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
 import { CurrentUserType } from 'src/common/types/current-user.type';
 import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
 import { RoleStatus } from 'src/common/enums/role_status';
+import { PermissionKey } from 'src/common/enums/permission-key';
 
 @Controller('payment-card')
 export class PaymentCardController {
@@ -54,8 +55,9 @@ export class PaymentCardController {
   }
 
   @Serilaize(PaymentCardDto)
-  @PermissionGuard([RoleStatus.CUSTOMER,RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.CUSTOMER,RoleStatus.ADMIN],PermissionKey.ViewCustomerSaves)
   @ApiOperation({ summary: 'Get all payment cards of the current customer' })
+  @ApiQuery({ name: 'customerId', required: false, example: 1 })
   @ApiSecurity('access-token')
   @ApiResponse({ status: 200, description: 'List of payment cards', type: [PaymentCardDto] })
   @Get()
@@ -65,7 +67,7 @@ export class PaymentCardController {
   }
 
   @Serilaize(PaymentCardDto)
-  @PermissionGuard([RoleStatus.CUSTOMER,RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.CUSTOMER,RoleStatus.ADMIN],PermissionKey.ViewCustomerSaves)
   @ApiOperation({ summary: 'Get one payment card by ID' })
   @ApiSecurity('access-token')
   @ApiParam({ name: 'id', example: 1, description: 'Payment card ID' })

@@ -9,6 +9,7 @@ import { getLang } from 'src/common/utils/get-lang.util';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
 import { RoleStatus } from 'src/common/enums/role_status';
+import { PermissionKey } from 'src/common/enums/permission-key';
 
 @Controller('subtype')
 export class SubtypeController {
@@ -37,7 +38,7 @@ export class SubtypeController {
     },
   })
   @Post('/create')
-  @PermissionGuard([RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.ADMIN],PermissionKey.CreateTypeOfStore)
   createSubType(@Body() body: CreateSubTypeDto) {
     return this.subtypeService.createSubType(body);
   }
@@ -67,7 +68,7 @@ export class SubtypeController {
     },
   })
   @Put('/update/:subTypeId')
-  @PermissionGuard([RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.ADMIN],PermissionKey.UpdateTypeOfStore)
   updateSubType(
     @Body() body: UpdateSubTypeDto,
     @Param('subTypeId') subTypeId: number,
@@ -90,7 +91,7 @@ export class SubtypeController {
     },
   })
   @Delete('/:subTypeId')
-  @PermissionGuard([RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.ADMIN],PermissionKey.DeleteTypeOfStore)
   deleteSubType(@Param('subTypeId') subTypeId: number) {
     return this.subtypeService.deleteSubType(+subTypeId);
   }
@@ -114,7 +115,7 @@ export class SubtypeController {
   }
 
   @Get('admin/byType/:typeId')
-  @PermissionGuard([RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.ADMIN],PermissionKey.ViewTypeOfStore)
   @Serilaize(SubTypeDto)
   fetchAllByTypeIdAdmin(@Param('typeId') typeId: string) {
     return this.subtypeService.getAllSubTypesByTypeId(+typeId);

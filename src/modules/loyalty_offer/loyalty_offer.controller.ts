@@ -9,13 +9,14 @@ import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } f
 import { getLang } from 'src/common/utils/get-lang.util';
 import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
 import { RoleStatus } from 'src/common/enums/role_status';
+import { PermissionKey } from 'src/common/enums/permission-key';
 
 @Controller('loyalty-offer')
 export class LoyaltyOfferController {
   constructor(private readonly loyaltyOfferService: LoyaltyOfferService) {}
 
   @Serilaize(ExtendedLoyaltyOfferDto)
-  @PermissionGuard([RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.ADMIN],PermissionKey.CreateLoyaltyOffer)
   @Post()
   @ApiOperation({ summary: 'Create a new loyalty offer' })
   @ApiSecurity('access-token')
@@ -26,7 +27,7 @@ export class LoyaltyOfferController {
   }
 
   @Serilaize(PaginatedLoyaltyOfferDto)
-  @PermissionGuard([RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.ADMIN],PermissionKey.ViewLoyaltyOffer)
   @Get('admin')
   @ApiOperation({ summary: 'Get all loyalty offers for admin' })
   @ApiQuery({ name: 'page', required: false, type: Number })
@@ -46,7 +47,7 @@ export class LoyaltyOfferController {
   }
 
   @Serilaize(ExtendedLoyaltyOfferDto)
-  @PermissionGuard([RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.ADMIN],PermissionKey.UpdateLoyaltyOffer)
   @Patch(':id')
   @ApiOperation({ summary: 'Update a loyalty offer by ID' })
   @ApiSecurity('access-token')
@@ -58,7 +59,7 @@ export class LoyaltyOfferController {
   }
 
   @Serilaize(ExtendedLoyaltyOfferDto)
-  @PermissionGuard([RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.ADMIN],PermissionKey.UpdateLoyaltyOffer)
   @Patch(':id/toggle')
   @ApiOperation({ summary: 'Toggle the status of a loyalty offer by ID' })
   @ApiSecurity('access-token')

@@ -8,6 +8,7 @@ import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } f
 import { CurrentUserType } from 'src/common/types/current-user.type';
 import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
 import { RoleStatus } from 'src/common/enums/role_status';
+import { PermissionKey } from 'src/common/enums/permission-key';
 
 @Controller('review')
 export class ReviewController {
@@ -52,7 +53,7 @@ export class ReviewController {
 
   @Serilaize(PaginatedReviewDto)
   @Get('all')
-  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],PermissionKey.ViewStoreReviews)
   @ApiOperation({ summary: 'Get all reviews for a store with pagination' })
   @ApiSecurity('access-token')
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })

@@ -8,12 +8,13 @@ import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } f
 import { CurrentUserType } from 'src/common/types/current-user.type';
 import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
 import { RoleStatus } from 'src/common/enums/role_status';
+import { PermissionKey } from 'src/common/enums/permission-key';
 
 @Controller('product-extra')
 export class ProductExtraController {
   constructor(private readonly productExtraService: ProductExtraService) {}
 
-  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],ApprovedStoreGuard)
+  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],PermissionKey.UpdateProduct,ApprovedStoreGuard)
   @Put(':extraId')
   @ApiOperation({ summary: 'Update a product extra' })
   @ApiSecurity('access-token')
@@ -40,7 +41,7 @@ export class ProductExtraController {
     );
   }
 
-  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],ApprovedStoreGuard)
+  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],PermissionKey.UpdateProduct,ApprovedStoreGuard)
   @Put('/active/:extraId')
   @ApiOperation({ summary: 'Toggle active status for a product extra' })
   @ApiSecurity('access-token')
@@ -58,7 +59,7 @@ export class ProductExtraController {
     return this.productExtraService.updateIsActive(+extraId, context.id);
   }
 
-  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],ApprovedStoreGuard)
+  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],PermissionKey.CreateProduct,ApprovedStoreGuard)
   @Post()
   @ApiOperation({ summary: 'Create or update product extras' })
   @ApiSecurity('access-token')

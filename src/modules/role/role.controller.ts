@@ -8,6 +8,7 @@ import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
 import { RoleWithCountsDto } from './dto/role-with-count.dto';
 import { RoleWithDetailsDto } from './dto/role-with-details.dto';
+import { PermissionKey } from 'src/common/enums/permission-key';
 
 @Controller('role')
 export class RoleController {
@@ -17,7 +18,7 @@ export class RoleController {
     @ApiSecurity('access-token')
     @ApiBody({ type: CreateRoleDto })
     @ApiResponse({status: 201,schema: { example: { message: 'Created successfully' } }})
-    @PermissionGuard([RoleStatus.ADMIN])
+    @PermissionGuard([RoleStatus.ADMIN],PermissionKey.CreateRole)
     @Post()
     async createRole(
       @I18n() i18n: I18nContext,
@@ -30,7 +31,7 @@ export class RoleController {
     @ApiSecurity('access-token')
     @ApiOperation({ summary: 'Get all roles with admin and permission counts' })
     @ApiResponse({status: 200,type: [RoleWithCountsDto]})
-    @PermissionGuard([RoleStatus.ADMIN])
+    @PermissionGuard([RoleStatus.ADMIN],PermissionKey.viewRole)
     @ApiQuery({
       name: 'withCounts',
       required: false,
@@ -49,7 +50,7 @@ export class RoleController {
     @ApiParam({ name: 'roleId', type: Number })
     @ApiBody({ type: CreateRoleDto })
     @ApiResponse({ status: 200, schema: { example: { message: 'Updated successfully' } } })
-    @PermissionGuard([RoleStatus.ADMIN])
+    @PermissionGuard([RoleStatus.ADMIN],PermissionKey.UpdateRole)
     @Put(':roleId')
     async updateRole(
       @Param('roleId') roleId: number,
@@ -69,7 +70,7 @@ export class RoleController {
       type: Boolean,
       description: 'Include admins in response (default: true)',
     })
-    @PermissionGuard([RoleStatus.ADMIN])
+    @PermissionGuard([RoleStatus.ADMIN],PermissionKey.viewRole)
     @Get(':id')
     @ApiParam({ name: 'id', type: Number, description: 'Role ID' })
     async getRoleWithDetails(

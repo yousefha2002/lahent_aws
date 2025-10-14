@@ -13,12 +13,13 @@ import { OfferType } from 'src/common/enums/offer_type';
 import { CurrentUserType } from 'src/common/types/current-user.type';
 import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
 import { RoleStatus } from 'src/common/enums/role_status';
+import { PermissionKey } from 'src/common/enums/permission-key';
 
 @Controller('offer')
 export class OfferController {
   constructor(private readonly offerService: OfferService) {}
 
-  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],ApprovedStoreGuard)
+  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],PermissionKey.CreateOffer,ApprovedStoreGuard)
   @Post()
   @ApiResponse({
     status: 201,
@@ -42,7 +43,7 @@ export class OfferController {
     return this.offerService.createOffer(dto, context.id, lang);
   }
 
-  @PermissionGuard([RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.ADMIN],PermissionKey.UpdateOffer)
   @Put('/active-status/:offerId')
   async changeOfferActiveStatus(
     @Param('offerId') offerId: string,
@@ -73,7 +74,7 @@ export class OfferController {
   }
 
   @Serilaize(PaginatedOfferResponseDto)
-  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],PermissionKey.ViewOffer)
   @Get('byStore/all')
   @ApiOperation({ summary: 'Get all offers for the current store' })
   @ApiSecurity('access-token')

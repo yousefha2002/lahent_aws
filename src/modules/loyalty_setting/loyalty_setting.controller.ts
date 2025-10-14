@@ -6,6 +6,7 @@ import { ApiBody, ApiOperation, ApiResponse, ApiSecurity } from '@nestjs/swagger
 import { CreateLoyaltySettingDto } from './dto/create_loyalty_setting.dto';
 import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
 import { RoleStatus } from 'src/common/enums/role_status';
+import { PermissionKey } from 'src/common/enums/permission-key';
 
 @Controller('loyalty-setting')
 export class LoyaltySettingController {
@@ -23,7 +24,7 @@ export class LoyaltySettingController {
     return this.loyaltySettingService.getSettings();
   }
 
-  @PermissionGuard([RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.ADMIN],PermissionKey.SystemPoints)
   @Serilaize(LoyaltySettingDto)
   @ApiOperation({ summary: 'Create or update loyalty settings' })
   @ApiSecurity('access-token')

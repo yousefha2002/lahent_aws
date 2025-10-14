@@ -11,6 +11,7 @@ import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { CurrentUserType } from 'src/common/types/current-user.type';
 import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
 import { RoleStatus } from 'src/common/enums/role_status';
+import { PermissionKey } from 'src/common/enums/permission-key';
 
 @Controller('gift')
 export class GiftController {
@@ -56,7 +57,8 @@ export class GiftController {
   @ApiQuery({ name: 'limit', required: false, example: 10 })
   @ApiResponse({ status: 200, type: PaginatedGiftDto })
   @Get('my-gifts')
-  @PermissionGuard([RoleStatus.CUSTOMER])
+  @ApiQuery({ name: 'customerId', required: false, example: 1 })
+  @PermissionGuard([RoleStatus.CUSTOMER,RoleStatus.ADMIN],PermissionKey.ViewCustomerGifts)
   async getMyGifts(
     @CurrentUser() user: CurrentUserType,
     @Query('page') page = 1,

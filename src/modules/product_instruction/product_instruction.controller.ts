@@ -8,6 +8,7 @@ import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } f
 import { CurrentUserType } from 'src/common/types/current-user.type';
 import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
 import { RoleStatus } from 'src/common/enums/role_status';
+import { PermissionKey } from 'src/common/enums/permission-key';
 
 @Controller('product-instruction')
 export class ProductInstructionController {
@@ -15,7 +16,7 @@ export class ProductInstructionController {
     private readonly productInstructionService: ProductInstructionService,
   ) {}
 
-  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],ApprovedStoreGuard)
+  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],PermissionKey.UpdateProduct,ApprovedStoreGuard)
   @Put(':instructionId')
   @ApiOperation({ summary: 'Update a product instruction' })
   @ApiSecurity('access-token')
@@ -42,7 +43,7 @@ export class ProductInstructionController {
     return this.productInstructionService.updateProductInstruction(+instructionId,body,context.id);
   }
 
-  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],ApprovedStoreGuard)
+  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],PermissionKey.UpdateProduct,ApprovedStoreGuard)
   @Put('/active/:instructionId')
   @ApiOperation({ summary: 'Toggle active status for a product instruction' })
   @ApiSecurity('access-token')
@@ -68,7 +69,7 @@ export class ProductInstructionController {
     return this.productInstructionService.updateIsActive(+instructionId,context.id);
   }
 
-  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],ApprovedStoreGuard)
+  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],PermissionKey.CreateProduct,ApprovedStoreGuard)
   @Post()
   @ApiOperation({ summary: 'Create product instructions' })
   @ApiSecurity('access-token')

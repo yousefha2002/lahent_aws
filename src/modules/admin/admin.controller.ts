@@ -10,6 +10,7 @@ import { UpdateAdminDto } from './dto/update-admin.dto';
 import { AdminWithPermissionsDto } from './dto/admin-permissions.dto';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { CurrentUserType } from 'src/common/types/current-user.type';
+import { PermissionKey } from 'src/common/enums/permission-key';
 
 @Controller('admin')
 export class AdminController {
@@ -36,7 +37,7 @@ export class AdminController {
   @ApiOperation({ summary: 'Create a new admin (admin only)' })
   @ApiResponse({ status: 201, description: 'Admin created successfully' })
   @ApiBody({type:CreateAdminDto})
-  @PermissionGuard([RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.ADMIN],PermissionKey.CreateAdmin)
   @Post()
   async createAdmin(@Body() dto: CreateAdminDto) {
     return this.adminService.createAdmin(dto);
@@ -47,7 +48,7 @@ export class AdminController {
   @ApiQuery({ name: 'page', required: false, example: 1 })
   @ApiQuery({ name: 'limit', required: false, example: 10 })
   @ApiResponse({ status: 200, type: PaginatedAdminsResponseDto })
-  @PermissionGuard([RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.ADMIN],PermissionKey.ViewAdmin)
   @Get()
   async getAllAdmins(
     @Query('page') page = '1',
@@ -61,7 +62,7 @@ export class AdminController {
   @ApiSecurity('access-token')
   @ApiOperation({ summary: 'Update an admin (exclude super admin)' })
   @ApiResponse({ status: 200, description: 'Admin updated successfully' })
-  @PermissionGuard([RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.ADMIN],PermissionKey.UpdateAdmin)
   @Put(':id')
   async updateAdmin(
     @Param('id', ParseIntPipe) id: number,

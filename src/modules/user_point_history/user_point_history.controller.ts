@@ -9,17 +9,19 @@ import { getLang } from 'src/common/utils/get-lang.util';
 import { CurrentUserType } from 'src/common/types/current-user.type';
 import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
 import { RoleStatus } from 'src/common/enums/role_status';
+import { PermissionKey } from 'src/common/enums/permission-key';
 
 @Controller('user-point-history')
 export class UserPointHistoryController {
   constructor(private readonly userPointHistoryService: UserPointHistoryService) {}
 
   @Serilaize(PaginatedUserPointHistoryDto)
-  @PermissionGuard([RoleStatus.CUSTOMER])
+  @PermissionGuard([RoleStatus.CUSTOMER],PermissionKey.ViewCustomerPointsHistory)
   @Get()
   @ApiOperation({ summary: 'Get user points history with related orders and stores' })
   @ApiQuery({ name: 'page', required: false, example: 1, description: 'Page number' })
   @ApiQuery({ name: 'limit', required: false, example: 10, description: 'Items per page' })
+  @ApiQuery({ name: 'customerId', required: false, example: 1 })
   @ApiSecurity('access-token')
   @ApiOkResponse({ type: PaginatedUserPointHistoryDto })
   async getUserPoints(

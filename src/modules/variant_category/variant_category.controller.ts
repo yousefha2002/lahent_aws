@@ -9,13 +9,14 @@ import { I18n, I18nContext } from 'nestjs-i18n';
 import { UpdateVariantCategoryDto } from './dto/update_variant_category.dto';
 import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
 import { RoleStatus } from 'src/common/enums/role_status';
+import { PermissionKey } from 'src/common/enums/permission-key';
 
 @Controller('variant-category')
 export class VariantCategoryController {
   constructor(private readonly variantCategoryService: VariantCategoryService) {}
 
   @Serilaize(VariantCategoryDto)
-  @PermissionGuard([RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.ADMIN],PermissionKey.CreateVariantCategory)
   @Post()
   @ApiOperation({ summary: 'Create a new variant category' })
   @ApiSecurity('access-token')
@@ -39,7 +40,7 @@ export class VariantCategoryController {
     return this.variantCategoryService.getAll(lang)
   }
 
-  @PermissionGuard([RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.ADMIN],PermissionKey.ViewVariantCategory)
   @Serilaize(VariantCategoryDto)
   @Get('admin')
   @ApiOperation({ summary: 'Get all variant categories for admin' })
@@ -50,7 +51,7 @@ export class VariantCategoryController {
     return this.variantCategoryService.getAll()
   }
 
-  @PermissionGuard([RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.ADMIN],PermissionKey.UpdateVariantCategory)
   @Put(':id')
   @ApiOperation({ summary: 'Update a variant category' })
   @ApiSecurity('access-token')

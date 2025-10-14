@@ -10,6 +10,7 @@ import { getLang } from 'src/common/utils/get-lang.util';
 import { UpdateGiftTemplateDto } from './dto/update-gift-template.dto';
 import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
 import { RoleStatus } from 'src/common/enums/role_status';
+import { PermissionKey } from 'src/common/enums/permission-key';
 
 @Controller('gift-template')
 export class GiftTemplateController {
@@ -20,7 +21,7 @@ export class GiftTemplateController {
   @ApiSecurity('access-token')
   @ApiBody({type:CreateGiftTemplateDto})
   @ApiResponse({ status: 201, description: 'Gift template created successfully', schema: { example: { message: 'Created successfully' } } })
-  @PermissionGuard([RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.ADMIN],PermissionKey.CreateGiftCategory)
   @Post()
   @UseInterceptors(FileInterceptor('image'))
   async create(
@@ -37,7 +38,7 @@ export class GiftTemplateController {
   @ApiSecurity('access-token')
   @ApiBody({ type: UpdateGiftTemplateDto })
   @ApiResponse({ status: 201, description: 'Gift template updated successfully', schema: { example: { message: 'Updated successfully' } } })
-  @PermissionGuard([RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.ADMIN],PermissionKey.UpdateGiftCategory)
   @Put(':id')
   @UseInterceptors(FileInterceptor('image'))
   async update(
@@ -75,7 +76,7 @@ export class GiftTemplateController {
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
   @ApiResponse({ status: 200, description: 'All gift templates by gift category (including inactive)', type: PaginatedAdminGiftTemplateDto })
   @ApiSecurity('access-token')
-  @PermissionGuard([RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.ADMIN],PermissionKey.ViewGiftCategory)
   @Serilaize(PaginatedAdminGiftTemplateDto)
   @Get('admin/by-category/:categoryId')
   async findByCategoryForAdmin(

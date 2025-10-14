@@ -9,12 +9,13 @@ import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { PageType } from 'src/common/enums/page_type';
 import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
 import { RoleStatus } from 'src/common/enums/role_status';
+import { PermissionKey } from 'src/common/enums/permission-key';
 
 @Controller('page')
 export class PageController {
   constructor(private readonly pageService: PageService) {}
 
-  @PermissionGuard([RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.ADMIN],PermissionKey.LandingPage)
   @ApiOperation({ summary: 'Create or update a page' })
   @ApiBody({ type: CreatePageDto })
   @ApiResponse({

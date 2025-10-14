@@ -12,7 +12,6 @@ import {OpeningHourEnum,validateAndParseOpeningHours,} from 'src/common/validato
 import { LoginStoreDto } from './dto/requests/store-login.dto';
 import { GetNearbyStoresDto } from './dto/requests/get-nearby-store.dto';
 import { StoreStatus } from 'src/common/enums/store_status';
-import { Store } from './entities/store.entity';
 import { UpdateStoreDto } from './dto/requests/update-store.dto';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { storeForAction } from './dto/responses/store-for-action.dto';
@@ -35,6 +34,7 @@ import { StoreAdminViewDto } from './dto/responses/admin-store.dto';
 import { CurrentUserType } from 'src/common/types/current-user.type';
 import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
 import { UpdateStoreLegalInfoDto } from './dto/requests/update-store-legal.dto';
+import { PermissionKey } from 'src/common/enums/permission-key';
 
 @Controller('store')
 export class StoreController {
@@ -52,7 +52,7 @@ export class StoreController {
   @ApiBody({ type: InitialCreateStoreDto })
   @ApiResponse({status: 200,schema: {example: {message: 'Store created successfully'}}})
   @ApiQuery({ name: 'ownerId', required: false, example: 1 })
-  @PermissionGuard([RoleStatus.OWNER,RoleStatus.ADMIN],CompletedProfileGuard)
+  @PermissionGuard([RoleStatus.OWNER,RoleStatus.ADMIN],PermissionKey.CreateStore,CompletedProfileGuard)
   async initialCreate(@Body() dto: InitialCreateStoreDto,@CurrentUser() user: CurrentUserType,@I18n() i18n: I18nContext,) 
   {
     const lang = getLang(i18n);
@@ -67,7 +67,7 @@ export class StoreController {
   @ApiBody({ type: CreateStoreDto })
   @ApiQuery({ name: 'ownerId', required: false, example: 1 })
   @ApiResponse({status: 200,description: 'Store created successfully',schema: { example: { message: 'Created successfully' } },})
-  @PermissionGuard([RoleStatus.OWNER,RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.OWNER,RoleStatus.ADMIN],PermissionKey.CreateStore)
   @UseInterceptors(
     FileFieldsInterceptor(
       [
@@ -111,7 +111,7 @@ export class StoreController {
 
   @Serilaize(IncompleteStoreResponseDto)
   @Get('incomplete')
-  @PermissionGuard([RoleStatus.OWNER,RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.OWNER,RoleStatus.ADMIN],PermissionKey.ViewStores)
   @ApiOperation({ summary: 'Get incomplete store info for owner' })
   @ApiSecurity('access-token')
   @ApiQuery({ name: 'ownerId', required: false, example: 1 })
@@ -134,7 +134,7 @@ export class StoreController {
     return this.storeService.getCurrentStore(context.id)
   }
 
-  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],PermissionKey.ViewStores)
   @Serilaize(storeForAction)
   @Get('action/current')
   @ApiOperation({ summary: 'Get full details of a store by ID for actions (owner or store only)' })
@@ -154,7 +154,7 @@ export class StoreController {
   @ApiSecurity('access-token')
   @ApiQuery({ name: 'ownerId', required: false, example: 1 })
   @Serilaize(OwnerStoresResponseDto)
-  @PermissionGuard([RoleStatus.OWNER,RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.OWNER,RoleStatus.ADMIN],PermissionKey.ViewStores)
   findStoresByOwner(@CurrentUser() user: CurrentUserType,@I18n() i18n: I18nContext) {
     const lang = getLang(i18n);
     const {context} = user
@@ -224,7 +224,7 @@ export class StoreController {
   }
 
   @Get('admin/all')
-  @PermissionGuard([RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.ADMIN],PermissionKey.ViewStores)
   @ApiOperation({ summary: 'Get all stores for admin, with optional status and filters' })
   @ApiQuery({ name: 'type', required: false, type: Number, description: 'Filter by store type ID' })
   @ApiQuery({ name: 'subType', required: false, type: Number, description: 'Filter by store sub-type ID' })
@@ -268,7 +268,7 @@ export class StoreController {
     );
   }
 
-  @PermissionGuard([RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.ADMIN],PermissionKey.ViewStores)
   @Get('admin/all/incomplete')
   @ApiOperation({ summary: 'Get all incomplete stores (for admin)' })
   @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number, default is 1' })
@@ -307,7 +307,7 @@ export class StoreController {
     return this.storeService.getFullDetailsStore(storeId, lang,context.id,customerLat,customerLng);
   }
 
-  @PermissionGuard([RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.ADMIN],PermissionKey.ViewStores)
   @Get('admin/:id/details')
   @ApiOperation({ summary: 'Get full store details (Admin)' })
   @ApiParam({ name: 'id', type: Number, description: 'Store ID' })
@@ -345,7 +345,7 @@ export class StoreController {
   @ApiOperation({ summary: 'Approve a store (Admin only)' })
   @ApiSecurity('access-token')
   @ApiParam({ name: 'storeId', description: 'ID of the store to approve', example: 5 })
-  @PermissionGuard([RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.ADMIN],PermissionKey.ChangeStoreStatus)
   @ApiResponse({
     status: 200,
     description: 'Store approved successfully',
@@ -365,7 +365,7 @@ export class StoreController {
   @ApiOperation({ summary: 'Suspend a store (Admin only)' })
   @ApiSecurity('access-token')
   @ApiParam({ name: 'storeId', description: 'ID of the store to suspend', example: 5 })
-  @PermissionGuard([RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.ADMIN],PermissionKey.ChangeStoreStatus)
   @ApiResponse({
     status: 200,
     description: 'Store suspended successfully',
@@ -398,7 +398,7 @@ export class StoreController {
       },
     },
   })
-  @PermissionGuard([RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.ADMIN],PermissionKey.ChangeStoreStatus)
   rejectStore(@Param('storeId') storeId: string,@I18n() i18n: I18nContext) {
     const lang = getLang(i18n);
     return this.storeService.changeStoreStatus(StoreStatus.REJECTED, +storeId,lang);
@@ -414,7 +414,7 @@ export class StoreController {
     schema: { example: { message: 'Store updated successfully' } },
   })
   @ApiQuery({ name: 'storeId', required: false, example: 1 })
-  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],PermissionKey.UpdateStore)
   updateStore(@CurrentUser() user: CurrentUserType, @Body() dto: UpdateStoreDto,@I18n() i18n: I18nContext) {
     const lang = getLang(i18n);
     const {context} = user
@@ -422,7 +422,7 @@ export class StoreController {
   }
 
   @Put('update-images')
-  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],PermissionKey.UpdateStore)
   @ApiOperation({ summary: 'Update store images (logo / cover)' })
   @ApiSecurity('access-token')
   @ApiQuery({ name: 'storeId', required: false, example: 1 })
@@ -479,7 +479,7 @@ export class StoreController {
   }
 
   @Put('update-legal-info')
-  @PermissionGuard([RoleStatus.STORE, RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.STORE, RoleStatus.ADMIN],PermissionKey.UpdateStore)
   @ApiOperation({ summary: 'Update store legal information (tax number & commercial register)' })
   @ApiSecurity('access-token')
   @ApiQuery({ name: 'storeId', required: false, example: 1 })
@@ -554,7 +554,7 @@ export class StoreController {
   @ApiResponse({ status: 200, description: 'Store selected successfully', type: StoreWithTokenDto })
   @ApiQuery({ name: 'ownerId', required: false, example: 1 })
   @ApiBody({ type: SelectOwnerForStoreDto })
-  @PermissionGuard([RoleStatus.OWNER,RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.OWNER])
   selectStoreForOwner(@CurrentUser() user:CurrentUserType,@Param('storeId') storeId:number,@Body() dto:SelectOwnerForStoreDto,@I18n() i18n: I18nContext,@Req() req: Request,@Ip() ip:string)
   {
     const lang = getLang(i18n)
@@ -575,7 +575,7 @@ export class StoreController {
   }
 
   @Put('update-password')
-  @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.STORE])
   @ApiOperation({ summary: 'Update store password (Store or Owner only)' })
   @ApiSecurity('access-token')
   @ApiBody({ type: UpdatePasswordDto })

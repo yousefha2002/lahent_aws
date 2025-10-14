@@ -9,11 +9,12 @@ import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { UpdateSectorDto } from './dto/update-sector.dto';
 import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
 import { RoleStatus } from 'src/common/enums/role_status';
+import { PermissionKey } from 'src/common/enums/permission-key';
 
 @Controller('sector')
 export class SectorController {
   constructor(private readonly sectorService: SectorService) {}
-  @PermissionGuard([RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.ADMIN],PermissionKey.CreateSector)
   @Post('create')
   @ApiOperation({ summary: 'Create a new sector' })
   @ApiBody({ type: CreateSectorDto })
@@ -39,7 +40,7 @@ export class SectorController {
     return this.sectorService.getAll(lang);
   }
 
-  @PermissionGuard([RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.ADMIN],PermissionKey.UpdateSector)
   @Put(':id')
   @ApiOperation({ summary: 'Update a sector' })
   @ApiParam({ name: 'id', type: Number, example: 1 })
@@ -59,7 +60,7 @@ export class SectorController {
   }
 
   @Get('admin')
-  @PermissionGuard([RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.ADMIN],PermissionKey.ViewSector)
   @Serilaize(SectorDto)
   @ApiOperation({ summary: 'Get all sectors (admin, without language filter)' })
   @ApiResponse({ status: 200, type: [SectorDto] })

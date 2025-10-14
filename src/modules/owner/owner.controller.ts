@@ -14,6 +14,7 @@ import { RoleStatus } from 'src/common/enums/role_status';
 import { UserTokenService } from '../user_token/user_token.service';
 import { FcmTokenService } from '../fcm_token/fcm_token.service';
 import { Owner } from './entities/owner.entity';
+import { PermissionKey } from 'src/common/enums/permission-key';
 
 @Controller('owner')
 export class OwnerController {
@@ -32,7 +33,7 @@ export class OwnerController {
     type: OwnerDto,
   })
   @Serilaize(OwnerDto)
-  @PermissionGuard([RoleStatus.OWNER,RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.OWNER,RoleStatus.ADMIN],PermissionKey.UpdateOwner)
   @Put()
   async updateOwner(
     @Body() body: UpdateOwnerDto,
@@ -69,7 +70,7 @@ export class OwnerController {
     type: OwnerDto,
   })
   @Serilaize(OwnerDto)
-  @PermissionGuard([RoleStatus.OWNER,RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.OWNER,RoleStatus.ADMIN],PermissionKey.ViewOwners)
   @Get('current')
   getCurrentOwner(@CurrentUser() user:CurrentUserType)
   {
@@ -85,7 +86,7 @@ export class OwnerController {
   @ApiQuery({ name: 'phone', required: false, type: String, description: 'Filter by phone' })
   @ApiQuery({ name: 'email', required: false, type: String, description: 'Filter by email' })
   @Serilaize(PaginationOwnerDto)
-  @PermissionGuard([RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.ADMIN],PermissionKey.ViewOwners)
   @Get('all')
   async getAllOwners(
     @Query('page') page: number = 1,

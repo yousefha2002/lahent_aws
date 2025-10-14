@@ -6,13 +6,14 @@ import { ApiBody, ApiOperation, ApiResponse, ApiSecurity } from '@nestjs/swagger
 import { CreateStoreCommissionDto } from './dto/create_store_commission.dto';
 import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
 import { RoleStatus } from 'src/common/enums/role_status';
+import { PermissionKey } from 'src/common/enums/permission-key';
 
 @Controller('store-commission')
 export class StoreCommissionController {
   constructor(private readonly storeCommissionService: StoreCommissionService) {}
 
   @Serilaize(StoreCommissionDto)
-  @PermissionGuard([RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.ADMIN],PermissionKey.CommissionStore)
   @ApiOperation({ summary: 'Create or update commission for a store' })
   @ApiSecurity('access-token')
   @ApiBody({ type: CreateStoreCommissionDto })
@@ -25,5 +26,4 @@ export class StoreCommissionController {
   async create(@Body() dto: CreateStoreCommissionDto) {
     return this.storeCommissionService.setCommission(dto.storeId, dto.commissionPercent);
   }
-
 }
