@@ -10,6 +10,7 @@ import { RoleStatus } from 'src/common/enums/role_status';
 import { REFRESH_TOKEN_EXPIRES_MS } from 'src/common/constants';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
+import { PermissionKey } from 'src/common/enums/permission-key';
 
 @Injectable()
 export class AdminService {
@@ -26,7 +27,7 @@ export class AdminService {
         include: [
           {
             association: 'role',
-            include: ['permissions'], 
+            include: ['rolePermissions'], 
           },
         ],
       });
@@ -153,17 +154,16 @@ export class AdminService {
     return { message: 'Admin updated successfully' };
   }
 
-  async verifyAdminPermission(adminId: number, permissionKey: string) 
-  {
+  async verifyAdminPermission(adminId: number, permissionKey: PermissionKey | string) {
     const admin = await this.findOneById(adminId, { includeRole: true });
 
     if (!admin) throw new ForbiddenException('Admin not found');
 
     if (admin.isSuperAdmin) return true;
 
-    const permissions = admin.role?.permissions || [];
+    const permissions: PermissionKey[] = admin.role?.rolePermissions?.map((p) => p.permission) || [];
 
-    if (!permissions.includes(permissionKey)) {
+    if (!permissions.includes(permissionKey as PermissionKey)) {
       throw new ForbiddenException('Permission denied');
     }
 
