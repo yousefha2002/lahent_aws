@@ -1,5 +1,6 @@
 import { Expose } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
+import { AddressLabel } from 'src/common/enums/address_label';
 
 export class AddressDto {
     @ApiProperty({ example: 1 })
@@ -8,7 +9,7 @@ export class AddressDto {
 
     @ApiProperty({ example: 'Home' })
     @Expose()
-    label: string;
+    label: AddressLabel;
 
     @ApiProperty({ example: 31.7683 })
     @Expose()

@@ -9,6 +9,7 @@ import {
     AllowNull,
     BelongsTo,
 } from 'sequelize-typescript';
+import { AddressLabel } from 'src/common/enums/address_label';
 
 import { Customer } from 'src/modules/customer/entities/customer.entity';
 
@@ -36,6 +37,6 @@ export class Address extends Model{
     lng: number;
 
     @AllowNull(false)
-    @Column(DataType.STRING)
-    label: string;
+    @Column({type: DataType.ENUM(...Object.values(AddressLabel)),})
+    label: AddressLabel;
 }

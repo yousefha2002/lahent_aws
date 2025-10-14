@@ -13,16 +13,11 @@ export class AddressService {
         private readonly i18n: I18nService
     ){}
 
-    async create(customerId: number, dto: CreateAddressDto,lang=Language.en) 
+    async create(customerId: number, dto: CreateAddressDto,lang=Language.ar) 
     {
         const addressCount = await this.addressRepo.count({ where: { customerId } });
         if (addressCount >= 8) {
             const msg = this.i18n.translate('translation.address.max_limit', { lang });
-            throw new BadRequestException(msg);
-        }
-        const existingLabel = await this.addressRepo.findOne({where: { customerId, label: dto.label }});
-        if (existingLabel) {
-            const msg = this.i18n.translate('translation.name_exists', { lang });
             throw new BadRequestException(msg);
         }
         return this.addressRepo.create({ ...dto, customerId });

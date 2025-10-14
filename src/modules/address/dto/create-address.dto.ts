@@ -1,11 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { AddressLabel } from 'src/common/enums/address_label';
 
 export class CreateAddressDto {
-    @ApiProperty({ example: 'Home' })
+    @ApiProperty({ example: 'home' })
     @IsNotEmpty()
-    @IsString()
-    label: string;
+    @IsEnum(AddressLabel)
+    label: AddressLabel;
 
     @ApiProperty({ example: 31.7683 })
     @IsNotEmpty()

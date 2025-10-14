@@ -40,8 +40,7 @@ export class AddressController {
   }
 
   @Serilaize(AddressDto)
-  @PermissionGuard([RoleStatus.CUSTOMER])
-  @UseGuards(CompletedProfileGuard)
+  @PermissionGuard([RoleStatus.CUSTOMER],CompletedProfileGuard)
   @ApiOperation({ summary: 'Update an existing address' })
   @ApiSecurity('access-token')
   @ApiParam({name: 'id',description: 'ID of the address to update',example: 1})

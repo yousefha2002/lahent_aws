@@ -1,7 +1,7 @@
 export enum PermissionKey {
     // 🏬 Store Permissions
     ChangeStoreStatus = "change_store_status",
-    CommissionStore = "comission_store",
+    CommissionStore = "commission_store",
     CreateStore = "create_store",
     UpdateStore = "update_store",
     DeleteStore = "delete_store",
@@ -38,7 +38,7 @@ export enum PermissionKey {
     ViewCustomerSaves = "view_customer_saves",
     ViewCustomerOrders = "view_customer_orders",
     CustomerBalanceAction = "customer_balance_action",
-    ViewCustomerTransactions = "view_customer_transitions",
+    ViewCustomerTransactions = "view_customer_transactions",
     ViewCustomerPointsHistory = "view_customer_points_history",
     ViewCustomerGifts = "view_customer_gifts",
     ViewCustomer ='view_customer',
@@ -70,9 +70,9 @@ export enum PermissionKey {
     ViewGiftCategory = "view_gift_category",
 
     // Variant category
-    CreateVariantCategory = "create_Variant_category",
-    UpdateVariantCategory = "update_Variant_category",
-    ViewVariantCategory = "view_Variant_category",
+    CreateVariantCategory = "create_variant_category",
+    UpdateVariantCategory = "update_variant_category",
+    ViewVariantCategory = "view_variant_category",
 
     // Loyalty Offers
     CreateLoyaltyOffer = "create_loyalty_offer",
@@ -82,7 +82,7 @@ export enum PermissionKey {
     // ⚙ System Permissions
     SystemPoints = "system_points",
     SystemSettings = "system_settings",
-    LandingPage = "langind_page",
+    LandingPage = "landing_page",
 
     // Coupons
     CreateCoupon = "create_coupon",

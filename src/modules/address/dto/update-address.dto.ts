@@ -1,11 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { AddressLabel } from 'src/common/enums/address_label';
 
 export class UpdateAddressDto {
     @ApiProperty({ example: 'Office', required: false })
     @IsOptional()
-    @IsString()
-    label?: string;
+    @IsEnum(AddressLabel)
+    label?: AddressLabel;
 
     @ApiProperty({ example: 31.7683, required: false })
     @IsOptional()
