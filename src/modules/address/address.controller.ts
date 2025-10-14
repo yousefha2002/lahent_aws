@@ -6,13 +6,14 @@ import { UpdateAddressDto } from './dto/update-address.dto';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { AddressDto } from './dto/address.dto';
 import { CompletedProfileGuard } from 'src/common/guards/auths/completed-profile.guard';
-import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiSecurity} from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity} from '@nestjs/swagger';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util'; 
 import { CurrentUserType } from 'src/common/types/current-user.type';
 import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
 
 import { RoleStatus } from 'src/common/enums/role_status';
+import { PermissionKey } from 'src/common/enums/permission-key';
 @Controller('address')
 export class AddressController {
   constructor(private readonly addressService: AddressService) {}
@@ -59,8 +60,9 @@ export class AddressController {
   }
 
   @Serilaize(AddressDto)
-  @PermissionGuard([RoleStatus.CUSTOMER])
+  @PermissionGuard([RoleStatus.CUSTOMER,RoleStatus.ADMIN],PermissionKey.ViewCustomerSaves)
   @ApiOperation({ summary: 'Get all addresses for the current customer' })
+  @ApiQuery({ name: 'customerId', required: false, example: 1 })
   @ApiSecurity('access-token')
   @ApiResponse({status: 200,type: [AddressDto]})
   @Get()

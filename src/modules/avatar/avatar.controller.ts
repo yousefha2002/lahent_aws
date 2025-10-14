@@ -10,6 +10,7 @@ import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
 import { RoleStatus } from 'src/common/enums/role_status';
 import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
+import { PermissionKey } from 'src/common/enums/permission-key';
 
 @Controller('avatar')
 export class AvatarController {
@@ -49,7 +50,7 @@ export class AvatarController {
       example: { message: 'Created successfully' },
     },
   })
-  @PermissionGuard([RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.ADMIN],PermissionKey.CreateAvatar)
   @Post()
   @UseInterceptors(FileInterceptor('image', multerOptions))
   @UseFilters(MulterExceptionFilter)
@@ -77,7 +78,7 @@ export class AvatarController {
     description: 'Avatar updated successfully',
     schema: { example: { message: 'Updated successfully' } },
   })
-  @PermissionGuard([RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.ADMIN],PermissionKey.UpdateAvatar)
   @Put(':id')
   @UseInterceptors(FileInterceptor('image', multerOptions))
   @UseFilters(MulterExceptionFilter)

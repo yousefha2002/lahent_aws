@@ -6,7 +6,6 @@ import {
   Param,
   Post,
   Put,
-  UseGuards,
 } from '@nestjs/common';
 import { CarService } from './car.service';
 import { CompletedProfileGuard } from 'src/common/guards/auths/completed-profile.guard';
@@ -15,12 +14,13 @@ import { UpdateCarDto } from './dto/update-car.dto';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { CustomerCarListDto } from './dto/customer-car-list.dto';
-import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiSecurity } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
 import { CurrentUserType } from 'src/common/types/current-user.type';
 import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
 import { RoleStatus } from 'src/common/enums/role_status';
+import { PermissionKey } from 'src/common/enums/permission-key';
 
 @Controller('car')
 export class CarController {
@@ -47,9 +47,10 @@ export class CarController {
   }
 
   @Serilaize(CustomerCarListDto)
-  @PermissionGuard([RoleStatus.CUSTOMER])
+  @PermissionGuard([RoleStatus.CUSTOMER,RoleStatus.ADMIN],PermissionKey.ViewCustomerSaves)
   @Get('all/byCustomer/saved')
   @ApiOperation({ summary: 'Get all saved cars for the current customer' })
+  @ApiQuery({ name: 'customerId', required: false, example: 1 })
   @ApiSecurity('access-token')
   @ApiResponse({
     status: 200,
@@ -66,9 +67,10 @@ export class CarController {
   }
 
   @Serilaize(CustomerCarListDto)
-  @PermissionGuard([RoleStatus.CUSTOMER])
+  @PermissionGuard([RoleStatus.CUSTOMER,RoleStatus.ADMIN],PermissionKey.ViewCustomerSaves)
   @Get(':carId/byCustomer')
   @ApiOperation({ summary: 'Get details of a specific car for the current customer' })
+  @ApiQuery({ name: 'customerId', required: false, example: 1 })
   @ApiSecurity('access-token')
   @ApiParam({ name: 'carId', description: 'ID of the car', example: 1 })
   @ApiResponse({

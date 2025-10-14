@@ -10,12 +10,13 @@ import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } f
 import { PaginatedCouponDto } from './dto/paginated-coupon.dto';
 import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
 import { RoleStatus } from 'src/common/enums/role_status';
+import { PermissionKey } from 'src/common/enums/permission-key';
 
 @Controller('coupon')
 export class CouponController {
   constructor(private readonly couponService: CouponService) {}
 
-  @PermissionGuard([RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.ADMIN],PermissionKey.CreateCoupon)
   @Serilaize(CouponDto)
   @Post()
   @ApiOperation({ summary: 'Create a new coupon' })
@@ -27,7 +28,7 @@ export class CouponController {
     return this.couponService.createCoupon(dto, lang);
   }
 
-  @PermissionGuard([RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.ADMIN],PermissionKey.UpdateCoupon)
   @Serilaize(CouponDto)
   @Patch(':id')
   @ApiOperation({ summary: 'Update a coupon by ID' })
@@ -41,7 +42,7 @@ export class CouponController {
     return this.couponService.updateCoupon(id, dto, lang);
   }
 
-  @PermissionGuard([RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.ADMIN],PermissionKey.ViewCoupon)
   @Get('admin')
   @Serilaize(PaginatedCouponDto)
   @ApiOperation({ summary: 'Get all coupons with pagination (Admin only)' })

@@ -5,12 +5,13 @@ import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
-import { ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiSecurity } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { RefreshTokenDto } from '../user_token/dtos/refreshToken.dto';
 import { CustomerDetailsDto } from './dto/customer.dto';
 import { CurrentUserType } from 'src/common/types/current-user.type';
 import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
 import { RoleStatus } from 'src/common/enums/role_status';
+import { PermissionKey } from 'src/common/enums/permission-key';
 
 @Controller('customer')
 export class CustomerController {
@@ -32,7 +33,8 @@ export class CustomerController {
   @ApiBody({type:UpdateCustomerDto})
   @ApiResponse({ status: 200, description: 'Customer profile updated successfully', type: CustomerDetailsDto })
   @Serilaize(CustomerDetailsDto)
-  @PermissionGuard([RoleStatus.CUSTOMER,RoleStatus.ADMIN])
+  @ApiQuery({ name: 'customerId', required: false, example: 1 })
+  @PermissionGuard([RoleStatus.CUSTOMER,RoleStatus.ADMIN],PermissionKey.UpdateCustomer)
   @Put()
   updateCustomer(
     @CurrentUser() user: CurrentUserType,

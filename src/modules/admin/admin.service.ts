@@ -20,21 +20,23 @@ export class AdminService {
     private readonly userTokenService:UserTokenService,
     private jwtService: JwtService,
   ) {}
-  async findOneById(id: number, options?: { includeRole?: boolean }) 
-  {
+
+  async findOneById(id: number, options?: { includeRole?: boolean }) {
+    const query: any = {
+      where: { id, active: true }, // شرط الـ active
+    };
+
     if (options?.includeRole) {
-      return this.adminRepo.findByPk(id, {
-        include: [
-          {
-            association: 'role',
-            include: ['rolePermissions'], 
-          },
-        ],
-      });
+      query.include = [
+        {
+          association: 'role',
+          include: [{ association: 'rolePermissions' }],
+        },
+      ];
     }
 
-  return this.adminRepo.findByPk(id);
-}
+    return this.adminRepo.findOne(query);
+  }
 
   async findByPhone(phone:string)
   {
@@ -127,7 +129,7 @@ export class AdminService {
 
   async updateAdmin(id: number, dto: UpdateAdminDto) 
   {
-    const admin = await this.findOneById(id);
+    const admin = await this.adminRepo.findByPk(id);
     if(!admin)
     {
       throw new BadRequestException('admin is not found')
@@ -161,12 +163,32 @@ export class AdminService {
 
     if (admin.isSuperAdmin) return true;
 
-    const permissions: PermissionKey[] = admin.role?.rolePermissions?.map((p) => p.permission) || [];
+    const permissions: string[] = admin.role?.permissions || [];
 
     if (!permissions.includes(permissionKey as PermissionKey)) {
       throw new ForbiddenException('Permission denied');
     }
 
     return true;
+  }
+
+  async getAdminWithPermissions(adminId: number) 
+  {
+    const admin = await this.findOneById(adminId, { includeRole: true });
+
+    if (!admin) throw new BadRequestException('Admin not found');
+
+    const permissions: string[] = admin.isSuperAdmin 
+      ? Object.values(PermissionKey) 
+      : admin.role?.permissions || [];
+
+    return {
+      id: admin.id,
+      name: admin.name,
+      phone: admin.phone,
+      active: admin.active,
+      isSuperAdmin: admin.isSuperAdmin,
+      permissions,
+    };
   }
 }

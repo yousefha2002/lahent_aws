@@ -9,6 +9,7 @@ import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
 import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
 import { RoleStatus } from 'src/common/enums/role_status';
+import { PermissionKey } from 'src/common/enums/permission-key';
 
 @Controller('car-brand')
 export class CarBrandController {
@@ -30,7 +31,7 @@ export class CarBrandController {
     description: 'Car brand created successfully',
     schema: { example: { message: 'Created successfully' } },
   })
-  @PermissionGuard([RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.ADMIN],PermissionKey.CreateCarBrand)
   @Post()
   create(@Body() dto: CreateCarBrandDto, @I18n() i18n: I18nContext) {
     const lang = getLang(i18n);
@@ -54,7 +55,7 @@ export class CarBrandController {
     description: 'Car brand updated successfully',
     schema: { example: { message: 'Updated successfully' } },
   })
-  @PermissionGuard([RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.ADMIN],PermissionKey.UpdateCarBrand)
   @Put(':id')
   update(@Param('id') id: number, @Body() dto: UpdateCarBrandDto) {
     return this.carBrandService.update(id, dto);
@@ -78,7 +79,7 @@ export class CarBrandController {
   @ApiOperation({ summary: 'Get all car brands for admin' })
   @ApiResponse({type:[CarBrandDto]})
   @Get('admin')
-  @PermissionGuard([RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.ADMIN],PermissionKey.ViewCarBrand)
   @Serilaize(CarBrandDto)
   getAllAdmin() {
     return this.carBrandService.getAll();

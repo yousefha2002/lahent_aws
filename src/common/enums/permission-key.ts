@@ -11,6 +11,7 @@ export enum PermissionKey {
     CreateStoreCategory = "create_store_category",
     UpdateStoreCategory = "update_store_category",
     ViewStoreCategory = "view_store_category",
+    DeleteStoreCategory = "delete_store_category",
 
     UpdateOwner = "update_owner",
     ViewOwners = "view_owners",

@@ -7,6 +7,9 @@ import { RoleStatus } from 'src/common/enums/role_status';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { PaginatedAdminsResponseDto } from './dto/admin-list.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
+import { AdminWithPermissionsDto } from './dto/admin-permissions.dto';
+import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
+import { CurrentUserType } from 'src/common/types/current-user.type';
 
 @Controller('admin')
 export class AdminController {
@@ -65,5 +68,15 @@ export class AdminController {
     @Body() dto: UpdateAdminDto,
   ) {
     return this.adminService.updateAdmin(id, dto);
+  }
+
+  @ApiSecurity('access-token')
+  @ApiOperation({ summary: 'Get admin with permissions' })
+  @ApiResponse({ status: 200, type: AdminWithPermissionsDto })
+  @PermissionGuard([RoleStatus.ADMIN])
+  @Get('permissions')
+  async getAdminPermissions(@CurrentUser() user: CurrentUserType) {
+    const {userId} = user
+    return this.adminService.getAdminWithPermissions(userId);
   }
 }

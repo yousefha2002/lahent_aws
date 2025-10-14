@@ -1,5 +1,6 @@
-import { IsInt, IsNotEmpty, IsString, Matches } from 'class-validator';
+import { IsInt, IsMobilePhone, IsNotEmpty, IsString, Matches } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 
 export class CreateAdminDto {
     @ApiProperty({
@@ -15,7 +16,9 @@ export class CreateAdminDto {
         description: 'Phone number of the admin (9–15 digits)',
     })
     @IsString()
-    @Matches(/^\d{9,15}$/, { message: 'Phone must be a valid number' })
+    @IsMobilePhone()
+    @Transform(({ value }) => value?.replace(/\D/g, '')) 
+    @IsNotEmpty()
     phone: string;
 
     @ApiProperty({
