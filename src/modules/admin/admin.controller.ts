@@ -11,6 +11,7 @@ import { AdminWithPermissionsDto } from './dto/admin-permissions.dto';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { CurrentUserType } from 'src/common/types/current-user.type';
 import { PermissionKey } from 'src/common/enums/permission-key';
+import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 
 @Controller('admin')
 export class AdminController {
@@ -43,6 +44,7 @@ export class AdminController {
     return this.adminService.createAdmin(dto);
   }
 
+  @Serilaize(PaginatedAdminsResponseDto)
   @ApiSecurity('access-token')
   @ApiOperation({ summary: 'Get all admins with roles (excluding super admin)' })
   @ApiQuery({ name: 'page', required: false, example: 1 })
@@ -77,7 +79,7 @@ export class AdminController {
   @PermissionGuard([RoleStatus.ADMIN])
   @Get('permissions')
   async getAdminPermissions(@CurrentUser() user: CurrentUserType) {
-    const {userId} = user
-    return this.adminService.getAdminWithPermissions(userId);
+    const {actor} = user
+    return this.adminService.getAdminWithPermissions(actor.id);
   }
 }

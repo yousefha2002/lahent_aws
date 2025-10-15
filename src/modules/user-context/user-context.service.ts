@@ -30,19 +30,19 @@ export class UserContextService {
             if (contextIds?.ownerId) contextEntity = await this.ownerService.findById(contextIds.ownerId);
             if (contextIds?.customerId) contextEntity = await this.customerService.findById(contextIds.customerId);
 
-            return { type: 'admin', userId: admin.id, context: contextEntity };
+            return { actor: { id: admin.id, type: RoleStatus.ADMIN }, context: contextEntity };
 
         case RoleStatus.STORE:
             const store = await this.storeService.getStoreById(id);
-            return { type: 'store', userId: store.id, context: store };
+            return {  actor: { id: store.id, type: RoleStatus.STORE }, context: store };
 
         case RoleStatus.OWNER:
             const owner = await this.ownerService.findById(id);
-            return { type: 'owner', userId: owner.id, context: owner };
+            return { actor: { id: owner.id, type: RoleStatus.OWNER }, context: owner };
 
         case RoleStatus.CUSTOMER:
             const customer = await this.customerService.findById(id);
-            return { type: 'customer', userId: customer.id, context: customer };
+            return { actor: { id: customer.id, type: RoleStatus.CUSTOMER }, context: customer };
 
         default:
             throw new NotFoundException('Role not found');

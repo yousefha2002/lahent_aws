@@ -12,7 +12,13 @@ import {
 import { OrderItem } from 'src/modules/order_item/entities/order_item.entity';
 import { ProductVariant } from 'src/modules/prouduct_variant/entities/prouduct_variant.entity';
 
-@Table({ tableName: 'order_item_variants' })
+@Table({ 
+  tableName: 'order_item_variants' ,
+  indexes: [
+    { name: 'idx_order_item_variants_orderItemId', fields: ['orderItemId'] },
+    { name: 'idx_order_item_variants_variantId', fields: ['variantId'] },
+  ]
+})
 export class OrderItemVariant extends Model{
     @AutoIncrement
     @PrimaryKey

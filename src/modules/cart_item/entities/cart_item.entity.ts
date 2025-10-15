@@ -16,7 +16,10 @@ import { CartItemInstruction } from 'src/modules/cart_item_instruction/entities/
 import { CartItemVariant } from 'src/modules/cart_item_variant/entities/cart_item_variant.entity';
 import { Product } from 'src/modules/product/entities/product.entity';
 
-@Table({ tableName: 'cart_items' })
+@Table({ 
+  tableName: 'cart_items',
+  indexes:[{ name: 'idx_cart_product', fields: ['cartId', 'productId'], unique: true }]
+})
 export class CartItem extends Model {
   @AutoIncrement
   @PrimaryKey

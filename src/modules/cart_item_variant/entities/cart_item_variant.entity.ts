@@ -13,7 +13,14 @@ import { CartItem } from 'src/modules/cart_item/entities/cart_item.entity';
 import { ProductVariant } from 'src/modules/prouduct_variant/entities/prouduct_variant.entity';
 
 
-@Table({ tableName: 'cart_item_variants' })
+@Table({ 
+    tableName: 'cart_item_variants' ,
+    indexes: [
+        { name: 'idx_cartItem_variant', fields: ['cartItemId'] },
+        { name: 'idx_productVariant', fields: ['productVariantId'] },
+        { name: 'idx_cartItem_productVariant', fields: ['cartItemId', 'productVariantId'], unique: true }
+    ]
+})
 export class CartItemVariant extends Model{
     @AutoIncrement
     @PrimaryKey

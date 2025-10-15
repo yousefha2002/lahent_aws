@@ -12,7 +12,13 @@ import {
 import { OrderItem } from 'src/modules/order_item/entities/order_item.entity';
 import { ProductInstruction } from 'src/modules/product_instruction/entities/product_instruction.entity';
 
-@Table({ tableName: 'order_item_instructions' })
+@Table({ 
+  tableName: 'order_item_instructions' ,
+  indexes: [
+    { name: 'idx_order_item_instructions_orderItemId', fields: ['orderItemId'] }, 
+    { name: 'idx_order_item_instructions_instructionId', fields: ['instructionId'] },
+  ],
+})
 export class OrderItemInstruction extends Model{
     @AutoIncrement
     @PrimaryKey

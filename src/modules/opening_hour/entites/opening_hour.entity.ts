@@ -12,7 +12,13 @@ import {
 import { DayOfWeek } from 'src/common/enums/day_of_week';
 import { Store } from 'src/modules/store/entities/store.entity';
 
-@Table({ tableName: 'opening_hours' })
+@Table({ 
+    tableName: 'opening_hours',
+    indexes:[
+        { fields: ['storeId'] },
+        { unique: true, fields: ['storeId', 'day'] }
+    ]
+})
 export class OpeningHour extends Model{
     @AutoIncrement
     @PrimaryKey

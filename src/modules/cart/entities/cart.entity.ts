@@ -15,7 +15,14 @@ import { Customer } from 'src/modules/customer/entities/customer.entity';
 import { Store } from 'src/modules/store/entities/store.entity';
 
 
-@Table({ tableName: 'carts' })
+@Table({ 
+    tableName: 'carts',
+    indexes: [
+        { name: 'idx_customer_store', fields: ['customerId', 'storeId'], unique: true },
+        { name: 'idx_customer', fields: ['customerId'] },
+        { name: 'idx_store', fields: ['storeId'] },
+    ]
+})
 export class Cart extends Model{
     @AutoIncrement
     @PrimaryKey

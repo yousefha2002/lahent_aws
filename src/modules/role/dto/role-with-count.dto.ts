@@ -1,15 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
+import { simpleRoleDto } from './simple-role.dto';
 
-export class RoleWithCountsDto {
-    @Expose()
-    @ApiProperty({ description: 'معرف الدور', example: 1 })
-    id: number;
-
-    @Expose()
-    @ApiProperty({ description: 'اسم الدور', example: 'Admin' })
-    name: string;
-
+export class RoleWithCountsDto extends simpleRoleDto{
     @Expose()
     @ApiProperty({ description: 'عدد الإدمن المرتبطين بهذا الدور', example: 5 })
     adminCount: number;

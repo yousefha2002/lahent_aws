@@ -10,7 +10,10 @@ import { PaymentCard } from 'src/modules/payment_card/entities/payment_card.enti
 import { Review } from 'src/modules/review/entities/review.entity';
 import { Store } from 'src/modules/store/entities/store.entity';
 
-@Table({ tableName: 'customers',paranoid: true })
+@Table({ 
+  tableName: 'customers',paranoid: true,
+  indexes:[{ name: 'idx_deletedAt', fields: ['deletedAt'] }]
+})
 export class Customer extends Model {
   @AutoIncrement
   @PrimaryKey

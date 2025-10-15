@@ -13,7 +13,14 @@ import { AddressLabel } from 'src/common/enums/address_label';
 
 import { Customer } from 'src/modules/customer/entities/customer.entity';
 
-@Table({ tableName: 'addresses' })
+@Table({ 
+    tableName: 'addresses',
+    indexes:[
+        { name: 'idx_customer_createdAt', fields: ['customerId', 'createdAt'] }, 
+        { name: 'idx_customer', fields: ['customerId'] },
+    ] 
+    
+})
 export class Address extends Model{
     @AutoIncrement
     @PrimaryKey

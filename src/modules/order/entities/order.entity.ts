@@ -22,7 +22,19 @@ import { OrderItem } from 'src/modules/order_item/entities/order_item.entity';
 import { Review } from 'src/modules/review/entities/review.entity';
 import { Store } from 'src/modules/store/entities/store.entity';
 
-@Table({ tableName: 'orders' })
+@Table({ 
+  tableName: 'orders',
+  indexes: [
+      { name: 'idx_orders_customerId', fields: ['customerId'] },
+      { name: 'idx_orders_storeId', fields: ['storeId'] },
+      { name: 'idx_orders_status', fields: ['status'] },
+      { name: 'idx_orders_status_createdAt', fields: ['status', 'createdAt'] },
+      { name: 'idx_orders_orderNumber', fields: ['orderNumber'] },
+      { name: 'idx_orders_storeId_status', fields: ['storeId', 'status'] },
+      { name: 'idx_orders_customer_createdAt', fields: ['customerId', 'createdAt'] }, 
+      { name: 'idx_orders_store_createdAt', fields: ['storeId', 'createdAt'] },
+    ]}
+)
 export class Order extends Model {
   @AutoIncrement
   @PrimaryKey

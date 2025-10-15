@@ -2,7 +2,20 @@ import { Table, Column, Model, DataType, AutoIncrement, PrimaryKey, AllowNull } 
 import { RoleStatus } from 'src/common/enums/role_status';
 
 
-@Table({ tableName: 'fcm_tokens' })
+@Table({ 
+    tableName: 'fcm_tokens' ,
+    indexes: [
+        {
+        unique: true,
+        name: 'idx_user_role_device',
+        fields: ['userId', 'role', 'deviceId'],
+        },
+        {
+        fields: ['userId', 'role'], 
+        },
+        { fields: ['token'] }
+    ]
+})
 export class FcmToken extends Model {
     @AutoIncrement
     @PrimaryKey

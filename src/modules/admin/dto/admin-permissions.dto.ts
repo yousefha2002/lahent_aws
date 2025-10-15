@@ -1,24 +1,9 @@
 import { PermissionKey } from 'src/common/enums/permission-key';
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
+import { SimpleAdminDto } from './simple-admin.dto';
 
-export class AdminWithPermissionsDto {
-    @Expose()
-    @ApiProperty()
-    id: number;
-
-    @Expose()
-    @ApiProperty()
-    name: string;
-
-    @Expose()
-    @ApiProperty()
-    phone: string;
-
-    @Expose()
-    @ApiProperty()
-    active: boolean;
-
+export class AdminWithPermissionsDto extends SimpleAdminDto{
     @Expose()
     @ApiProperty()
     isSuperAdmin: boolean;

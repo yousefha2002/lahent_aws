@@ -13,7 +13,14 @@ import {
 import { CarBrand } from 'src/modules/car_brand/entities/car_brand.entity';
 import { Customer } from 'src/modules/customer/entities/customer.entity';
 
-@Table({ tableName: 'cars' })
+@Table({ 
+  tableName: 'cars',
+  indexes:[
+    { name: 'idx_customer_isSave', fields: ['customerId', 'isSave'] },
+    { name: 'idx_customer_carName_isSave', fields: ['customerId', 'carName', 'isSave'], unique: true }, 
+    { name: 'idx_customer_isSave_createdAt', fields: ['customerId', 'isSave', 'createdAt'] },
+  ]
+})
 export class Car extends Model {
   @AutoIncrement
   @PrimaryKey

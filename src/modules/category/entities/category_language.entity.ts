@@ -2,7 +2,14 @@ import { Table, Column, Model, DataType, AllowNull, ForeignKey, BelongsTo, AutoI
 import { Category } from './category.entity';
 import { Language } from 'src/common/enums/language';
 
-@Table({ tableName: 'category_languages' })
+@Table({ 
+    tableName: 'category_languages',
+    indexes:[
+        { name: 'idx_categoryId', fields: ['categoryId'] },
+        { name: 'idx_categoryId_languageCode', fields: ['categoryId', 'languageCode'] },
+        { name: 'idx_title_languageCode', fields: ['title', 'languageCode'] }
+        ]
+    })
 export class CategoryLanguage extends Model {
     @AutoIncrement
     @PrimaryKey

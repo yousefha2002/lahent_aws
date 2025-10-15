@@ -8,7 +8,15 @@ import { OfferProduct } from 'src/modules/offer_product/entites/offer_product.en
 import { Product } from 'src/modules/product/entities/product.entity';
 import { Store } from 'src/modules/store/entities/store.entity';
 
-@Table({ tableName: 'offers' })
+@Table({ 
+  tableName: 'offers',
+  indexes: [
+    { fields: ['isActive', 'startDate'] },
+    { fields: ['storeId'] },
+    { fields: ['target'] },
+    { fields: ['durationUnit', 'startDate'] },
+  ]
+  })
 export class Offer extends Model {
   @AutoIncrement
   @PrimaryKey

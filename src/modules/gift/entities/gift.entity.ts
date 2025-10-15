@@ -14,7 +14,17 @@ import { GiftStatus } from 'src/common/enums/gift_status';
 import { Customer } from 'src/modules/customer/entities/customer.entity';
 import { GiftTemplate } from 'src/modules/gift_template/entities/gift_template.entity';
 
-@Table({ tableName: 'gifts' })
+@Table({ 
+  tableName: 'gifts',
+    indexes: [
+      {
+        name: 'idx_receiverPhone_status',
+        fields: ['receiverPhone', 'status'],
+      },
+      { fields: ['senderId'] },
+      { fields: ['receiverId'] },
+    ]
+ })
 export class Gift extends Model {
   @PrimaryKey
   @AutoIncrement

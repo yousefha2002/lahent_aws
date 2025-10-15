@@ -9,7 +9,10 @@ import {
   AllowNull,
 } from 'sequelize-typescript';
 
-@Table({ tableName: 'coupons' })
+@Table({ 
+    tableName: 'coupons',
+    indexes: [{ name: 'idx_createdAt', fields: ['createdAt'] }]
+  })
 export class Coupon extends Model {
   @AutoIncrement
   @PrimaryKey

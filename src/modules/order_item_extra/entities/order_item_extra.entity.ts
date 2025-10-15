@@ -12,7 +12,13 @@ import {
 import { OrderItem } from 'src/modules/order_item/entities/order_item.entity';
 import { ProductExtra } from 'src/modules/product_extra/entities/product_extra.entity';
 
-@Table({ tableName: 'order_item_extras' })
+@Table({ 
+    tableName: 'order_item_extras',
+    indexes:[
+        { name: 'idx_order_item_extras_orderItemId', fields: ['orderItemId'] },
+        { name: 'idx_order_item_extras_extraId', fields: ['extraId'] }
+    ]
+})
 export class OrderItemExtra extends Model{
     @AutoIncrement
     @PrimaryKey

@@ -3,7 +3,7 @@ import { IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { AddressLabel } from 'src/common/enums/address_label';
 
 export class CreateAddressDto {
-    @ApiProperty({ example: 'home' })
+    @ApiProperty({ example: 'home',enum: AddressLabel })
     @IsNotEmpty()
     @IsEnum(AddressLabel)
     label: AddressLabel;

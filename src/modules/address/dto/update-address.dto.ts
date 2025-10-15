@@ -3,7 +3,7 @@ import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-valida
 import { AddressLabel } from 'src/common/enums/address_label';
 
 export class UpdateAddressDto {
-    @ApiProperty({ example: 'Office', required: false })
+    @ApiProperty({ example: 'Office', required: false,enum: AddressLabel })
     @IsOptional()
     @IsEnum(AddressLabel)
     label?: AddressLabel;

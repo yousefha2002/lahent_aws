@@ -18,7 +18,7 @@ import { OrderItemInstruction } from 'src/modules/order_item_instruction/entitie
 import { OrderItemVariant } from 'src/modules/order_item_variant/entities/order_item_variant.entity';
 import { Product } from 'src/modules/product/entities/product.entity';
 
-@Table({ tableName: 'order_items' })
+@Table({ tableName: 'order_items',indexes:[{ name: 'idx_order_items_orderId', fields: ['orderId'] },]})
     export class OrderItem extends Model{
     @AutoIncrement
     @PrimaryKey

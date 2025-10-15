@@ -7,7 +7,7 @@ export class AddressDto {
     @Expose()
     id: number;
 
-    @ApiProperty({ example: 'Home' })
+    @ApiProperty({enum: AddressLabel, example: 'Home' })
     @Expose()
     label: AddressLabel;
 

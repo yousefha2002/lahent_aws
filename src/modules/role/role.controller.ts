@@ -9,6 +9,7 @@ import { getLang } from 'src/common/utils/get-lang.util';
 import { RoleWithCountsDto } from './dto/role-with-count.dto';
 import { RoleWithDetailsDto } from './dto/role-with-details.dto';
 import { PermissionKey } from 'src/common/enums/permission-key';
+import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 
 @Controller('role')
 export class RoleController {
@@ -28,6 +29,7 @@ export class RoleController {
       return this.roleService.createRoleWithPermissions(dto, lang);
     }
 
+    @Serilaize(RoleWithCountsDto)
     @ApiSecurity('access-token')
     @ApiOperation({ summary: 'Get all roles with admin and permission counts' })
     @ApiResponse({status: 200,type: [RoleWithCountsDto]})
@@ -61,6 +63,7 @@ export class RoleController {
       return this.roleService.updateRoleWithPermissions(roleId, dto, lang);
     }
 
+    @Serilaize(RoleWithDetailsDto)
     @ApiSecurity('access-token')
     @ApiOperation({ summary: 'Get role with its permissions and admins' })
     @ApiResponse({ status: 200, type: RoleWithDetailsDto })

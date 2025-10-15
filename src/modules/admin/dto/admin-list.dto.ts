@@ -1,26 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Expose } from 'class-transformer';
+import { Expose, Type } from 'class-transformer';
+import { SimpleAdminDto } from './simple-admin.dto';
+import { simpleRoleDto } from 'src/modules/role/dto/simple-role.dto';
 
-export class AdminListDto {
+export class AdminListDto extends SimpleAdminDto {
     @Expose()
-    @ApiProperty({ example: 1 })
-    id: number;
-
-    @Expose()
-    @ApiProperty({ example: 'Yousef' })
-    name: string;
-
-    @Expose()
-    @ApiProperty({ example: '966500000000' })
-    phone: string;
-
-    @Expose()
-    @ApiProperty({ example: true })
-    active: boolean;
-
-    @Expose()
-    @ApiProperty({ example: { id: 2, name: 'Manager' } })
-    role: { id: number; name: string };
+    @ApiProperty({type:simpleRoleDto})
+    @Type(()=>simpleRoleDto)
+    role: simpleRoleDto
 }
 
 export class PaginatedAdminsResponseDto {
@@ -34,5 +21,6 @@ export class PaginatedAdminsResponseDto {
 
     @Expose()
     @ApiProperty({ type: [AdminListDto] })
+    @Type(()=>AdminListDto)
     data: AdminListDto[];
 }

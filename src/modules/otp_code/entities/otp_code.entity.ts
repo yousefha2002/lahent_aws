@@ -10,7 +10,15 @@ import {
 } from 'sequelize-typescript';
 import { RoleStatus } from 'src/common/enums/role_status';
 
-@Table({ tableName: 'otp_codes' })
+@Table({ 
+    tableName: 'otp_codes',
+    indexes:[
+        { name: 'idx_otp_phone_type', fields: ['phone', 'type'] }, 
+        { name: 'idx_otp_phone_code', fields: ['phone', 'code'] }, 
+        { name: 'idx_otp_createdAt', fields: ['createdAt'] },
+        { name: 'idx_otp_expiresAt', fields: ['expiresAt'] }
+    ]
+})
 export class OtpCode extends Model {
     @AutoIncrement
     @PrimaryKey

@@ -11,7 +11,18 @@ import {
 import { Customer } from 'src/modules/customer/entities/customer.entity';
 import { Store } from 'src/modules/store/entities/store.entity';
 
-@Table({ tableName: 'favorites', timestamps: true })
+@Table({ 
+  tableName: 'favorites', 
+  timestamps: true ,
+  indexes: [
+      {
+        unique: true,
+        name: 'idx_customer_store',
+        fields: ['customerId', 'storeId'],
+      },
+      { fields: ['storeId'] }
+    ]}
+  )
 export class Favorite extends Model {
   @AutoIncrement
   @PrimaryKey
