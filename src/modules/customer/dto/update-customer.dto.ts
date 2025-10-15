@@ -14,8 +14,7 @@ export class UpdateCustomerDto {
     @IsOptional()
     email: string;
 
-    @ApiPropertyOptional({example:"1"})
+    @ApiPropertyOptional({example:1})
     @IsOptional()
-    @IsString()
-    avatarId?: string;
+    avatarId?: string | number;
 }

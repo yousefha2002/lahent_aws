@@ -20,7 +20,6 @@ export enum PermissionKey {
 
     CreateOffer = "create_offer",
     UpdateOffer = "update_offer",
-    ActivateOffer = "activate_offer",
     ViewOffer = "view_offer",
 
     ViewStoreTransactions = "view_store_transactions",

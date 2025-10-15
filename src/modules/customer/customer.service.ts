@@ -1,3 +1,4 @@
+import { AuditLogService } from './../audit_log/audit_log.service';
 import { UserTokenService } from './../user_token/user_token.service';
 import { AvatarService } from './../avatar/avatar.service';
 import {BadRequestException,forwardRef,Inject,Injectable,NotFoundException} from '@nestjs/common';
@@ -13,6 +14,8 @@ import { JwtService } from '@nestjs/jwt';
 import { REFRESH_TOKEN_EXPIRES_MS } from 'src/common/constants';
 import { Op } from 'sequelize';
 import { RefreshTokenDto } from '../user_token/dtos/refreshToken.dto';
+import { ActorInfo } from 'src/common/types/current-user.type';
+import { AuditLogAction, AuditLogEntity } from 'src/common/enums/audit_log';
 
 @Injectable()
 export class CustomerService {
@@ -24,6 +27,7 @@ export class CustomerService {
     @Inject(forwardRef(() => GiftService)) private giftService: GiftService,
     private jwtService: JwtService,
     private userTokenService:UserTokenService,
+    private readonly auditLogService:AuditLogService
   ) {}
   async createCustomer(phone:string,lang=Language.ar)
   {
@@ -104,13 +108,13 @@ export class CustomerService {
     await customer.save({ transaction });
   }
 
-  async updateProfile(customer: Customer,dto: UpdateCustomerDto,lang : Language) 
+  async updateProfile(customer: Customer,actor:ActorInfo,dto: UpdateCustomerDto,lang : Language) 
   {
+    const oldCustomer = { ...customer.get({ plain: true }) };
     const hasAvatarId = !!dto.avatarId;
     const hasName = !!dto.name;
     const hasEmail = !!dto.email;
 
-    // تحقق من البريد الإلكتروني إذا تم تغييره
     if (hasEmail && dto.email !== customer.email) {
       const existing = await this.customerRepo.findOne({
         where: { email: dto.email },
@@ -121,7 +125,6 @@ export class CustomerService {
       }
     }
 
-    // أول مرة فقط: لازم يرسل الثلاثة معاً
     const isFirstTime =!customer.name && !customer.email && !customer.avatarId;
 
     if (isFirstTime && (!hasName || !hasEmail || !hasAvatarId)) {
@@ -143,8 +146,14 @@ export class CustomerService {
     customer.isCompletedProfile = true;
 
     await customer.save();
-    await customer.reload({ include: ['avatar'] });
-
+    const customerAfterUpdate = await customer.reload({ include: ['avatar'] });
+    await this.auditLogService.logChange({
+      actor: actor,
+      entity: AuditLogEntity.CUSTOMER,
+      action: AuditLogAction.UPDATE,
+      oldEntity: oldCustomer,
+      newEntity: customerAfterUpdate.get({ plain: true }),
+    });
     return customer;
   }
 

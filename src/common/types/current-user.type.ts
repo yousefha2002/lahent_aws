@@ -1,11 +1,11 @@
 import { RoleStatus } from "../enums/role_status";
 
-export interface CurrentUserInfo {
+export interface ActorInfo {
     id: number;
     type: RoleStatus;
 }
 
 export interface CurrentUserType {
-    actor: CurrentUserInfo; 
+    actor: ActorInfo; 
     context?: any;
 }

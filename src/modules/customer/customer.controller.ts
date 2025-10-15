@@ -20,7 +20,7 @@ export class CustomerController {
   constructor(
     private readonly customerService: CustomerService,
     private readonly userTokenService:UserTokenService,
-    private readonly fcmTokenService:FcmTokenService
+    private readonly fcmTokenService:FcmTokenService,
   ) {}
 
   @ApiSecurity('access-token')
@@ -48,8 +48,8 @@ export class CustomerController {
     @I18n() i18n: I18nContext,
   ) {
     const lang = getLang(i18n);
-    const {context} = user
-    return this.customerService.updateProfile(context, body, lang);
+    const {context,actor} = user
+    return this.customerService.updateProfile(context,actor, body, lang);
   }
 
   @ApiOperation({ summary: 'Refresh access token using refresh token' })

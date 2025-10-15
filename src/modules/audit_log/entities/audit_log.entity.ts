@@ -29,7 +29,4 @@ export class AuditLog extends Model {
 
     @Column({ type: DataType.JSON, allowNull: true })
     newData: any;
-
-    @Column({ type: DataType.TEXT, allowNull: true })
-    description: string;
 }
