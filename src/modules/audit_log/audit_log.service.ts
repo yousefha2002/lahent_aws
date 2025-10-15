@@ -27,9 +27,9 @@ export class AuditLogService {
         oldData = {};
         newData = {};
         for (const key of Object.keys(newEntity)) {
-            if (oldEntity[key] !== newEntity[key]) {
-            oldData[key] = oldEntity[key];
-            newData[key] = newEntity[key];
+            if (JSON.stringify(oldEntity[key]) !== JSON.stringify(newEntity[key])) {
+                oldData[key] = oldEntity[key];
+                newData[key] = newEntity[key];
             }
         }
         } else if (action === AuditLogAction.CREATE && newEntity) {
