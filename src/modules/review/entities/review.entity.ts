@@ -10,7 +10,28 @@ import { Customer } from 'src/modules/customer/entities/customer.entity';
 import { Order } from 'src/modules/order/entities/order.entity';
 import { Store } from 'src/modules/store/entities/store.entity';
 
-@Table({paranoid: true})
+@Table({
+  paranoid: true,
+  indexes: [
+    {
+      name: 'idx_review_storeId',
+      fields: ['storeId'],
+    },
+    {
+      name: 'idx_review_storeId_rating',
+      fields: ['storeId', 'rating'],
+    },
+    {
+      name: 'idx_review_customerId_orderId',
+      unique: true,
+      fields: ['customerId', 'orderId'],
+    },
+    {
+      name: 'idx_review_storeId_createdAt',
+      fields: ['storeId', 'createdAt'],
+    }
+  ]
+})
 export class Review extends Model {
   @Column({
     type: DataType.INTEGER,

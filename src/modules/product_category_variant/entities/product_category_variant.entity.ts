@@ -3,7 +3,14 @@ import { Product } from 'src/modules/product/entities/product.entity';
 import { ProductVariant } from 'src/modules/prouduct_variant/entities/prouduct_variant.entity';
 import { VariantCategory } from 'src/modules/variant_category/entities/variant_category.entity';
 
-@Table({ tableName: 'product_category_variants' })
+@Table({ 
+    tableName: 'product_category_variants',
+    indexes:[
+        { name: 'idx_product_variantCategory', unique: true, fields: ['productId', 'variantCategoryId'] },
+        { name: 'idx_product_category_variant_productId', fields: ['productId'] },
+        { name: 'idx_product_category_variant_variantCategoryId', fields: ['variantCategoryId'] }
+    ]
+})
 export class ProductCategoryVariant extends Model {
 
     @AutoIncrement

@@ -14,7 +14,13 @@ import {
 import { ProductCategoryVariant } from 'src/modules/product_category_variant/entities/product_category_variant.entity';
 import { ProductVariantLanguage } from './product_variant_language.entity';
 
-@Table({ tableName: 'product_variants' })
+@Table({ 
+  tableName: 'product_variants' ,
+  indexes:[
+    { name: 'idx_product_variant_productCategoryVariantId', fields: ['productCategoryVariantId'] },
+    { name: 'idx_product_variant_productCategoryVariantId_isActive', fields: ['productCategoryVariantId', 'isActive'] }
+  ]
+})
 export class ProductVariant extends Model {
   @AutoIncrement
   @PrimaryKey

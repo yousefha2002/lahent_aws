@@ -2,7 +2,14 @@ import { Table, Column, Model, DataType, ForeignKey, BelongsTo, AllowNull, Prima
 import { Product } from './product.entity';
 import { Language } from 'src/common/enums/language';
 
-@Table({ tableName: 'product_languages' })
+@Table({ 
+    tableName: 'product_languages' ,
+    indexes:[
+        { name: 'idx_productLanguage_productId_languageCode', fields: ['productId', 'languageCode'] },
+        { name: 'idx_productLanguage_productId', fields: ['productId'] },
+        { name: 'idx_productLanguage_name', fields: ['name'] }
+    ]
+})
 export class ProductLanguage extends Model {
     @ForeignKey(() => Product)
     @Column(DataType.INTEGER)

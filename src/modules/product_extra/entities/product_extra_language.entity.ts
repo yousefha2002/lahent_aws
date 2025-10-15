@@ -2,7 +2,13 @@ import { Table, Column, Model, DataType, ForeignKey, BelongsTo, AllowNull, Prima
 import { ProductExtra } from './product_extra.entity';
 import { Language } from 'src/common/enums/language';
 
-@Table({ tableName: 'product_extra_languages' })
+@Table({ 
+    tableName: 'product_extra_languages' ,
+    indexes:[ 
+        { name: 'idx_product_extra_language_productExtraId_languageCode', unique: true, fields: ['productExtraId', 'languageCode'] ,},
+        { name: 'idx_product_extra_language_productExtraId', fields: ['productExtraId']}
+    ]
+})
 export class ProductExtraLanguage extends Model {
     @PrimaryKey
     @AutoIncrement

@@ -1,7 +1,13 @@
 import {Table,Column,Model,DataType,PrimaryKey,AutoIncrement,Default,AllowNull, BelongsTo, ForeignKey} from 'sequelize-typescript';
 import { Customer } from 'src/modules/customer/entities/customer.entity';
 
-@Table({ tableName: 'payment_cards' })
+@Table({ 
+    tableName: 'payment_cards',
+    indexes:[
+        { name: 'idx_payment_cards_customer', fields: ['customerId'] },
+        { name: 'idx_payment_cards_customer_isDefault', fields: ['customerId', 'isDefault'] }
+    ]
+})
 export class PaymentCard extends Model {
     @PrimaryKey
     @AutoIncrement

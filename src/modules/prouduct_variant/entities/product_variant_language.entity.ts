@@ -2,7 +2,20 @@ import { Table, Column, Model, DataType, ForeignKey, BelongsTo, PrimaryKey, Auto
 import { ProductVariant } from './prouduct_variant.entity';
 import { Language } from 'src/common/enums/language';
 
-@Table({ tableName: 'product_variant_languages' })
+@Table({ 
+    tableName: 'product_variant_languages' ,
+    indexes: [
+        { 
+            name: 'idx_variant_language_productVariantId_languageCode', 
+            unique: true, 
+            fields: ['productVariantId', 'languageCode'] 
+        },
+        { 
+            name: 'idx_variant_language_productVariantId', 
+            fields: ['productVariantId'] 
+        },
+    ]
+})
 export class ProductVariantLanguage extends Model {
     @PrimaryKey
     @AutoIncrement

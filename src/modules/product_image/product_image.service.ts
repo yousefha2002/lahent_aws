@@ -21,7 +21,7 @@ export class ProductImageService {
         imageUrl: img.imageUrl,
         imagePublicId: img.imagePublicId,
       })),
-      { transaction }, // ✅ outside the map
+      { transaction },
     );
   }
 

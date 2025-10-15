@@ -3,7 +3,13 @@ import {Table,Column,Model,DataType,AllowNull, ForeignKey, BelongsTo, PrimaryKey
 import { Language } from 'src/common/enums/language';
 import { Store } from './store.entity';
 
-@Table({ tableName: 'store_languages' })
+@Table({ 
+    tableName: 'store_languages',
+    indexes: [
+        { name: 'idx_storeLanguage_store_lang', fields: ['storeId', 'languageCode'] },
+        { name: 'idx_storeLanguage_name', fields: ['name'] }
+    ] 
+})
 export class StoreLanguage extends Model {
 
     @AutoIncrement

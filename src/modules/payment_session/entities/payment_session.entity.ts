@@ -4,7 +4,10 @@ import {Table,Column,Model,DataType,AutoIncrement,PrimaryKey,ForeignKey,AllowNul
 import { Order } from 'src/modules/order/entities/order.entity';
 import { GatewaySource } from 'src/common/enums/gateway-source';
 import { GatewayType } from 'src/common/enums/gateway_type';
-@Table({ tableName: 'payment_sessions' })
+@Table({ 
+    tableName: 'payment_sessions' ,
+    indexes:[{ name: 'idx_payment_sessions_paymentOrderId', fields: ['paymentOrderId'] }]
+})
 export class PaymentSession extends Model {
     @PrimaryKey
     @AutoIncrement

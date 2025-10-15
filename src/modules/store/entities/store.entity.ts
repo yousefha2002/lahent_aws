@@ -15,7 +15,19 @@ import { SubType } from 'src/modules/subtype/entities/subtype.entity';
 import { StoreLanguage } from './store_language.entity';
 import { StoreCommission } from 'src/modules/store_commission/entities/store_commission.entity';
 
-@Table({ tableName: 'stores',paranoid:true })
+@Table({ 
+  tableName: 'stores',
+  paranoid:true, 
+  indexes: [
+    { name: 'idx_store_status_subType', fields: ['status', 'subTypeId'] },
+    { name: 'idx_store_owner', fields: ['ownerId'] },
+    { name: 'idx_store_lat_lng', fields: ['lat', 'lng'], using: 'BTREE' },
+    { name: 'idx_store_createdAt', fields: ['createdAt'] },
+    { name: 'idx_store_phone', unique: true, fields: ['phone'] },
+    { name: 'idx_store_phoneLogin', unique: true, fields: ['phoneLogin'] },
+    { name: 'idx_store_deletedAt', fields: ['deletedAt'] },
+  ]  
+})
 export class Store extends Model {
   @AutoIncrement
   @PrimaryKey

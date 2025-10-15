@@ -5,7 +5,19 @@ import { Gift } from "src/modules/gift/entities/gift.entity";
 import { LoyaltyOffer } from "src/modules/loyalty_offer/entites/loyalty_offer.entity";
 import { Order } from "src/modules/order/entities/order.entity";
 
-@Table({ tableName: 'transactions' })
+@Table({ 
+    tableName: 'transactions',
+    indexes: [
+        { name: 'idx_transaction_customerId', fields: ['customerId'] },
+        { name: 'idx_transaction_type', fields: ['type'] },
+        { name: 'idx_transaction_createdAt', fields: ['createdAt'] },
+        { name: 'idx_transaction_customerId_createdAt', fields: ['customerId', 'createdAt'] },
+        { name: 'idx_transaction_customerId_type', fields: ['customerId', 'type'] },
+        { name: 'idx_transaction_orderId', fields: ['orderId'] },
+        { name: 'idx_transaction_giftId', fields: ['giftId'] },
+        { name: 'idx_transaction_loyaltyOfferId', fields: ['loyaltyOfferId'] },
+    ]
+})
 export class Transaction extends Model {
     @PrimaryKey
     @AutoIncrement

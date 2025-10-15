@@ -14,7 +14,13 @@ import {
 } from 'sequelize-typescript';
 import { Product } from 'src/modules/product/entities/product.entity';
 
-@Table({ tableName: 'product_extras' })
+@Table({ 
+  tableName: 'product_extras' ,
+  indexes:[
+    { name: 'idx_product_extra_productId', fields: ['productId'] },
+    { name: 'idx_product_extra_productId_isActive', fields: ['productId', 'isActive'] },
+  ]
+})
 export class ProductExtra extends Model {
   @AutoIncrement
   @PrimaryKey

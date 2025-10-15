@@ -25,7 +25,17 @@ import { VariantCategory } from 'src/modules/variant_category/entities/variant_c
 import { ProductLanguage } from './product_language.entity';
 import { OrderItem } from 'src/modules/order_item/entities/order_item.entity';
 
-@Table({ tableName: 'products',paranoid: true })
+@Table({ 
+    tableName: 'products',paranoid: true ,
+    indexes:[
+        { name: 'idx_product_storeId', fields: ['storeId'] },
+        { name: 'idx_product_storeId_categoryId', fields: ['storeId', 'categoryId'] },
+        { name: 'idx_product_isActive', fields: ['isActive'] },
+        { name: 'idx_product_createdAt', fields: ['createdAt'] },
+        { name: 'idx_product_sales', fields: ['sales'] },
+        { name: 'uniq_store_productNumber', unique: true, fields: ['storeId', 'productNumber'] },
+    ]
+})
 export class Product extends Model{
     @AutoIncrement
     @PrimaryKey

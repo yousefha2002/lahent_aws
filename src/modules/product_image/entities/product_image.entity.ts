@@ -12,7 +12,10 @@ import {
 import { Product } from 'src/modules/product/entities/product.entity';
 
 
-@Table({ tableName: 'product_images' })
+@Table({ 
+    tableName: 'product_images' ,
+    indexes:[{ name: 'idx_product_images_productId', fields: ['productId'] }]
+})
 export class ProductImage extends Model{
     @AutoIncrement
     @PrimaryKey
