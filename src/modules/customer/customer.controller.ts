@@ -5,17 +5,23 @@ import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
-import { ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { RefreshTokenDto } from '../user_token/dtos/refreshToken.dto';
 import { CustomerDetailsDto } from './dto/customer.dto';
 import { CurrentUserType } from 'src/common/types/current-user.type';
 import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
 import { RoleStatus } from 'src/common/enums/role_status';
 import { PermissionKey } from 'src/common/enums/permission-key';
+import { FcmTokenService } from '../fcm_token/fcm_token.service';
+import { UserTokenService } from '../user_token/user_token.service';
 
 @Controller('customer')
 export class CustomerController {
-  constructor(private readonly customerService: CustomerService) {}
+  constructor(
+    private readonly customerService: CustomerService,
+    private readonly userTokenService:UserTokenService,
+    private readonly fcmTokenService:FcmTokenService
+  ) {}
 
   @ApiSecurity('access-token')
   @ApiOperation({ summary: 'Get current logged in customer' })
@@ -56,5 +62,22 @@ export class CustomerController {
   @Post('refresh-token')
   async refreshToken(@Body() dto: RefreshTokenDto) {
     return this.customerService.refreshToken(dto);
+  }
+
+  @PermissionGuard([RoleStatus.CUSTOMER])
+  @Post('logout')
+  @ApiOperation({ summary: 'Logout Customer and invalidate refresh token' })
+  @ApiBody({type:RefreshTokenDto})
+  @ApiSecurity('access-token')
+  @ApiResponse({
+    status: 200,
+    description: 'Customer logged out successfully',
+    schema: { example: { message: 'Logged out successfully' } },
+  })
+  async logoutStore(@CurrentUser() user: CurrentUserType,@Body() body:RefreshTokenDto) {
+    const {context} = user
+    await this.userTokenService.logout(body);
+    await this.fcmTokenService.removeTokenByDevice(context.id,body.deviceId,RoleStatus.STORE);
+    return {message:"logout success"}
   }
 }
