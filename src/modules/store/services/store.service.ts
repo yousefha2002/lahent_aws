@@ -326,7 +326,7 @@ export class StoreService {
       }
       await this.storeCommissionService.getCommission(storeId)
       const message = SMSMessages.STORE_APPROVED()[lang];
-      await this.smsService.sendSms(store.phone, message);
+      // await this.smsService.sendSms(store.phone, message);
     }
     store.status = status;
     await store.save();
