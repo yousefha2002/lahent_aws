@@ -1,14 +1,13 @@
 import { AuditLogService } from './../audit_log/audit_log.service';
 import { UserTokenService } from './../user_token/user_token.service';
 import { AvatarService } from './../avatar/avatar.service';
-import {BadRequestException,forwardRef,Inject,Injectable,NotFoundException} from '@nestjs/common';
+import {BadRequestException,Inject,Injectable,NotFoundException} from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
 import { Customer } from './entities/customer.entity';
 import { I18nService } from 'nestjs-i18n';
 import { Language } from 'src/common/enums/language';
 import { Avatar } from '../avatar/entities/avatar.entity';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
-import { GiftService } from '../gift/gift.service';
 import {generateAccessToken, generateRefreshToken } from 'src/common/utils/generateToken';
 import { JwtService } from '@nestjs/jwt';
 import { REFRESH_TOKEN_EXPIRES_MS } from 'src/common/constants';
@@ -25,7 +24,6 @@ export class CustomerService {
     private customerRepo: typeof Customer,
     private avatarService: AvatarService,
     private readonly i18n: I18nService,
-    @Inject(forwardRef(() => GiftService)) private giftService: GiftService,
     private jwtService: JwtService,
     private userTokenService:UserTokenService,
     private readonly auditLogService:AuditLogService
@@ -39,11 +37,6 @@ export class CustomerService {
       throw new BadRequestException(message);
     }
     const new_customer = await this.customerRepo.create({phone})
-    const amountCount = await this.giftService.updateGiftsForNewCustomer(
-      new_customer.phone,
-      new_customer.id,
-    );
-    new_customer.walletBalance = amountCount;
     await new_customer.save()
     return new_customer
   }

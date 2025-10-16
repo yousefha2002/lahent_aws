@@ -66,6 +66,7 @@ import { FcmToken } from 'src/modules/fcm_token/entities/fcm_token.entity';
 import { AuditLog } from 'src/modules/audit_log/entities/audit_log.entity';
 import { RolePermission } from 'src/modules/role/entites/role_permission.entity';
 import { Role } from 'src/modules/role/entites/role.entity';
+import { SystemSetting } from 'src/modules/system_setting/entities/system_setting.entity';
 
 export const databaseProviders = [
   {
@@ -158,6 +159,7 @@ export const databaseProviders = [
         AuditLog,
         RolePermission,
         Role,
+        SystemSetting
       ]); 
       await sequelize.sync({ alter: false});
       return sequelize;

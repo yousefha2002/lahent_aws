@@ -67,6 +67,7 @@ import { AuditLogModule } from './modules/audit_log/audit_log.module';
 import { UserContextModule } from './modules/user-context/user-context.module';
 import { S3Module } from './modules/s3/s3.module';
 import { RoleModule } from './modules/role/role.module';
+import { SystemSettingModule } from './modules/system_setting/system_setting.module';
 
 @Module({
   imports: [
@@ -149,6 +150,7 @@ import { RoleModule } from './modules/role/role.module';
     UserContextModule,
     S3Module,
     RoleModule,
+    SystemSettingModule,
   ],
   providers: [MulterConfigService],
 })

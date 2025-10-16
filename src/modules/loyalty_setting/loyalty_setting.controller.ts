@@ -7,6 +7,8 @@ import { CreateLoyaltySettingDto } from './dto/create_loyalty_setting.dto';
 import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
 import { RoleStatus } from 'src/common/enums/role_status';
 import { PermissionKey } from 'src/common/enums/permission-key';
+import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
+import { CurrentUserType } from 'src/common/types/current-user.type';
 
 @Controller('loyalty-setting')
 export class LoyaltySettingController {
@@ -35,7 +37,8 @@ export class LoyaltySettingController {
     type: LoyaltySettingDto,
   })
   @Post()
-  async createOrUpdate(@Body() dto: CreateLoyaltySettingDto) {
-    return this.loyaltySettingService.createOrUpdate(dto);
+  async createOrUpdate(@Body() dto: CreateLoyaltySettingDto,@CurrentUser() user:CurrentUserType) {
+    const {actor} = user
+    return this.loyaltySettingService.createOrUpdate(dto,actor);
   }
 }

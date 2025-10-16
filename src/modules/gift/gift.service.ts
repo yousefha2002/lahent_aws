@@ -50,7 +50,6 @@ export class GiftService {
       let finalReceiverId: number | null = null;
       let finalReceiverName: string;
       let finalReceiverPhone: string;
-      let finalStatus: GiftStatus;
 
       // Find receiver by phone
       const receiver = await this.customerService.findByPhone(
@@ -64,7 +63,6 @@ export class GiftService {
         finalReceiverId = receiver.id;
         finalReceiverName = receiver.name;
         finalReceiverPhone = receiver.phone;
-        finalStatus = GiftStatus.RECEVIED;
       } else {
         if (!receiverName) {
           const message = this.i18n.translate('translation.receiver_required', { lang });
@@ -74,7 +72,6 @@ export class GiftService {
         finalReceiverId = null;
         finalReceiverName = receiverName;
         finalReceiverPhone = formatPhoneNumber(receiverPhone);
-        finalStatus = GiftStatus.PENDING;
       }
 
       // Create the gift
@@ -85,7 +82,6 @@ export class GiftService {
         receiverPhone: finalReceiverPhone,
         giftTemplateId: giftTemplate.id,
         amount,
-        status: finalStatus,
       }, { transaction });
 
       // Deduct from sender wallet
@@ -131,37 +127,6 @@ export class GiftService {
       await transaction.rollback();
       throw error;
     }
-  }
-
-  async updateGiftsForNewCustomer(
-    phone: string,
-    customerId: number,
-  ) {
-    const gifts = await this.giftRepo.findAll({
-      where: { receiverPhone: phone, status: GiftStatus.PENDING },
-    });
-
-    let totalAmount = 0;
-
-    if (gifts.length === 0) return totalAmount;
-
-    for (const gift of gifts) {
-      gift.receiverId = customerId;
-      gift.status = GiftStatus.RECEVIED;
-      await gift.save();
-
-      await this.transactionService.createTransaction({
-        customerId,
-        amount: gift.amount,
-        direction: 'IN',
-        type: TransactionType.GIFT_RECEIVED,
-        giftId: gift.id,
-      });
-
-      totalAmount += gift.amount;
-    }
-
-    return totalAmount;
   }
 
   async getGiftsByCustomer(customerId: number, page = 1, limit = 10){

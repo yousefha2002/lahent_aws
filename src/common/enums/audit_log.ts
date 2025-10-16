@@ -15,6 +15,7 @@ export enum AuditLogEntity {
     GIFTTEMPLATE = 'giftTemplate',
     LOYALTYOFFER ='loyaltyOffer',
     POINTSSYSTEM = 'pointsSystem',
+    SETTINGSSYSTEM = 'settingsSystem',
     OWNER = 'owner',
     ROLE = 'role',
     SECTOR = 'sector',

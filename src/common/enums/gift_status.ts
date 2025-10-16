@@ -1,4 +1,5 @@
 export enum GiftStatus {
-  PENDING = 'pending',
-  RECEVIED = 'received',
+  PENDING = 'pending',   
+  RECEIVED = 'received',
+  REJECTED = 'rejected',
 }
