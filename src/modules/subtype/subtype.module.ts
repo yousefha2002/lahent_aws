@@ -6,6 +6,7 @@ import { TypeModule } from '../type/type.module';
 import { AdminModule } from '../admin/admin.module';
 import { StoreModule } from '../store/store.module';
 import { UserContextModule } from '../user-context/user-context.module';
+import { AuditLogModule } from '../audit_log/audit_log.module';
 
 @Module({
   controllers: [SubtypeController],
@@ -14,6 +15,7 @@ import { UserContextModule } from '../user-context/user-context.module';
     forwardRef(()=>UserContextModule),
     forwardRef(() => StoreModule),
     forwardRef(() => TypeModule),
+    AuditLogModule
   ],
   exports: [SubtypeService],
 })

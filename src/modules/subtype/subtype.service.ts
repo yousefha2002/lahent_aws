@@ -1,3 +1,4 @@
+import { AuditLogService } from './../audit_log/audit_log.service';
 import {
   BadRequestException,
   forwardRef,
@@ -25,6 +26,7 @@ export class SubtypeService {
     @Inject(forwardRef(() => TypeService)) private typeService: TypeService,
     private readonly i18n: I18nService,
     @Inject(forwardRef(() => StoreService)) private storeService: StoreService,
+    private readonly auditLogService:AuditLogService,
   ) {}
 
   async createSubType(dto: CreateSubTypeDto) {

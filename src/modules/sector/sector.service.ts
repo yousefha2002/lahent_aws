@@ -13,6 +13,7 @@ import { validateRequiredLanguages, validateUniqueLanguages } from 'src/common/v
 import { ActorInfo } from 'src/common/types/current-user.type';
 import { AuditLogAction, AuditLogEntity } from 'src/common/enums/audit_log';
 import { prepareEntityChange } from 'src/common/utils/prepareEntityChange';
+import { buildMultiLangEntity } from 'src/common/utils/buildMultiLangEntity';
 
 @Injectable()
 export class SectorService {
@@ -30,24 +31,33 @@ export class SectorService {
         validateRequiredLanguages(codes, 'sector languages');
 
         try {
-        const sector = await this.sectorRepo.create({}, { transaction });
+            const sector = await this.sectorRepo.create({}, { transaction });
 
-        for (const langObj of dto.languages) {
-            await this.verifyName(langObj.name, langObj.languageCode,undefined);
+            for (const langObj of dto.languages) {
+                await this.verifyName(langObj.name, langObj.languageCode,undefined);
 
-            await this.sectorLanguageRepo.create(
-            {
-                name: langObj.name,
-                languageCode: langObj.languageCode,
-                sectorId: sector.id,
-            },
-            { transaction },
-            );
-        }
+                await this.sectorLanguageRepo.create(
+                {
+                    name: langObj.name,
+                    languageCode: langObj.languageCode,
+                    sectorId: sector.id,
+                },
+                { transaction },
+                );
+            }
+            const newEntity = buildMultiLangEntity(dto.languages, ['name']);
+            await this.auditLogService.logChange({
+            actor,
+            entity: AuditLogEntity.SECTOR,
+            action: AuditLogAction.CREATE,
+            entityId: sector.id,
+            newEntity,
+            fieldsToExclude: [],
+            });
 
-        await transaction.commit();
-        const message = this.i18n.translate('translation.sector.created', { lang });
-        return { message };
+            await transaction.commit();
+            const message = this.i18n.translate('translation.createdSuccefully', { lang });
+            return { message };
         } catch (error) {
         await transaction.rollback();
         throw error;
