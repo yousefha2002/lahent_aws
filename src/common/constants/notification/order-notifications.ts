@@ -16,7 +16,7 @@ export const OrderNotifications = {
     }),
     PREPARING: (orderNumber: number) => ({
         en: `Order #${orderNumber} is now being prepared.`,
-        ar: `بدأ تحضير الطلب رقم #${orderNumber}.`,
+        ar: `بدأ تحضير الطلب رقم #${orderNumber}.`, 
     }),
     HALF_PREPARING: (orderNumber: number) => ({
         en: `Order #${orderNumber} is halfway prepared.`,

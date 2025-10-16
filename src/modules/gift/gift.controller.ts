@@ -75,4 +75,17 @@ export class GiftController {
     const {context} = user
     return this.giftService.getGiftsByCustomer(context.id, Number(page), Number(limit));
   }
+
+  @ApiSecurity('access-token')
+  @Patch(':id/thank')
+  @PermissionGuard([RoleStatus.CUSTOMER], CompletedProfileGuard)
+  async thankGift(
+    @Param('id') id: number,
+    @CurrentUser() user: CurrentUserType,
+    @I18n() i18n: I18nContext,
+  ) {
+    const lang = getLang(i18n);
+    const { context } = user;
+    return this.giftService.thankForGift(Number(id), context, lang);
+  }
 }

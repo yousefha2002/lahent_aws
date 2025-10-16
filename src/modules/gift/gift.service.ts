@@ -103,7 +103,7 @@ export class GiftService {
         await this.fcmTokenService.notifyUser(
           receiver.id,
           RoleStatus.CUSTOMER,
-          GiftNotifications.GIFT_RECEIVED.title[lang],
+          GiftNotifications.GIFT_RECEIVED[lang],
         );
       }
 
@@ -172,6 +172,12 @@ export class GiftService {
             giftId: gift.id,
           }, transaction);
 
+          await this.fcmTokenService.notifyUser(
+            gift.senderId,
+            RoleStatus.CUSTOMER,
+            GiftNotifications.GIFT_ACCEPTED(customer.name)[lang]
+          );
+
         } else {
           gift.status = GiftStatus.REJECTED;
 
@@ -201,5 +207,40 @@ export class GiftService {
         await transaction.rollback();
         throw error;
       }
+  }
+
+  async thankForGift(giftId: number, customer: Customer, lang: Language) 
+  {
+    const gift = await this.giftRepo.findOne({ where: { id: giftId } });
+
+    if (!gift) {
+      throw new BadRequestException(this.i18n.translate('translation.gift_not_found', { lang }));
+    }
+
+    if (gift.receiverId !== customer.id) {
+      throw new BadRequestException(this.i18n.translate('translation.not_allowed', { lang }));
+    }
+
+    if (gift.status !== GiftStatus.RECEIVED) {
+      throw new BadRequestException(this.i18n.translate('translation.gift_not_accepted_yet', { lang }));
+    }
+
+    if (gift.thanked) {
+      throw new BadRequestException(this.i18n.translate('translation.gift_already_thanked', { lang }));
+    }
+
+    gift.thanked = true;
+    await gift.save();
+
+    // إشعار للمرسل أنه المستلم شكره
+    const sender = await this.customerService.findById(gift.senderId);
+
+    await this.fcmTokenService.notifyUser(
+      sender.id,
+      RoleStatus.CUSTOMER,
+      GiftNotifications.GIFT_THANKED(customer.name)[lang]
+    );
+
+    return { message: this.i18n.translate('translation.gift_thanked_success', { lang }) };
   }
 }

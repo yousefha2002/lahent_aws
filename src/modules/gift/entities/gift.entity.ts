@@ -67,4 +67,8 @@ export class Gift extends Model {
   @Default(GiftStatus.PENDING)
   @Column(DataType.ENUM(...Object.values(GiftStatus)))
   status: GiftStatus;
+
+  @Default(false)
+  @Column(DataType.BOOLEAN)
+  thanked:boolean
 }
