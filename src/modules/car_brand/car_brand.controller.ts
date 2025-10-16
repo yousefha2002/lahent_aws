@@ -10,6 +10,8 @@ import { getLang } from 'src/common/utils/get-lang.util';
 import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
 import { RoleStatus } from 'src/common/enums/role_status';
 import { PermissionKey } from 'src/common/enums/permission-key';
+import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
+import { CurrentUserType } from 'src/common/types/current-user.type';
 
 @Controller('car-brand')
 export class CarBrandController {
@@ -33,9 +35,10 @@ export class CarBrandController {
   })
   @PermissionGuard([RoleStatus.ADMIN],PermissionKey.CreateCarBrand)
   @Post()
-  create(@Body() dto: CreateCarBrandDto, @I18n() i18n: I18nContext) {
+  create(@Body() dto: CreateCarBrandDto,@CurrentUser() user:CurrentUserType, @I18n() i18n: I18nContext) {
     const lang = getLang(i18n);
-    return this.carBrandService.create(dto, lang);
+    const {actor} = user
+    return this.carBrandService.create(dto,actor, lang);
   }
 
   @ApiOperation({ summary: 'Update a car brand by ID (admin only)' })
@@ -57,8 +60,10 @@ export class CarBrandController {
   })
   @PermissionGuard([RoleStatus.ADMIN],PermissionKey.UpdateCarBrand)
   @Put(':id')
-  update(@Param('id') id: number, @Body() dto: UpdateCarBrandDto) {
-    return this.carBrandService.update(id, dto);
+  update(@Param('id') id: number,@CurrentUser() user:CurrentUserType, @Body() dto: UpdateCarBrandDto,@I18n() i18n: I18nContext) {
+    const {actor} = user
+    const lang = getLang(i18n);
+    return this.carBrandService.update(id ,actor, dto,lang);
   }
 
   @ApiOperation({ summary: 'Get all car brands and their languages' })

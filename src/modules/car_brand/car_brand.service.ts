@@ -1,3 +1,4 @@
+import { AuditLogService } from './../audit_log/audit_log.service';
 import {
   BadRequestException,
   Inject,
@@ -11,6 +12,8 @@ import { CreateCarBrandDto } from './dto/create_car_brand.dto';
 import { I18nService } from 'nestjs-i18n';
 import { Language } from 'src/common/enums/language';
 import { CarBrandLanguage } from './entities/car_brand.languae.entity';
+import { ActorInfo } from 'src/common/types/current-user.type';
+import { AuditLogAction, AuditLogEntity } from 'src/common/enums/audit_log';
 
 @Injectable()
 export class CarBrandService {
@@ -19,12 +22,12 @@ export class CarBrandService {
     private carBrandRep: typeof CarBrand,
     @Inject(repositories.car_brand_langauge_repository)
     private carBrandLanguageRep: typeof CarBrandLanguage,
-
+    private readonly auditLogService:AuditLogService,
     private readonly i18n: I18nService,
   ) {}
 
-  async create(dto: CreateCarBrandDto, lang = Language.ar) {
-    // Validate all names first
+  async create(dto: CreateCarBrandDto, actor: ActorInfo, lang: Language) 
+  {
     for (const [langCode, name] of Object.entries(dto.names)) {
       const exists = await this.carBrandLanguageRep.findOne({
         where: { name: name, languageCode: langCode },
@@ -38,10 +41,8 @@ export class CarBrandService {
       }
     }
 
-    // Create base brand
     const brand = await this.carBrandRep.create({});
 
-    // Create all language entries
     for (const [langCode, name] of Object.entries(dto.names)) {
       await this.carBrandLanguageRep.create({
         carBrandId: brand.id,
@@ -50,14 +51,32 @@ export class CarBrandService {
       });
     }
 
-    const message = this.i18n.translate('translation.createdSuccefully', {
-      lang,
+    const newEntity = { ...dto.names }; 
+
+    await this.auditLogService.logChange({
+      actor,
+      entity: AuditLogEntity.EXTRA, 
+      action: AuditLogAction.CREATE,
+      entityId: brand.id,
+      newEntity,
+      fieldsToExclude: [],
     });
+
+    const message = this.i18n.translate('translation.createdSuccefully', { lang });
     return { message };
   }
 
-  async update(id: number, dto: UpdateCarBrandDto, lang = Language.ar) {
+  async update(id: number, actor: ActorInfo, dto: UpdateCarBrandDto, lang :Language) 
+  {
     const brand = await this.getOneOrFail(id);
+
+    const oldLanguages = await this.carBrandLanguageRep.findAll({
+      where: { carBrandId: id },
+    });
+    const oldEntity = oldLanguages.reduce((acc, item) => {
+      acc[item.languageCode] = item.name;
+      return acc;
+    }, {} as Record<string, string>);
 
     for (const [langCode, name] of Object.entries(dto.names)) {
       const exists = await this.carBrandLanguageRep.findOne({
@@ -86,9 +105,25 @@ export class CarBrandService {
       }
     }
 
-    const message = this.i18n.translate('translation.updatedSuccefully', {
-      lang,
+    const newLanguages = await this.carBrandLanguageRep.findAll({
+      where: { carBrandId: id },
     });
+    const newEntity = newLanguages.reduce((acc, item) => {
+      acc[item.languageCode] = item.name;
+      return acc;
+    }, {} as Record<string, string>);
+
+    await this.auditLogService.logChange({
+      actor,
+      entity: AuditLogEntity.EXTRA,
+      action: AuditLogAction.UPDATE,
+      entityId: brand.id,
+      oldEntity,
+      newEntity,
+      fieldsToExclude: []
+    });
+
+    const message = this.i18n.translate('translation.updatedSuccefully', {lang});
     return { message };
   }
 
