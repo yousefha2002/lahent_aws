@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { GiftService } from './gift.service';
 import { CreateGiftDto } from './dto/create-gift.dto';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
@@ -19,21 +19,9 @@ export class GiftController {
 
   @ApiOperation({ summary: 'Send a gift (customer only)' })
   @ApiSecurity('access-token')
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        receiverPhone: { type: 'string', example: '970593411165' },
-        receiverName: { type: 'string', example: 'Ali' },
-        giftTemplateId: { type: 'number', example: 1 },
-        amount: { type: 'number', example: 100 },
-      },
-      required: ['receiverPhone', 'giftTemplateId', 'amount'],
-    },
-  })
+  @ApiBody({type:CreateGiftDto})
   @ApiResponse({
     status: 201,
-    description: 'Gift sent successfully',
     schema: {
       example: { message: 'Sent successfully' },
     },
@@ -48,6 +36,26 @@ export class GiftController {
     const lang = getLang(i18n);
     const {context} = sender
     return this.giftService.createGift(context, body, lang);
+  }
+
+  @ApiOperation({ summary: 'Respond to a gift (accept or reject)' })
+  @ApiSecurity('access-token')
+  @ApiBody({
+    schema: {
+      example: { accept: true },
+    },
+  })
+  @Patch(':id/respond')
+  @PermissionGuard([RoleStatus.CUSTOMER], CompletedProfileGuard)
+  async respondToGift(
+    @Param('id') giftId: number,
+    @Body('accept') accept: boolean,
+    @CurrentUser() user: CurrentUserType,
+    @I18n() i18n: I18nContext
+  ) {
+    const lang = getLang(i18n);
+    const { context } = user;
+    return this.giftService.respondToGift(giftId, context, accept, lang);
   }
 
   @Serilaize(PaginatedGiftDto)

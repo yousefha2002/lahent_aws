@@ -45,9 +45,9 @@ export class TransactionService {
     } else if (typeFilter === 'purchase') {
       where.type = { [Op.in]: [TransactionType.PURCHASE_GATEWAY, TransactionType.PURCHASE_WALLET] };
     } else if (typeFilter === 'refund') {
-      where.type = TransactionType.REFUND_WALLET;
+      where.type ={ [Op.in]: [TransactionType.REFUND_WALLET,TransactionType.GIFT_REFUNDED] };
     } else if (typeFilter === 'gift') {
-      where.type = { [Op.in]: [TransactionType.GIFT_SENT, TransactionType.GIFT_RECEIVED] };
+      where.type = { [Op.in]: [TransactionType.GIFT_SENT, TransactionType.GIFT_RECEIVED,TransactionType.GIFT_REFUNDED] };
     }
 
     const { rows, count } = await this.transactionRepo.findAndCountAll({

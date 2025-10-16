@@ -1,8 +1,13 @@
 import { Expose, Type } from 'class-transformer';
 import { BasicGiftTemplateDto } from 'src/modules/gift_template/dto/gift-template.dto';
 import { ApiProperty } from '@nestjs/swagger';
+import { GiftStatus } from 'src/common/enums/gift_status';
 
-export class OtherPartyDto {
+export class Sender {
+    @ApiProperty({ example: 1 })
+    @Expose()
+    id: number;
+
     @ApiProperty({ example: 'Ali' })
     @Expose()
     name: string;
@@ -21,19 +26,19 @@ export class GiftDto {
     @Expose()
     amount: number;
 
-    @ApiProperty({ example: 'SENT', description: 'Direction of the gift: SENT or RECEIVED' })
+    @ApiProperty({ example: GiftStatus.PENDING })
     @Expose()
-    direction: 'SENT' | 'RECEIVED';
+    status: GiftStatus;
 
     @ApiProperty({ type: () => BasicGiftTemplateDto })
     @Expose()
     @Type(() => BasicGiftTemplateDto)
     giftTemplate: BasicGiftTemplateDto;
 
-    @ApiProperty({ type: () => OtherPartyDto })
+    @ApiProperty({ type: () => Sender })
     @Expose()
-    @Type(() => OtherPartyDto)
-    otherParty: OtherPartyDto;
+    @Type(() => Sender)
+    sender: Sender;
 
     @ApiProperty({ example: '2025-09-20T07:48:09.000Z' })
     @Expose()
