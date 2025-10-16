@@ -11,6 +11,8 @@ import { getLang } from 'src/common/utils/get-lang.util';
 import { RoleStatus } from 'src/common/enums/role_status';
 import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
 import { PermissionKey } from 'src/common/enums/permission-key';
+import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
+import { CurrentUserType } from 'src/common/types/current-user.type';
 
 @Controller('avatar')
 export class AvatarController {
@@ -55,11 +57,13 @@ export class AvatarController {
   @UseInterceptors(FileInterceptor('image', multerOptions))
   @UseFilters(MulterExceptionFilter)
   createAvatar(
+    @CurrentUser() user:CurrentUserType,
     @I18n() i18n: I18nContext,
     @UploadedFile() file?: Express.Multer.File,
   ) {
     const lang = getLang(i18n);
-    return this.avatarService.create(lang, file);
+    const {actor} = user
+    return this.avatarService.create(actor,lang, file);
   }
 
   @ApiOperation({ summary: 'Update an existing avatar (admin only)' })
@@ -83,11 +87,13 @@ export class AvatarController {
   @UseInterceptors(FileInterceptor('image', multerOptions))
   @UseFilters(MulterExceptionFilter)
   async updateAvatar(
+    @CurrentUser() user:CurrentUserType,
     @Param('id') id: string,
     @I18n() i18n: I18nContext,
     @UploadedFile() file?: Express.Multer.File,
   ) {
     const lang = getLang(i18n);
-    return this.avatarService.update(+id, lang, file);
+    const {actor} = user
+    return this.avatarService.update(+id,actor, lang, file);
   }
 }

@@ -11,41 +11,69 @@ export class AuditLogService {
     ){}
 
     async logChange(params: {
-    actor: { id: number; type: RoleStatus };
-    entity: AuditLogEntity;
-    action: AuditLogAction;
-    oldEntity?: any | null; 
-    newEntity?: any | null;
-    entityId?: number;   
-    }) {
-    const { actor, entity, action, oldEntity = null, newEntity = null, entityId } = params;
+        actor: { id: number; type: RoleStatus };
+        entity: AuditLogEntity;
+        action: AuditLogAction;
+        oldEntity?: any | null;
+        newEntity?: any | null;
+        entityId?: number;
+        fieldsToExclude?: string[];
+        }) {
+        const {
+            actor,
+            entity,
+            action,
+            oldEntity = null,
+            newEntity = null,
+            entityId,
+            fieldsToExclude = [],
+        } = params;
 
-    let oldData: Record<string, any> | null = null;
-    let newData: Record<string, any> | null = null;
+        let oldData: Record<string, any> | null = null;
+        let newData: Record<string, any> | null = null;
 
-    if (action === AuditLogAction.UPDATE && oldEntity && newEntity) {
-        oldData = {};
-        newData = {};
-        for (const key of Object.keys(newEntity)) {
-            if (JSON.stringify(oldEntity[key]) !== JSON.stringify(newEntity[key])) {
-                oldData[key] = oldEntity[key];
-                newData[key] = newEntity[key];
+        if (action === AuditLogAction.UPDATE && oldEntity && newEntity) {
+            oldData = {};
+            newData = {};
+
+            for (const key of Object.keys(newEntity)) {
+            // استثناء الحقول المحددة
+            if (fieldsToExclude.includes(key)) continue;
+
+            const oldValue = oldEntity[key];
+            const newValue = newEntity[key];
+
+            // تجاهل القيم الكائنية (object) لأنها غالبًا علاقات
+            if (typeof newValue === 'object' && newValue !== null) continue;
+
+            // إذا القيمة اختلفت نسجلها
+            if (oldValue !== newValue) {
+                oldData[key] = oldValue;
+                newData[key] = newValue;
             }
-        }
+            }
+
+            // في حال ما صار أي تغيير، لا نحفظ السجل
+            if (
+            Object.keys(newData).length === 0 &&
+            Object.keys(oldData).length === 0
+            ) {
+            return null;
+            }
         } else if (action === AuditLogAction.CREATE && newEntity) {
-        newData = { ...newEntity };
+            newData = { ...newEntity };
         } else if (action === AuditLogAction.DELETE && oldEntity) {
-        oldData = { ...oldEntity };
+            oldData = { ...oldEntity };
         }
 
         return this.auditLogRepo.create({
-        userId: actor.id,
-        userRole: actor.type,
-        entity,
-        entityId: entityId ?? newEntity?.id ?? oldEntity?.id ?? null,
-        action,
-        oldData,
-        newData,
+            userId: actor.id,
+            userRole: actor.type,
+            entity,
+            entityId: entityId ?? newEntity?.id ?? oldEntity?.id ?? null,
+            action,
+            oldData,
+            newData,
         });
     }
 }

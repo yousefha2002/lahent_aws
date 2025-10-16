@@ -6,7 +6,8 @@ export enum AuditLogEntity {
     OFFER = 'offer',
     VARIANT = 'variant',
     EXTRA = 'extra',
-    INSTRUCTION = 'instruction'
+    INSTRUCTION = 'instruction',
+    AVATAR = 'avatar'
 }
 
 export enum AuditLogAction {

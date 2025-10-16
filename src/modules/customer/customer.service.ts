@@ -153,6 +153,7 @@ export class CustomerService {
       action: AuditLogAction.UPDATE,
       oldEntity: oldCustomer,
       newEntity: customerAfterUpdate.get({ plain: true }),
+      fieldsToExclude: ['avatar', 'createdAt', 'updatedAt']
     });
     return customer;
   }

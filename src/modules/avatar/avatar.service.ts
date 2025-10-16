@@ -4,6 +4,9 @@ import { repositories } from 'src/common/enums/repositories';
 import { Avatar } from './entities/avatar.entity';
 import { I18nService } from 'nestjs-i18n';
 import { Language } from 'src/common/enums/language';
+import { ActorInfo } from 'src/common/types/current-user.type';
+import { AuditLogService } from '../audit_log/audit_log.service';
+import { AuditLogAction, AuditLogEntity } from 'src/common/enums/audit_log';
 
 @Injectable()
 export class AvatarService {
@@ -11,6 +14,7 @@ export class AvatarService {
         @Inject(repositories.avatar_repository) private avatarRepo: typeof Avatar,
         private s3Service:S3Service,
         private readonly i18n: I18nService,
+        private readonly auditLogService:AuditLogService
     ){}
     async findById(id: number,lang=Language.ar) 
     {
@@ -28,7 +32,7 @@ export class AvatarService {
         return this.avatarRepo.findAll()
     }
 
-    async create(lang:Language,file?: Express.Multer.File)
+    async create(actor:ActorInfo,lang:Language,file?: Express.Multer.File)
     {
         if(!file)
         {
@@ -36,13 +40,21 @@ export class AvatarService {
             throw new BadRequestException(message)
         }
         const result = await this.s3Service.uploadImage(file);
-        await this.avatarRepo.create({url: result.secure_url,publicId: result.public_id})
+        const newAvatar = await this.avatarRepo.create({url: result.secure_url,publicId: result.public_id})
         const message = this.i18n.translate('translation.createdSuccefully', { lang });
+        await this.auditLogService.logChange({
+            actor,
+            entity: AuditLogEntity.AVATAR,
+            action: AuditLogAction.CREATE,
+            newEntity: newAvatar.get({ plain: true }),
+            fieldsToExclude: ['createdAt', 'updatedAt','publicId']
+        });
         return {message}
     }
 
-    async update(id: number, lang : Language, file?: Express.Multer.File) {
+    async update(id: number,actor:ActorInfo, lang : Language, file?: Express.Multer.File) {
         const avatar = await this.findById(id,lang);
+        const oldAvatar = { ...avatar.get({ plain: true }) };
 
         if (!file) {
             const message = this.i18n.translate('translation.file_required', { lang });
@@ -55,7 +67,15 @@ export class AvatarService {
         avatar.url = result.secure_url;
         avatar.publicId = result.public_id;
         await avatar.save();
-
+        const newAvatar = await avatar.reload();
+        await this.auditLogService.logChange({
+            actor,
+            entity: AuditLogEntity.AVATAR,
+            action: AuditLogAction.UPDATE,
+            oldEntity: oldAvatar,
+            newEntity: newAvatar.get({ plain: true }),
+            fieldsToExclude: ['createdAt', 'updatedAt','publicId']
+        });
         const message = this.i18n.translate('translation.updatedSuccefully', { lang });
         return { message };
     }
