@@ -55,7 +55,7 @@ export class CarBrandService {
 
     await this.auditLogService.logChange({
       actor,
-      entity: AuditLogEntity.EXTRA, 
+      entity: AuditLogEntity.CARBRAND, 
       action: AuditLogAction.CREATE,
       entityId: brand.id,
       newEntity,
@@ -115,7 +115,7 @@ export class CarBrandService {
 
     await this.auditLogService.logChange({
       actor,
-      entity: AuditLogEntity.EXTRA,
+      entity: AuditLogEntity.CARBRAND,
       action: AuditLogAction.UPDATE,
       entityId: brand.id,
       oldEntity,
