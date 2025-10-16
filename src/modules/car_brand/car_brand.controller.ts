@@ -1,6 +1,5 @@
 import {Body,Controller,Get,Param,Post,Put} from '@nestjs/common';
 import { CarBrandService } from './car_brand.service';
-import { CreateCarBrandDto } from './dto/create_car_brand.dto';
 import { UpdateCarBrandDto } from './dto/update_car_brand.dto';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { CarBrandDto } from './dto/car-brand.dto';
@@ -19,15 +18,7 @@ export class CarBrandController {
 
   @ApiOperation({ summary: 'Create a car brand (admin only)' })
   @ApiSecurity('access-token')
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        names: { type: 'object', example: { en: 'honday', ar: 'هونداي' } },
-      },
-      required: ['names'],
-    },
-  })
+  @ApiBody({type:UpdateCarBrandDto})
   @ApiResponse({
     status: 201,
     description: 'Car brand created successfully',
@@ -35,7 +26,7 @@ export class CarBrandController {
   })
   @PermissionGuard([RoleStatus.ADMIN],PermissionKey.CreateCarBrand)
   @Post()
-  create(@Body() dto: CreateCarBrandDto,@CurrentUser() user:CurrentUserType, @I18n() i18n: I18nContext) {
+  create(@Body() dto: UpdateCarBrandDto,@CurrentUser() user:CurrentUserType, @I18n() i18n: I18nContext) {
     const lang = getLang(i18n);
     const {actor} = user
     return this.carBrandService.create(dto,actor, lang);
@@ -44,15 +35,7 @@ export class CarBrandController {
   @ApiOperation({ summary: 'Update a car brand by ID (admin only)' })
   @ApiParam({ name: 'id', description: 'ID of the car brand to update', example: 1 })
   @ApiSecurity('access-token')
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        names: { type: 'object', example: { en: 'honday', ar: 'هونداي' } },
-      },
-      required: ['names'],
-    },
-  })
+  @ApiBody({type:UpdateCarBrandDto})
   @ApiResponse({
     status: 201,
     description: 'Car brand updated successfully',

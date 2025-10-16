@@ -10,6 +10,8 @@ import { UpdateSectorDto } from './dto/update-sector.dto';
 import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
 import { RoleStatus } from 'src/common/enums/role_status';
 import { PermissionKey } from 'src/common/enums/permission-key';
+import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
+import { CurrentUserType } from 'src/common/types/current-user.type';
 
 @Controller('sector')
 export class SectorController {
@@ -26,9 +28,11 @@ export class SectorController {
   createSector(
     @Body() body: CreateSectorDto,
     @I18n() i18n: I18nContext,
+    @CurrentUser() user:CurrentUserType,
   ) {
     const lang = getLang(i18n);
-    return this.sectorService.create(body, lang);
+    const {actor} = user
+    return this.sectorService.create(body,actor, lang);
   }
 
   @Serilaize(SectorDto)
@@ -52,11 +56,13 @@ export class SectorController {
   })
   updateSector(
     @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user:CurrentUserType,
     @Body() body: UpdateSectorDto,
     @I18n() i18n: I18nContext,
   ) {
     const lang = getLang(i18n);
-    return this.sectorService.update(id, body, lang);
+    const {actor} = user 
+    return this.sectorService.update(id,actor, body, lang);
   }
 
   @Get('admin')

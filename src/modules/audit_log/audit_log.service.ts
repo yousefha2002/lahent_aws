@@ -18,7 +18,7 @@ export class AuditLogService {
         newEntity?: any | null;
         entityId?: number;
         fieldsToExclude?: string[];
-        }) {
+    }) {
         const {
             actor,
             entity,
@@ -37,35 +37,62 @@ export class AuditLogService {
             newData = {};
 
             for (const key of Object.keys(newEntity)) {
-            // استثناء الحقول المحددة
             if (fieldsToExclude.includes(key)) continue;
 
             const oldValue = oldEntity[key];
             const newValue = newEntity[key];
 
-            // تجاهل القيم الكائنية (object) لأنها غالبًا علاقات
-            if (typeof newValue === 'object' && newValue !== null) continue;
+            if (typeof newValue === 'object' && newValue !== null) {
+                // ✅ دعم خاص لـ translations
+                if (key === 'translations') {
+                for (const lang of Object.keys(newValue)) {
+                    const oldLang = oldValue?.[lang] || {};
+                    const newLang = newValue[lang] || {};
 
-            // إذا القيمة اختلفت نسجلها
+                    for (const subKey of Object.keys(newLang)) {
+                    const oldVal = oldLang[subKey];
+                    const newVal = newLang[subKey];
+
+                    if (oldVal !== newVal) {
+                        if (!oldData.translations) oldData.translations = {};
+                        if (!newData.translations) newData.translations = {};
+
+                        if (!oldData.translations[lang]) oldData.translations[lang] = {};
+                        if (!newData.translations[lang]) newData.translations[lang] = {};
+
+                        oldData.translations[lang][subKey] = oldVal;
+                        newData.translations[lang][subKey] = newVal;
+                    }
+                    }
+                }
+                }
+
+                // تجاهل أي object ثاني غير translations
+                continue;
+            }
+
+            // مقارنة القيم العادية
             if (oldValue !== newValue) {
                 oldData[key] = oldValue;
                 newData[key] = newValue;
             }
             }
 
-            // في حال ما صار أي تغيير، لا نحفظ السجل
+            // لا تسجل التغيير إذا ما صار تغيير فعلي
             if (
             Object.keys(newData).length === 0 &&
             Object.keys(oldData).length === 0
             ) {
             return null;
             }
+
         } else if (action === AuditLogAction.CREATE && newEntity) {
             newData = { ...newEntity };
         } else if (action === AuditLogAction.DELETE && oldEntity) {
             oldData = { ...oldEntity };
         }
 
+        // حفظ السجل في جدول audit_logs
         return this.auditLogRepo.create({
             userId: actor.id,
             userRole: actor.type,

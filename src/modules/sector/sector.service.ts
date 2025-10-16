@@ -1,3 +1,4 @@
+import { AuditLogService } from './../audit_log/audit_log.service';
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
 import { Sector } from './entities/sector.entity';
@@ -9,6 +10,9 @@ import { Language } from 'src/common/enums/language';
 import { CreateSectorDto } from './dto/create-sector.dto';
 import { UpdateSectorDto } from './dto/update-sector.dto';
 import { validateRequiredLanguages, validateUniqueLanguages } from 'src/common/validators/translation-validator.';
+import { ActorInfo } from 'src/common/types/current-user.type';
+import { AuditLogAction, AuditLogEntity } from 'src/common/enums/audit_log';
+import { prepareEntityChange } from 'src/common/utils/prepareEntityChange';
 
 @Injectable()
 export class SectorService {
@@ -16,9 +20,10 @@ export class SectorService {
         @Inject(repositories.sector_repository) private sectorRepo: typeof Sector,
         @Inject(repositories.sector_language_repository) private sectorLanguageRepo: typeof SectorLanguage,
         @Inject('SEQUELIZE') private readonly sequelize: Sequelize,
-        private readonly i18n: I18nService
+        private readonly i18n: I18nService,
+        private readonly auditLogService:AuditLogService
     ){}
-    async create(dto: CreateSectorDto, lang: Language) 
+    async create(dto: CreateSectorDto,actor:ActorInfo, lang: Language) 
     {
         const transaction = await this.sequelize.transaction();
         const codes = dto.languages.map((l) => l.languageCode);
@@ -86,52 +91,81 @@ export class SectorService {
         return sectors;
     }
 
-    async update(id: number, dto: UpdateSectorDto, lang: Language) {
+    async update(id: number, actor: ActorInfo, dto: UpdateSectorDto, lang: Language) 
+    {
         const transaction = await this.sequelize.transaction();
+
         try {
-        const sector = await this.sectorRepo.findByPk(id);
-        if (!sector) {
-            const message = this.i18n.translate('translation.sector.not_found', { lang });
-            throw new BadRequestException(message);
-        }
+            const sector = await this.sectorRepo.findByPk(id);
+            if (!sector) {
+                const message = this.i18n.translate('translation.sector.not_found', { lang });
+                throw new BadRequestException(message);
+            }
 
-        if (dto.languages) {
-            const codes = dto.languages.map((l) => l.languageCode);
-            validateUniqueLanguages(codes, 'sector languages');
-
-            for (const langObj of dto.languages) {
-            await this.verifyName(langObj.name, langObj.languageCode,id);
-
-            const existingLang = await this.sectorLanguageRepo.findOne({
-                where: {
-                sectorId: id,
-                languageCode: langObj.languageCode,
-                },
+            // 🟡 جلب النسخة القديمة قبل التحديث
+            const oldLanguages = await this.sectorLanguageRepo.findAll({
+                where: { sectorId: id },
                 transaction,
             });
 
-            if (existingLang) {
-                existingLang.name = langObj.name;
-                await existingLang.save({ transaction });
-            } else {
-                await this.sectorLanguageRepo.create(
-                {
-                    name: langObj.name,
-                    languageCode: langObj.languageCode,
-                    sectorId: sector.id,
-                },
-                { transaction },
-                );
-            }
-            }
-        }
+            if (dto.languages) {
+                const codes = dto.languages.map((l) => l.languageCode);
+                validateUniqueLanguages(codes, 'sector languages');
 
-        await transaction.commit();
-        const message = this.i18n.translate('translation.sector.updated', { lang });
-        return { message };
+                for (const langObj of dto.languages) {
+                await this.verifyName(langObj.name, langObj.languageCode, id);
+
+                const existingLang = await this.sectorLanguageRepo.findOne({
+                    where: {
+                    sectorId: id,
+                    languageCode: langObj.languageCode,
+                    },
+                    transaction,
+                });
+
+                if (existingLang) {
+                    existingLang.name = langObj.name;
+                    await existingLang.save({ transaction });
+                } else {
+                    await this.sectorLanguageRepo.create(
+                    {
+                        name: langObj.name,
+                        languageCode: langObj.languageCode,
+                        sectorId: sector.id,
+                    },
+                    { transaction },
+                    );
+                }
+                }
+            }
+
+            const newLanguages = await this.sectorLanguageRepo.findAll({
+                where: { sectorId: id },
+                transaction,
+            });
+
+            const { oldEntity, newEntity } = prepareEntityChange({
+                oldLanguages,
+                newLanguages,
+                fields: ['name'],
+            });
+
+            await this.auditLogService.logChange({
+                actor,
+                entity: AuditLogEntity.SECTOR,
+                action: AuditLogAction.UPDATE,
+                entityId: sector.id,
+                oldEntity,
+                newEntity,
+            });
+
+            await transaction.commit();
+
+            const message = this.i18n.translate('translation.updatedSuccefully', { lang });
+            return { message };
         } catch (error) {
-        await transaction.rollback();
-        throw error;
+            await transaction.rollback();
+            throw error;
         }
     }
 
