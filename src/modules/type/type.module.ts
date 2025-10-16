@@ -5,6 +5,7 @@ import { TypeProvider } from './providers/type.provider';
 import { SubtypeModule } from '../subtype/subtype.module';
 import { UserContextModule } from '../user-context/user-context.module';
 import { S3Module } from '../s3/s3.module';
+import { AuditLogModule } from '../audit_log/audit_log.module';
 
 @Module({
   controllers: [TypeController],
@@ -13,6 +14,7 @@ import { S3Module } from '../s3/s3.module';
     S3Module,
     forwardRef(()=>UserContextModule),
     forwardRef(() => SubtypeModule),
+    AuditLogModule
   ],
   exports: [TypeService],
 })

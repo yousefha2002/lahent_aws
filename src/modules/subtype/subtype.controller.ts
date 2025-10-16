@@ -1,6 +1,6 @@
 import {Body,Controller,Delete,Get,Param,Post,Put} from '@nestjs/common';
 import { SubtypeService } from './subtype.service';
-import { CreateSubTypeDto } from './dto/create-subType.dto';
+import { CreateSubTypeDto, UpdateSubTypeDto } from './dto/create-subType.dto';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { SubTypeDto } from './dto/subType.dto';
 import {ApiBody,ApiOperation,ApiParam,ApiResponse,ApiSecurity} from '@nestjs/swagger';
@@ -31,12 +31,12 @@ export class SubtypeController {
   @ApiOperation({ summary: 'Update sub type by ID (admin only)' })
   @ApiSecurity('access-token')
   @ApiParam({name: 'subTypeId',description: 'ID of the sub type to update',example: 1,})
-  @ApiBody({type:CreateSubTypeDto})
+  @ApiBody({type:UpdateSubTypeDto})
   @ApiResponse({status: 200,schema: {example: { message: 'Updated successfully' },},})
   @Put('/update/:subTypeId')
   @PermissionGuard([RoleStatus.ADMIN],PermissionKey.UpdateTypeOfStore)
   updateSubType(
-    @Body() body: CreateSubTypeDto,
+    @Body() body: UpdateSubTypeDto,
     @CurrentUser() user:CurrentUserType,
     @Param('subTypeId') subTypeId: number,
     @I18n() i18n: I18nContext

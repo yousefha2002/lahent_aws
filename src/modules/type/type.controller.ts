@@ -1,17 +1,4 @@
-import {
-  BadRequestException,
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Post,
-  Put,
-  UploadedFile,
-  UseFilters,
-  UseGuards,
-  UseInterceptors,
-} from '@nestjs/common';
+import {BadRequestException,Body,Controller,Delete,Get,Param,Post,Put,UploadedFile,UseFilters,UseInterceptors,} from '@nestjs/common';
 import { TypeService } from './type.service';
 import { CreateTypeDto } from './dto/create-type.dto';
 import { MulterExceptionFilter } from 'src/multer/multer.exception.filter';

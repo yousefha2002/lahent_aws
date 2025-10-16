@@ -25,3 +25,11 @@ export class CreateSubTypeDto {
   @ApiProperty({ type: [SubTypeLanguageDto] })
   languages: SubTypeLanguageDto[];
 }
+
+export class UpdateSubTypeDto {
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => SubTypeLanguageDto)
+  @ApiProperty({ type: [SubTypeLanguageDto] })
+  languages: SubTypeLanguageDto[];
+}

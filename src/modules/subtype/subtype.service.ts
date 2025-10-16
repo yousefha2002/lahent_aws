@@ -3,7 +3,7 @@ import {BadRequestException,forwardRef,Inject,Injectable,NotFoundException} from
 import { repositories } from 'src/common/enums/repositories';
 import { SubType } from './entities/subtype.entity';
 import { SubTypeLanguage } from './entities/sybtype_language.entity';
-import { CreateSubTypeDto } from './dto/create-subType.dto';
+import { CreateSubTypeDto, UpdateSubTypeDto } from './dto/create-subType.dto';
 import { TypeService } from '../type/type.service';
 import { Language } from 'src/common/enums/language';
 import { I18nService } from 'nestjs-i18n';
@@ -71,7 +71,7 @@ export class SubtypeService {
     }
   }
 
-  async updateSubType(subTypeId: number, dto: CreateSubTypeDto, actor: ActorInfo, lang: Language) {
+  async updateSubType(subTypeId: number, dto: UpdateSubTypeDto, actor: ActorInfo, lang: Language) {
     const transaction = await this.sequelize.transaction();
 
     try {
@@ -83,12 +83,6 @@ export class SubtypeService {
       });
       const oldEntity = buildMultiLangEntity(oldLanguages, ['name']);
       oldEntity.typeId = subType.typeId; 
-
-      if (dto.typeId && dto.typeId !== subType.typeId) {
-        await this.typeService.findById(dto.typeId); 
-        subType.typeId = dto.typeId;
-        await subType.save({ transaction });
-      }
 
       for (const langObj of dto.languages) {
         const existingLang = await this.subTypelangRepo.findOne({
@@ -116,7 +110,6 @@ export class SubtypeService {
         transaction,
       });
       const newEntity = buildMultiLangEntity(newLanguages, ['name']);
-      newEntity.typeId = subType.typeId;
 
       await this.auditLogService.logChange({
         actor,
