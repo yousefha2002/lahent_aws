@@ -1,20 +1,17 @@
 import { AuditLogService } from './../audit_log/audit_log.service';
-import {
-  BadRequestException,
-  forwardRef,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import {BadRequestException,forwardRef,Inject,Injectable,NotFoundException} from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
 import { SubType } from './entities/subtype.entity';
 import { SubTypeLanguage } from './entities/sybtype_language.entity';
 import { CreateSubTypeDto } from './dto/create-subType.dto';
 import { TypeService } from '../type/type.service';
 import { Language } from 'src/common/enums/language';
-import { UpdateSubTypeDto } from './dto/update-subType.dto';
 import { I18nService } from 'nestjs-i18n';
 import { StoreService } from '../store/services/store.service';
+import { AuditLogAction, AuditLogEntity } from 'src/common/enums/audit_log';
+import { buildMultiLangEntity } from 'src/common/utils/buildMultiLangEntity';
+import { ActorInfo } from 'src/common/types/current-user.type';
+import { Sequelize } from 'sequelize';
 
 @Injectable()
 export class SubtypeService {
@@ -27,54 +24,118 @@ export class SubtypeService {
     private readonly i18n: I18nService,
     @Inject(forwardRef(() => StoreService)) private storeService: StoreService,
     private readonly auditLogService:AuditLogService,
+    @Inject('SEQUELIZE') private readonly sequelize: Sequelize,
   ) {}
 
-  async createSubType(dto: CreateSubTypeDto) {
-    await this.typeService.findById(dto.typeId);
-    const subTypeCreated = await this.subTypeRepo.create({
-      typeId: dto.typeId,
-    });
-    await Promise.all([
-      this.createSubTypeLang(dto.nameEn, Language.en, subTypeCreated.id),
-      this.createSubTypeLang(dto.nameAr, Language.ar, subTypeCreated.id),
-    ]);
-    return { message: 'sub type created' };
-  }
+  async createSubType(dto: CreateSubTypeDto, actor: ActorInfo, lang: Language) 
+  {
+    const transaction = await this.sequelize.transaction();
 
-  async createSubTypeLang(
-    name: string,
-    languageCode: string,
-    subTypeId: number,
-  ) {
-    await this.subTypelangRepo.create({ name, languageCode, subTypeId });
-  }
+    try {
+        await this.typeService.findById(dto.typeId);
 
-  async updateSubType(subTypeId: number, dto: UpdateSubTypeDto) {
-    await this.subTypeById(subTypeId);
-    await Promise.all([
-      this.updateSubTypeLanguageName(subTypeId, Language.en, dto.nameEn),
-      this.updateSubTypeLanguageName(subTypeId, Language.ar, dto.nameAr),
-    ]);
-    return { message: 'sub type updated' };
-  }
+        const subTypeCreated = await this.subTypeRepo.create(
+          { typeId: dto.typeId },
+          { transaction },
+        );
 
-  async updateSubTypeLanguageName(
-    subTypeId: number,
-    languageCode: string,
-    newName: string,
-  ) {
-    const subTypeLang = await this.subTypelangRepo.findOne({
-      where: { subTypeId, languageCode },
-    });
+        for (const langObj of dto.languages) {
+          await this.subTypelangRepo.create(
+            {
+              subTypeId: subTypeCreated.id,
+              languageCode: langObj.languageCode,
+              name: langObj.name,
+            },
+            { transaction },
+          );
+        }
 
-    if (!subTypeLang) {
-      throw new BadRequestException('SubType language entry not found');
+        const newEntity = buildMultiLangEntity(dto.languages, ['name']);
+
+        await this.auditLogService.logChange({
+          actor,
+          entity: AuditLogEntity.SUBTYPE,
+          action: AuditLogAction.CREATE,
+          entityId: subTypeCreated.id,
+          newEntity,
+          fieldsToExclude: [],
+        });
+
+        await transaction.commit();
+
+        const message = this.i18n.translate('translation.createdSuccefully', { lang });
+        return { message };
+    } catch (error) {
+        await transaction.rollback();
+        throw error;
     }
+  }
 
-    subTypeLang.name = newName;
-    await subTypeLang.save();
+  async updateSubType(subTypeId: number, dto: CreateSubTypeDto, actor: ActorInfo, lang: Language) {
+    const transaction = await this.sequelize.transaction();
 
-    return { message: 'SubType name updated successfully' };
+    try {
+      const subType = await this.subTypeById(subTypeId);
+
+      const oldLanguages = await this.subTypelangRepo.findAll({
+        where: { subTypeId },
+        transaction,
+      });
+      const oldEntity = buildMultiLangEntity(oldLanguages, ['name']);
+      oldEntity.typeId = subType.typeId; 
+
+      if (dto.typeId && dto.typeId !== subType.typeId) {
+        await this.typeService.findById(dto.typeId); 
+        subType.typeId = dto.typeId;
+        await subType.save({ transaction });
+      }
+
+      for (const langObj of dto.languages) {
+        const existingLang = await this.subTypelangRepo.findOne({
+          where: { subTypeId, languageCode: langObj.languageCode },
+          transaction,
+        });
+
+        if (existingLang) {
+          existingLang.name = langObj.name;
+          await existingLang.save({ transaction });
+        } else {
+          await this.subTypelangRepo.create(
+            {
+              subTypeId,
+              languageCode: langObj.languageCode,
+              name: langObj.name,
+            },
+            { transaction },
+          );
+        }
+      }
+
+      const newLanguages = await this.subTypelangRepo.findAll({
+        where: { subTypeId },
+        transaction,
+      });
+      const newEntity = buildMultiLangEntity(newLanguages, ['name']);
+      newEntity.typeId = subType.typeId;
+
+      await this.auditLogService.logChange({
+        actor,
+        entity: AuditLogEntity.SUBTYPE,
+        action: AuditLogAction.UPDATE,
+        entityId: subTypeId,
+        oldEntity,
+        newEntity,
+        fieldsToExclude: [],
+      });
+
+      await transaction.commit();
+
+      const message = this.i18n.translate('translation.updatedSuccefully', { lang });
+      return { message };
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
   }
 
   async subTypeById(subTypeById: number) {
@@ -89,28 +150,43 @@ export class SubtypeService {
     return this.subTypeRepo.count({ where: { typeId } });
   }
 
-  async deleteSubType(id: number, lang = Language.en) {
-    const type = await this.subTypeRepo.findByPk(id);
-    if (!type) {
-      const message = this.i18n.translate('translation.type_not_found', {
-        lang,
-      });
+  async deleteSubType(id: number, actor: ActorInfo, lang: Language) 
+  {
+    const subType = await this.subTypeRepo.findByPk(id, {include: ['languages'],});
+
+    if (!subType) {
+      const message = this.i18n.translate('translation.type_not_found', { lang });
       throw new NotFoundException(message);
     }
 
     const subTypeCount = await this.storeService.countStoreBySubTypeId(id);
     if (subTypeCount > 0) {
-      const message = this.i18n.translate('translation.type_has_stores', {
-        lang,
-      });
+      const message = this.i18n.translate('translation.type_has_stores', { lang });
       throw new BadRequestException(message);
     }
 
+    const oldEntity = {
+      id: subType.id,
+      typeId: subType.typeId,
+      translations: subType.languages?.map(lang => ({
+        languageCode: lang.languageCode,
+        name: lang.name,
+      })) || [],
+    };
+
     await this.subTypeRepo.destroy({ where: { id } });
 
-    const message = this.i18n.translate('translation.deletedSuccefully', {
-      lang, // تمرير اللغة يدويًا
+    await this.auditLogService.logChange({
+      actor,
+      entity: AuditLogEntity.SUBTYPE,
+      action: AuditLogAction.DELETE,
+      entityId: id,
+      oldEntity,
+      newEntity: null,
+      fieldsToExclude: [],
     });
+
+    const message = this.i18n.translate('translation.deletedSuccefully', { lang });
     return { message };
   }
 
