@@ -1,3 +1,4 @@
+import { AuditLogService } from './../audit_log/audit_log.service';
 import { S3Service } from './../s3/s3.service';
 import {
   BadRequestException,
@@ -13,6 +14,11 @@ import { TypeLanguage } from './entities/type_language.entity';
 import { Language } from 'src/common/enums/language';
 import { I18nService } from 'nestjs-i18n';
 import { SubtypeService } from '../subtype/subtype.service';
+import { ActorInfo } from 'src/common/types/current-user.type';
+import { Sequelize } from 'sequelize';
+import { buildMultiLangEntity } from 'src/common/utils/buildMultiLangEntity';
+import { AuditLogAction, AuditLogEntity } from 'src/common/enums/audit_log';
+import { validateAndParseTypeTranslations } from 'src/common/validators/validate-type-translations.validator';
 
 @Injectable()
 export class TypeService {
@@ -24,158 +30,190 @@ export class TypeService {
     private readonly i18n: I18nService,
     @Inject(forwardRef(() => SubtypeService))
     private subTypeService: SubtypeService,
+    @Inject('SEQUELIZE') private readonly sequelize: Sequelize,
+    private readonly auditLogService:AuditLogService
   ) {}
 
-  async createType(
-    dto: CreateTypeDto,
-    file: Express.Multer.File,
-    lang: string,
-  ) {
-    const [] = await Promise.all([
-      this.checkTypeLanguage(dto.nameEn, lang),
-      this.checkTypeLanguage(dto.nameAr, lang),
-    ]);
-    const result = await this.s3Service.uploadImage(file);
-    const createdData = {
-      iconUrl: result.secure_url,
-      iconPublicId: result.public_id,
-    };
-    const typeCreated = await this.typeRepo.create({ ...createdData });
-    await Promise.all([
-      this.createTypeLang(dto.nameEn, Language.en, typeCreated.id),
-      this.createTypeLang(dto.nameAr, Language.ar, typeCreated.id),
-    ]);
-    const message = this.i18n.translate('translation.createdSuccefully', {lang,});
-    return { message };
-  }
+  async createType(dto: CreateTypeDto, actor: ActorInfo, file: Express.Multer.File, lang: Language) {
+    const transaction = await this.sequelize.transaction();
 
-  async checkTypeLanguage(name: string, lang: string) {
-    const typeLang = await this.typeLangRepo.findOne({ where: { name } });
-    if (typeLang) {
-      const message = this.i18n.translate('translation.find_type_message', {
-        lang,
-      });
-      throw new BadRequestException(message);
+    try {
+        const translations = validateAndParseTypeTranslations(dto.languages);
+
+        let createdData: any = {};
+        const result = await this.s3Service.uploadImage(file);
+        createdData = { iconUrl: result.secure_url, iconPublicId: result.public_id };
+        const typeCreated = await this.typeRepo.create({ ...createdData }, { transaction });
+        for (const langObj of translations) {
+            await this.typeLangRepo.create({
+                typeId: typeCreated.id,
+                languageCode: langObj.languageCode,
+                name: langObj.name,
+            }, { transaction });
+        }
+
+        const newLanguages = await this.typeLangRepo.findAll({
+            where: { typeId: typeCreated.id },
+            transaction,
+        });
+        const newEntity = buildMultiLangEntity(newLanguages, ['name']);
+        if (file) {
+            newEntity.iconUrl = createdData.iconUrl;
+        }
+
+        await this.auditLogService.logChange({
+            actor,
+            entity: AuditLogEntity.TYPE,
+            action: AuditLogAction.CREATE,
+            entityId: typeCreated.id,
+            newEntity,
+            fieldsToExclude: [],
+        });
+
+        await transaction.commit();
+
+        const message = this.i18n.translate('translation.createdSuccefully', { lang });
+        return { message };
+    } catch (error) {
+        await transaction.rollback();
+        throw error;
     }
   }
 
-  async createTypeLang(name: string, languageCode: string, typeId: number) {
-    await this.typeLangRepo.create({ name, languageCode, typeId });
-  }
+  async updateType(id: number,dto: CreateTypeDto,actor: ActorInfo,lang: Language,file?: Express.Multer.File) 
+  {
+    const transaction = await this.sequelize.transaction();
 
-  async updateType(
-    id: number,
-    dto: CreateTypeDto,
-    lang: string,
-    file?: Express.Multer.File,
-  ) {
-    const type = await this.typeRepo.findByPk(id);
-    if (!type) throw new NotFoundException(`Type with id ${id} not found`);
-
-    // Check for duplicate names (excluding current type)
-    await this.ensureUniqueName(dto.nameEn, id, lang);
-    await this.ensureUniqueName(dto.nameAr, id, lang);
-
-    // Replace image if file is provided
-    if (file) {
-      if (type.iconPublicId) {
-        await this.s3Service.deleteImage(type.iconPublicId);
+    try {
+      const type = await this.typeRepo.findByPk(id, { transaction });
+      if (!type) {
+        const message = this.i18n.translate('translation.type_not_found', { lang });
+        throw new NotFoundException(message);
       }
-      const result = await this.s3Service.uploadImage(file);
-      type.iconUrl = result.secure_url;
-      type.iconPublicId = result.public_id;
-    }
 
-    await type.save();
+      const translations = validateAndParseTypeTranslations(dto.languages);
 
-    // Update language records
-    await Promise.all([
-      await this.updateLanguageName(id, Language.en, dto.nameEn),
-      await this.updateLanguageName(id, Language.ar, dto.nameAr),
-    ]);
+      const oldLanguages = await this.typeLangRepo.findAll({ where: { typeId: id }, transaction });
+      const oldEntity = buildMultiLangEntity(oldLanguages, ['name']);
+      if (type.iconUrl) {
+        oldEntity.iconUrl = type.iconUrl;
+      }
 
-    const message = this.i18n.translate('translation.updatedSuccefully', {
-      lang, // تمرير اللغة يدويًا
-    });
-    return { message };
-  }
+      if (file) {
+        if (type.iconPublicId) {
+          await this.s3Service.deleteImage(type.iconPublicId);
+        }
+        const result = await this.s3Service.uploadImage(file);
+        type.iconUrl = result.secure_url;
+        type.iconPublicId = result.public_id;
+      }
+      await type.save({ transaction });
 
-  private async ensureUniqueName(
-    name: string,
-    currentTypeId: number,
-    lang: string,
-  ) {
-    const existing = await this.typeLangRepo.findOne({ where: { name } });
-    if (existing && existing.typeId !== currentTypeId) {
-      const message = this.i18n.translate('translation.find_type_message', {
-        lang, // تمرير اللغة يدويًا
+      for (const langObj of translations) {
+        const existingLang = await this.typeLangRepo.findOne({
+          where: { typeId: id, languageCode: langObj.languageCode },
+          transaction,
+        });
+
+        if (existingLang) {
+          existingLang.name = langObj.name;
+          await existingLang.save({ transaction });
+        } else {
+          await this.typeLangRepo.create({
+            typeId: id,
+            languageCode: langObj.languageCode,
+            name: langObj.name,
+          }, { transaction });
+        }
+      }
+
+      const newLanguages = await this.typeLangRepo.findAll({ where: { typeId: id }, transaction });
+      const newEntity = buildMultiLangEntity(newLanguages, ['name']);
+      if (file) {
+        newEntity.iconUrl = type.iconUrl;
+        newEntity.iconPublicId = type.iconPublicId;
+      }
+
+      await this.auditLogService.logChange({
+        actor,
+        entity: AuditLogEntity.TYPE,
+        action: AuditLogAction.UPDATE,
+        entityId: id,
+        oldEntity,
+        newEntity,
+        fieldsToExclude: [],
       });
-      throw new BadRequestException(message);
+
+      await transaction.commit();
+
+      const message = this.i18n.translate('translation.updatedSuccefully', { lang });
+      return { message };
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
     }
   }
 
-  private async updateLanguageName(
-    typeId: number,
-    lang: Language,
-    newName: string,
-  ) {
-    const record = await this.typeLangRepo.findOne({
-      where: { typeId, languageCode: lang },
-    });
-    if (record) {
-      record.name = newName;
-      await record.save();
-    }
-  }
-
-  // if needed but not recommended
-  async deleteType(id: number, lang = Language.en) {
+  async deleteType(id: number, actor: ActorInfo, lang: Language = Language.en) 
+  {
     const type = await this.typeRepo.findByPk(id);
     if (!type) {
-      const message = this.i18n.translate('translation.type_not_found', {
-        lang,
-      });
+      const message = this.i18n.translate('translation.type_not_found', { lang });
       throw new NotFoundException(message);
     }
 
     const subTypeCount = await this.subTypeService.countSubTypeByTypeId(id);
     if (subTypeCount > 0) {
-      const message = this.i18n.translate('translation.type_has_subtypes', {
-        lang,
-      });
+      const message = this.i18n.translate('translation.type_has_subtypes', { lang });
       throw new BadRequestException(message);
     }
 
-    await this.s3Service.deleteImage(type.iconPublicId);
+    const oldLanguages = await this.typeLangRepo.findAll({ where: { typeId: id } });
+    const oldEntity = buildMultiLangEntity(oldLanguages, ['name']);
+    if (type.iconUrl) {
+      oldEntity.iconUrl = type.iconUrl;
+    }
+
+    if (type.iconPublicId) {
+      await this.s3Service.deleteImage(type.iconPublicId);
+    }
 
     await this.typeRepo.destroy({ where: { id } });
 
-    const message = this.i18n.translate('translation.deletedSuccefully', {
-      lang, // تمرير اللغة يدويًا
+    await this.auditLogService.logChange({
+      actor,
+      entity: AuditLogEntity.TYPE,
+      action: AuditLogAction.DELETE,
+      entityId: id,
+      oldEntity,
+      newEntity: null,
+      fieldsToExclude: [],
     });
+
+    const message = this.i18n.translate('translation.deletedSuccefully', { lang });
     return { message };
   }
 
-  async getAllTypes(language?: Language) {
-    const includeOptions: any = {
-      model: this.typeLangRepo,
-    };
+    async getAllTypes(language?: Language) {
+      const includeOptions: any = {
+        model: this.typeLangRepo,
+      };
 
-    if (language) {
-      includeOptions.where = { languageCode: language };
+      if (language) {
+        includeOptions.where = { languageCode: language };
+      }
+      const types = await this.typeRepo.findAll({
+        include: [includeOptions],
+      });
+
+      return types;
     }
-    const types = await this.typeRepo.findAll({
-      include: [includeOptions],
-    });
 
-    return types;
-  }
-
-  async findById(id: string | number) {
-    const type = await this.typeRepo.findByPk(id);
-    if (!type) {
-      throw new BadRequestException('Invalid type');
+    async findById(id: string | number) {
+      const type = await this.typeRepo.findByPk(id);
+      if (!type) {
+        throw new BadRequestException('Invalid type');
+      }
+      return type;
     }
-    return type;
-  }
 }

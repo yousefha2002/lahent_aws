@@ -6,6 +6,7 @@ import { SubtypeModule } from '../subtype/subtype.module';
 import { UserContextModule } from '../user-context/user-context.module';
 import { S3Module } from '../s3/s3.module';
 import { AuditLogModule } from '../audit_log/audit_log.module';
+import { DatabaseModule } from 'src/database/database.module';
 
 @Module({
   controllers: [TypeController],
@@ -14,7 +15,8 @@ import { AuditLogModule } from '../audit_log/audit_log.module';
     S3Module,
     forwardRef(()=>UserContextModule),
     forwardRef(() => SubtypeModule),
-    AuditLogModule
+    AuditLogModule,
+    DatabaseModule
   ],
   exports: [TypeService],
 })

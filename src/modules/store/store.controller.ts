@@ -2,7 +2,7 @@ import { FcmTokenService } from 'src/modules/fcm_token/fcm_token.service';
 import { UserTokenService } from './../user_token/user_token.service';
 import { StoreGeolocationService } from './services/storeGeolocation.service';
 import { StoreAuthService } from './services/storeAuth.service';
-import {Controller,Post,Body,UseGuards,UseInterceptors,UploadedFiles,Get,Query,Put,Param,ParseIntPipe,Req,Ip,} from '@nestjs/common';
+import {Controller,Post,Body,UseInterceptors,UploadedFiles,Get,Query,Put,Param,ParseIntPipe,Req,Ip,} from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { CreateStoreDto } from './dto/requests/create-store.dto';
 import { StoreService } from './services/store.service';

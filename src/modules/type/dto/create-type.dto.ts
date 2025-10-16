@@ -1,18 +1,19 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { Language } from 'src/common/enums/language';
 
 export class CreateTypeDto {
-  @Transform(({ value }) => value?.trim().toLowerCase())
   @IsString()
   @IsNotEmpty()
-  nameEn: string;
-
-  @Transform(({ value }) => value?.trim().toLowerCase())
-  @IsString()
-  @IsNotEmpty()
-  nameAr: string;
+  @ApiProperty({
+    example: JSON.stringify([
+      { languageCode: 'en', name: 'Store' },
+      { languageCode: 'ar', name: 'متجر' },
+    ]),
+  })
+  languages: string;
 
   @ApiProperty({ type: 'string', format: 'binary', required: false })
+  @IsOptional()
   image?: any;
 }

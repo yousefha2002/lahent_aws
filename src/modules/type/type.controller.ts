@@ -1,3 +1,4 @@
+import { CurrentUserType } from 'src/common/types/current-user.type';
 import {BadRequestException,Body,Controller,Delete,Get,Param,Post,Put,UploadedFile,UseFilters,UseInterceptors,} from '@nestjs/common';
 import { TypeService } from './type.service';
 import { CreateTypeDto } from './dto/create-type.dto';
@@ -12,6 +13,7 @@ import { getLang } from 'src/common/utils/get-lang.util';
 import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
 import { RoleStatus } from 'src/common/enums/role_status';
 import { PermissionKey } from 'src/common/enums/permission-key';
+import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 
 @Controller('type')
 export class TypeController {
@@ -20,26 +22,8 @@ export class TypeController {
   @ApiOperation({ summary: 'Create a new type with icon (admin only)' })
   @ApiSecurity('access-token')
   @ApiConsumes('multipart/form-data')
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        nameEn: { type: 'string', example: 'store' },
-        nameAr: { type: 'string', example: 'متجر' },
-        image: { type: 'string', format: 'binary' },
-      },
-      required: ['nameEn', 'nameAr', 'image'],
-    },
-  })
-  @ApiResponse({
-    status: 201,
-    description: 'Type created successfully',
-    schema: {
-      example: {
-        message: 'Created successfully',
-      },
-    },
-  })
+  @ApiBody({type:CreateTypeDto})
+  @ApiResponse({status: 201,schema: {example: {message: 'Created successfully'}}})
   @Post('create')
   @PermissionGuard([RoleStatus.ADMIN],PermissionKey.CreateTypeOfStore)
   @UseInterceptors(FileInterceptor('image', multerOptions))
@@ -47,37 +31,23 @@ export class TypeController {
   createType(
     @I18n() i18n: I18nContext,
     @Body() dto: CreateTypeDto,
+    @CurrentUser() user:CurrentUserType,
     @UploadedFile() file?: Express.Multer.File,
   ) {
     if (!file) {
       throw new BadRequestException('upload icon is required');
     }
     const lang = getLang(i18n);
-    return this.typeService.createType(dto, file, lang);
+    const {actor} = user
+    return this.typeService.createType(dto,actor, file, lang);
   }
 
   @ApiOperation({ summary: 'Update type by ID (admin only)' })
   @ApiSecurity('access-token')
   @ApiConsumes('multipart/form-data')
   @ApiParam({ name: 'typeId', description: 'ID of the type to update', example: 1 })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        nameEn: { type: 'string', example: 'electronic' },
-        nameAr: { type: 'string', example: 'الكترونيات' },
-        image: { type: 'string', format: 'binary', nullable: true },
-      },
-      required: ['nameEn', 'nameAr'],
-    },
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Type updated successfully',
-    schema: {
-      example: { message: 'Updated successfully' },
-    },
-  })
+  @ApiBody({type:CreateTypeDto})
+  @ApiResponse({status: 200,schema: {example: { message: 'Updated successfully' }}})
   @Put('update/:typeId')
   @PermissionGuard([RoleStatus.ADMIN],PermissionKey.UpdateTypeOfStore)
   @UseInterceptors(FileInterceptor('image', multerOptions))
@@ -86,10 +56,12 @@ export class TypeController {
     @I18n() i18n: I18nContext,
     @Param('typeId') typeId: string,
     @Body() dto: CreateTypeDto,
+    @CurrentUser() user:CurrentUserType,
     @UploadedFile() file?: Express.Multer.File,
   ) {
     const lang = getLang(i18n);
-    return this.typeService.updateType(+typeId, dto, lang, file);
+    const {actor} = user
+    return this.typeService.updateType(+typeId, dto,actor, lang, file);
   }
 
   @ApiOperation({ summary: 'Delete a type by ID (admin only)' })
@@ -105,9 +77,11 @@ export class TypeController {
   deleteType(
     @Param('typeId') typeId: string,
     @I18n() i18n: I18nContext,
+    @CurrentUser() user:CurrentUserType
   ) {
     const lang = getLang(i18n);
-    return this.typeService.deleteType(+typeId,lang);
+    const {actor} = user
+    return this.typeService.deleteType(+typeId,actor,lang);
   }
 
   @ApiOperation({ summary: 'Get all types with their languages' })
