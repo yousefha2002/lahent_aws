@@ -11,6 +11,7 @@ import { AuditLogAction, AuditLogEntity } from 'src/common/enums/audit_log';
 import { buildMultiLangEntity } from 'src/common/utils/buildMultiLangEntity';
 import { validateRequiredLanguages, validateUniqueLanguages } from 'src/common/validators/translation-validator.';
 import { Sequelize } from 'sequelize';
+import { prepareEntityChange } from 'src/common/utils/prepareEntityChange';
 
 @Injectable()
 export class CarBrandService {
@@ -54,7 +55,7 @@ export class CarBrandService {
         );
       }
 
-      const newEntity = buildMultiLangEntity(dto.languages, ['name']);
+    const { newEntity } = prepareEntityChange({newLanguages: dto.languages,fields: ['name']});
 
       await this.auditLogService.logChange({
         actor,
@@ -79,10 +80,8 @@ export class CarBrandService {
   {
     const brand = await this.getOneOrFail(id);
 
-    const oldLanguages = await this.carBrandLanguageRep.findAll({
-      where: { carBrandId: id },
-    });
-    const oldEntity = buildMultiLangEntity(oldLanguages, ['name']);
+    const oldLanguages = await this.carBrandLanguageRep.findAll({where: { carBrandId: id }});
+    const oldEntityData = brand.get({ plain: true });
 
     if (dto.languages) {
       const codes = dto.languages.map(l => l.languageCode);
@@ -112,26 +111,32 @@ export class CarBrandService {
           });
         }
       }
+    }
+
+    const newLanguages = await this.carBrandLanguageRep.findAll({
+      where: { carBrandId: id },
+    });
+    const { oldEntity, newEntity } = prepareEntityChange({
+      oldEntity: oldEntityData,
+      newEntity: brand.get({ plain: true }),
+      oldLanguages,
+      newLanguages,
+      fields: ['name'],
+    });
+
+    await this.auditLogService.logChange({
+      actor,
+      entity: AuditLogEntity.CARBRAND,
+      action: AuditLogAction.UPDATE,
+      entityId: brand.id,
+      oldEntity,
+      newEntity,
+      fieldsToExclude: [],
+    });
+
+    const message = this.i18n.translate('translation.updatedSuccefully', { lang });
+    return { message };
   }
-
-  const newLanguages = await this.carBrandLanguageRep.findAll({
-    where: { carBrandId: id },
-  });
-  const newEntity = buildMultiLangEntity(newLanguages, ['name']);
-
-  await this.auditLogService.logChange({
-    actor,
-    entity: AuditLogEntity.CARBRAND,
-    action: AuditLogAction.UPDATE,
-    entityId: brand.id,
-    oldEntity,
-    newEntity,
-    fieldsToExclude: [],
-  });
-
-  const message = this.i18n.translate('translation.updatedSuccefully', { lang });
-  return { message };
-}
 
   async getAll(lang?: Language) 
   {

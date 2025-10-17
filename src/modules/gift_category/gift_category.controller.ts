@@ -9,6 +9,8 @@ import { getLang } from 'src/common/utils/get-lang.util';
 import { RoleStatus } from 'src/common/enums/role_status';
 import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
 import { PermissionKey } from 'src/common/enums/permission-key';
+import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
+import { CurrentUserType } from 'src/common/types/current-user.type';
 
 @Controller('gift-category')
 export class GiftCategoryController {
@@ -21,8 +23,9 @@ export class GiftCategoryController {
   @Serilaize(GiftCategoryDtoWithMessage)
   @PermissionGuard([RoleStatus.ADMIN],PermissionKey.CreateGiftCategory)
   @Post()
-  async create(@Body() body: CreateGiftCategoryDto, @I18n() i18n: I18nContext) {
-    return this.giftCategoryService.create(body, getLang(i18n));
+  async create(@Body() body: CreateGiftCategoryDto,@CurrentUser() user:CurrentUserType, @I18n() i18n: I18nContext) {
+    const {actor} = user
+    return this.giftCategoryService.create(body,actor, getLang(i18n));
   }
 
   @ApiOperation({ summary: 'Update a gift category by ID (admin only)' })
@@ -33,8 +36,9 @@ export class GiftCategoryController {
   @Serilaize(GiftCategoryDto)
   @PermissionGuard([RoleStatus.ADMIN],PermissionKey.UpdateGiftCategory)
   @Put(':id')
-  async update(@Param('id', ParseIntPipe) id: number, @Body() body: CreateGiftCategoryDto, @I18n() i18n: I18nContext) {
-    return this.giftCategoryService.update(id, body, getLang(i18n));
+  async update(@Param('id', ParseIntPipe) id: number,@CurrentUser() user:CurrentUserType, @Body() body: CreateGiftCategoryDto, @I18n() i18n: I18nContext) {
+    const {actor} = user
+    return this.giftCategoryService.update(id, body,actor, getLang(i18n));
   }
 
   @ApiOperation({ summary: 'Get all Gift categories and their languages' })
