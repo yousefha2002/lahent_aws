@@ -11,6 +11,7 @@ export enum AuditLogEntity {
     CARBRAND = 'carBrand',
     PRODUCTCATEGORY = 'productCategory',
     COUPON = 'coupon',
+    GIFT = 'gift',
     GIFTCATEGORY = 'giftCategory',
     GIFTTEMPLATE = 'giftTemplate',
     LOYALTYOFFER ='loyaltyOffer',

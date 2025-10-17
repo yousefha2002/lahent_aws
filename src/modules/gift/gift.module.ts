@@ -9,6 +9,7 @@ import { FcmTokenModule } from '../fcm_token/fcm_token.module';
 import { SmsModule } from '../sms/sms.module';
 import { DatabaseModule } from 'src/database/database.module';
 import { UserContextModule } from '../user-context/user-context.module';
+import { AuditLogModule } from '../audit_log/audit_log.module';
 
 @Module({
   controllers: [GiftController],
@@ -20,7 +21,8 @@ import { UserContextModule } from '../user-context/user-context.module';
     forwardRef(()=>UserContextModule),
     FcmTokenModule,
     SmsModule,
-    DatabaseModule
+    DatabaseModule,
+    AuditLogModule
   ],
   exports: [GiftService],
 })

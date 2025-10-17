@@ -41,6 +41,7 @@ export enum PermissionKey {
     ViewCustomerPointsHistory = "view_customer_points_history",
     ViewCustomerGifts = "view_customer_gifts",
     ViewCustomer ='view_customer',
+    RejectGift = 'reject_gift',
 
     // car brands
     CreateCarBrand = "create_car_brand",

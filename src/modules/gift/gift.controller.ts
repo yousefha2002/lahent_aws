@@ -88,4 +88,22 @@ export class GiftController {
     const { context } = user;
     return this.giftService.thankForGift(Number(id), context, lang);
   }
+
+  @ApiSecurity('access-token')
+  @Patch(':id/cancel')
+  @PermissionGuard([RoleStatus.ADMIN],PermissionKey.RejectGift)
+  @ApiOperation({ summary: 'Cancel a gift (admin only)' })
+  @ApiResponse({
+    status: 200,
+    schema: { example: { message: 'Gift cancelled successfully' } },
+  })
+  async cancelGiftByAdmin(
+    @Param('id') id: number,
+    @I18n() i18n: I18nContext,
+    @CurrentUser() user:CurrentUserType
+  ) {
+    const lang = getLang(i18n);
+    const {actor} = user
+    return this.giftService.cancelGiftByAdmin(Number(id),actor, lang);
+  }
 }

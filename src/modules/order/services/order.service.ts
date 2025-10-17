@@ -57,18 +57,18 @@ export class OrderService {
         OrderStatus.EXPIRED_CONFIRMATION,
       ],
       completedOrCanceled: [
-        OrderStatus.RECEIVED,
-        OrderStatus.REJECTED,
-        OrderStatus.CANCELLED,
-        OrderStatus.EXPIRED_CONFIRMATION,
-    ],
-    Tracking :[
-      OrderStatus.ARRIVED,
-      OrderStatus.HALF_PREPARATION,
-      OrderStatus.PREPARING,
-      OrderStatus.READY,
-      OrderStatus.SCHEDULED
-    ]
+          OrderStatus.RECEIVED,
+          OrderStatus.REJECTED,
+          OrderStatus.CANCELLED,
+          OrderStatus.EXPIRED_CONFIRMATION,
+      ],
+      Tracking :[
+        OrderStatus.ARRIVED,
+        OrderStatus.HALF_PREPARATION,
+        OrderStatus.PREPARING,
+        OrderStatus.READY,
+        OrderStatus.SCHEDULED
+      ]
     };
 
     const whereClause: any = { storeId };
