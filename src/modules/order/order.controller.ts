@@ -153,6 +153,21 @@ export class OrderController {
   }
 
   @Serilaize(OrderActionResponseDto)
+  @PermissionGuard([RoleStatus.ADMIN])
+  @Put('admin/cancel/:orderId')
+  @ApiOperation({ summary: 'Cancel an order and refund (Admin)' })
+  @ApiSecurity('access-token')
+  @ApiParam({ name: 'orderId', description: 'ID of the order to cancel', example: 123 })
+  @ApiResponse({ status: 200, description: 'Order canceled by admin successfully', type: OrderActionResponseDto })
+  cancelOrderByAdmin(
+    @Param('orderId', ParseIntPipe) orderId: number,
+    @I18n() i18n: I18nContext
+  ) {
+    const lang = getLang(i18n);
+    return this.orderStatusService.refundOrderByAdmin(orderId, lang);
+  }
+
+  @Serilaize(OrderActionResponseDto)
   @PermissionGuard([RoleStatus.CUSTOMER])
   @Put('arrived/:orderId')
   @ApiOperation({ summary: 'Mark order as arrived by customer' })

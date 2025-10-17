@@ -71,6 +71,92 @@ export class OrderStatusService {
         }
     }
 
+    async refundOrderBase({
+        orderId,
+        lang,
+        status = OrderStatus.CANCELLED,
+        allowedStatuses,
+        transactionType,
+        notify = true,
+        requireCustomerOwnership = false,
+        customerId,
+        }: {
+        orderId: number;
+        lang: Language;
+        status?: OrderStatus;
+        allowedStatuses: OrderStatus[];
+        transactionType: StoreTransactionType;
+        notify?: boolean;
+        requireCustomerOwnership?: boolean;
+        customerId?: number;
+    }) 
+    {
+        const transaction = await this.sequelize.transaction();
+        try {
+            const where: any = { id: orderId };
+
+            if (requireCustomerOwnership && customerId) {
+            where.customerId = customerId;
+            }
+
+            const order = await this.orderRepo.findOne({ where, transaction });
+            if (!order)
+            throw new NotFoundException(this.i18n.translate('translation.orders.not_found', { lang }),);
+
+            if (!allowedStatuses.includes(order.status)) {
+                throw new BadRequestException(this.i18n.translate('translation.orders.invalid_status_for_refund', {lang}));
+            }
+
+            await this.handleOrderRefundActions(order, status, transactionType, transaction);
+            await transaction.commit();
+
+            if (notify) {
+            this.orderNotificationService.notifyBothSocket({orderId: order.id,status,customerId: order.customerId,storeId: order.storeId,});
+
+            await this.fcmTokenService.notifyUsers(
+                [
+                { userId: order.customerId, role: RoleStatus.CUSTOMER },
+                { userId: order.storeId, role: RoleStatus.STORE },
+                ],
+                OrderNotifications.ORDER_CANCELLED(order.orderNumber)[lang],
+                { orderId: order.id.toString(), status },
+            );
+            }
+
+            return {success: true,message: this.i18n.translate('translation.orders.refund_success', { lang }),
+            };
+        } catch (error) {
+            await transaction.rollback();
+            throw error;
+        }
+    }
+
+    async refundOrderByCustomer(orderId: number, customer: Customer, lang: Language) 
+    {
+        return this.refundOrderBase({
+            orderId,
+            lang,
+            allowedStatuses: [OrderStatus.CUSTOMER_DECISION],
+            transactionType: StoreTransactionType.CANCELED,
+            requireCustomerOwnership: true,
+            customerId: customer.id,
+        });
+    }
+
+    async refundOrderByAdmin(orderId: number, lang: Language) {
+    return this.refundOrderBase({
+        orderId,
+        lang,
+        allowedStatuses: [
+        OrderStatus.READY,
+        OrderStatus.PREPARING,
+        OrderStatus.HALF_PREPARATION,
+        OrderStatus.SCHEDULED
+        ],
+        transactionType: StoreTransactionType.REFUND,
+    });
+    }
+
     async rejectOrderByStore(orderId: number, storeId: number, lang: Language = Language.ar) {
         const transaction = await this.sequelize.transaction();
         try {

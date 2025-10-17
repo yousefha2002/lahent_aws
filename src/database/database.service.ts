@@ -79,7 +79,7 @@ export const databaseProviders = [
         username: 'admin',
         password: '059283805928388',
         database: 'lahant-store',
-        logging: (msg) => console.error(msg)
+        logging: (msg) => console.error(msg) 
       })
 
       // const sequelize = new Sequelize({
