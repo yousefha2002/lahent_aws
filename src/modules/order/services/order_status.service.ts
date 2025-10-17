@@ -314,33 +314,74 @@ export class OrderStatusService {
         }
     }
 
-    async markOrderReceived(orderId: number, customerId: number, lang: Language = Language.en) {
+    async markOrderReceivedByCustomer(orderId: number, customerId: number, lang: Language) 
+    {
         const transaction = await this.sequelize.transaction();
         try {
             const order = await this.orderRepo.findOne({ where: { id: orderId, customerId }, transaction });
             if (!order) throw new NotFoundException(this.i18n.translate('translation.orders.not_found', { lang }));
 
             if (order.status !== OrderStatus.ARRIVED) {
-                throw new BadRequestException(this.i18n.translate('translation.orders.invalid_status_for_received', { lang }));
+            throw new BadRequestException(this.i18n.translate('translation.orders.invalid_status_for_received', { lang }));
             }
 
-            order.status = OrderStatus.RECEIVED;
-            order.receivedAt = new Date();
-
-            await order.save({ transaction });
+            await this.markOrderReceivedBase(order, lang, transaction);
             await transaction.commit();
-            this.orderNotificationService.notifyStoreSocket({orderId: order.id,status: order.status,storeId: order.storeId});
-            await this.fcmTokenService.notifyUser(
-                order.storeId,
-                RoleStatus.STORE,
-                OrderNotifications.ORDER_RECEIVED(order.orderNumber)[lang],
-                { orderId: order.id.toString(), status: order.status }
-            );
+
             return { success: true, message: this.i18n.translate('translation.orders.received_success', { lang }) };
         } catch (error) {
             await transaction.rollback();
             throw error;
         }
+    }
+
+    async markOrderReceivedByAdmin(orderId: number, lang: Language) 
+    {
+        const transaction = await this.sequelize.transaction();
+        try {
+            const order = await this.orderRepo.findOne({ where: { id: orderId }, transaction });
+            if (!order) throw new NotFoundException(this.i18n.translate('translation.orders.not_found', { lang }));
+
+            const allowedStatuses = [
+                OrderStatus.ARRIVED,
+                OrderStatus.READY,
+                OrderStatus.PREPARING,
+                OrderStatus.HALF_PREPARATION,
+                OrderStatus.SCHEDULED,
+            ];
+
+            if (!allowedStatuses.includes(order.status)) {
+            throw new BadRequestException(this.i18n.translate('translation.orders.invalid_status_for_received', { lang }));
+            }
+
+            await this.markOrderReceivedBase(order, lang, transaction);
+            await transaction.commit();
+
+            return { success: true, message: this.i18n.translate('translation.orders.received_success', { lang }) };
+        } catch (error) {
+            await transaction.rollback();
+            throw error;
+        }
+        }
+
+    private async markOrderReceivedBase(order: Order,lang: Language,transaction: any) 
+    {
+        order.status = OrderStatus.RECEIVED;
+        order.receivedAt = new Date();
+        await order.save({ transaction });
+
+        this.orderNotificationService.notifyStoreSocket({
+            orderId: order.id,
+            status: order.status,
+            storeId: order.storeId,
+        });
+
+        await this.fcmTokenService.notifyUser(
+            order.storeId,
+            RoleStatus.STORE,
+            OrderNotifications.ORDER_RECEIVED(order.orderNumber)[lang],
+            { orderId: order.id.toString(), status: order.status }
+        );
     }
 
     async extendCustomerDecisionTimeout(orderId: number, customerId: number, extraMinutes: number, lang: Language = Language.en) {

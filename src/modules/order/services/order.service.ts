@@ -61,6 +61,13 @@ export class OrderService {
         OrderStatus.REJECTED,
         OrderStatus.CANCELLED,
         OrderStatus.EXPIRED_CONFIRMATION,
+    ],
+    Tracking :[
+      OrderStatus.ARRIVED,
+      OrderStatus.HALF_PREPARATION,
+      OrderStatus.PREPARING,
+      OrderStatus.READY,
+      OrderStatus.SCHEDULED
     ]
     };
 

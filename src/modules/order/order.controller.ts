@@ -153,7 +153,7 @@ export class OrderController {
   }
 
   @Serilaize(OrderActionResponseDto)
-  @PermissionGuard([RoleStatus.ADMIN])
+  @PermissionGuard([RoleStatus.ADMIN],PermissionKey.UpdateOrder)
   @Put('admin/cancel/:orderId')
   @ApiOperation({ summary: 'Cancel an order and refund (Admin)' })
   @ApiSecurity('access-token')
@@ -190,7 +190,6 @@ export class OrderController {
   @ApiOperation({ summary: 'Mark order as received by customer' })
   @ApiSecurity('access-token')
   @ApiParam({ name: 'orderId', description: 'ID of the order to mark as received', example: 123 })
-  @ApiQuery({ name: 'lang', enum: Language, required: false, example: 'en' })
   @ApiResponse({ status: 200, description: 'Order marked as received successfully', type: OrderActionResponseDto })
   markReceived(
     @CurrentUser() user: CurrentUserType,
@@ -199,8 +198,24 @@ export class OrderController {
   ) {
     const lang = getLang(i18n);
     const {context} = user
-    return this.orderStatusService.markOrderReceived(orderId, context.id,lang);
+    return this.orderStatusService.markOrderReceivedByCustomer(orderId, context.id,lang);
   }
+
+  @Serilaize(OrderActionResponseDto)
+  @PermissionGuard([RoleStatus.ADMIN],PermissionKey.UpdateOrder)
+  @Put('admin/received/:orderId')
+  @ApiOperation({ summary: 'Mark order as received by admin' })
+  @ApiSecurity('access-token')
+  @ApiParam({ name: 'orderId', description: 'ID of the order to mark as received', example: 123 })
+  @ApiResponse({ status: 200, description: 'Order marked as received successfully by admin', type: OrderActionResponseDto })
+  markReceivedByAdmin(
+    @Param('orderId', ParseIntPipe) orderId: number,
+    @I18n() i18n: I18nContext
+  ) {
+    const lang = getLang(i18n);
+    return this.orderStatusService.markOrderReceivedByAdmin(orderId, lang);
+  }
+  
 
   @Serilaize(OrderActionResponseDto)
   @PermissionGuard([RoleStatus.STORE])
