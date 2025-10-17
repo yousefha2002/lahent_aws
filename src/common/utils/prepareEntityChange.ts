@@ -13,11 +13,20 @@ export function prepareEntityChange({
     newLanguages?: any[];
     fields?: string[];
 }) {
-    if (oldLanguages && newLanguages) {
-        const oldData = buildMultiLangEntity(oldLanguages, fields || ['name']);
-        const newData = buildMultiLangEntity(newLanguages, fields || ['name']);
-        return { oldEntity: oldData, newEntity: newData };
-    }
+    const processLanguages = (langs?: any[]) => {
+        if (!langs || langs.length === 0) return {};
+        const flds = fields && fields.length
+        ? fields
+        : Object.keys(langs[0]).filter(k => k !== 'languageCode');
+        return buildMultiLangEntity(langs, flds);
+    };
 
-    return { oldEntity, newEntity };
+    const oldLangData = processLanguages(oldLanguages);
+    const newLangData = processLanguages(newLanguages);
+
+    // دمج الكائنات العادية مع اللغات
+    const finalOldEntity = { ...oldEntity, ...oldLangData };
+    const finalNewEntity = { ...newEntity, ...newLangData };
+
+    return { oldEntity: finalOldEntity, newEntity: finalNewEntity };
 }
