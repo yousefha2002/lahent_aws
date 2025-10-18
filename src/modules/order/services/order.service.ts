@@ -369,4 +369,18 @@ export class OrderService {
 
     return !!existingOrder;
   }
+
+  async getCustomerOrderSummary(customerId: number) {
+      const result = await this.orderRepo.findOne({
+        where: { customerId },
+        attributes: [
+          [this.sequelize.fn('SUM', this.sequelize.col('finalPriceToPay')), 'youPaid'],
+          [this.sequelize.fn('SUM', this.sequelize.literal('couponDiscountAmount + offersDiscount')), 'youSaved'],
+          [this.sequelize.fn('SUM', this.sequelize.col('offersDiscount')), 'storesOffer'],
+        ],
+        raw: true,
+      });
+
+      return result;
+    }
 }

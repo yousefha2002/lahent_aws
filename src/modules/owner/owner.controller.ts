@@ -13,7 +13,6 @@ import { PermissionGuard } from 'src/common/decorators/permession-guard.decorato
 import { RoleStatus } from 'src/common/enums/role_status';
 import { UserTokenService } from '../user_token/user_token.service';
 import { FcmTokenService } from '../fcm_token/fcm_token.service';
-import { Owner } from './entities/owner.entity';
 import { PermissionKey } from 'src/common/enums/permission-key';
 
 @Controller('owner')
