@@ -3,7 +3,7 @@ import { Type } from 'class-transformer';
 import { IsArray, IsNotEmpty, IsNumber, IsString, ValidateNested } from 'class-validator';
 import { Language } from 'src/common/enums/language';
 
-class SubTypeLanguageDto {
+class BasicSubTypeLanguageDto {
   @ApiProperty()
   @IsNotEmpty()
   languageCode: Language;
@@ -15,21 +15,22 @@ class SubTypeLanguageDto {
 }
 
 export class CreateSubTypeDto {
+  @ApiProperty()
   @IsNumber()
   @IsNotEmpty()
   typeId: number;
 
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => SubTypeLanguageDto)
-  @ApiProperty({ type: [SubTypeLanguageDto] })
-  languages: SubTypeLanguageDto[];
+  @Type(() => BasicSubTypeLanguageDto)
+  @ApiProperty({ type: [BasicSubTypeLanguageDto] })
+  languages: BasicSubTypeLanguageDto[];
 }
 
 export class UpdateSubTypeDto {
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => SubTypeLanguageDto)
-  @ApiProperty({ type: [SubTypeLanguageDto] })
-  languages: SubTypeLanguageDto[];
+  @Type(() => BasicSubTypeLanguageDto)
+  @ApiProperty({ type: [BasicSubTypeLanguageDto] })
+  languages: BasicSubTypeLanguageDto[];
 }

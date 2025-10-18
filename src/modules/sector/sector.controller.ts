@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Post, Put, UseGuards } from '@nestjs/common';
 import { SectorService } from './sector.service';
-import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { CreateSectorDto } from './dto/create-sector.dto';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
@@ -16,6 +16,8 @@ import { CurrentUserType } from 'src/common/types/current-user.type';
 @Controller('sector')
 export class SectorController {
   constructor(private readonly sectorService: SectorService) {}
+
+  @ApiSecurity('access-token')
   @PermissionGuard([RoleStatus.ADMIN],PermissionKey.CreateSector)
   @Post('create')
   @ApiOperation({ summary: 'Create a new sector' })
@@ -44,6 +46,7 @@ export class SectorController {
     return this.sectorService.getAll(lang);
   }
 
+  @ApiSecurity('access-token')
   @PermissionGuard([RoleStatus.ADMIN],PermissionKey.UpdateSector)
   @Put(':id')
   @ApiOperation({ summary: 'Update a sector' })
@@ -66,6 +69,7 @@ export class SectorController {
   }
 
   @Get('admin')
+  @ApiSecurity('access-token')
   @PermissionGuard([RoleStatus.ADMIN],PermissionKey.ViewSector)
   @Serilaize(SectorDto)
   @ApiOperation({ summary: 'Get all sectors (admin, without language filter)' })

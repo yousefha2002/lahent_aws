@@ -131,7 +131,6 @@ export class TypeService {
       const newEntity = buildMultiLangEntity(newLanguages, ['name']);
       if (file) {
         newEntity.iconUrl = type.iconUrl;
-        newEntity.iconPublicId = type.iconPublicId;
       }
 
       await this.auditLogService.logChange({

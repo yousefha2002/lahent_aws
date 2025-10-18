@@ -9,9 +9,9 @@ import { Language } from 'src/common/enums/language';
 import { I18nService } from 'nestjs-i18n';
 import { StoreService } from '../store/services/store.service';
 import { AuditLogAction, AuditLogEntity } from 'src/common/enums/audit_log';
-import { buildMultiLangEntity } from 'src/common/utils/buildMultiLangEntity';
 import { ActorInfo } from 'src/common/types/current-user.type';
 import { Sequelize } from 'sequelize';
+import { buildMultiLangEntity } from 'src/common/utils/buildMultiLangEntity';
 
 @Injectable()
 export class SubtypeService {
@@ -40,7 +40,7 @@ export class SubtypeService {
         );
 
         for (const langObj of dto.languages) {
-          await this.subTypelangRepo.create(
+          const createdLang = await this.subTypelangRepo.create(
             {
               subTypeId: subTypeCreated.id,
               languageCode: langObj.languageCode,
@@ -49,16 +49,16 @@ export class SubtypeService {
             { transaction },
           );
         }
-
-        const newEntity = buildMultiLangEntity(dto.languages, ['name']);
+        const newLanguages = await this.subTypelangRepo.findAll({where: { subTypeId: subTypeCreated.id },transaction});
+        const translationEntity = buildMultiLangEntity(newLanguages, ['name']);
 
         await this.auditLogService.logChange({
           actor,
           entity: AuditLogEntity.SUBTYPE,
           action: AuditLogAction.CREATE,
           entityId: subTypeCreated.id,
-          newEntity,
-          fieldsToExclude: [],
+          newEntity: { ...subTypeCreated.get({ plain: true }), ...translationEntity },
+          fieldsToExclude: ['createdAt', 'updatedAt'],
         });
 
         await transaction.commit();
@@ -75,14 +75,9 @@ export class SubtypeService {
     const transaction = await this.sequelize.transaction();
 
     try {
-      const subType = await this.subTypeById(subTypeId);
-
-      const oldLanguages = await this.subTypelangRepo.findAll({
-        where: { subTypeId },
-        transaction,
-      });
-      const oldEntity = buildMultiLangEntity(oldLanguages, ['name']);
-      oldEntity.typeId = subType.typeId; 
+      await this.subTypeById(subTypeId);
+      const oldLanguages = await this.subTypelangRepo.findAll({ where: { subTypeId }, transaction });
+      const oldTranslationEntity = buildMultiLangEntity(oldLanguages, ['name']);
 
       for (const langObj of dto.languages) {
         const existingLang = await this.subTypelangRepo.findOne({
@@ -105,20 +100,17 @@ export class SubtypeService {
         }
       }
 
-      const newLanguages = await this.subTypelangRepo.findAll({
-        where: { subTypeId },
-        transaction,
-      });
-      const newEntity = buildMultiLangEntity(newLanguages, ['name']);
+      const newLanguages = await this.subTypelangRepo.findAll({ where: { subTypeId }, transaction });
+      const newTranslationEntity = buildMultiLangEntity(newLanguages, ['name']);
 
       await this.auditLogService.logChange({
         actor,
         entity: AuditLogEntity.SUBTYPE,
         action: AuditLogAction.UPDATE,
         entityId: subTypeId,
-        oldEntity,
-        newEntity,
-        fieldsToExclude: [],
+        oldEntity: oldTranslationEntity ,
+        newEntity: newTranslationEntity ,
+        fieldsToExclude: ['createdAt', 'updatedAt'],
       });
 
       await transaction.commit();
@@ -157,28 +149,7 @@ export class SubtypeService {
       const message = this.i18n.translate('translation.type_has_stores', { lang });
       throw new BadRequestException(message);
     }
-
-    const oldEntity = {
-      id: subType.id,
-      typeId: subType.typeId,
-      translations: subType.languages?.map(lang => ({
-        languageCode: lang.languageCode,
-        name: lang.name,
-      })) || [],
-    };
-
     await this.subTypeRepo.destroy({ where: { id } });
-
-    await this.auditLogService.logChange({
-      actor,
-      entity: AuditLogEntity.SUBTYPE,
-      action: AuditLogAction.DELETE,
-      entityId: id,
-      oldEntity,
-      newEntity: null,
-      fieldsToExclude: [],
-    });
-
     const message = this.i18n.translate('translation.deletedSuccefully', { lang });
     return { message };
   }

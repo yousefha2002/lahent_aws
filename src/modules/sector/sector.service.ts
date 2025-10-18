@@ -12,7 +12,6 @@ import { UpdateSectorDto } from './dto/update-sector.dto';
 import { validateRequiredLanguages, validateUniqueLanguages } from 'src/common/validators/translation-validator.';
 import { ActorInfo } from 'src/common/types/current-user.type';
 import { AuditLogAction, AuditLogEntity } from 'src/common/enums/audit_log';
-import { prepareEntityChange } from 'src/common/utils/prepareEntityChange';
 import { buildMultiLangEntity } from 'src/common/utils/buildMultiLangEntity';
 
 @Injectable()
@@ -112,11 +111,8 @@ export class SectorService {
                 throw new BadRequestException(message);
             }
 
-            // 🟡 جلب النسخة القديمة قبل التحديث
-            const oldLanguages = await this.sectorLanguageRepo.findAll({
-                where: { sectorId: id },
-                transaction,
-            });
+            const oldLanguages = await this.sectorLanguageRepo.findAll({where: { sectorId: id },transaction,});
+            const oldTranslationEntity = buildMultiLangEntity(oldLanguages, ['name']);
 
             if (dto.languages) {
                 const codes = dto.languages.map((l) => l.languageCode);
@@ -149,24 +145,16 @@ export class SectorService {
                 }
             }
 
-            const newLanguages = await this.sectorLanguageRepo.findAll({
-                where: { sectorId: id },
-                transaction,
-            });
-
-            const { oldEntity, newEntity } = prepareEntityChange({
-                oldLanguages,
-                newLanguages,
-                fields: ['name'],
-            });
+            const newLanguages = await this.sectorLanguageRepo.findAll({where: { sectorId: id },transaction,});
+            const newTranslationEntity = buildMultiLangEntity(newLanguages, ['name']);
 
             await this.auditLogService.logChange({
                 actor,
                 entity: AuditLogEntity.SECTOR,
                 action: AuditLogAction.UPDATE,
                 entityId: sector.id,
-                oldEntity,
-                newEntity,
+                oldEntity:oldTranslationEntity,
+                newEntity:newTranslationEntity,
             });
 
             await transaction.commit();

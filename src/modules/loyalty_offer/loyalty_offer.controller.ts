@@ -10,6 +10,8 @@ import { getLang } from 'src/common/utils/get-lang.util';
 import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
 import { RoleStatus } from 'src/common/enums/role_status';
 import { PermissionKey } from 'src/common/enums/permission-key';
+import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
+import { CurrentUserType } from 'src/common/types/current-user.type';
 
 @Controller('loyalty-offer')
 export class LoyaltyOfferController {
@@ -22,8 +24,9 @@ export class LoyaltyOfferController {
   @ApiSecurity('access-token')
   @ApiBody({ type: CreateLoyaltyOfferDto })
   @ApiResponse({ status: 201, description: 'Created loyalty offer', type: ExtendedLoyaltyOfferDto })
-  async create(@Body() dto: CreateLoyaltyOfferDto, @I18n() i18n: I18nContext) {
-    return this.loyaltyOfferService.create(dto, getLang(i18n));
+  async create(@Body() dto: CreateLoyaltyOfferDto, @I18n() i18n: I18nContext,@CurrentUser() user:CurrentUserType) {
+    const {actor} = user
+    return this.loyaltyOfferService.create(dto,actor, getLang(i18n));
   }
 
   @Serilaize(PaginatedLoyaltyOfferDto)
@@ -54,8 +57,9 @@ export class LoyaltyOfferController {
   @ApiParam({ name: 'id', description: 'ID of the loyalty offer', example: 1 })
   @ApiBody({ type: UpdateLoyaltyOfferDto })
   @ApiResponse({ status: 200, description: 'Updated loyalty offer', type: ExtendedLoyaltyOfferDto })
-  async update(@Param('id') id: number, @Body() dto: UpdateLoyaltyOfferDto, @I18n() i18n: I18nContext) {
-    return this.loyaltyOfferService.update(+id, dto, getLang(i18n));
+  async update(@Param('id') id: number, @Body() dto: UpdateLoyaltyOfferDto, @I18n() i18n: I18nContext,@CurrentUser() user:CurrentUserType) {
+    const {actor} = user
+    return this.loyaltyOfferService.update(+id,actor, dto, getLang(i18n));
   }
 
   @Serilaize(ExtendedLoyaltyOfferDto)
@@ -65,7 +69,8 @@ export class LoyaltyOfferController {
   @ApiSecurity('access-token')
   @ApiParam({ name: 'id', description: 'ID of the loyalty offer', example: 1 })
   @ApiResponse({ status: 200, description: 'Loyalty offer status toggled successfully', type: ExtendedLoyaltyOfferDto })
-  async toggleStatus(@Param('id') id: number, @I18n() i18n: I18nContext) {
-    return this.loyaltyOfferService.toggleStatus(+id, getLang(i18n));
+  async toggleStatus(@Param('id') id: number, @I18n() i18n: I18nContext,@CurrentUser() user:CurrentUserType) {
+    const {actor} = user
+    return this.loyaltyOfferService.toggleStatus(+id,actor, getLang(i18n));
   }
 }
