@@ -60,14 +60,18 @@ export class StoreTransactionController {
     @ApiQuery({ name: 'storeId', required: false, example: 1 })
     @ApiSecurity('access-token')
     @ApiResponse({ status: 200, description: 'Store financials', type: StoreFinancialsResponseDto })
+    @ApiQuery({ name: 'from', required: false, type: String, description: 'Filter by registration start date (YYYY-MM-DD)' })
+    @ApiQuery({ name: 'to', required: false, type: String, description: 'Filter by registration end date (YYYY-MM-DD)' })
     @Get('financials/byStore')
     async getStoreFinancials(
         @CurrentUser() user: CurrentUserType,
-        @Query() query: StoreFinancialsFilterDto
+        @Query() query: StoreFinancialsFilterDto,
+        @Query('from') from?: string,
+        @Query('to') to?: string,
     ) {
         const { filter, specificDate } = query;
         const {context} = user
-        return this.storeTransactionService.getStoreFinancials(context.id, filter, specificDate);
+        return this.storeTransactionService.getStoreFinancials(context.id, filter, specificDate,from,to);
     }
 
     @Serilaize(AdminTransactionResponse)

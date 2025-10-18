@@ -22,7 +22,7 @@ import { Language } from 'src/common/enums/language';
 import { StoreLanguage } from 'src/modules/store/entities/store_language.entity';
 import { CarBrand } from 'src/modules/car_brand/entities/car_brand.entity';
 import { CarBrandLanguage } from 'src/modules/car_brand/entities/car_brand.languae.entity';
-import { getDateRange } from 'src/common/utils/getDateRange';
+import { getEffectiveDateRange } from 'src/common/utils/getDataRangeOptions';
 
 @Injectable()
 export class OrderService {
@@ -253,9 +253,9 @@ export class OrderService {
     return +maxOrderNumber + 1;
   }
 
-  async getStoreOrderStats(storeId: number, filter?: string, specificDate?: string) 
+  async getStoreOrderStats(storeId: number, filter?: string, specificDate?: string,from?:string,to?:string) 
   {
-    const { start, end } = getDateRange(filter || 'all', specificDate);
+    const { start, end } = getEffectiveDateRange({ filter, specificDate, from, to });
     const result = await Order.findOne({
       attributes: [
         [literal(`
@@ -308,8 +308,10 @@ export class OrderService {
   storeId: number,
   filter?: string,
   specificDate?: string,
+  from?:string,
+  to?:string
 ) {
-  const { start, end } = getDateRange(filter ?? 'all', specificDate);
+  const { start, end } = getEffectiveDateRange({ filter, specificDate, from, to });
 
   const avgPrepResult = await this.orderRepo.findOne({
     attributes: [

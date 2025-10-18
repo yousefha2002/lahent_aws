@@ -502,9 +502,11 @@ export class ProductService {
     return this.productRepo.restore({where: { storeId},transaction})
   }
 
-  async getTopProductsBySales(storeId: number, lang: Language, filter: string, specificDate?: string) {
+  async getTopProductsBySales(storeId: number, lang: Language, filter: string, specificDate?: string,from?:string,to?:string) {
     let dateFilter = {};
-    if (filter) {
+    if (from && to) {
+      dateFilter = { createdAt: { [Op.between]: [new Date(from), new Date(to)] } };
+    } else if (filter || specificDate) {
       const { start, end } = getDateRange(filter, specificDate);
       dateFilter = { createdAt: { [Op.between]: [start, end] } };
     }

@@ -98,16 +98,20 @@ export class ProductController {
   @ApiOperation({ summary: 'Get top 4 selling products for a store' })
   @ApiResponse({ status: 200, type: [TopProductResponseDto] })
   @ApiQuery({ name: 'storeId', required: false, example: 1 })
+  @ApiQuery({ name: 'from', required: false, type: String, description: 'Filter by registration start date (YYYY-MM-DD)' })
+  @ApiQuery({ name: 'to', required: false, type: String, description: 'Filter by registration end date (YYYY-MM-DD)' })
   @ApiSecurity('access-token')
   async getTopSellingProducts(
     @CurrentUser() user:CurrentUserType,
     @I18n() i18n: I18nContext,
-    @Query() query: StoreFinancialsFilterDto
+    @Query() query: StoreFinancialsFilterDto,
+    @Query('from') from?: string,
+    @Query('to') to?: string
   ) {
     const lang = getLang(i18n);
     const { filter, specificDate } = query;
     const {context} = user
-    return this.productService.getTopProductsBySales(context.id, lang,filter,specificDate);
+    return this.productService.getTopProductsBySales(context.id, lang,filter,specificDate,from,to);
   }
 
   @Serilaize(PaginatedProductsCustomerViewDto)

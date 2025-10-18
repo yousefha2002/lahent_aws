@@ -11,7 +11,6 @@ import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { PaginatedOrderListDto } from './dto/responses/store-order-list.dto';
 import { filterStatusByStore } from 'src/common/types/filter-status';
 import { OrderDto } from './dto/responses/order-full-details.dto';
-import { Language } from 'src/common/enums/language';
 import { CompletedProfileGuard } from 'src/common/guards/auths/completed-profile.guard';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { CreateOrderResponseDto } from './dto/responses/create-order-response.dto';
@@ -90,13 +89,17 @@ export class OrderController {
     description: 'Store analytics',
     type: OrderAnalyticsResponseDto,
   })
+  @ApiQuery({ name: 'from', required: false, type: String, description: 'Filter by registration start date (YYYY-MM-DD)' })
+  @ApiQuery({ name: 'to', required: false, type: String, description: 'Filter by registration end date (YYYY-MM-DD)' })
   async getOrderAvgAnalyticsByStore(
     @CurrentUser() user: CurrentUserType,
-    @Query() query: StoreFinancialsFilterDto
+    @Query() query: StoreFinancialsFilterDto,
+    @Query('from') from?: string,
+    @Query('to') to?: string,
   ) {
     const { filter, specificDate } = query;
     const {context} = user
-    return this.orderService.getOrderAvgAnalyticsByStore(context.id, filter, specificDate);
+    return this.orderService.getOrderAvgAnalyticsByStore(context.id, filter, specificDate,from,to);
   }
 
   @Serilaize(OrderActionResponseDto)
@@ -288,10 +291,17 @@ export class OrderController {
     description: 'Order statistics grouped by status',
     type:StoreOrderStatsResponseDto
   })
-  async getStoreOrderStats(@CurrentUser() user: CurrentUserType, @Query() query: StoreFinancialsFilterDto) {
+  @ApiQuery({ name: 'from', required: false, type: String, description: 'Filter by registration start date (YYYY-MM-DD)' })
+  @ApiQuery({ name: 'to', required: false, type: String, description: 'Filter by registration end date (YYYY-MM-DD)' })
+  async getStoreOrderStats(
+    @CurrentUser() user: CurrentUserType, 
+    @Query() query: StoreFinancialsFilterDto,
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+  ) {
     const { filter, specificDate } = query;
     const {context} = user
-    return this.orderService.getStoreOrderStats(context.id,filter,specificDate);
+    return this.orderService.getStoreOrderStats(context.id,filter,specificDate,from,to);
   }
 
   @Serilaize(OrderDto)

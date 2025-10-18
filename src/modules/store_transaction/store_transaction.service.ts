@@ -15,6 +15,7 @@ import { StoreTransactionType } from 'src/common/enums/transaction_type';
 import { Language } from 'src/common/enums/language';
 import { I18nService } from 'nestjs-i18n';
 import { S3Service } from '../s3/s3.service';
+import { getEffectiveDateRange } from 'src/common/utils/getDataRangeOptions';
 
 @Injectable()
 export class StoreTransactionService {
@@ -91,9 +92,9 @@ export class StoreTransactionService {
         return availableBalance
     }
 
-    async getStoreFinancials(storeId: number, filter: string, specificDate?: string) 
+    async getStoreFinancials(storeId: number, filter: string, specificDate?: string,from?:string,to?:string) 
     {
-        const { start, end } = getDateRange(filter, specificDate);
+        const { start, end } = getEffectiveDateRange({ filter, specificDate, from, to });
         const result = await this.storeTransactionRepo.findOne({
             attributes: [
                 [literal(`
