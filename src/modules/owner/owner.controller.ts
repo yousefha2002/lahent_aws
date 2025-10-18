@@ -84,6 +84,7 @@ export class OwnerController {
   @ApiQuery({ name: 'city', required: false, type: String, description: 'Filter by city' })
   @ApiQuery({ name: 'phone', required: false, type: String, description: 'Filter by phone' })
   @ApiQuery({ name: 'email', required: false, type: String, description: 'Filter by email' })
+  @ApiQuery({ name: 'isCompletedProfile', required: false, type: Boolean, description: 'Filter by completed profile (true/false)' })
   @Serilaize(PaginationOwnerDto)
   @PermissionGuard([RoleStatus.ADMIN],PermissionKey.ViewOwners)
   @Get('all')
@@ -93,9 +94,11 @@ export class OwnerController {
     @Query('name') name?: string,
     @Query('city') city?: string,
     @Query('phone') phone?: string,
-    @Query('email') email?: string)
+    @Query('email') email?: string,
+    @Query('isCompletedProfile') isCompletedProfile?: string
+  )
   {
-    return this.ownerService.findAll(page, limit,name,city,phone,email);
+    return this.ownerService.findAll(page, limit,name,city,phone,email,isCompletedProfile);
   }
 
   @PermissionGuard([RoleStatus.OWNER])

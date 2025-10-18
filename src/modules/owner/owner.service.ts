@@ -87,14 +87,20 @@ export class OwnerService {
     return this.ownerRepo.findOne({ where: { phone} ,paranoid: false});
   }
 
-  async findAll(page = 1, limit = 10,name?: string,city?: string,phone?: string,email?:string) 
+  async findAll(page = 1, limit = 10,name?: string,city?: string,phone?: string,email?:string,isCompletedProfile?: string) 
   {
+    let completedProfile: boolean | undefined;
+    if (isCompletedProfile === 'true') completedProfile = true;
+    else if (isCompletedProfile === 'false') completedProfile = false;
+    else completedProfile = undefined;
+    
     const offset = (page - 1) * limit;
     const whereStore: any = {
       ...(city && { city:{ [Op.like]: `%${city}%` } }),
       ...(phone && { phone: { [Op.like]: `%${phone}%` } }),
       ...(email && { email: { [Op.like]: `%${email}%` } }),
-      ...(name && { name: { [Op.like]: `%${name}%` } })
+      ...(name && { name: { [Op.like]: `%${name}%` } }),
+      ...(completedProfile !== undefined && { isCompletedProfile: completedProfile })
     };
     const { rows, count } = await this.ownerRepo.findAndCountAll({
       limit,
