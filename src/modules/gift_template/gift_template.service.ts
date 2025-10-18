@@ -1,3 +1,4 @@
+import { AuditLogService } from './../audit_log/audit_log.service';
 import { S3Service } from './../s3/s3.service';
 import { GiftCategoryService } from './../gift_category/gift_category.service';
 import {BadRequestException,Inject,Injectable,NotFoundException} from '@nestjs/common';
@@ -11,6 +12,8 @@ import { Op, Sequelize } from 'sequelize';
 import { validateDates } from 'src/common/validators/date.validator';
 import { validateCreateDates } from 'src/common/validators/create-date.validator';
 import { ActorInfo } from 'src/common/types/current-user.type';
+import { AuditLogAction, AuditLogEntity } from 'src/common/enums/audit_log';
+import { normalizeDatesForAudit } from 'src/common/utils/normalizeDateForAduit';
 
 @Injectable()
 export class GiftTemplateService {
@@ -20,6 +23,7 @@ export class GiftTemplateService {
     private readonly s3Service: S3Service,
     private readonly giftCategoryService: GiftCategoryService,
     private readonly i18n: I18nService,
+    private readonly auditLogService:AuditLogService
   ) {}
 
   async create(body: CreateGiftTemplateDto,actor:ActorInfo, file: Express.Multer.File, lang : Language) 
@@ -41,12 +45,20 @@ export class GiftTemplateService {
 
     const uploadResult = await this.s3Service.uploadImage(file);
 
-    await this.giftTemplateRepo.create({
+    const giftTemplate = await this.giftTemplateRepo.create({
         imageUrl: uploadResult.secure_url,
         imagePublicId: uploadResult.public_id,
         categoryId: +categoryId,
         startDate,
         endDate,
+    });
+    const newEntity = normalizeDatesForAudit(giftTemplate.get({ plain: true }));
+    await this.auditLogService.logChange({
+      actor,
+      entity: AuditLogEntity.GIFTTEMPLATE,
+      action: AuditLogAction.CREATE,
+      newEntity,
+      fieldsToExclude: ['createdAt', 'updatedAt','imagePublicId'],
     });
     return { message: this.i18n.translate('translation.gift_template.created', { lang }) };
   }
@@ -59,6 +71,7 @@ export class GiftTemplateService {
         this.i18n.translate('translation.gift_template.not_found', { lang })
       );
     }
+    const oldEntity = normalizeDatesForAudit(giftTemplate.get({ plain: true }));
 
     const { categoryId, startDate: newStart, endDate: newEnd } = body;
     if (categoryId !== undefined) {
@@ -83,7 +96,17 @@ export class GiftTemplateService {
       lang,
     });
 
-    await giftTemplate.update({ ...body, startDate, endDate });
+    await giftTemplate.update({ ...body, startDate, endDate,...(file ? { imageUrl: giftTemplate.imageUrl, imagePublicId: giftTemplate.imagePublicId } : {}), });
+    const updatedGiftTemplate = await giftTemplate.reload();
+    const newEntity = normalizeDatesForAudit(updatedGiftTemplate.get({ plain: true }));
+    await this.auditLogService.logChange({
+      actor,
+      entity: AuditLogEntity.GIFTTEMPLATE,
+      action: AuditLogAction.UPDATE,
+      oldEntity,
+      newEntity,
+      fieldsToExclude: ['createdAt', 'updatedAt','imagePublicId'],
+    });
 
     return {
       message: this.i18n.translate('translation.gift_template.updated', { lang }),
@@ -117,7 +140,7 @@ export class GiftTemplateService {
     };
   }
 
-  async findById(id: number, lang = Language.ar) 
+  async findById(id: number, lang : Language) 
   {
     const giftTemplate = await this.giftTemplateRepo.findOne({
       where: {

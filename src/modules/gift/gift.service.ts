@@ -44,7 +44,7 @@ export class GiftService {
     const transaction = await this.sequelize.transaction();
     try {
       const { receiverPhone, receiverName, giftTemplateId, amount } = dto;
-      const giftTemplate = await this.giftTemplateService.findById(giftTemplateId)
+      const giftTemplate = await this.giftTemplateService.findById(giftTemplateId,lang)
 
       if (sender.walletBalance < amount) {
         const message = this.i18n.translate('translation.not_enough_balance', { lang });
