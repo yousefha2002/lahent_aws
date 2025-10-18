@@ -1,4 +1,5 @@
 import {Table,Column,Model,DataType,AutoIncrement,PrimaryKey,AllowNull,HasMany,ForeignKey,BelongsTo,Default,BelongsToMany} from 'sequelize-typescript';
+import { CustomerStatus } from 'src/common/enums/customer_status';
 import { Address } from 'src/modules/address/entities/address.entity';
 import { Avatar } from 'src/modules/avatar/entities/avatar.entity';
 import { Car } from 'src/modules/car/entities/car.entity';
@@ -84,4 +85,8 @@ export class Customer extends Model {
 
   @Column({ type: DataType.DATE,allowNull: true,})
   lastActive: Date;
+
+  @Default(CustomerStatus.ACTIVE)
+  @Column(DataType.ENUM(...Object.values(CustomerStatus)))
+  status: CustomerStatus;
 }

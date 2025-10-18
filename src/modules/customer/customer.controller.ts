@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Put } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
 import { CustomerService } from './customer.service';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
@@ -79,5 +79,20 @@ export class CustomerController {
     await this.userTokenService.logout(body);
     await this.fcmTokenService.removeTokenByDevice(context.id,body.deviceId,RoleStatus.STORE);
     return {message:"logout success"}
+  }
+
+  @ApiSecurity('access-token')
+  @ApiOperation({ summary: 'Toggle customer status (Active/Inactive)' })
+  @ApiResponse({type:CustomerDetailsDto})
+  @PermissionGuard([RoleStatus.ADMIN], PermissionKey.UpdateCustomer)
+  @Put('toggle-status/:id')
+  async toggleStatus(
+    @CurrentUser() user: CurrentUserType,
+    @I18n() i18n: I18nContext,
+    @Param('id') id: number,
+  ) {
+    const lang = getLang(i18n);
+    const { actor } = user;
+    return this.customerService.toggleStatus(+id, actor, lang);
   }
 }

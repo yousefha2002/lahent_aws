@@ -1,3 +1,4 @@
+import { CustomerStatus } from './../../../common/enums/customer_status';
 import { Expose, Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -42,4 +43,9 @@ export class CustomerDetailsDto extends CustomerSummaryDto {
     @ApiProperty({ example: false, description: 'Profile completion status' })
     @Expose()
     isCompletedProfile: boolean;
+
+    @ApiProperty({enum:CustomerStatus})
+    @Expose()
+    status:CustomerStatus
+
 }

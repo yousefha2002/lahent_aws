@@ -15,7 +15,7 @@ import { Op } from 'sequelize';
 import { RefreshTokenDto } from '../user_token/dtos/refreshToken.dto';
 import { ActorInfo } from 'src/common/types/current-user.type';
 import { AuditLogAction, AuditLogEntity } from 'src/common/enums/audit_log';
-import { prepareEntityChange } from 'src/common/utils/prepareEntityChange';
+import { CustomerStatus } from 'src/common/enums/customer_status';
 
 @Injectable()
 export class CustomerService {
@@ -141,21 +141,42 @@ export class CustomerService {
     await customer.save();
     const customerAfterUpdate = await customer.reload({ include: ['avatar'] });
 
-    const { oldEntity, newEntity } = prepareEntityChange({
-      oldEntity: oldCustomer,
-      newEntity: customerAfterUpdate.get({ plain: true }),
+    await this.auditLogService.logChange({
+      actor,
+      entity: AuditLogEntity.CUSTOMER,
+      action: AuditLogAction.UPDATE,
+      oldEntity:oldCustomer,
+      newEntity:customerAfterUpdate.get({ plain: true }),
+      fieldsToExclude: ['avatar', 'createdAt', 'updatedAt'],
     });
+
+    return customer;
+  }
+
+  async toggleStatus(customerId: number, actor: ActorInfo, lang: Language) 
+  {
+    const customer = await this.findById(customerId, lang);
+    const oldEntity = customer.get({ plain: true });
+
+    const newStatus =
+      customer.status === CustomerStatus.ACTIVE
+        ? CustomerStatus.SUSPEND
+        : CustomerStatus.ACTIVE;
+
+    await customer.update({ status: newStatus });
+
+    const updatedCustomer = await customer.reload();
 
     await this.auditLogService.logChange({
       actor,
       entity: AuditLogEntity.CUSTOMER,
       action: AuditLogAction.UPDATE,
       oldEntity,
-      newEntity,
+      newEntity: updatedCustomer.get({ plain: true }),
       fieldsToExclude: ['avatar', 'createdAt', 'updatedAt'],
     });
 
-    return customer;
+    return updatedCustomer;
   }
 
   async findByPhone(phone: string) {
