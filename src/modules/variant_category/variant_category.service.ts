@@ -1,3 +1,4 @@
+import { AuditLogService } from './../audit_log/audit_log.service';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
 import { VariantCategory } from './entities/variant_category.entity';
@@ -8,6 +9,9 @@ import { Language } from 'src/common/enums/language';
 import { validateRequiredLanguages } from 'src/common/validators/translation-validator.';
 import { UpdateVariantCategoryDto } from './dto/update_variant_category.dto';
 import { I18nService } from 'nestjs-i18n';
+import { ActorInfo } from 'src/common/types/current-user.type';
+import { buildMultiLangEntity } from 'src/common/utils/buildMultiLangEntity';
+import { AuditLogAction, AuditLogEntity } from 'src/common/enums/audit_log';
 
 @Injectable()
 export class VariantCategoryService {
@@ -15,10 +19,11 @@ export class VariantCategoryService {
         @Inject(repositories.variant_category_repository) private variantCategoryRepo: typeof VariantCategory,
         @Inject(repositories.variant_category_language_repository) private variantCategoryLanguageRepo: typeof VariantCategoryLanguage,
         @Inject('SEQUELIZE') private readonly sequelize: Sequelize,
-        private readonly i18n: I18nService
+        private readonly i18n: I18nService,
+        private readonly auditLogService:AuditLogService
     ){}
 
-    async create(createDto: CreateVariantCategoryDto,lang:Language) 
+    async create(createDto: CreateVariantCategoryDto,actor:ActorInfo,lang:Language) 
     {
         const { languages } = createDto;
         const codes = languages.map(l => l.languageCode);
@@ -40,7 +45,7 @@ export class VariantCategoryService {
 
         const category = await this.variantCategoryRepo.create({}, { transaction: t });
 
-        const categoryLanguages = await Promise.all(
+        await Promise.all(
             languages.map(lang =>
             this.variantCategoryLanguageRepo.create(
                 {
@@ -52,6 +57,15 @@ export class VariantCategoryService {
             ),
             ),
         );
+        const newEntity = buildMultiLangEntity(languages, ['name']);
+        await this.auditLogService.logChange({
+            actor,
+            entity: AuditLogEntity.VARIANTCATEGORY,
+            action: AuditLogAction.CREATE,
+            entityId: category.id,
+            newEntity,
+            fieldsToExclude: ['createdAt', 'updatedAt'],
+            });
         await t.commit();
 
         const message = this.i18n.translate('translation.createdSuccefully', { lang });
@@ -81,13 +95,15 @@ export class VariantCategoryService {
         return category
     }
 
-    async update(id: number, dto: UpdateVariantCategoryDto, lang: Language) {
+    async update(id: number,actor:ActorInfo, dto: UpdateVariantCategoryDto, lang: Language) {
     const transaction = await this.sequelize.transaction();
     try {
         const category = await this.variantCategoryRepo.findByPk(id);
         if (!category) {
         throw new BadRequestException(this.i18n.translate('translation.not_found', { lang }));
         }
+        const oldLanguages = await this.variantCategoryLanguageRepo.findAll({where: { variantCategoryId: id },transaction});
+        const oldEntity = buildMultiLangEntity(oldLanguages, ['name']);
 
         if (dto.languages) {
         const codes = dto.languages.map(l => l.languageCode);
@@ -117,6 +133,18 @@ export class VariantCategoryService {
             }
         }
         }
+        const newLanguages = await this.variantCategoryLanguageRepo.findAll({where: { variantCategoryId: id },transaction});
+        const newEntity = buildMultiLangEntity(newLanguages, ['name']);
+
+        await this.auditLogService.logChange({
+        actor,
+        entity: AuditLogEntity.VARIANTCATEGORY,
+        action: AuditLogAction.UPDATE,
+        entityId: category.id,
+        oldEntity,
+        newEntity,
+        fieldsToExclude: ['createdAt', 'updatedAt'],
+        });
 
         await transaction.commit();
         const message = this.i18n.translate('translation.updatedSuccefully', { lang });

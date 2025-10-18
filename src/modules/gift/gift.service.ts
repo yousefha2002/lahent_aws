@@ -258,7 +258,6 @@ export class GiftService {
 
       const sender = await this.customerService.findById(gift.senderId);
       const oldGift = { ...gift.get({ plain: true }) };
-      const oldSender = { ...sender.get({ plain: true }) };
       sender.walletBalance += gift.amount;
       await sender.save({ transaction });
 
@@ -282,14 +281,6 @@ export class GiftService {
         fieldsToExclude: ['updatedAt', 'createdAt'],
       });
 
-    await this.auditLogService.logChange({
-        actor: { id: 0, type: RoleStatus.ADMIN },
-        entity: AuditLogEntity.CUSTOMER,
-        action: AuditLogAction.UPDATE,
-        oldEntity: oldSender,
-        newEntity: sender.get({ plain: true }),
-        fieldsToExclude: ['updatedAt', 'createdAt'],
-      });
       await transaction.commit();
 
       return { message: this.i18n.translate('translation.gift_cancelled_success', { lang }) };

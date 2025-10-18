@@ -11,6 +11,8 @@ import { PaginatedCouponDto } from './dto/paginated-coupon.dto';
 import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
 import { RoleStatus } from 'src/common/enums/role_status';
 import { PermissionKey } from 'src/common/enums/permission-key';
+import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
+import { CurrentUserType } from 'src/common/types/current-user.type';
 
 @Controller('coupon')
 export class CouponController {
@@ -23,9 +25,10 @@ export class CouponController {
   @ApiSecurity('access-token')
   @ApiBody({ type: CreateCouponDto })
   @ApiResponse({ status: 201, description: 'Created coupon', type: CouponDto })
-  create(@Body() dto: CreateCouponDto, @I18n() i18n: I18nContext) {
+  create(@Body() dto: CreateCouponDto, @I18n() i18n: I18nContext,@CurrentUser() user:CurrentUserType) {
     const lang = getLang(i18n);
-    return this.couponService.createCoupon(dto, lang);
+    const {actor} = user
+    return this.couponService.createCoupon(dto, lang,actor);
   }
 
   @PermissionGuard([RoleStatus.ADMIN],PermissionKey.UpdateCoupon)
@@ -37,9 +40,10 @@ export class CouponController {
   @ApiBody({ type: UpdateCouponDto })
   @ApiResponse({ status: 200, description: 'Updated coupon', type: CouponDto })
   @ApiResponse({ status: 404, description: 'Coupon not found' })
-  update(@Param('id') id: number, @Body() dto: UpdateCouponDto, @I18n() i18n: I18nContext) {
+  update(@Param('id') id: number, @Body() dto: UpdateCouponDto, @I18n() i18n: I18nContext,@CurrentUser() user:CurrentUserType) {
     const lang = getLang(i18n);
-    return this.couponService.updateCoupon(id, dto, lang);
+    const {actor} = user
+    return this.couponService.updateCoupon(id,actor, dto, lang);
   }
 
   @PermissionGuard([RoleStatus.ADMIN],PermissionKey.ViewCoupon)

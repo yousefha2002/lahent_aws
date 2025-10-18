@@ -12,7 +12,6 @@ import { AuditLogService } from '../audit_log/audit_log.service';
 import { validateRequiredLanguages } from 'src/common/validators/translation-validator.';
 import { buildMultiLangEntity } from 'src/common/utils/buildMultiLangEntity';
 import { AuditLogAction, AuditLogEntity } from 'src/common/enums/audit_log';
-import { prepareEntityChange } from 'src/common/utils/prepareEntityChange';
 
 @Injectable()
 export class GiftCategoryService {
@@ -54,15 +53,17 @@ export class GiftCategoryService {
         }, { transaction });
       }
 
-      const { newEntity } = prepareEntityChange({newLanguages: dto.languages,fields: ['title']});
-
+      const translationEntity = buildMultiLangEntity(dto.languages, ['title']);
       await this.auditLogService.logChange({
         actor,
         entity: AuditLogEntity.GIFTCATEGORY,
         action: AuditLogAction.CREATE,
         entityId: category.id,
-        newEntity,
-        fieldsToExclude: [],
+        newEntity: {
+          ...category.get({ plain: true }),
+          ...translationEntity
+        },
+        fieldsToExclude: ['createdAt', 'updatedAt'],
       });
 
       await transaction.commit();
@@ -97,12 +98,8 @@ export class GiftCategoryService {
         throw new NotFoundException(msg);
       }
 
-      const oldLanguages = await this.giftCategoryLanguageModel.findAll({
-        where: { giftCategoryId: id },
-        transaction,
-      });
-
-      const oldEntityData = category.get({ plain: true });
+      const oldLanguages = await this.giftCategoryLanguageModel.findAll({where: { giftCategoryId: id },transaction});
+      const oldTranslationEntity = buildMultiLangEntity(oldLanguages, ['name']);
 
       for (const langItem of languages) {
         const exists = await this.giftCategoryLanguageModel.findOne({
@@ -135,26 +132,16 @@ export class GiftCategoryService {
         }
       }
 
-      const newLanguages = await this.giftCategoryLanguageModel.findAll({
-        where: { giftCategoryId: id },
-        transaction,
-      });
-
-      const { oldEntity, newEntity } = prepareEntityChange({
-        oldEntity: oldEntityData,
-        newEntity: category.get({ plain: true }),
-        oldLanguages,
-        newLanguages,
-        fields: ['name'], 
-      });
+      const newLanguages = await this.giftCategoryLanguageModel.findAll({where: { giftCategoryId: id },transaction});
+      const newTranslationEntity = buildMultiLangEntity(newLanguages, ['name']);
 
       await this.auditLogService.logChange({
         actor,
         entity: AuditLogEntity.GIFTCATEGORY,
         action: AuditLogAction.UPDATE,
         entityId: category.id,
-        oldEntity,
-        newEntity,
+        oldEntity:oldTranslationEntity,
+        newEntity:newTranslationEntity,
         fieldsToExclude: ['createdAt', 'updatedAt'],
       });
 

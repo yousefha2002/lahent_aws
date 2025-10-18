@@ -10,6 +10,8 @@ import { UpdateVariantCategoryDto } from './dto/update_variant_category.dto';
 import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
 import { RoleStatus } from 'src/common/enums/role_status';
 import { PermissionKey } from 'src/common/enums/permission-key';
+import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
+import { CurrentUserType } from 'src/common/types/current-user.type';
 
 @Controller('variant-category')
 export class VariantCategoryController {
@@ -25,9 +27,10 @@ export class VariantCategoryController {
     status: 200,
     schema: { example: { message: 'created successfully' } },
   })
-  async create(@Body() dto: CreateVariantCategoryDto,@I18n() i18n: I18nContext) {
+  async create(@Body() dto: CreateVariantCategoryDto,@I18n() i18n: I18nContext,@CurrentUser() user:CurrentUserType) {
     const lang = getLang(i18n);
-    return this.variantCategoryService.create(dto,lang);
+    const {actor} = user
+    return this.variantCategoryService.create(dto,actor,lang);
   }
 
   @Serilaize(VariantCategoryDto)
@@ -66,8 +69,10 @@ export class VariantCategoryController {
     @Param('id', ParseIntPipe) id: number,
     @Body() body: UpdateVariantCategoryDto,
     @I18n() i18n: I18nContext,
+    @CurrentUser() user:CurrentUserType
   ) {
     const lang = getLang(i18n);
-    return this.variantCategoryService.update(id, body, lang);
+    const {actor} = user
+    return this.variantCategoryService.update(id,actor, body, lang);
   }
 }
