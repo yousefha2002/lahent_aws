@@ -21,7 +21,7 @@ export class CustomerSummaryDto {
     @Expose()
     name: string;
 
-    @ApiProperty({ example: '+123456789', description: 'Customer phone number' })
+    @ApiProperty({ example: '96651231234', description: 'Customer phone number' })
     @Expose()
     phone: string;
     
@@ -47,6 +47,10 @@ export class CustomerDetailsDto extends CustomerSummaryDto {
     @ApiProperty({enum:CustomerStatus})
     @Expose()
     status:CustomerStatus
+
+    @ApiProperty({ example: 'yousef@gmail.com', description: 'Customer email' })
+    @Expose()
+    email: string;
 
     @ApiProperty({ example: '2025-08-29T10:00:00.000Z',})
     @Expose()
