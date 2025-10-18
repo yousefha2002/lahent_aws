@@ -7,9 +7,10 @@ import { CreateGiftTemplateDto } from './dto/create-gift-template.dto';
 import { I18nService } from 'nestjs-i18n';
 import { Language } from 'src/common/enums/language';
 import { UpdateGiftTemplateDto } from './dto/update-gift-template.dto';
-import { Op } from 'sequelize';
+import { Op, Sequelize } from 'sequelize';
 import { validateDates } from 'src/common/validators/date.validator';
 import { validateCreateDates } from 'src/common/validators/create-date.validator';
+import { ActorInfo } from 'src/common/types/current-user.type';
 
 @Injectable()
 export class GiftTemplateService {
@@ -21,7 +22,7 @@ export class GiftTemplateService {
     private readonly i18n: I18nService,
   ) {}
 
-  async create(body: CreateGiftTemplateDto, file: Express.Multer.File, lang : Language) 
+  async create(body: CreateGiftTemplateDto,actor:ActorInfo, file: Express.Multer.File, lang : Language) 
   {
     const { categoryId, startDate: startInput, endDate: endInput } = body;
 
@@ -47,11 +48,10 @@ export class GiftTemplateService {
         startDate,
         endDate,
     });
-
     return { message: this.i18n.translate('translation.gift_template.created', { lang }) };
   }
 
-  async update(body: UpdateGiftTemplateDto,templateId: number,lang:Language,file?: Express.Multer.File
+  async update(body: UpdateGiftTemplateDto,actor:ActorInfo,templateId: number,lang:Language,file?: Express.Multer.File
   ) {
     const giftTemplate = await this.giftTemplateRepo.findByPk(templateId);
     if (!giftTemplate) {

@@ -11,6 +11,8 @@ import { UpdateGiftTemplateDto } from './dto/update-gift-template.dto';
 import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
 import { RoleStatus } from 'src/common/enums/role_status';
 import { PermissionKey } from 'src/common/enums/permission-key';
+import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
+import { CurrentUserType } from 'src/common/types/current-user.type';
 
 @Controller('gift-template')
 export class GiftTemplateController {
@@ -28,8 +30,10 @@ export class GiftTemplateController {
     @UploadedFile() file: Express.Multer.File,
     @Body() body: CreateGiftTemplateDto,
     @I18n() i18n: I18nContext,
+    @CurrentUser() user:CurrentUserType
   ) {
-    return this.giftTemplateService.create(body, file, getLang(i18n));
+    const {actor} = user
+    return this.giftTemplateService.create(body,actor, file, getLang(i18n));
   }
 
   @ApiOperation({ summary: 'Update a Gift Template by ID (admin only)' })
@@ -46,8 +50,10 @@ export class GiftTemplateController {
     @Body() body: UpdateGiftTemplateDto,
     @UploadedFile() file: Express.Multer.File,
     @I18n() i18n: I18nContext,
+    @CurrentUser() user:CurrentUserType
   ) {
-    return this.giftTemplateService.update(body, id, getLang(i18n), file);
+    const {actor} = user
+    return this.giftTemplateService.update(body,actor, id, getLang(i18n), file);
   }
 
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })

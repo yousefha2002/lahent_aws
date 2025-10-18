@@ -160,7 +160,7 @@ export class CustomerService {
 
     const newStatus =
       customer.status === CustomerStatus.ACTIVE
-        ? CustomerStatus.SUSPEND
+        ? CustomerStatus.SUSPENDED
         : CustomerStatus.ACTIVE;
 
     await customer.update({ status: newStatus });

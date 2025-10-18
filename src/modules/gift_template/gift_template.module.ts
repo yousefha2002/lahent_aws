@@ -5,11 +5,13 @@ import { GiftTemplateProvider } from './providers/gift_template.provider';
 import { GiftCategoryModule } from '../gift_category/gift_category.module';
 import { UserContextModule } from '../user-context/user-context.module';
 import { S3Module } from '../s3/s3.module';
+import { DatabaseModule } from 'src/database/database.module';
+import { AuditLogModule } from '../audit_log/audit_log.module';
 
 @Module({
   controllers: [GiftTemplateController],
   providers: [GiftTemplateService, ...GiftTemplateProvider],
-  imports: [GiftCategoryModule, forwardRef(()=>UserContextModule), S3Module],
+  imports: [GiftCategoryModule, forwardRef(()=>UserContextModule), S3Module,DatabaseModule,AuditLogModule],
   exports: [GiftTemplateService],
 })
 export class GiftTemplateModule {}
