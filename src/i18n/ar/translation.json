@@ -2,6 +2,7 @@
   "createdSuccefully": "تم الانشاء بنجاح",
   "updatedSuccefully": "تم التعديل بنجاح",
   "deletedSuccefully": "تم الحذف بنجاح",
+  "account_blocked": "حسابك محظور",
   "must_send_all_first_time": "يجب إرسال جميع البيانات في المرة الأولى",
   "file_required": "الملف مطلوب",
   "name_exists": "الاسم مستخدم مسبقًا",

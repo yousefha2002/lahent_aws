@@ -28,9 +28,9 @@ export class CustomerService {
     private userTokenService:UserTokenService,
     private readonly auditLogService:AuditLogService
   ) {}
-  async createCustomer(phone:string,lang=Language.ar)
+  async createCustomer(phone:string,lang:Language)
   {
-    const customer = await this.findByPhone(phone)
+    const customer = await this.findByPhone(phone,lang);
     if(customer)
     {
       const message =this.i18n.translate('translation.mobile_phone_exists', { lang });
@@ -179,8 +179,51 @@ export class CustomerService {
     return updatedCustomer;
   }
 
-  async findByPhone(phone: string) {
-    const customer = await this.customerRepo.findOne({ where: { phone },paranoid: false,include:[Avatar] });
+  async findAll(page = 1,limit = 10,name?: string,phone?: string,email?: string,status?: string,from?: string,to?: string) {
+    const offset = (page - 1) * limit;
+
+    const where: any = {
+      ...(name && { name: { [Op.like]: `%${name}%` } }),
+      ...(phone && { phone: { [Op.like]: `%${phone}%` } }),
+      ...(email && { email: { [Op.like]: `%${email}%` } }),
+      ...(status && { status }),
+    };
+
+    if (from && to) {
+      where.createdAt = { [Op.between]: [new Date(from), new Date(to)] };
+    } else if (from) {
+      where.createdAt = { [Op.gte]: new Date(from) };
+    } else if (to) {
+      where.createdAt = { [Op.lte]: new Date(to) };
+    }
+
+    const { rows, count } = await this.customerRepo.findAndCountAll({
+      limit,
+      offset,
+      where,
+      include: [{ model:Avatar, required: false }],
+      order: [['createdAt', 'DESC']],
+    });
+
+    const totalPages = Math.ceil(count / limit);
+
+    return {
+      data: rows,
+      totalItems: count,
+      totalPages,
+    };
+  }
+
+  async findByPhone(phone: string,lang=Language.ar) {
+    const customer = await this.customerRepo.findOne({
+      where: { phone},
+      paranoid: false,
+      include: [Avatar],
+    });
+    if (customer && customer.status !== CustomerStatus.ACTIVE) {
+      const message = this.i18n.translate('translation.account_blocked', {lang});
+      throw new BadRequestException(message);
+    }
     return customer;
   }
 

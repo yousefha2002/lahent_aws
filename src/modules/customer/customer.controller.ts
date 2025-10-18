@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { CustomerService } from './customer.service';
 import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
@@ -7,7 +7,7 @@ import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
 import { ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { RefreshTokenDto } from '../user_token/dtos/refreshToken.dto';
-import { CustomerDetailsDto } from './dto/customer.dto';
+import { CustomerDetailsDto, PaginationCustomerDto } from './dto/customer.dto';
 import { CurrentUserType } from 'src/common/types/current-user.type';
 import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
 import { RoleStatus } from 'src/common/enums/role_status';
@@ -27,7 +27,8 @@ export class CustomerController {
   @ApiOperation({ summary: 'Get current logged in customer' })
   @ApiResponse({ status: 200, description: 'Returns the currently logged in customer', type: CustomerDetailsDto })
   @Serilaize(CustomerDetailsDto)
-  @PermissionGuard([RoleStatus.CUSTOMER])
+  @ApiQuery({ name: 'customerId', required: false, example: 1 })
+  @PermissionGuard([RoleStatus.CUSTOMER,RoleStatus.ADMIN],PermissionKey.ViewCustomer)
   @Get()
   getMine(@CurrentUser() user: CurrentUserType) {
     const {context} = user
@@ -81,6 +82,8 @@ export class CustomerController {
     return {message:"logout success"}
   }
 
+  @Serilaize(CustomerDetailsDto)
+  @ApiResponse({ status: 200, description: 'Customer profile updated successfully', type: CustomerDetailsDto })
   @ApiSecurity('access-token')
   @ApiOperation({ summary: 'Toggle customer status (Active/Inactive)' })
   @ApiResponse({type:CustomerDetailsDto})
@@ -94,5 +97,30 @@ export class CustomerController {
     const lang = getLang(i18n);
     const { actor } = user;
     return this.customerService.toggleStatus(+id, actor, lang);
+  }
+
+  @ApiOperation({ summary: 'Get all customers (Admin only) with filters & pagination' })
+  @ApiSecurity('access-token')
+  @ApiResponse({ status: 200, type: PaginationCustomerDto })
+  @ApiQuery({ name: 'name', required: false, type: String, description: 'Filter by name' })
+  @ApiQuery({ name: 'phone', required: false, type: String, description: 'Filter by phone' })
+  @ApiQuery({ name: 'email', required: false, type: String, description: 'Filter by email' })
+  @ApiQuery({ name: 'status', required: false, type: String, description: 'Filter by status' })
+  @ApiQuery({ name: 'from', required: false, type: String, description: 'Filter by registration start date (YYYY-MM-DD)' })
+  @ApiQuery({ name: 'to', required: false, type: String, description: 'Filter by registration end date (YYYY-MM-DD)' })
+  @Serilaize(PaginationCustomerDto)
+  @PermissionGuard([RoleStatus.ADMIN], PermissionKey.ViewCustomer)
+  @Get('all')
+  async getAllCustomers(
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10,
+    @Query('name') name?: string,
+    @Query('phone') phone?: string,
+    @Query('email') email?: string,
+    @Query('status') status?: string,
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+  ) {
+    return this.customerService.findAll(page, limit, name, phone, email, status, from, to);
   }
 }

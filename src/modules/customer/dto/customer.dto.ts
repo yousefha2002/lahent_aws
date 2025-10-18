@@ -48,4 +48,27 @@ export class CustomerDetailsDto extends CustomerSummaryDto {
     @Expose()
     status:CustomerStatus
 
+    @ApiProperty({ example: '2025-08-29T10:00:00.000Z',})
+    @Expose()
+    createdAt: Date;
+
+    @ApiProperty({ example: '2025-08-29T10:00:00.000Z'})
+    @Expose()
+    lastActive: Date | null;
+}
+
+
+export class PaginationCustomerDto {
+    @Expose()
+    @ApiProperty({ type: [CustomerDetailsDto] })
+    @Type(()=>CustomerDetailsDto)
+    data: CustomerDetailsDto[];
+
+    @Expose()
+    @ApiProperty()
+    totalItems: number;
+
+    @Expose()
+    @ApiProperty()
+    totalPages: number;
 }

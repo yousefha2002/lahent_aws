@@ -29,6 +29,7 @@ import { CurrentUserType } from 'src/common/types/current-user.type';
 import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
 import { RoleStatus } from 'src/common/enums/role_status';
 import { PermissionKey } from 'src/common/enums/permission-key';
+import { CustomerOrderSummaryDto } from './dto/responses/customer-order-summary.dto';
 
 @Controller('order')
 export class OrderController {
@@ -38,6 +39,17 @@ export class OrderController {
     private readonly orderStatusService:OrderStatusService,
     private readonly orderPlacingService:OrderPlacingService
   ) {}
+
+  @PermissionGuard([RoleStatus.CUSTOMER])
+  @Serilaize(CustomerOrderSummaryDto)
+  @Get('summary/byCustomer')
+  @ApiOperation({ summary: 'Get total spent and savings for a customer' })
+  @ApiSecurity('access-token')
+  @ApiResponse({ status: 200, type: CustomerOrderSummaryDto })
+  async getCustomerOrderSummary(@CurrentUser() user: CurrentUserType) {
+    const { context } = user;
+    return this.orderService.getCustomerOrderSummary(context.id);
+  }
 
   @Serilaize(CreateOrderResponseDto)
   @PermissionGuard([RoleStatus.CUSTOMER],CompletedProfileGuard)

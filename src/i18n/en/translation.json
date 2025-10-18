@@ -3,6 +3,7 @@
   "createdSuccefully": "created succesfully!",
   "updatedSuccefully": "updated succesfully",
   "deletedSuccefully": "deleted succesfully",
+  "account_blocked": "Your account is blocked",
   "must_send_all_first_time_en": "You must send all data the first time",
   "name_exists": "Name is already in use",
   "not_found": "Item not found",
