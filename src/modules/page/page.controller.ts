@@ -3,18 +3,21 @@ import { PageService } from './page.service';
 import { I18n, I18nContext } from 'nestjs-i18n';
 import { getLang } from 'src/common/utils/get-lang.util';
 import { CreatePageDto } from './dto/create-page.dto';
-import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiParam, ApiResponse, ApiSecurity } from '@nestjs/swagger';
 import { PageDto } from './dto/page.dto';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
 import { PageType } from 'src/common/enums/page_type';
 import { PermissionGuard } from 'src/common/decorators/permession-guard.decorator';
 import { RoleStatus } from 'src/common/enums/role_status';
 import { PermissionKey } from 'src/common/enums/permission-key';
+import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
+import { CurrentUserType } from 'src/common/types/current-user.type';
 
 @Controller('page')
 export class PageController {
   constructor(private readonly pageService: PageService) {}
 
+  @ApiSecurity('access-token')
   @PermissionGuard([RoleStatus.ADMIN],PermissionKey.LandingPage)
   @ApiOperation({ summary: 'Create or update a page' })
   @ApiBody({ type: CreatePageDto })
@@ -26,8 +29,10 @@ export class PageController {
   @Post()
   createOrUpdate(
     @Body() dto: CreatePageDto,
+    @CurrentUser() user:CurrentUserType
   ) {
-    return this.pageService.createOrUpdatePage(dto);
+    const {actor} = user
+    return this.pageService.createOrUpdatePage(dto,actor);
   }
 
   @Serilaize(PageDto)

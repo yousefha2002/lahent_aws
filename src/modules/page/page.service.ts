@@ -1,3 +1,4 @@
+import { AuditLogService } from './../audit_log/audit_log.service';
 import { PageLanguage } from './entities/page_language.entity';
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
@@ -6,40 +7,65 @@ import { CreatePageDto } from './dto/create-page.dto';
 import { PageType } from 'src/common/enums/page_type';
 import { Language } from 'src/common/enums/language';
 import { validateRequiredLanguages } from 'src/common/validators/translation-validator.';
+import { AuditLogAction, AuditLogEntity } from 'src/common/enums/audit_log';
+import { ActorInfo } from 'src/common/types/current-user.type';
 
 @Injectable()
 export class PageService {
     constructor(
         @Inject(repositories.page_repository) private pageRepo: typeof Page,
-        @Inject(repositories.pageLanguage_repository) private pageLanguageRepo: typeof PageLanguage
+        @Inject(repositories.pageLanguage_repository) private pageLanguageRepo: typeof PageLanguage,
+        private readonly auditLogService:AuditLogService
     ){}
     
-    async createOrUpdatePage(dto: CreatePageDto) {
+    async createOrUpdatePage(dto: CreatePageDto, actor: ActorInfo) 
+    {
         validateRequiredLanguages(dto.contents.map(c => c.languageCode), 'Page contents');
-
-        // البحث عن الصفحة حسب الـ type
         let page = await this.pageRepo.findOne({ where: { type: dto.type }, include: [PageLanguage] });
+
+        const oldEntity = page ? structuredClone(page.get({ plain: true })) : null;
 
         if (!page) {
             page = await this.pageRepo.create({ type: dto.type });
-        }
 
-        for (const content of dto.contents) {
-        const existingContent = page.languages?.find(l => l.languageCode === content.languageCode);
+            for (const content of dto.contents) {
+                await this.pageLanguageRepo.create({
+                    pageId: page.id,
+                    languageCode: content.languageCode,
+                    content: content.content,
+                });
+            }
 
-        if (existingContent) {
-            existingContent.content = content.content;
-            await existingContent.save();
+            page = await this.pageRepo.findOne({ where: { id: page.id }, include: [PageLanguage] });
         } else {
-            await this.pageLanguageRepo.create({
-            pageId: page.id,
-            languageCode: content.languageCode,
-            content: content.content,
-            });
-        }
+            for (const content of dto.contents) {
+                const existingContent = page.languages?.find(l => l.languageCode === content.languageCode);
+
+                if (existingContent) {
+                    existingContent.content = content.content;
+                    await existingContent.save();
+                } else {
+                    await this.pageLanguageRepo.create({
+                        pageId: page.id,
+                        languageCode: content.languageCode,
+                        content: content.content,
+                    });
+                }
+            }
+
+            page = await this.pageRepo.findOne({ where: { id: page.id }, include: [PageLanguage] });
         }
 
-        return {success:true}
+        await this.auditLogService.logChange({
+            actor,
+            entity: AuditLogEntity.SETTINGSSYSTEM,
+            action: oldEntity ? AuditLogAction.UPDATE : AuditLogAction.CREATE,
+            oldEntity,
+            newEntity: page!.get({ plain: true }),
+            fieldsToExclude: ['createdAt', 'updatedAt'],
+        });
+
+        return { success: true };
     }
 
     async getPageByType(type: PageType,lang:Language) {

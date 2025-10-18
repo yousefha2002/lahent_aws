@@ -18,7 +18,8 @@ export class AuditLogService {
         newEntity?: any | null;
         entityId?: number;
         fieldsToExclude?: string[];
-        }) {
+        keyForArray?: string;
+    }) {
         const {
             actor,
             entity,
@@ -27,111 +28,106 @@ export class AuditLogService {
             newEntity = null,
             entityId,
             fieldsToExclude = [],
+            keyForArray = 'id',
         } = params;
 
-        let oldData: Record<string, any> | null = null;
-        let newData: Record<string, any> | null = null;
-        console.log(oldEntity)
-        console.log(newEntity)
-
-        // 🔹 فلترة عميقة لأي كائن أو مصفوفة
         const excludeFieldsDeep = (obj: any, exclude: string[]): any => {
             if (Array.isArray(obj)) {
-            return obj.map((item) => excludeFieldsDeep(item, exclude));
+                return obj.map((item) => excludeFieldsDeep(item, exclude));
             } else if (obj && typeof obj === 'object') {
-            const result: any = {};
-            for (const [key, value] of Object.entries(obj)) {
-                if (exclude.includes(key)) continue;
-                result[key] = excludeFieldsDeep(value, exclude);
-            }
-            return result;
+                const result: any = {};
+                for (const [key, value] of Object.entries(obj)) {
+                    if (exclude.includes(key)) continue;
+                    result[key] = excludeFieldsDeep(value, exclude);
+                }
+                return result;
             }
             return obj;
         };
 
-        // 🔹 مقارنة القيم لتسجيل التغييرات
         const getChanges = (
             oldVal: any,
             newVal: any,
             exclude: string[] = []
         ): { old?: any; new?: any } | null => {
             if (Array.isArray(newVal) && Array.isArray(oldVal)) {
-            const oldArr: any[] = [];
-            const newArr: any[] = [];
+                const oldMap = new Map((oldVal as any[]).map(item => [item[keyForArray], item]));
+                const newMap = new Map((newVal as any[]).map(item => [item[keyForArray], item]));
 
-            for (let i = 0; i < newVal.length; i++) {
-                const oldItem = oldVal[i] || {};
-                const newItem = newVal[i];
-                const itemChanges: any = {};
-                const itemOld: any = {};
+                const oldArr: any[] = [];
+                const newArr: any[] = [];
 
-                for (const key of Object.keys(newItem)) {
-                if (exclude.includes(key)) continue;
-                if (oldItem[key] !== newItem[key]) {
-                    itemChanges[key] = newItem[key];
-                    itemOld[key] = oldItem[key];
+                for (const [key, newItem] of newMap.entries()) {
+                    const oldItem = oldMap.get(key) || {};
+                    const itemChanges: any = {};
+                    const itemOld: any = {};
+
+                    for (const k of Object.keys(newItem)) {
+                        if (exclude.includes(k)) continue;
+                        if (oldItem[k] !== newItem[k]) {
+                            itemChanges[k] = newItem[k];
+                            itemOld[k] = oldItem[k];
+                        }
+                    }
+
+                    if (Object.keys(itemChanges).length > 0) {
+                        oldArr.push(itemOld);
+                        newArr.push(itemChanges);
+                    }
                 }
-                }
 
-                if (Object.keys(itemChanges).length > 0) {
-                oldArr.push(itemOld);
-                newArr.push(itemChanges);
-                }
-            }
-
-            return oldArr.length > 0 ? { old: oldArr, new: newArr } : null;
+                return oldArr.length > 0 ? { old: oldArr, new: newArr } : null;
             } else if (
-            typeof newVal === 'object' &&
-            newVal !== null &&
-            typeof oldVal === 'object' &&
-            oldVal !== null
+                typeof newVal === 'object' &&
+                newVal !== null &&
+                typeof oldVal === 'object' &&
+                oldVal !== null
             ) {
-            const changesOld: any = {};
-            const changesNew: any = {};
+                const changesOld: any = {};
+                const changesNew: any = {};
 
-            for (const key of Object.keys(newVal)) {
-                if (exclude.includes(key)) continue;
-                const changes = getChanges(oldVal[key], newVal[key], exclude);
-                if (changes) {
-                changesOld[key] = changes.old;
-                changesNew[key] = changes.new;
+                for (const key of Object.keys(newVal)) {
+                    if (exclude.includes(key)) continue;
+                    const changes = getChanges(oldVal[key], newVal[key], exclude);
+                    if (changes) {
+                        changesOld[key] = changes.old;
+                        changesNew[key] = changes.new;
+                    }
                 }
-            }
 
-            return Object.keys(changesOld).length > 0
-                ? { old: changesOld, new: changesNew }
-                : null;
+                return Object.keys(changesOld).length > 0
+                    ? { old: changesOld, new: changesNew }
+                    : null;
             } else if (oldVal !== newVal) {
-            return { old: oldVal, new: newVal };
+                return { old: oldVal, new: newVal };
             }
 
             return null;
         };
 
-        // 🔹 التعامل مع أنواع العمليات
+        let oldData: Record<string, any> | null = null;
+        let newData: Record<string, any> | null = null;
+
         if (action === AuditLogAction.UPDATE && oldEntity && newEntity) {
             oldData = {};
             newData = {};
 
             for (const key of Object.keys(newEntity)) {
-            if (fieldsToExclude.includes(key)) continue;
+                if (fieldsToExclude.includes(key)) continue;
 
-            const changes = getChanges(oldEntity[key], newEntity[key], fieldsToExclude);
-            if (changes) {
-                oldData[key] = changes.old;
-                newData[key] = changes.new;
-            }
+                const changes = getChanges(oldEntity[key], newEntity[key], fieldsToExclude);
+                if (changes) {
+                    oldData[key] = changes.old;
+                    newData[key] = changes.new;
+                }
             }
 
             if (Object.keys(oldData).length === 0 && Object.keys(newData).length === 0) {
-            return null;
+                return null; 
             }
-        } 
-        else if (action === AuditLogAction.CREATE && newEntity) {
-            // ✅ فلترة عميقة للإنشاء
+        } else if (action === AuditLogAction.CREATE && newEntity) {
             newData = excludeFieldsDeep(newEntity, fieldsToExclude);
-        } 
-        else if (action === AuditLogAction.DELETE && oldEntity) {
+        } else if (action === AuditLogAction.DELETE && oldEntity) {
             oldData = excludeFieldsDeep(oldEntity, fieldsToExclude);
         }
 
@@ -144,5 +140,5 @@ export class AuditLogService {
             oldData,
             newData,
         });
-        }
+    }
 }
