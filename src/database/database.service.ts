@@ -69,6 +69,8 @@ import { Role } from 'src/modules/role/entites/role.entity';
 import { SystemSetting } from 'src/modules/system_setting/entities/system_setting.entity';
 import { Ticket } from 'src/modules/ticket/entities/ticket.entity';
 import { TicketMessage } from 'src/modules/ticket_message/entities/ticket_message.entity';
+import { TicketType } from 'src/modules/ticket_type/entities/ticket_type.entity';
+import { TicketTypeLanguage } from 'src/modules/ticket_type/entities/ticket_type_language.entity';
 
 export const databaseProviders = [
   {
@@ -163,7 +165,9 @@ export const databaseProviders = [
         Role,
         SystemSetting,
         Ticket,
-        TicketMessage
+        TicketMessage,
+        TicketType,
+        TicketTypeLanguage
       ]); 
       await sequelize.sync({ alter: false});
       return sequelize;

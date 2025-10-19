@@ -70,6 +70,7 @@ import { RoleModule } from './modules/role/role.module';
 import { SystemSettingModule } from './modules/system_setting/system_setting.module';
 import { TicketModule } from './modules/ticket/ticket.module';
 import { TicketMessageModule } from './modules/ticket_message/ticket_message.module';
+import { TicketTypeModule } from './modules/ticket_type/ticket_type.module';
 
 @Module({
   imports: [
@@ -155,6 +156,7 @@ import { TicketMessageModule } from './modules/ticket_message/ticket_message.mod
     SystemSettingModule,
     TicketModule,
     TicketMessageModule,
+    TicketTypeModule,
   ],
   providers: [MulterConfigService],
 })
