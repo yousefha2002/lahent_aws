@@ -24,6 +24,10 @@ export class SimpleTicketDto {
 
     @Expose()
     @ApiProperty()
+    updatedAt:Date
+
+    @Expose()
+    @ApiProperty()
     rating:number
 
     @ApiProperty({enum:TicketStatus})
