@@ -1,6 +1,6 @@
 import { UserTokenService } from './../user_token/user_token.service';
 import { RoleService } from './../role/role.service';
-import {BadRequestException, ForbiddenException, Inject,Injectable,} from '@nestjs/common';
+import {BadRequestException, ForbiddenException, Inject,Injectable, NotFoundException,} from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
 import { Admin } from './entities/admin.entity';
 import { RefreshTokenDto } from '../user_token/dtos/refreshToken.dto';
@@ -11,6 +11,7 @@ import { REFRESH_TOKEN_EXPIRES_MS } from 'src/common/constants';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
 import { PermissionKey } from 'src/common/enums/permission-key';
+import { Role } from '../role/entites/role.entity';
 
 @Injectable()
 export class AdminService {
@@ -190,5 +191,15 @@ export class AdminService {
       isSuperAdmin: admin.isSuperAdmin,
       permissions,
     };
+  }
+
+  async checkAdminPermission(adminId:number,permission:PermissionKey)
+  {
+    const admin = await this.adminRepo.findOne({where:{id:adminId,active:true},include:[Role]});
+    if (!admin) throw new NotFoundException('Reviewer admin not found');
+    if (!admin.role.permissions.includes(permission)) {
+        throw new ForbiddenException('The assigned admin must have review_ticket permission');
+    }
+    return true
   }
 }

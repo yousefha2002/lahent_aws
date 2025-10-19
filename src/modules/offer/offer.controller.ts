@@ -39,8 +39,8 @@ export class OfferController {
     @I18n() i18n: I18nContext
   ) {
     const lang = getLang(i18n);
-    const {context} = user
-    return this.offerService.createOffer(dto, context.id, lang);
+    const {context,actor} = user
+    return this.offerService.createOffer(dto,actor, context.id, lang);
   }
 
   @PermissionGuard([RoleStatus.ADMIN],PermissionKey.UpdateOffer)
@@ -48,10 +48,12 @@ export class OfferController {
   async changeOfferActiveStatus(
     @Param('offerId') offerId: string,
     @Body() body: ChangeOfferActiveDto,
-    @I18n() i18n: I18nContext
+    @I18n() i18n: I18nContext,
+    @CurrentUser() user:CurrentUserType
   ) {
     const lang = getLang(i18n);
-    return this.offerService.changeOfferActiveStatus(+offerId, body, lang);
+    const {actor} = user
+    return this.offerService.changeOfferActiveStatus(+offerId,actor, body, lang);
   }
 
   @Serilaize(PaginatedOfferResponseDto)

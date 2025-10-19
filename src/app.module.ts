@@ -68,6 +68,8 @@ import { UserContextModule } from './modules/user-context/user-context.module';
 import { S3Module } from './modules/s3/s3.module';
 import { RoleModule } from './modules/role/role.module';
 import { SystemSettingModule } from './modules/system_setting/system_setting.module';
+import { TicketModule } from './modules/ticket/ticket.module';
+import { TicketMessageModule } from './modules/ticket_message/ticket_message.module';
 
 @Module({
   imports: [
@@ -151,6 +153,8 @@ import { SystemSettingModule } from './modules/system_setting/system_setting.mod
     S3Module,
     RoleModule,
     SystemSettingModule,
+    TicketModule,
+    TicketMessageModule,
   ],
   providers: [MulterConfigService],
 })

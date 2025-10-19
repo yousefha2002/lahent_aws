@@ -105,5 +105,10 @@ export enum PermissionKey {
     RestoreStore = "restore_store",
     deleteCustomer = "delete_customer",
     deleteOwner = "delete_owner",
-    deleteStore = "delete_store"
+    deleteStore = "delete_store",
+
+    // View Tickets
+    ViewTicket = "view_ticket",
+    AssignTicket = "assign_ticket",
+    ReviewTicket = "review_ticket"
 }

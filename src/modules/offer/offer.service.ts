@@ -22,6 +22,7 @@ import { StoreLanguage } from '../store/entities/store_language.entity';
 import { CategoryLanguage } from '../category/entities/category_language.entity';
 import { SubType } from '../subtype/entities/subtype.entity';
 import { Type } from '../type/entities/type.entity';
+import { ActorInfo } from 'src/common/types/current-user.type';
 
 @Injectable()
 export class OfferService {
@@ -35,7 +36,7 @@ export class OfferService {
     private readonly i18n: I18nService,
   ) {}
 
-  async createOffer(dto: CreateOfferDto, storeId: number, lang = Language.en) {
+  async createOffer(dto: CreateOfferDto,actor:ActorInfo, storeId: number, lang = Language.en) {
     const { name, target, startDate, productIds, categoryIds } = dto;
 
     if (startDate <= new Date()) {
@@ -95,6 +96,7 @@ export class OfferService {
 
   async changeOfferActiveStatus(
     offerId: number,
+    actor:ActorInfo,
     dto: ChangeOfferActiveDto,
     lang : Language,
   ) {

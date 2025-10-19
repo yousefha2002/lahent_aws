@@ -69,4 +69,6 @@ export enum repositories {
   role_permission_repository='role_permission_repository',
   audit_log_repository='audit_log_repository',
   system_settings_repository='system_settings_repository',
+  ticket_repository='ticket_repository',
+  ticket_message_repository='ticket_message_repository',
 }
