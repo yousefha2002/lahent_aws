@@ -24,7 +24,6 @@ import { StoreCommission } from 'src/modules/store_commission/entities/store_com
     { name: 'idx_store_lat_lng', fields: ['lat', 'lng'], using: 'BTREE' },
     { name: 'idx_store_createdAt', fields: ['createdAt'] },
     { name: 'idx_store_phone', unique: true, fields: ['phone'] },
-    { name: 'idx_store_phoneLogin', unique: true, fields: ['phoneLogin'] },
     { name: 'idx_store_deletedAt', fields: ['deletedAt'] },
   ]  
 })
@@ -89,9 +88,6 @@ export class Store extends Model {
 
   @Column({ type: DataType.STRING, unique: true })
   phone: string;
-
-  @Column({ type: DataType.STRING, unique: true })
-  phoneLogin: string;
 
   @AllowNull(false)
   @Default(0)

@@ -114,7 +114,6 @@ export class StoreAuthService {
 
             await Promise.all([
                 this.checkIfPhoneUsed(dto.phone),
-                this.checkIfPhoneLoginUsed(dto.phoneLogin),
                 this.subTypeService.subTypeById(+dto.subTypeId),
             ]);
 
@@ -129,7 +128,6 @@ export class StoreAuthService {
 
             const newStore = await store.update({
                 phone: dto.phone,
-                phoneLogin: dto.phoneLogin,
                 lat: dto.lat,
                 lng: dto.lng,
                 city: dto.city,
@@ -137,8 +135,8 @@ export class StoreAuthService {
                 subTypeId: dto.subTypeId,
                 inStore: dto.inStore,
                 driveThru: dto.driveThru,
-                commercialRegister: dto.commercialRegister,
-                taxNumber: dto.taxNumber,
+                ...(dto.commercialRegister !== undefined && { commercialRegister: dto.commercialRegister }),
+                ...(dto.taxNumber !== undefined && { taxNumber: dto.taxNumber }),
                 isCompletedProfile:true,
                 ...(logoUpload ? { logoUrl: logoUpload.secure_url, logoPublicId: logoUpload.public_id } : {}),
                 ...(coverUpload ? { coverUrl: coverUpload.secure_url, coverPublicId: coverUpload.public_id } : {}),
@@ -174,19 +172,9 @@ export class StoreAuthService {
         return false;
     }
 
-    async checkIfPhoneLoginUsed(phone: string,lang=Language.en) {
-        const store = await this.storeRepo.findOne({
-        where: { phoneLogin: phone },
-        });
-        if (store) {
-        throw new BadRequestException(this.i18n.t('translation.store.loginPhoneInUse',{lang}));
-        }
-        return false;
-    }
-
     async login(dto: LoginStoreDto,lang:Language) {
         const storeByPass = await this.storeRepo.findOne({
-            where: { phoneLogin: dto.phone },
+            where: { phone: dto.phone },
             include:[{model:StoreLanguage,where:{languageCode:lang}}]
         });
         if (!storeByPass) {

@@ -10,12 +10,6 @@ export class CreateStoreDto {
   @ApiProperty({ example: '0501234567' })
   phone: string;
 
-  @Transform(({ value }) => value?.replace(/\D/g, ''))
-  @IsNotEmpty()
-  @IsMobilePhone()
-  @ApiProperty({ example: '0501234567' })
-  phoneLogin: string;
-
   @IsString()
   @IsNotEmpty()
   @IsIn(cities, { message: 'City must be one of the allowed cities in Saudi Arabia' })

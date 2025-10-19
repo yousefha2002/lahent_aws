@@ -54,8 +54,4 @@ export class CurrentStoreDTO {
     @ApiProperty({example:"approved"})
     @Expose()
     status:StoreStatus
-
-    @ApiProperty({ example: '966501234567' })
-    @Expose()
-    phoneLogin: string;
 }
