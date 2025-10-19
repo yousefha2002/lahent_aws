@@ -195,10 +195,13 @@ export class AdminService {
 
   async checkAdminPermission(adminId:number,permission:PermissionKey)
   {
+    console.log(permission)
     const admin = await this.adminRepo.findOne({where:{id:adminId,active:true},include:[Role]});
-    if (!admin) throw new NotFoundException('Reviewer admin not found');
+    if (!admin) throw new NotFoundException('Admin not found');
+    console.log(admin.role.permissions)
+    console.log(admin.role.permissions.includes(permission))
     if (!admin.role.permissions.includes(permission)) {
-        throw new ForbiddenException('The assigned admin must have review_ticket permission');
+        throw new ForbiddenException('Admin does not have the required permission');
     }
     return true
   }
