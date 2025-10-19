@@ -1,5 +1,5 @@
 import { AdminService } from 'src/modules/admin/admin.service';
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
 import { Ticket } from './entities/ticket.entity';
 import { CreateTicketDto } from './dto/requests/create-ticket.dto';
@@ -18,23 +18,26 @@ export class TicketService {
         private readonly adminService:AdminService
     ){}
 
-    async createTicket(storeId: number, dto: CreateTicketDto,lang:Language) {
+    async createStoreTicket(storeId: number, dto: CreateTicketDto,lang:Language) {
         await this.ticketRepo.create({
+            type: 'store',
+            storeCreatorId: storeId,  
             storeId,
             subject: dto.subject,
             description: dto.description,
-        });
+            status: TicketStatus.PENDING,
+        })
         const message = this.i18n.translate('translation.createdSuccefully', { lang });
         return { message };
     }
 
-    async assignTicketToReviewer(actor: ActorInfo,dto:AssignTicketDto,lang:Language) {
-        const {reviewerAdminId,ticketId} = dto
+    async assignTicket(dto:AssignTicketDto,lang:Language) {
+        const {assignedAdminId,ticketId} = dto
         const ticket = await this.ticketRepo.findOne({where:{id:ticketId,status: [TicketStatus.PENDING, TicketStatus.IN_PROGRESS]}});
         if (!ticket) throw new NotFoundException('Ticket not found');
-        await this.adminService.checkAdminPermission(reviewerAdminId,PermissionKey.ReviewTicket)    
-        ticket.reviewerId = reviewerAdminId;
-        ticket.assignedAdminId = actor.id
+        await this.adminService.checkAdminPermission(assignedAdminId,PermissionKey.ReviewTicket)   
+        if (!ticket) throw new NotFoundException('Ticket not found');
+        ticket.assignedAdminId = assignedAdminId;
         ticket.status = TicketStatus.IN_PROGRESS
         await ticket.save();
         const message = this.i18n.translate('translation.updatedSuccefully', { lang });
@@ -59,8 +62,8 @@ export class TicketService {
         };
     }
 
-    async getTicketsForReviewer(reviewerId: number,page: number,limit: number,status?: TicketStatus) {
-    const where: any = { reviewerId };
+    async getTicketsForReviewer(assignedAdminId: number,page: number,limit: number,status?: TicketStatus) {
+    const where: any = { assignedAdminId };
     if (status) where.status = status;
     const { rows, count } = await this.ticketRepo.findAndCountAll({
         where,

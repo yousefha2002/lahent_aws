@@ -8,5 +8,5 @@ export class AssignTicketDto {
 
     @ApiProperty()
     @IsNumber()
-    reviewerAdminId: number;
+    assignedAdminId: number;
 }

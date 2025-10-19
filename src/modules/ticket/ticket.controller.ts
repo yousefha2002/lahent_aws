@@ -28,31 +28,29 @@ export class TicketController {
     description: 'Ticket created successfully',
     schema: { example: { message: 'Created successfully' } }
   })
-  @Post()
-  create(
+  @Post('store')
+  createStoreTicket(
     @CurrentUser() user: CurrentUserType,
     @Body() dto: CreateTicketDto,
     @I18n() i18n: I18nContext,
   ) {
     const lang = getLang(i18n);
     const { context } = user;
-    return this.ticketService.createTicket(context.id, dto,lang);
+    return this.ticketService.createStoreTicket(context.id, dto,lang);
   }
 
-  @PermissionGuard([RoleStatus.ADMIN],PermissionKey.AssignTicket)
+  @PermissionGuard([RoleStatus.ADMIN],PermissionKey.ManageTicket)
   @ApiOperation({ summary: 'Assign ticket to an existing admin as reviewer' })
   @ApiSecurity('access-token')
   @ApiBody({ type: AssignTicketDto })
   @ApiResponse({ status: 200, schema: { example: { message: 'Created successfully' } } })
   @Patch('assign-reviewer')
   async assignTicket(
-    @CurrentUser() user: CurrentUserType,
     @Body() dto: AssignTicketDto,
     @I18n() i18n: I18nContext,
   ) {
-    const { actor } = user;
     const lang = getLang(i18n);
-    return this.ticketService.assignTicketToReviewer(actor, dto,lang);
+    return this.ticketService.assignTicket( dto,lang);
   }
 
   @Serilaize(StoreListPagination)

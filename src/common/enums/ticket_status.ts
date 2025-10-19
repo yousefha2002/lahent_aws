@@ -1,6 +1,7 @@
 export enum TicketStatus {
-  PENDING = 'pending',      // تم إنشاء التذكرة وتنتظر المراجعة
-  IN_PROGRESS = 'inProgress', // الأدمن يتابع المشكلة
-  REJECTED = 'rejected',    // تم رفض التذكرة
-  CLOSED = 'closed',        // تم حل التذكرة وإغلاقها
+  PENDING = 'pending',        // قيد المراجعة
+  IN_PROGRESS = 'inProgress',      // تم الإسناد
+  CLOSED = 'closed',          // مغلقة
+  DELETED = 'deleted',        // محذوفة
+  DUPLICATED = 'duplicated',  // مكررة
 }

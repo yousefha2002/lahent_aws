@@ -205,4 +205,25 @@ export class AdminService {
     }
     return true
   }
+
+  async getAdminsWithReviewTicketPermission() 
+  {
+    const admins = await this.adminRepo.findAll({
+      where: { active: true, isSuperAdmin: false },
+      include: [
+        {
+          association: 'role',
+          include: [
+            {
+              association: 'rolePermissions',
+              required: true,
+              where: { permission: PermissionKey.ReviewTicket },
+            },
+          ],
+        },
+      ],
+    });
+
+    return admins
+  }
 }

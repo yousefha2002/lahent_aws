@@ -9,6 +9,7 @@ import {
     ForeignKey,
     BelongsTo,
 } from 'sequelize-typescript';
+import { RoleStatus } from 'src/common/enums/role_status';
 import { Admin } from 'src/modules/admin/entities/admin.entity';
 import { Store } from 'src/modules/store/entities/store.entity';
 import { Ticket } from 'src/modules/ticket/entities/ticket.entity';
@@ -27,8 +28,8 @@ export class TicketMessage extends Model {
     @BelongsTo(() => Ticket)
     ticket: Ticket;
 
-    @Column(DataType.ENUM('ADMIN', 'STORE'))
-    senderType: 'ADMIN' | 'STORE';
+    @Column(DataType.ENUM(RoleStatus.ADMIN,RoleStatus.STORE))
+    senderType: RoleStatus.ADMIN | RoleStatus.STORE;
 
     @ForeignKey(() => Admin)
     @Column(DataType.INTEGER)

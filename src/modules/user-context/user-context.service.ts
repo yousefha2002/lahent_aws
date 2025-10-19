@@ -30,7 +30,7 @@ export class UserContextService {
             if (contextIds?.ownerId) contextEntity = await this.ownerService.findById(contextIds.ownerId);
             if (contextIds?.customerId) contextEntity = await this.customerService.findById(contextIds.customerId);
 
-            return { actor: { id: admin.id, type: RoleStatus.ADMIN }, context: contextEntity };
+            return { actor: { id: admin.id, type: RoleStatus.ADMIN,isSuperAdmin:admin.isSuperAdmin }, context: contextEntity };
 
         case RoleStatus.STORE:
             const store = await this.storeService.getStoreById(id);

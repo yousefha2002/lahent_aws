@@ -12,6 +12,7 @@ import { CurrentUser } from 'src/common/decorators/currentUser.decorator';
 import { CurrentUserType } from 'src/common/types/current-user.type';
 import { PermissionKey } from 'src/common/enums/permission-key';
 import { Serilaize } from 'src/common/interceptors/serialize.interceptor';
+import { SimpleAdminDto } from './dto/simple-admin.dto';
 
 @Controller('admin')
 export class AdminController {
@@ -81,5 +82,15 @@ export class AdminController {
   async getAdminPermissions(@CurrentUser() user: CurrentUserType) {
     const {actor} = user
     return this.adminService.getAdminWithPermissions(actor.id);
+  }
+
+  @Serilaize(SimpleAdminDto)
+  @ApiSecurity('access-token')
+  @ApiOperation({ summary: 'Get all admins who have ReviewTicket permission' })
+  @ApiResponse({ status: 200, type: [SimpleAdminDto] })
+  @PermissionGuard([RoleStatus.ADMIN], PermissionKey.ManageTicket)
+  @Get('reviewers')
+  async getAdminsWithReviewTicket() {
+    return this.adminService.getAdminsWithReviewTicketPermission();
   }
 }
