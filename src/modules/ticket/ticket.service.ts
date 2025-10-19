@@ -2,11 +2,11 @@ import { AdminService } from 'src/modules/admin/admin.service';
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { repositories } from 'src/common/enums/repositories';
 import { Ticket } from './entities/ticket.entity';
-import { CreateTicketDto } from './dto/create-ticket.dto';
+import { CreateTicketDto } from './dto/requests/create-ticket.dto';
 import { Language } from 'src/common/enums/language';
 import { I18nService } from 'nestjs-i18n';
 import { ActorInfo } from 'src/common/types/current-user.type';
-import { AssignTicketDto } from './dto/assign-ticket.dto';
+import { AssignTicketDto } from './dto/requests/assign-ticket.dto';
 import { TicketStatus } from 'src/common/enums/ticket_status';
 import { PermissionKey } from 'src/common/enums/permission-key';
 
@@ -30,13 +30,14 @@ export class TicketService {
 
     async assignTicketToReviewer(actor: ActorInfo,dto:AssignTicketDto,lang:Language) {
         const {reviewerAdminId,ticketId} = dto
-        const ticket = await this.ticketRepo.findOne({where:{id:ticketId,status:TicketStatus.PENDING}});
+        const ticket = await this.ticketRepo.findOne({where:{id:ticketId,status: [TicketStatus.PENDING, TicketStatus.IN_PROGRESS]}});
         if (!ticket) throw new NotFoundException('Ticket not found');
         await this.adminService.checkAdminPermission(reviewerAdminId,PermissionKey.ReviewTicket)    
         ticket.reviewerId = reviewerAdminId;
         ticket.assignedAdminId = actor.id
+        ticket.status = TicketStatus.IN_PROGRESS
         await ticket.save();
-        const message = this.i18n.translate('translation.createdSuccefully', { lang });
+        const message = this.i18n.translate('translation.updatedSuccefully', { lang });
         return { message };
     }
 
@@ -56,5 +57,25 @@ export class TicketService {
             total: count,
             totalPages: Math.ceil(count / limit),
         };
+    }
+
+    async getTicketsForReviewer(reviewerId: number,page: number,limit: number,status?: TicketStatus) {
+    const where: any = { reviewerId };
+    if (status) where.status = status;
+    const { rows, count } = await this.ticketRepo.findAndCountAll({
+        where,
+        offset: (page - 1) * limit,
+        limit,
+        order: [['createdAt', 'DESC']],
+        include: [
+        { association: 'store' },
+        { association: 'assignedAdmin' },
+        ],
+    });
+    return {
+        data: rows,
+        total: count,
+        totalPages: Math.ceil(count / limit),
+    };
     }
 }

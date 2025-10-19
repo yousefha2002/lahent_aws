@@ -108,7 +108,7 @@ export enum PermissionKey {
     deleteStore = "delete_store",
 
     // View Tickets
-    ViewTicket = "view_ticket",
+    RespondAnyTicket = "respond_any_ticket",
     AssignTicket = "assign_ticket",
     ReviewTicket = "review_ticket"
 }
