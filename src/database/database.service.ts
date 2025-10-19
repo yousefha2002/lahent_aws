@@ -67,6 +67,8 @@ import { AuditLog } from 'src/modules/audit_log/entities/audit_log.entity';
 import { RolePermission } from 'src/modules/role/entites/role_permission.entity';
 import { Role } from 'src/modules/role/entites/role.entity';
 import { SystemSetting } from 'src/modules/system_setting/entities/system_setting.entity';
+import { Ticket } from 'src/modules/ticket/entities/ticket.entity';
+import { TicketMessage } from 'src/modules/ticket_message/entities/ticket_message.entity';
 
 export const databaseProviders = [
   {
@@ -159,7 +161,9 @@ export const databaseProviders = [
         AuditLog,
         RolePermission,
         Role,
-        SystemSetting
+        SystemSetting,
+        Ticket,
+        TicketMessage
       ]); 
       await sequelize.sync({ alter: false});
       return sequelize;
