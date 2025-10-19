@@ -1,4 +1,4 @@
-import { Body, Controller, Ip, Post, Req } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { OtpCodeService } from './otp_code.service';
 import { SendOtpDto } from './dto/send_otp.dto';
 import { VerifyOtpDto } from './dto/verify_opt.dto';
@@ -27,11 +27,9 @@ export class OtpCodeController {
   async verifyOtpOwner(
     @Body() body: VerifyOtpDto,
     @I18n() i18n: I18nContext,
-    @Req() req: Request,@Ip() ip:string
   ) {
     const lang = getLang(i18n);
-    const device = req.headers['user-agent'] || 'unknown';
-    return this.otpCodeService.verifyOtp(body, RoleStatus.OWNER, lang,device,ip);
+    return this.otpCodeService.verifyOtp(body, RoleStatus.OWNER, lang);
   }
 
   @ApiOperation({ summary: 'Verify OTP for customer' })
@@ -46,11 +44,9 @@ export class OtpCodeController {
   async verifyOtpCustomer(
     @Body() body: VerifyOtpDto,
     @I18n() i18n: I18nContext,
-    @Req() req: Request,@Ip() ip:string
   ) {
     const lang = getLang(i18n);
-    const device = req.headers['user-agent'] || 'unknown';
-    return this.otpCodeService.verifyOtp(body, RoleStatus.CUSTOMER, lang,device,ip);
+    return this.otpCodeService.verifyOtp(body, RoleStatus.CUSTOMER, lang);
   }
 
   @ApiOperation({ summary: 'Send OTP to owner' })
@@ -88,10 +84,9 @@ export class OtpCodeController {
   @Serilaize(AdminOtpVerifyToken)
   @ApiBody({ type: VerifyOtpDto })
   @Post('verify/admin')
-  async verifyOtpAdmin(@Body() body: VerifyOtpDto, @I18n() i18n: I18nContext, @Req() req: Request,@Ip() ip:string) {
+  async verifyOtpAdmin(@Body() body: VerifyOtpDto, @I18n() i18n: I18nContext) {
     const lang = getLang(i18n);
-    const device = req.headers['user-agent'] || 'unknown';
-    return this.otpCodeService.verifyOtp(body, RoleStatus.ADMIN, lang, device, ip);
+    return this.otpCodeService.verifyOtp(body, RoleStatus.ADMIN, lang);
   }
 
   @ApiOperation({ summary: 'Send OTP to admin' })

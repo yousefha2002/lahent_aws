@@ -5,7 +5,7 @@ import { RoleStatus } from 'src/common/enums/role_status';
     tableName: 'user_tokens' ,
     indexes: [
         { name: 'idx_user_tokens_refreshToken', fields: ['refreshToken'] },
-        { name: 'idx_user_tokens_refreshToken_device', fields: ['refreshToken', 'deviceId', 'isRevoked', 'expiresAt'] },
+        { name: 'idx_user_tokens_refreshToken_device', fields: ['refreshToken', 'deviceId', 'expiresAt'] },
         { name: 'idx_user_tokens_role_customer', fields: ['role', 'customerId'] },
         { name: 'idx_user_tokens_role_store', fields: ['role', 'storeId'] },
         { name: 'idx_user_tokens_role_owner', fields: ['role', 'ownerId'] },
@@ -39,25 +39,9 @@ export class UserToken extends Model {
     @Column(DataType.INTEGER)
     storeId?: number;
 
-    @Column(DataType.STRING)
-    device?: string; // User agent أو Device info
-
-    @Column(DataType.STRING)
-    ip?: string; // IP الجهاز
-
-    @Default(false)
-    @Column(DataType.BOOLEAN)
-    isRevoked: boolean;
-
     @AllowNull(false)
     @Column(DataType.DATE)
     expiresAt: Date;
-
-    @Column({ type: DataType.DATE, allowNull: true })
-    lastLoginAt?: Date;
-
-    @Column({ type: DataType.DATE, allowNull: true })
-    lastLogoutAt?: Date;
 
     @AllowNull(false)
     @Column(DataType.STRING)

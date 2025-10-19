@@ -89,4 +89,7 @@ export class Customer extends Model {
   @Default(CustomerStatus.ACTIVE)
   @Column(DataType.ENUM(...Object.values(CustomerStatus)))
   status: CustomerStatus;
+  
+  @Column({ type: DataType.DATE, allowNull: true })
+  lastLoginAt: Date;
 }

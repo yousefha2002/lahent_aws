@@ -59,7 +59,7 @@ export class OtpCodeService {
     return {phone,code,status: entity ? 'login' : 'signup',}; 
   }
 
-  async verifyOtp(body: VerifyOtpDto,type: RoleStatus,lang: Language,device?: string,ip?: string,) 
+  async verifyOtp(body: VerifyOtpDto,type: RoleStatus,lang: Language,) 
   {
     const { phone, code, deviceId } = body;
     const serviceMap = {
@@ -77,7 +77,8 @@ export class OtpCodeService {
     if (isDemoOtp) {
       let entity = await service.findByPhone(phone) || await createFn(phone);
       const tokens = generateTokens(entity.id, type);
-      await this.userTokenService.handleUserToken(type, entity.id, tokens.refreshToken, deviceId, device, ip);
+      await this.userTokenService.handleUserToken(type, entity.id, tokens.refreshToken, deviceId);
+      await entity.update({ lastLoginAt: new Date() });
 
       return { status: 'login', [entityName]: entity, ...tokens };
     }
@@ -105,8 +106,8 @@ export class OtpCodeService {
     }
 
     const tokens = generateTokens(entity.id, type);
-    await this.userTokenService.handleUserToken(type, entity.id, tokens.refreshToken, deviceId, device, ip);
-
+    await this.userTokenService.handleUserToken(type, entity.id, tokens.refreshToken, deviceId);
+    await entity.update({ lastLoginAt: new Date() });
     return { status, [entityName]: entity, ...tokens };
   }
 }

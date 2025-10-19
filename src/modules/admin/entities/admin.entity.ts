@@ -44,4 +44,7 @@ export class Admin extends Model {
         defaultValue: true,
     })
     active: boolean;
+
+    @Column({ type: DataType.DATE, allowNull: true })
+    lastLoginAt: Date;
 }

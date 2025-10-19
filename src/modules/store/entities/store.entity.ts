@@ -164,4 +164,7 @@ export class Store extends Model {
 
   @Column({ type: DataType.DATE,allowNull: true,})
   lastActive: Date;
+
+  @Column({ type: DataType.DATE, allowNull: true })
+  lastLoginAt: Date;
 }

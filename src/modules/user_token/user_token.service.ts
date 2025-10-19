@@ -14,27 +14,24 @@ export class UserTokenService {
 
     async createToken(dto: CreateTokenDto) {
         return this.userTokenRepo.create({
-        customerId: dto.customerId || null,
-        storeId: dto.storeId || null,
-        ownerId: dto.ownerId || null,
-        adminId: dto.adminId || null,
-        role: dto.role,
-        refreshToken: dto.refreshToken,
-        expiresAt: dto.expiresAt,
-        device: dto.device,
-        ip: dto.ip,
-        lastLoginAt: new Date(),
-        deviceId:dto.deviceId
+            customerId: dto.customerId || null,
+            storeId: dto.storeId || null,
+            ownerId: dto.ownerId || null,
+            adminId: dto.adminId || null,
+            role: dto.role,
+            refreshToken: dto.refreshToken,
+            expiresAt: dto.expiresAt,
+            deviceId:dto.deviceId
         });
     }
 
     async findTokenForRefreshing(refreshToken: string,deviceId:string) {
-        return this.userTokenRepo.findOne({ where: {  refreshToken, deviceId,isRevoked:false,expiresAt: {[Op.gt]: new Date()}}});
+        return this.userTokenRepo.findOne({ where: {  refreshToken, deviceId,expiresAt: {[Op.gt]: new Date()}}});
     }
 
 
     async findExistingToken(type: RoleStatus, entityId: number, deviceId: string) {
-        const where: any = { deviceId, role: type,expiresAt: { [Op.gt]: new Date() },isRevoked:false };
+        const where: any = { deviceId, role: type,expiresAt: { [Op.gt]: new Date() }};
 
         switch (type) {
             case RoleStatus.OWNER:
@@ -63,29 +60,25 @@ export class UserTokenService {
         return token;
     }
 
-    async logout(body:RefreshTokenDto) 
-    {
-        const token = await this.findTokenForRefreshing(body.refreshToken,body.deviceId);
+    async logout(body: RefreshTokenDto) {
+        const token = await this.findTokenForRefreshing(body.refreshToken, body.deviceId);
+
         if (!token) {
-            throw new UnauthorizedException('Invalid or already revoked token');
+            throw new UnauthorizedException('Invalid token');
         }
 
-        token.isRevoked = true;
-        token.lastLogoutAt = new Date();
-        await token.save();
+        await token.destroy();
 
         return { message: 'Logged out successfully' };
     }
 
-    async handleUserToken(type: RoleStatus,entityId: number,refreshToken: string,deviceId: string,device?: string,ip?: string) 
+    async handleUserToken(type: RoleStatus,entityId: number,refreshToken: string,deviceId: string) 
     {
         const existingToken = await this.findExistingToken(type, entityId, deviceId);
 
         if (existingToken) 
         {
             await this.rotateToken(existingToken,refreshToken,new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS));
-            existingToken.lastLoginAt = new Date();
-            await existingToken.save();
         } 
         else 
             {
@@ -103,7 +96,7 @@ export class UserTokenService {
                 default:
                     throw new BadRequestException('Invalid role type');
             }
-            await this.createToken({[idField]: entityId,role: type,refreshToken,expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS),device,deviceId,ip,});
+            await this.createToken({[idField]: entityId,role: type,refreshToken,expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS),deviceId,});
         }
     }
 

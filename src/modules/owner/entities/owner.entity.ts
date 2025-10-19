@@ -52,4 +52,7 @@ export class Owner extends Model {
   @Default(false)
   @Column(DataType.BOOLEAN)
   isCompletedProfile: boolean;
+
+  @Column({ type: DataType.DATE, allowNull: true })
+  lastLoginAt: Date;
 }

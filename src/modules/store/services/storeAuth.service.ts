@@ -184,7 +184,7 @@ export class StoreAuthService {
         return false;
     }
 
-    async login(dto: LoginStoreDto,lang:Language,device: string, ip?: string) {
+    async login(dto: LoginStoreDto,lang:Language) {
         const storeByPass = await this.storeRepo.findOne({
             where: { phoneLogin: dto.phone },
             include:[{model:StoreLanguage,where:{languageCode:lang}}]
@@ -202,7 +202,6 @@ export class StoreAuthService {
         if(existingToken)
         {
             await this.userTokenService.rotateToken(existingToken,tokens.refreshToken,new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS))
-            existingToken.lastLoginAt = new Date();
             await existingToken.save();
         }
         else{
@@ -211,12 +210,11 @@ export class StoreAuthService {
                 role: RoleStatus.STORE,
                 refreshToken:tokens.refreshToken,
                 expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS),
-                device,
-                ip,
                 deviceId:dto.deviceId
             });
         }
         await storeByPass.save()
+        await storeByPass.update({ lastLoginAt: new Date() });
 
         return {store: storeByPass,accessToken:tokens.accessToken,refreshToken:tokens.refreshToken};
     }
@@ -264,8 +262,6 @@ export class StoreAuthService {
             role: RoleStatus.STORE,
             refreshToken:tokens.refreshToken,
             expiresAt: new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS),
-            device,
-            ip,
             deviceId
         });
         }

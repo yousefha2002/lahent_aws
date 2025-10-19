@@ -59,6 +59,10 @@ export class CustomerDetailsDto extends CustomerSummaryDto {
     @ApiProperty({ example: '2025-08-29T10:00:00.000Z'})
     @Expose()
     lastActive: Date | null;
+
+    @ApiProperty({ example: '2025-08-29T10:00:00.000Z'})
+    @Expose()
+    lastLoginAt: Date | null;
 }
 
 

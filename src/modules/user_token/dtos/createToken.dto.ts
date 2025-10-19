@@ -6,7 +6,5 @@ export interface CreateTokenDto {
     role: string;
     refreshToken: string;
     expiresAt: Date;
-    device?: string;
-    ip?: string;
     deviceId:string
 }

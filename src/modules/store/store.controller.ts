@@ -2,7 +2,7 @@ import { FcmTokenService } from 'src/modules/fcm_token/fcm_token.service';
 import { UserTokenService } from './../user_token/user_token.service';
 import { StoreGeolocationService } from './services/storeGeolocation.service';
 import { StoreAuthService } from './services/storeAuth.service';
-import {Controller,Post,Body,UseInterceptors,UploadedFiles,Get,Query,Put,Param,ParseIntPipe,Req,Ip,} from '@nestjs/common';
+import {Controller,Post,Body,UseInterceptors,UploadedFiles,Get,Query,Put,Param,ParseIntPipe} from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { CreateStoreDto } from './dto/requests/create-store.dto';
 import { StoreService } from './services/store.service';
@@ -103,10 +103,9 @@ export class StoreController {
   @ApiOperation({ summary: 'Login store and return access & refresh tokens' })
   @ApiBody({ type: LoginStoreDto })
   @ApiResponse({status: 200,description: 'Store login successful',type: StoreWithTokenDto})
-  login(@Body() body: LoginStoreDto,@I18n() i18n: I18nContext,@Req() req: Request,@Ip() ip:string) {
+  login(@Body() body: LoginStoreDto,@I18n() i18n: I18nContext) {
     const lang = getLang(i18n);
-    const device = req.headers['user-agent'] || 'unknown';
-    return this.storeAuthService.login(body,lang,device,ip);
+    return this.storeAuthService.login(body,lang);
   }
 
   @Serilaize(IncompleteStoreResponseDto)
@@ -555,12 +554,11 @@ export class StoreController {
   @ApiQuery({ name: 'ownerId', required: false, example: 1 })
   @ApiBody({ type: SelectOwnerForStoreDto })
   @PermissionGuard([RoleStatus.OWNER])
-  selectStoreForOwner(@CurrentUser() user:CurrentUserType,@Param('storeId') storeId:number,@Body() dto:SelectOwnerForStoreDto,@I18n() i18n: I18nContext,@Req() req: Request,@Ip() ip:string)
+  selectStoreForOwner(@CurrentUser() user:CurrentUserType,@Param('storeId') storeId:number,@Body() dto:SelectOwnerForStoreDto,@I18n() i18n: I18nContext)
   {
     const lang = getLang(i18n)
-    const device = req.headers['user-agent'] || 'unknown';
     const {context} = user
-    return this.storeAuthService.selectStoreForOnwer(storeId,context.id,dto,lang,device,ip)
+    return this.storeAuthService.selectStoreForOnwer(storeId,context.id,dto,lang)
   }
 
   @Serilaize(StoreOptionsDto)
