@@ -71,4 +71,6 @@ export enum repositories {
   system_settings_repository='system_settings_repository',
   ticket_repository='ticket_repository',
   ticket_message_repository='ticket_message_repository',
+  ticket_type_repository='ticket_type_repository',
+  ticket_type_language_repository='ticket_type_language_repository'
 }

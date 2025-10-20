@@ -3,7 +3,7 @@ import { TicketType } from "./ticket_type.entity";
 import { Language } from "src/common/enums/language";
 
 @Table({ tableName: 'ticket_type_languages' })
-export class TicketTypeLanguage extends Model<TicketTypeLanguage> {
+export class TicketTypeLanguage extends Model{
     @Column({ autoIncrement: true, primaryKey: true })
     id: number;
 

@@ -109,5 +109,10 @@ export enum PermissionKey {
 
     // View Tickets
     ReviewTicket = "review_ticket",
-    ManageTicket = "manage_ticket"
+    ManageTicket = "manage_ticket",
+
+    // ticket type 
+    CreateTicketType = "create_ticket_type",
+    UpdateTicketType = "update_ticket_type",
+    ViewTicketType = "view_ticket_type",
 }

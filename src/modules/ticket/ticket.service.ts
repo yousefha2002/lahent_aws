@@ -5,7 +5,6 @@ import { Ticket } from './entities/ticket.entity';
 import { CreateTicketDto } from './dto/requests/create-ticket.dto';
 import { Language } from 'src/common/enums/language';
 import { I18nService } from 'nestjs-i18n';
-import { ActorInfo } from 'src/common/types/current-user.type';
 import { AssignTicketDto } from './dto/requests/assign-ticket.dto';
 import { TicketStatus } from 'src/common/enums/ticket_status';
 import { PermissionKey } from 'src/common/enums/permission-key';
