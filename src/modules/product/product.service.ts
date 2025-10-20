@@ -6,7 +6,7 @@ import { CreateProductDto } from './dto/requests/create-product.dto';
 import { ProductImageService } from '../product_image/product_image.service';
 import { Sequelize, Transaction, Op } from 'sequelize';
 import { UpdateProductWithImageDto } from './dto/requests/update-product-withImage.dto';
-import { ExistingImage } from 'src/common/validators/existing-images.validator';
+import { ExistingImage, validateExistingImages } from 'src/common/validators/existing-images.validator';
 import { CategoryService } from '../category/category.service';
 import { ProductImage } from '../product_image/entities/product_image.entity';
 import { OfferService } from '../offer/offer.service';
@@ -120,89 +120,135 @@ export class ProductService {
     }
   }
 
-  async updateProductWithImages(
-    productId: number,
-    dto: UpdateProductWithImageDto,
-    lang: Language = Language.en,
-    existingImages: ExistingImage[],
-    newImageFiles: Express.Multer.File[],
-  ) {
+  async updateProductWithImages(productId: number,dto: UpdateProductWithImageDto,lang: Language,newImageFiles: Express.Multer.File[] = []) 
+  {
     await this.productById(productId, lang);
     const transaction = await this.sequelize.transaction();
 
-    const languages = validateProductLanguages(dto.languages); // زي createProduct
-
     try {
-      // ✨ تحديث الحقول الأساسية للمنتج
-      await this.productRepo.update(
-        {
-          basePrice: parseFloat(dto.basePrice),
-          preparationTime: parseInt(dto.preparationTime),
-        },
-        { where: { id: productId }, transaction },
-      );
+      // ✨ 1. تحديث الحقول الأساسية فقط لو تم إرسالها
+      const updateData: any = {};
+      if (dto.basePrice !== undefined) {
+        const parsedPrice = parseFloat(dto.basePrice);
+        if (isNaN(parsedPrice))
+          throw new BadRequestException(this.i18n.translate('translation.invalidBasePrice', { lang }));
+        updateData.basePrice = parsedPrice;
+      }
+      if (dto.preparationTime !== undefined) {
+        const parsedTime = parseInt(dto.preparationTime);
+        if (isNaN(parsedTime))
+          throw new BadRequestException(this.i18n.translate('translation.invalidPreparationTime', { lang }));
+        updateData.preparationTime = parsedTime;
+      }
 
-      // ✨ تحديث الصور
+      if (Object.keys(updateData).length > 0) {
+        await this.productRepo.update(updateData, {
+          where: { id: productId },
+          transaction,
+        });
+      }
+
+      // ✨ 2. تحديث الصور (existing + new)
       const currentImages = await this.productImageService.imagesForProduct(
         productId,
         transaction,
       );
 
-      const imagesIDToKeep = existingImages.map(
-        (img) => img.imageUrl,
-      );
-      const imagesToDelete = currentImages.filter(
-        (img) => !imagesIDToKeep.includes(img.imageUrl),
-      );
+      let existingImagesParsed: ExistingImage[] = [];
 
-      for (const img of imagesToDelete) {
-        await this.productImageService.deleteImage(img.id, transaction);
+      if (dto.existingImages) {
+        try {
+          existingImagesParsed = validateExistingImages(dto.existingImages);
+        } catch (error) {
+          throw new BadRequestException(error.message);
+        }
+        const currentImageUrls = currentImages.map((img) => img.imageUrl);
+        const imagesToKeep = existingImagesParsed.map((img) => img.imageUrl).filter((url) => currentImageUrls.includes(url));;
+        const imagesToDelete = currentImages.filter(
+          (img) => !imagesToKeep.includes(img.imageUrl),
+        );
+
+        const totalImagesAfterUpload = imagesToKeep.length + (newImageFiles?.length || 0);
+        if (totalImagesAfterUpload === 0) {
+          throw new BadRequestException(this.i18n.translate('translation.productMustHaveImage', { lang }));
+        }
+
+        for (const img of imagesToDelete) {
+          await this.productImageService.deleteImage(img.id, transaction);
+        }
+      } else {
+        // لو المستخدم ما أرسل existingImages، نعتبر أنه يريد الاحتفاظ بكل الصور الحالية
+        existingImagesParsed = currentImages.map((img) => ({
+          imageUrl: img.imageUrl,
+        }));
       }
 
+      // ✋ تحقق من العدد قبل رفع أي صورة جديدة
+      const totalImagesAfterUpload =
+        existingImagesParsed.length + (newImageFiles?.length || 0);
+
+      if (totalImagesAfterUpload > 5) {
+        throw new BadRequestException(
+          this.i18n.translate('translation.max5Images', { lang })
+        );
+      }
+
+      // ✨ رفع صور جديدة (إن وجدت)
       if (newImageFiles && newImageFiles.length > 0) {
         const uploadedImages = await Promise.all(
           newImageFiles.map((file) => this.s3Service.uploadImage(file)),
         );
+
         const imagesData = uploadedImages.map((img) => ({
           productId,
           imageUrl: img.secure_url,
           imagePublicId: img.public_id,
         }));
-        await this.productImageService.createMultiImage(
-          imagesData,
-          transaction,
-        );
+
+        await this.productImageService.createMultiImage(imagesData, transaction);
       }
 
-      // ✨ تحديث اللغات
-      for (const langItem of languages) {
-        const exists = await this.productLanguageRepo.findOne({
-          where: { productId, languageCode: langItem.languageCode },
-          transaction,
-        });
+      // ✨ 3. تحديث أو إضافة اللغات فقط إذا تم إرسالها
+      if (dto.languages) {
+        const languages = validateProductLanguages(dto.languages);
 
-        if (exists) {
-          // update existing language row
-          await this.productLanguageRepo.update(
-            {
-              name: langItem.name,
-              shortDescription: langItem.shortDescription,
-              longDescription: langItem.longDescription,
-            },
-            { where: { id: exists.id }, transaction },
-          );
-        } else {
-          // insert new language row
-          await this.productLanguageRepo.create(
-            {
-              productId,
-              languageCode: langItem.languageCode,
-              name: langItem.name,
-              shortDescription: langItem.shortDescription,
-              longDescription: langItem.longDescription,
-            },
-            { transaction },
-          );
+        for (const langItem of languages) {
+          const existingLang = await this.productLanguageRepo.findOne({
+            where: { productId, languageCode: langItem.languageCode },
+            transaction,
+          });
+
+          if (existingLang) {
+            const updateLangData: any = {};
+
+            if (langItem.name !== undefined) {
+              updateLangData.name = langItem.name;
+            }
+            if (langItem.shortDescription !== undefined) {
+              updateLangData.shortDescription = langItem.shortDescription;
+            }
+            if (langItem.longDescription !== undefined) {
+              updateLangData.longDescription = langItem.longDescription;
+            }
+
+            if (Object.keys(updateLangData).length > 0) {
+              await this.productLanguageRepo.update(updateLangData, {
+                where: { id: existingLang.id },
+                transaction,
+              });
+            }
+          } else {
+            await this.productLanguageRepo.create(
+              {
+                productId,
+                languageCode: langItem.languageCode,
+                name: langItem.name,
+                shortDescription: langItem.shortDescription,
+                longDescription: langItem.longDescription,
+              },
+              { transaction },
+            );
+          }
         }
       }
 

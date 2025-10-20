@@ -58,15 +58,7 @@ export class ProductController {
   @ApiConsumes('multipart/form-data')
   @ApiQuery({ name: 'storeId', required: false, example: 1 })
   @ApiBody({ type: UpdateProductWithImageDto })
-  @ApiResponse({
-    status: 200,
-    schema: {
-      example: {
-        message: 'Product updated successfully',
-        productId: 101,
-      },
-    },
-  })
+  @ApiResponse({status: 200,schema: {example: {message: 'Product updated successfully',productId: 101}}})
   @PermissionGuard([RoleStatus.STORE,RoleStatus.ADMIN],PermissionKey.UpdateProduct,ApprovedStoreGuard)
   @UseInterceptors(FileFieldsInterceptor([{ name: 'images', maxCount: 5 }], multerOptions),)
   async updateProductWithImage(
@@ -75,19 +67,12 @@ export class ProductController {
     @I18n() i18n: I18nContext,
     @UploadedFiles() files: { images?: Express.Multer.File[] },
   ) {
-    let existingImages: ExistingImage[] = [];
-    try {
-      existingImages = validateExistingImages(body.existingImages);
-    } catch (error) {
-      throw new BadRequestException(error.message);
-    }
-    const images = files.images || [];
+    const images = files?.images || [];
     const lang = getLang(i18n);
     return this.productService.updateProductWithImages(
       +productId,
       body,
       lang,
-      existingImages,
       images,
     );
   }

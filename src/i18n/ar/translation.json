@@ -27,6 +27,10 @@
     "not_found": "حساب الأدمن غير موجود",
     "old_password_incorrect": "كلمة المرور السابقة خاطئة"
   },
+  "invalidBasePrice": "سعر المنتج غير صالح",
+  "invalidPreparationTime": "وقت التحضير غير صالح",
+  "productMustHaveImage": "يجب أن يحتوي المنتج على صورة واحدة على الأقل",
+  "max5Images": "يمكنك رفع 5 صور كحد أقصى لكل منتج",
   "cart_product_added": "تم إضافة المنتج إلى السلة",
   "cart_product_deleted": "تم حذف المنتج من السلة",
   "cart_product_quantity_updated": "تم تعديل كمية المنتج في السلة",
