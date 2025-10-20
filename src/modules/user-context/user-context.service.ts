@@ -34,6 +34,8 @@ export class UserContextService {
 
         case RoleStatus.STORE:
             const store = await this.storeService.getStoreById(id);
+            store.lastActive = new Date();
+            await store.save();
             return {  actor: { id: store.id, type: RoleStatus.STORE }, context: store };
 
         case RoleStatus.OWNER:
@@ -42,6 +44,8 @@ export class UserContextService {
 
         case RoleStatus.CUSTOMER:
             const customer = await this.customerService.findById(id);
+            customer.lastActive = new Date();
+            await customer.save();
             return { actor: { id: customer.id, type: RoleStatus.CUSTOMER }, context: customer };
 
         default:
