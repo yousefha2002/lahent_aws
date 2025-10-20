@@ -25,7 +25,7 @@ export class UpdateProductWithImageDto {
 
   @IsString()
   @ApiProperty({
-    example: JSON.stringify([{ id: 1 }, { id: 2 }]),
+    example: JSON.stringify("uploads/bpaayhvhetsszkxwritd"),
     description: 'JSON array of existing image IDs to keep',
   })
   existingImages: string;
