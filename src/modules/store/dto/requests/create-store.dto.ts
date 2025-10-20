@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import {IsNotEmpty,IsString,MaxLength,MinLength,IsMobilePhone,IsIn} from 'class-validator';
+import {IsNotEmpty,IsString,MaxLength,MinLength,IsMobilePhone,IsIn, IsOptional} from 'class-validator';
 import { cities } from 'src/common/constants/cities';
 
 export class CreateStoreDto {
@@ -19,11 +19,13 @@ export class CreateStoreDto {
   @IsString()
   @IsNotEmpty()
   @ApiProperty({ example: '1234567890' })
+  @IsOptional()
   commercialRegister: string;
 
   @IsString()
   @IsNotEmpty()
   @ApiProperty({ example: '1234567890' })
+  @IsOptional()
   taxNumber: string;
 
   @IsString()
